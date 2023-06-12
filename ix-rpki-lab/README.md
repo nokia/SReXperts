@@ -20,7 +20,7 @@ In short, we will be mimicking an IXP peering deployment at a site of your choos
 
 ## Drawing
 
-![image](https://github.com/hansthienpondt/SReXperts/assets/2031627/92c9aa75-079f-4173-92a6-ba1ad9a7921a)
+![image](https://gitlab.com/rdodin/pics/-/wikis/uploads/67e727f0a3430fabeeda8d5d603582a1/image.png)
 
 ## Deploying the lab
 
@@ -50,6 +50,7 @@ ssh admin@clab-IXP-Peering-srlinux (admin/NokiaSrl1!)
 | RPKI-to-Router protocol (RFC 6810, RFC 8210, RFC 8210bis) | [stayrtr](https://github.com/bgp/stayrtr) |
 
 ## Credentials & Access
+
 Once the lab is deployed, you can access the network elements through the exposed network management interfaces. The connection can be made from a shell inside the VM where the lab is deployed or from the internet using the public IP address assigned to the VM.
 
 For access from the shell, use the addresses presented by containerlab at the end of the deployment process or use the values from the lab file. You can always check which nodes are available by running `sudo containerlab inspect --all`.

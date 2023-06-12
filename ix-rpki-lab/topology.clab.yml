@@ -15,7 +15,7 @@ topology:
     IXP:
       mgmt-ipv4: 192.168.121.101
       kind: srl
-      type: 'ixrd2l'
+      type: "ixrd2l"
       image: ghcr.io/nokia/srlinux:${SRLINUX_VERSION:=23.3.2}
       startup-config: |
         /interface ethernet-1/1 subinterface 0 type bridged
@@ -30,12 +30,12 @@ topology:
       kind: vr-sros
       # type: 'sr-1x-48d' # 48x800G, requires 23.3.R1
       # image: vrnetlab/vr-sros:${SROS_VERSION:=23.3.R1}
-      image: europe-west1-docker.pkg.dev/nhc-f4160d67/containerlab/vr-sros:${SROS_VERSION:=23.3.R1}
+      image: europe-west1-docker.pkg.dev/nhc-f4160d67/containerlab/vr-sros:23.3.R1
       license: /opt/srexperts/license-sros23.txt
       ports:
-      - 52001:22
-      - 52301:57400
-      - 52401:830
+        - 52001:22
+        - 52301:57400
+        - 52401:830
       startup-config: |
         /configure policy-options policy-statement accept-all default-action action-type accept
         /configure port 1/1/c1 admin-state enable connector breakout c1-100g
@@ -63,16 +63,15 @@ topology:
         }
         /configure router "Base" static-routes route 5.132.0.0/17 route-type unicast blackhole admin-state enable
 
-
     srlinux:
       mgmt-ipv4: 192.168.121.103
       kind: srl
-      type: 'ixrd5' # 32x400G
+      type: "ixrd5" # 32x400G
       image: ghcr.io/nokia/srlinux:${SRLINUX_VERSION:=23.3.2}
       ports:
-      - "52002:22"
-      - "52302:57400"
-      - "52102:80"
+        - "52002:22"
+        - "52302:57400"
+        - "52102:80"
       startup-config: |
         /routing-policy policy accept-all default-action policy-result accept
         /interface ethernet-1/1
@@ -106,9 +105,9 @@ topology:
         static-routes route 2.58.21.0/24 next-hop-group blackhole
 
   links:
-  - endpoints:
-    - "IXP:e1-1"
-    - "sros:eth1"
-  - endpoints:
-    - "IXP:e1-2"
-    - "srlinux:e1-1"
+    - endpoints:
+        - "IXP:e1-1"
+        - "sros:eth1"
+    - endpoints:
+        - "IXP:e1-2"
+        - "srlinux:e1-1"

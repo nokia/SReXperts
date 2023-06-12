@@ -1,0 +1,698 @@
+###########################################################################
+#
+#   Filename:           dictionary-freeradius.txt
+#
+#   Author:             Nokia
+#   Created:            Fri Feb 2 16:27:12 2007
+#
+#   Description:        RADIUS dictionary, suitable for FreeRADIUS
+#
+#
+###########################################################################
+#
+#   $Revision: ae6a1f4638f64385970a9a31ba64f98d79dbec51 $
+#
+###########################################################################
+#
+#              Copyright (c) 2003-2016 Nokia
+#
+###########################################################################
+#  The Private Enterprise Number 6527 was assigned to TiMetra Inc.,
+#  previously known as Panthera Networks, by the IANA on July 14, 2000.
+#
+#  TiMetra, Inc. was acquired by Alcatel on July 18, 2003.  In November
+#  of 2014 the enterprise number, 6527, was registered to Alcatel-Lucent.
+#
+#  Alcatel-Lucent was acquired by Nokia in 2016.
+###########################################################################
+
+VENDOR          Alcatel-IPD               6527
+
+BEGIN-VENDOR    Alcatel-IPD
+
+# User management VSAs
+ATTRIBUTE Timetra-Access                     1      integer
+# The value of attribute Timetra-Access is an integer from 1 to 15,
+# defined as the sum of the values of the allowed management interfaces.
+VALUE     Timetra-Access                   ftp             1
+VALUE     Timetra-Access                   console         2
+VALUE     Timetra-Access                   both            3   # ftp + console
+VALUE     Timetra-Access                   netconf         4
+VALUE     Timetra-Access                   grpc            8
+
+ATTRIBUTE Timetra-Home-Directory             2      string
+ATTRIBUTE Timetra-Restrict-To-Home           3      integer
+
+VALUE     Timetra-Restrict-To-Home         true            1
+VALUE     Timetra-Restrict-To-Home         false           2
+
+ATTRIBUTE Timetra-Profile                    4      string
+ATTRIBUTE Timetra-Default-Action             5      integer
+
+VALUE     Timetra-Default-Action           permit-all      1
+VALUE     Timetra-Default-Action           deny-all        2
+VALUE     Timetra-Default-Action           none            3
+
+ATTRIBUTE Timetra-Cmd                        6      string
+ATTRIBUTE Timetra-Action                     7      integer
+
+VALUE     Timetra-Action                   permit          1
+VALUE     Timetra-Action                   deny            2
+
+ATTRIBUTE Timetra-Exec-File                  8      string
+
+# RADIUS subscriber authorization and CoA VSAs
+ATTRIBUTE Alc-Primary-Dns                    9      ipaddr
+ATTRIBUTE Alc-Secondary-Dns                 10      ipaddr
+ATTRIBUTE Alc-Subsc-ID-Str                  11      string
+ATTRIBUTE Alc-Subsc-Prof-Str                12      string
+ATTRIBUTE Alc-SLA-Prof-Str                  13      string
+ATTRIBUTE Alc-Force-Renew                   14      string   # CoA
+ATTRIBUTE Alc-Create-Host                   15      string   # CoA
+ATTRIBUTE Alc-ANCP-Str                      16      string
+ATTRIBUTE Alc-Retail-Serv-Id                17      integer
+ATTRIBUTE Alc-Default-Router                18      ipaddr
+
+# RADIUS subscriber accounting VSAs
+ATTRIBUTE Alc-Acct-I-Inprof-Octets-64       19      octets
+ATTRIBUTE Alc-Acct-I-Outprof-Octets-64      20      octets
+ATTRIBUTE Alc-Acct-O-Inprof-Octets-64       21      octets
+ATTRIBUTE Alc-Acct-O-Outprof-Octets-64      22      octets
+ATTRIBUTE Alc-Acct-I-Inprof-Pkts-64         23      octets
+ATTRIBUTE Alc-Acct-I-Outprof-Pkts-64        24      octets
+ATTRIBUTE Alc-Acct-O-Inprof-Pkts-64         25      octets
+ATTRIBUTE Alc-Acct-O-Outprof-Pkts-64        26      octets
+
+ATTRIBUTE Alc-Client-Hardware-Addr          27      string
+ATTRIBUTE Alc-Int-Dest-Id-Str               28      string
+ATTRIBUTE Alc-Primary-Nbns                  29      ipaddr
+ATTRIBUTE Alc-Secondary-Nbns                30      ipaddr
+ATTRIBUTE Alc-MSAP-Serv-Id                  31      integer
+ATTRIBUTE Alc-MSAP-Policy                   32      string
+ATTRIBUTE Alc-MSAP-Interface                33      string
+ATTRIBUTE Alc-PPPoE-PADO-Delay              34      integer
+ATTRIBUTE Alc-PPPoE-Service-Name            35      string
+ATTRIBUTE Alc-DHCP-Vendor-Class-Id          36      string
+
+# RADIUS subscriber accounting VSAs (HSMDA override counters)
+ATTRIBUTE Alc-Acct-OC-I-Inprof-Octets-64    37      octets
+ATTRIBUTE Alc-Acct-OC-I-Outprof-Octets-64   38      octets
+ATTRIBUTE Alc-Acct-OC-O-Inprof-Octets-64    39      octets
+ATTRIBUTE Alc-Acct-OC-O-Outprof-Octets-64   40      octets
+ATTRIBUTE Alc-Acct-OC-I-Inprof-Pkts-64      41      octets
+ATTRIBUTE Alc-Acct-OC-I-Outprof-Pkts-64     42      octets
+ATTRIBUTE Alc-Acct-OC-O-Inprof-Pkts-64      43      octets
+ATTRIBUTE Alc-Acct-OC-O-Outprof-Pkts-64     44      octets
+
+ATTRIBUTE Alc-App-Prof-Str                  45      string
+ATTRIBUTE Alc-Tunnel-Group                  46      string
+ATTRIBUTE Alc-Tunnel-Algorithm              47      integer
+
+VALUE     Alc-Tunnel-Algorithm             weighted-access 1
+VALUE     Alc-Tunnel-Algorithm             existing-first  2
+VALUE     Alc-Tunnel-Algorithm             weighted-random 3
+
+ATTRIBUTE Alc-Tunnel-Max-Sessions           48      integer  has_tag
+ATTRIBUTE Alc-Tunnel-Idle-Timeout           49      integer  has_tag
+ATTRIBUTE Alc-Tunnel-Hello-Interval         50      integer  has_tag
+ATTRIBUTE Alc-Tunnel-Destruct-Timeout       51      integer  has_tag
+ATTRIBUTE Alc-Tunnel-Max-Retries-Estab      52      integer  has_tag
+ATTRIBUTE Alc-Tunnel-Max-Retries-Not-Estab  53      integer  has_tag
+ATTRIBUTE Alc-Tunnel-AVP-Hiding             54      integer  has_tag
+
+VALUE     Alc-Tunnel-AVP-Hiding            nothing        1
+VALUE     Alc-Tunnel-AVP-Hiding            sensitive-only 2
+VALUE     Alc-Tunnel-AVP-Hiding            all            3
+
+ATTRIBUTE Alc-BGP-Policy                    55      string
+ATTRIBUTE Alc-BGP-Auth-Keychain             56      string
+ATTRIBUTE Alc-BGP-Auth-Key                  57      octets
+ATTRIBUTE Alc-BGP-Export-Policy             58      string
+ATTRIBUTE Alc-BGP-Import-Policy             59      string
+ATTRIBUTE Alc-BGP-PeerAS                    60      integer
+ATTRIBUTE Alc-IPsec-Serv-Id                 61      integer
+ATTRIBUTE Alc-IPsec-Interface               62      string
+ATTRIBUTE Alc-IPsec-Tunnel-Template-Id      63      integer
+ATTRIBUTE Alc-IPsec-SA-Lifetime             64      integer
+ATTRIBUTE Alc-IPsec-SA-PFS-Group            65      integer
+
+# Match TC TmnxIkePolicyDHGroup in TIMETRA-IPSEC-MIB
+VALUE     Alc-IPsec-SA-PFS-Group           group1          1
+VALUE     Alc-IPsec-SA-PFS-Group           group2          2
+VALUE     Alc-IPsec-SA-PFS-Group           group5          5
+VALUE     Alc-IPsec-SA-PFS-Group           group14         14
+VALUE     Alc-IPsec-SA-PFS-Group           group15         15
+VALUE     Alc-IPsec-SA-PFS-Group           group19         19
+VALUE     Alc-IPsec-SA-PFS-Group           group20         20
+VALUE     Alc-IPsec-SA-PFS-Group           group21         21
+
+ATTRIBUTE Alc-IPsec-SA-Encr-Algorithm       66      integer
+
+# Match TC TmnxEncrAlgorithm in TIMETRA-IPSEC-MIB
+VALUE     Alc-IPsec-SA-Encr-Algorithm      null            1
+VALUE     Alc-IPsec-SA-Encr-Algorithm      des             2
+VALUE     Alc-IPsec-SA-Encr-Algorithm      des3            3
+VALUE     Alc-IPsec-SA-Encr-Algorithm      aes128          4
+VALUE     Alc-IPsec-SA-Encr-Algorithm      aes192          5
+VALUE     Alc-IPsec-SA-Encr-Algorithm      aes256          6
+VALUE     Alc-IPsec-SA-Encr-Algorithm      aes128gcm8      7
+VALUE     Alc-IPsec-SA-Encr-Algorithm      aes128gcm12     8
+VALUE     Alc-IPsec-SA-Encr-Algorithm      aes128gcm16     9
+VALUE     Alc-IPsec-SA-Encr-Algorithm      aes192gcm8      10
+VALUE     Alc-IPsec-SA-Encr-Algorithm      aes192gcm12     11
+VALUE     Alc-IPsec-SA-Encr-Algorithm      aes192gcm16     12
+VALUE     Alc-IPsec-SA-Encr-Algorithm      aes256gcm8      13
+VALUE     Alc-IPsec-SA-Encr-Algorithm      aes256gcm12     14
+VALUE     Alc-IPsec-SA-Encr-Algorithm      aes256gcm16     15
+VALUE     Alc-IPsec-SA-Encr-Algorithm      aes128gmac      16
+VALUE     Alc-IPsec-SA-Encr-Algorithm      aes192gmac      17
+VALUE     Alc-IPsec-SA-Encr-Algorithm      aes256gmac      18
+
+ATTRIBUTE Alc-IPsec-SA-Auth-Algorithm       67      integer
+
+# Match TC TmnxAuthAlgorithm in TIMETRA-IPSEC-MIB
+VALUE     Alc-IPsec-SA-Auth-Algorithm      null            1
+VALUE     Alc-IPsec-SA-Auth-Algorithm      md5             2
+VALUE     Alc-IPsec-SA-Auth-Algorithm      sha1            3
+VALUE     Alc-IPsec-SA-Auth-Algorithm      sha256          4
+VALUE     Alc-IPsec-SA-Auth-Algorithm      sha384          5
+VALUE     Alc-IPsec-SA-Auth-Algorithm      sha512          6
+VALUE     Alc-IPsec-SA-Auth-Algorithm      aesxcbc         7
+VALUE     Alc-IPsec-SA-Auth-Algorithm      authencrypt     8
+
+ATTRIBUTE Alc-IPsec-SA-Replay-Window        68      integer
+
+# RADIUS subscriber accounting VSAs (custom records)
+ATTRIBUTE Alc-Acct-I-High-Octets-Drop_64    69      octets
+ATTRIBUTE Alc-Acct-I-Low-Octets-Drop_64     70      octets
+ATTRIBUTE Alc-Acct-I-High-Pack-Drop_64      71      octets
+ATTRIBUTE Alc-Acct-I-Low-Pack-Drop_64       72      octets
+ATTRIBUTE Alc-Acct-I-High-Octets-Offer_64   73      octets
+ATTRIBUTE Alc-Acct-I-Low-Octets-Offer_64    74      octets
+ATTRIBUTE Alc-Acct-I-High-Pack-Offer_64     75      octets
+ATTRIBUTE Alc-Acct-I-Low-Pack-Offer_64      76      octets
+ATTRIBUTE Alc-Acct-I-Unc-Octets-Offer_64    77      octets
+ATTRIBUTE Alc-Acct-I-Unc-Pack-Offer_64      78      octets
+ATTRIBUTE Alc-Acct-I-All-Octets-Offer_64    79      octets
+ATTRIBUTE Alc-Acct-I-All-Pack-Offer_64      80      octets
+ATTRIBUTE Alc-Acct-O-Inprof-Pack-Drop_64    81      octets
+ATTRIBUTE Alc-Acct-O-Outprof-Pack-Drop_64   82      octets
+ATTRIBUTE Alc-Acct-O-Inprof-Octs-Drop_64    83      octets
+ATTRIBUTE Alc-Acct-O-Outprof-Octs-Drop_64   84      octets
+
+# RADIUS subscriber accounting VSAs (custom records, HSMDA)
+ATTRIBUTE Alc-Acct-OC-I-All-Octs-Offer_64   85      octets
+ATTRIBUTE Alc-Acct-OC-I-All-Pack-Offer_64   86      octets
+ATTRIBUTE Alc-Acct-OC-I-Inpr-Octs-Drop_64   87      octets
+ATTRIBUTE Alc-Acct-OC-I-Outpr-Octs-Drop_64  88      octets
+ATTRIBUTE Alc-Acct-OC-I-Inpr-Pack-Drop_64   89      octets
+ATTRIBUTE Alc-Acct-OC-I-Outpr-Pack-Drop_64  90      octets
+ATTRIBUTE Alc-Acct-OC-O-Inpr-Pack-Drop_64   91      octets
+ATTRIBUTE Alc-Acct-OC-O-Outpr-Pack-Drop_64  92      octets
+ATTRIBUTE Alc-Acct-OC-O-Inpr-Octs-Drop_64   93      octets
+ATTRIBUTE Alc-Acct-OC-O-Outpr-Octs-Drop_64  94      octets
+
+# Credit control VSAs
+ATTRIBUTE Alc-Credit-Control-CategoryMap    95      string
+ATTRIBUTE Alc-Credit-Control-Quota          96      string
+
+ATTRIBUTE Alc-Tunnel-Challenge              97      integer  has_tag
+
+VALUE     Alc-Tunnel-Challenge             never           1
+VALUE     Alc-Tunnel-Challenge             always          2
+
+ATTRIBUTE Alc-Force-Nak                     98      string   # CoA
+
+ATTRIBUTE Alc-Ipv6-Address                  99      ipv6addr
+ATTRIBUTE Alc-Serv-Id                      100      integer
+ATTRIBUTE Alc-Interface                    101      string
+ATTRIBUTE Alc-ToServer-Dhcp-Options        102      octets
+ATTRIBUTE Alc-ToClient-Dhcp-Options        103      octets
+ATTRIBUTE Alc-Tunnel-Serv-Id               104      integer
+ATTRIBUTE Alc-Ipv6-Primary-Dns             105      ipv6addr
+ATTRIBUTE Alc-Ipv6-Secondary-Dns           106      ipv6addr
+
+# RADIUS subscriber accounting VSAs (Policers)
+ATTRIBUTE Alc-Acct-I-statmode              107      string
+ATTRIBUTE Alc-Acct-I-Hiprio-Octets_64      108      octets
+ATTRIBUTE Alc-Acct-I-Lowprio-Octets_64     109      octets
+ATTRIBUTE Alc-Acct-O-Hiprio-Octets_64      110      octets
+ATTRIBUTE Alc-Acct-O-Lowprio-Octets_64     111      octets
+ATTRIBUTE Alc-Acct-I-Hiprio-Packets_64     112      octets
+ATTRIBUTE Alc-Acct-I-Lowprio-Packets_64    113      octets
+ATTRIBUTE Alc-Acct-O-Hiprio-Packets_64     114      octets
+ATTRIBUTE Alc-Acct-O-Lowprio-Packets_64    115      octets
+ATTRIBUTE Alc-Acct-I-All-Octets_64         116      octets
+ATTRIBUTE Alc-Acct-O-All-Octets_64         117      octets
+ATTRIBUTE Alc-Acct-I-All-Packets_64        118      octets
+ATTRIBUTE Alc-Acct-O-All-Packets_64        119      octets
+
+ATTRIBUTE Alc-Tunnel-Rx-Window-Size        120      integer  has_tag
+
+# NAT Subscriber
+ATTRIBUTE Alc-Nat-Port-Range               121      string
+
+# Lawful intercept VSAs
+ATTRIBUTE Alc-LI-Action                    122      integer  encrypt=2
+
+VALUE     Alc-LI-Action                    no-action            1
+VALUE     Alc-LI-Action                    enable               2
+VALUE     Alc-LI-Action                    disable              3
+VALUE     Alc-LI-Action                    clear-dest-service   4
+
+ATTRIBUTE Alc-LI-Destination               123      string   encrypt=2
+
+# This VSA can occur multiple times (for each FC that must be intercepted)
+# If this VSA is not present, all FCs will be intercepted.
+ATTRIBUTE Alc-LI-FC                        124      integer  encrypt=2
+
+VALUE     Alc-LI-FC                        be              0
+VALUE     Alc-LI-FC                        l2              1
+VALUE     Alc-LI-FC                        af              2
+VALUE     Alc-LI-FC                        l1              3
+VALUE     Alc-LI-FC                        h2              4
+VALUE     Alc-LI-FC                        ef              5
+VALUE     Alc-LI-FC                        h1              6
+VALUE     Alc-LI-FC                        nc              7
+
+# If this VSA is not present, both directions will be intercepted.
+ATTRIBUTE Alc-LI-Direction                 125      integer  encrypt=2
+
+VALUE     Alc-LI-Direction                 ingress         1
+VALUE     Alc-LI-Direction                 egress          2
+
+# Subscriber QoS overrides
+ATTRIBUTE Alc-Subscriber-QoS-Override      126      string
+
+# RADIUS subscriber accounting VSAs (Policers)
+ATTRIBUTE Alc-Acct-O-statmode              127      string
+
+# ATM Traffic Descriptor Profiles
+ATTRIBUTE Alc-ATM-Ingress-TD-Profile       128      integer
+ATTRIBUTE Alc-ATM-Egress-TD-Profile        129      integer
+
+# Application-assurance transit ip (CoA)
+ATTRIBUTE Alc-AA-Transit-IP                130      integer   # CoA
+
+VALUE     Alc-AA-Transit-IP                host            1
+VALUE     Alc-AA-Transit-IP                audit-start     2
+VALUE     Alc-AA-Transit-IP                audit-end       3
+VALUE     Alc-AA-Transit-IP                host-update     4
+
+# DHCPv6 Relay pool selection attributes
+ATTRIBUTE Alc-Delegated-IPv6-Pool          131      string
+
+ATTRIBUTE Alc-Access-Loop-Rate-Down        132      integer
+ATTRIBUTE Alc-Access-Loop-Encap-Offset     133      octets
+
+# Submgt SLA-profile filter overrrule
+ATTRIBUTE Alc-Subscriber-Filter            134      string
+
+ATTRIBUTE Alc-PPP-Force-IPv6CP             135      integer
+
+# One-Time HTTP Redirection
+ATTRIBUTE Alc-Onetime-Http-Redirection-Filter-Id     136      string
+
+# Used when clearing all radius li triggered sources from a mirror destination
+# via CoA. The value of this attribute is used to authenticate the coa.
+ATTRIBUTE Alc-Authentication-Policy-Name   137      string
+
+# Lawful intercept VSAs continued
+ATTRIBUTE Alc-LI-Intercept-Id              138      integer  encrypt=2
+ATTRIBUTE Alc-LI-Session-Id                139      integer  encrypt=2
+
+# Nat
+ATTRIBUTE Alc-Nat-Outside-Serv-Id          140      integer
+ATTRIBUTE Alc-Nat-Outside-Ip-Addr          141      ipaddr
+
+# Mobile-Gateway APN-Password VSA (password used for the next APN AccessReq)
+ATTRIBUTE Alc-APN-Password                 142      string   encrypt=2
+
+# Mobile-Gateway Next-APN-Name VSA (PGW-APN to be used for the session)
+ATTRIBUTE Alc-APN-Name                     143      string
+
+ATTRIBUTE Alc-Tunnel-Acct-Policy           144      string   has_tag
+
+# Wlan-Gateway
+ATTRIBUTE Alc-Mgw-Interface-Type           145      integer
+
+VALUE     Alc-Mgw-Interface-Type           gn              1
+VALUE     Alc-Mgw-Interface-Type           s2a             2
+VALUE     Alc-Mgw-Interface-Type           s2b             3
+
+ATTRIBUTE Alc-Wlan-APN-Name                146      string
+
+ATTRIBUTE Alc-MsIsdn                       147      string
+
+# WIFI Received Signal Strength Indication
+ATTRIBUTE Alc-RSSI                         148      integer
+
+# Number of attached WIFI UEs
+ATTRIBUTE Alc-Num-Attached-UEs             149      integer
+
+# Mobile-Gateway Charging-profile-ID VSA
+ATTRIBUTE Alc-Charging-Prof-ID             150      integer
+
+# Subscriber Services
+ATTRIBUTE Alc-Sub-Serv-Activate            151      string   has_tag
+ATTRIBUTE Alc-Sub-Serv-Deactivate          152      string   has_tag
+ATTRIBUTE Alc-Sub-Serv-Acct-Stats-Type     153      integer  has_tag
+
+VALUE     Alc-Sub-Serv-Acct-Stats-Type     off         1
+VALUE     Alc-Sub-Serv-Acct-Stats-Type     volume-time 2
+VALUE     Alc-Sub-Serv-Acct-Stats-Type     time        3
+
+ATTRIBUTE Alc-Sub-Serv-Acct-Interim-Ivl    154      integer  has_tag
+
+ATTRIBUTE Alc-Sub-Serv-Internal            155      octets
+
+# Application-Assurance Radius Accounting Attributes
+ATTRIBUTE Alc-AA-Group-Partition-Isa-Id    156      string
+
+# Application-Assurance Radius Peer Information
+ATTRIBUTE Alc-AA-Peer-Identifier           157      string
+
+# Filter entries
+ATTRIBUTE Alc-Nas-Filter-Rule-Shared       158      octets
+ATTRIBUTE Alc-Ascend-Data-Filter-Host-Spec 159      abinary
+
+# Relative Session-Timeout
+ATTRIBUTE Alc-Relative-Session-Timeout     160      integer
+
+ATTRIBUTE Alc-Delegated-IPv6-Prefix-Length 161      integer
+
+ATTRIBUTE Alc-Subscriber-Session-Limit     162      integer
+
+# Accounting interim update trigger reason
+ATTRIBUTE Alc-Acct-Triggered-Reason        163      integer
+
+VALUE     Alc-Acct-Triggered-Reason        regular                       1
+VALUE     Alc-Acct-Triggered-Reason        sla-start                     2
+VALUE     Alc-Acct-Triggered-Reason        sla-stop                      3
+VALUE     Alc-Acct-Triggered-Reason        Framed-IP-Address-up          4
+VALUE     Alc-Acct-Triggered-Reason        Framed-IP-Address-down        5
+VALUE     Alc-Acct-Triggered-Reason        Alc-Ipv6-Address-up           6
+VALUE     Alc-Acct-Triggered-Reason        Alc-Ipv6-Address-down         7
+VALUE     Alc-Acct-Triggered-Reason        Delegated-IPv6-Prefix-up      8
+VALUE     Alc-Acct-Triggered-Reason        Delegated-IPv6-Prefix-down    9
+VALUE     Alc-Acct-Triggered-Reason        Framed-IPv6-Prefix-up         10
+VALUE     Alc-Acct-Triggered-Reason        Framed-IPv6-Prefix-down       11
+VALUE     Alc-Acct-Triggered-Reason        Interval-Changed              12
+VALUE     Alc-Acct-Triggered-Reason        DSL-Line-Attributes-Changed   13
+VALUE     Alc-Acct-Triggered-Reason        Wlan-Mobility-Event           14
+VALUE     Alc-Acct-Triggered-Reason        Persistence-Recover           15
+VALUE     Alc-Acct-Triggered-Reason        SRRP-Switchover               16
+VALUE     Alc-Acct-Triggered-Reason        Nat-Port-Range-Event          17
+VALUE     Alc-Acct-Triggered-Reason        CoA-Triggered                 18
+VALUE     Alc-Acct-Triggered-Reason        Nat-Free                      19
+VALUE     Alc-Acct-Triggered-Reason        Nat-Map                       20
+VALUE     Alc-Acct-Triggered-Reason        Nat-Update                    21
+VALUE     Alc-Acct-Triggered-Reason        Stateless-SRRP-Switchover     22
+VALUE     Alc-Acct-Triggered-Reason        Data-Triggered-Host-Promotion 23
+VALUE     Alc-Acct-Triggered-Reason        Lac-Traffic-Steering-Enabled  24
+VALUE     Alc-Acct-Triggered-Reason        Lac-Traffic-Steering-Disabled 25
+VALUE     Alc-Acct-Triggered-Reason        Bonding-Connection            26
+VALUE     Alc-Acct-Triggered-Reason        IPsec-Traffic-Acct-On         27
+VALUE     Alc-Acct-Triggered-Reason        IPsec-Traffic-Acct-Off        28
+
+# Dynamic Business Services
+ATTRIBUTE Alc-Dyn-Serv-SAP-Id              164      string   has_tag
+ATTRIBUTE Alc-Dyn-Serv-Script-Params       165      string   has_tag
+ATTRIBUTE Alc-Dyn-Serv-Script-Action       166      integer  has_tag
+
+VALUE     Alc-Dyn-Serv-Script-Action       setup    1
+VALUE     Alc-Dyn-Serv-Script-Action       modify   2
+VALUE     Alc-Dyn-Serv-Script-Action       teardown 3
+
+ATTRIBUTE Alc-Dyn-Serv-Policy              167      string   has_tag
+ATTRIBUTE Alc-Dyn-Serv-Acct-Interim-Ivl-1  168      integer  has_tag
+ATTRIBUTE Alc-Dyn-Serv-Acct-Interim-Ivl-2  169      integer  has_tag
+ATTRIBUTE Alc-Dyn-Serv-Acct-Stats-Type-1   170      integer  has_tag
+
+VALUE     Alc-Dyn-Serv-Acct-Stats-Type-1   off         1
+VALUE     Alc-Dyn-Serv-Acct-Stats-Type-1   volume-time 2
+VALUE     Alc-Dyn-Serv-Acct-Stats-Type-1   time        3
+
+ATTRIBUTE Alc-Dyn-Serv-Acct-Stats-Type-2   171      integer  has_tag
+
+VALUE     Alc-Dyn-Serv-Acct-Stats-Type-2   off         1
+VALUE     Alc-Dyn-Serv-Acct-Stats-Type-2   volume-time 2
+VALUE     Alc-Dyn-Serv-Acct-Stats-Type-2   time        3
+
+ATTRIBUTE Alc-Wlan-Portal-Redirect         172      string
+ATTRIBUTE Alc-Wlan-Portal-Url              173      string
+
+# Lease-Time
+ATTRIBUTE Alc-Lease-Time                   174      integer
+
+ATTRIBUTE Alc-DSL-Line-State               175      integer
+
+VALUE     Alc-DSL-Line-State               show-time 1
+VALUE     Alc-DSL-Line-State               idle      2
+VALUE     Alc-DSL-Line-State               silent    3
+
+ATTRIBUTE Alc-DSL-Type                     176      integer
+
+VALUE     Alc-DSL-Type                     other     0
+VALUE     Alc-DSL-Type                     ADSL1     1
+VALUE     Alc-DSL-Type                     ADSL2     2
+VALUE     Alc-DSL-Type                     ADSL2PLUS 3
+VALUE     Alc-DSL-Type                     VDSL1     4
+VALUE     Alc-DSL-Type                     VDSL2     5
+VALUE     Alc-DSL-Type                     SDSL      6
+
+# HTTP-Redirect redirect URL override
+ATTRIBUTE Alc-Portal-Url                   177      string
+ATTRIBUTE Alc-Ipv6-Portal-Url              178      string
+
+# Wifi Local Breakout
+ATTRIBUTE Alc-GTP-Local-Breakout           179      integer
+
+VALUE     Alc-GTP-Local-Breakout           not-allowed 0
+VALUE     Alc-GTP-Local-Breakout           allowed     1
+
+ATTRIBUTE Alc-SAP-Session-Index            180      integer
+
+ATTRIBUTE Alc-SLAAC-IPv6-Pool              181      string
+
+ATTRIBUTE Alc-AA-Sub-Http-Url-Param        182      string
+
+ATTRIBUTE Alc-WPP-Error-Code               183      integer
+
+ATTRIBUTE Alc-Wlan-Ue-Creation-Type        184      integer
+
+VALUE     Alc-Wlan-Ue-Creation-Type        iom  0
+VALUE     Alc-Wlan-Ue-Creation-Type        isa  1
+
+ATTRIBUTE Alc-Onetime-Http-Redirect-Reactivate     185      string
+
+# Wifi distributed subscriber management
+ATTRIBUTE Alc-Wlan-Dsm-Ot-Http-Redirect-Url 186      string
+ATTRIBUTE Alc-Wlan-Dsm-Ip-Filter            187      string
+ATTRIBUTE Alc-Wlan-Dsm-Ingress-Policer      188      string
+ATTRIBUTE Alc-Wlan-Dsm-Egress-Policer       189      string
+
+# Wifi Handover from 3G/4G to Wlan Gw
+ATTRIBUTE Alc-Wlan-Handover-Ip-Address     190      ipaddr
+
+ATTRIBUTE Alc-ToServer-Dhcp6-Options       191      octets
+ATTRIBUTE Alc-ToClient-Dhcp6-Options       192      octets
+
+ATTRIBUTE Alc-AA-App-Service-Options       193      string
+
+ATTRIBUTE Alc-IPv6-Acct-Input-Packets      194      integer
+ATTRIBUTE Alc-IPv6-Acct-Input-Octets       195      integer
+ATTRIBUTE Alc-IPv6-Acct-Input-GigaWords    196      integer
+ATTRIBUTE Alc-IPv6-Acct-Output-Packets     197      integer
+ATTRIBUTE Alc-IPv6-Acct-Output-Octets      198      integer
+ATTRIBUTE Alc-IPv6-Acct-Output-Gigawords   199      integer
+
+ATTRIBUTE Alc-v6-Preferred-Lifetime        200      integer
+ATTRIBUTE Alc-v6-Valid-Lifetime            201      integer
+ATTRIBUTE Alc-Dhcp6-Renew-Time             202      integer
+ATTRIBUTE Alc-Dhcp6-Rebind-Time            203      integer
+
+ATTRIBUTE Alc-Tunnel-DF-bit                204      integer  has_tag
+
+VALUE     Alc-Tunnel-DF-bit                clr-lac-data 0
+VALUE     Alc-Tunnel-DF-bit                set-lac-data 1
+
+# Wifi Gtp Default Bearer Id
+ATTRIBUTE Alc-GTP-Default-Bearer-Id        205      integer
+
+# Wifi per-SSID VLAN
+ATTRIBUTE Alc-Wlan-SSID-VLAN               206      string
+
+ATTRIBUTE Alc-RIP-Policy                   207      string
+
+ATTRIBUTE Alc-BGP-IPv6-Policy              208      string
+ATTRIBUTE Alc-BGP-IPv6-Auth-Keychain       209      string
+ATTRIBUTE Alc-BGP-IPv6-Auth-Key            210      octets
+ATTRIBUTE Alc-BGP-IPv6-Export-Policy       211      string
+ATTRIBUTE Alc-BGP-IPv6-Import-Policy       212      string
+ATTRIBUTE Alc-BGP-IPv6-PeerAS              213      integer
+
+
+ATTRIBUTE Alc-Tunnel-Recovery-Method       214      integer  has_tag
+
+VALUE     Alc-Tunnel-Recovery-Method       recovery-tunnel 0
+VALUE     Alc-Tunnel-Recovery-Method       mcs             1
+
+ATTRIBUTE Alc-Tunnel-Recovery-Time         215      integer  has_tag
+
+
+# Data-triggered lease-time
+ATTRIBUTE Alc-Datatrig-Lease-Time          216      integer
+
+
+# Subscriber UPnP override policy
+ATTRIBUTE Alc-UPnP-Sub-Override-Policy     217      string
+
+
+ATTRIBUTE Alc-Wlan-Handover-Ipv6-Address   218      ipv6addr
+ATTRIBUTE Alc-Egress-Report-Rate-Subtract  219      integer
+
+ATTRIBUTE Alc-Home-Aware-Pool              220      string
+ATTRIBUTE Alc-DMZ-Address                  221      ipaddr
+ATTRIBUTE Alc-Standby-Ips                  222      ipaddr
+ATTRIBUTE Alc-Reserved-Addresses           223      string
+ATTRIBUTE Alc-BRG-Profile                  224      string
+ATTRIBUTE Alc-BRG-Id                       225      string
+
+
+ATTRIBUTE Alc-Error-Code                   226      integer
+ATTRIBUTE Alc-Error-Message                227      string
+
+
+ATTRIBUTE Alc-Trigger-Acct-Interim         228      string
+
+
+ATTRIBUTE Alc-IPsec-Ts-Override            229      string
+
+
+
+# RADIUS subscriber accounting VSAs (Policers)
+ATTRIBUTE Alc-Acct-O-Exprof-Octets_64      230      octets
+ATTRIBUTE Alc-Acct-O-Exprof-Packets_64     231      octets
+
+
+ATTRIBUTE Alc-Acct-Interim-Ivl             232      integer  has_tag
+
+
+# Tunnel QoS overrides
+ATTRIBUTE Alc-Tunnel-QoS-Override          233      string
+
+
+ATTRIBUTE Alc-DNAT-Override                234      string
+
+ATTRIBUTE Alc-BRG-DHCP-Streaming-Dest      235      ipaddr
+ATTRIBUTE Alc-Host-DHCP-Streaming-Disabled 236      integer
+
+ATTRIBUTE Alc-Subject-Key-Identifier       237      octets
+
+ATTRIBUTE Alc-Remove-Override              238      string
+
+ATTRIBUTE Alc-BRG-Num-Active-Sessions      239      integer
+ATTRIBUTE Alc-Nat-Port-Range-Freed         240      string
+ATTRIBUTE Alc-Per-Host-Port-Range          241      integer
+
+ATTRIBUTE Alc-Radius-Py                    242      octets
+
+ATTRIBUTE Alc-LI-Use-Outside-Ip            243      integer encrypt=2
+VALUE     Alc-LI-Use-Outside-Ip            true     1
+VALUE     Alc-LI-Use-Outside-Ip            false    2
+
+ATTRIBUTE Alc-Force-DHCP-Relay             244      string
+
+END-VENDOR      Alcatel-IPD
+
+#
+# Extended types
+#
+
+BEGIN-VENDOR    Alcatel-IPD format=Extended-Vendor-Specific-1
+
+ATTRIBUTE Alc-PPPoE-Client-Service           1      integer
+ATTRIBUTE Alc-PPPoE-Client-MAC               2      string
+ATTRIBUTE Alc-PPPoE-Client-Policy            3      string
+ATTRIBUTE Alc-PPPoE-Client-Username          4      string
+ATTRIBUTE Alc-PPPoE-Client-Password          5      string   encrypt=2
+
+ATTRIBUTE Alc-Xconnect-Tunnel-Service        6      integer
+ATTRIBUTE Alc-Xconnect-Tunnel-Remote-Ipv6    7      ipv6addr
+ATTRIBUTE Alc-Xconnect-Tunnel-Type           8      integer
+VALUE     Alc-Xconnect-Tunnel-Type           l2tpv3 0
+VALUE     Alc-Xconnect-Tunnel-Type           gre    1
+
+ATTRIBUTE Alc-Bridge-Id                      9      integer
+ATTRIBUTE Alc-Vxlan-VNI                     10      integer
+ATTRIBUTE Alc-RT                            14      string
+ATTRIBUTE Alc-RD                            15      string
+
+ATTRIBUTE Alc-IPv6-Router-Adv-Policy        16      string
+
+ATTRIBUTE Alc-Nat-Outside-IPs               17      string
+
+
+ATTRIBUTE Alc-Mld-Import-Policy             18      string
+
+ATTRIBUTE Alc-Bonding-Id                    19      string
+ATTRIBUTE Alc-Bonding-Serv-Id               20      integer
+ATTRIBUTE Alc-Bonding-Interface             21      string
+ATTRIBUTE Alc-Bonding-Reference-Rate        22      string
+ATTRIBUTE Alc-Bonding-Active-Connection     23      integer
+
+ATTRIBUTE Alc-IPv6-DMZ-Enabled              24      integer
+
+ATTRIBUTE Alc-Steering-Profile              25      string
+ATTRIBUTE Alc-Aa-Sub-Scope                  26      integer
+VALUE     Alc-Aa-Sub-Scope                  subscriber 1
+VALUE     Alc-Aa-Sub-Scope                  mac        2
+
+ATTRIBUTE Alc-IPv6-Sub-If-Prefix            27      string
+
+ATTRIBUTE Alc-HLE-Device-Type               28      integer
+VALUE     Alc-HLE-Device-Type               home    1
+
+
+ATTRIBUTE Alc-Mld-Import-Policy-Modif       35      string
+
+ATTRIBUTE Alc-Bonding-Load-Balance-Stats    36      octets
+
+ATTRIBUTE Alc-VAS-IPv4-Filter               37      string
+ATTRIBUTE Alc-VAS-NSH-IPv4-Opaque-Meta-Data 38      octets
+
+ATTRIBUTE Alc-Static-Port-Forward           39      string
+
+ATTRIBUTE Alc-IPv6-Slaac-Replacement-Prefix 40      ipv6prefix
+
+ATTRIBUTE Alc-Acct-IPsec-Bidir-Kibibytes    41      integer64
+ATTRIBUTE Alc-Acct-IPsec-Encrypted-Kibibytes 42     integer64
+ATTRIBUTE Alc-Acct-IPsec-Decrypted-Kibibytes 43     integer64
+ATTRIBUTE Alc-Acct-IPsec-Bidir-Packets      44      integer64
+ATTRIBUTE Alc-Acct-IPsec-Encrypted-Packets  45      integer64
+ATTRIBUTE Alc-Acct-IPsec-Decrypted-Packets  46      integer64
+
+ATTRIBUTE Alc-SPI-Sharing-Id                47      string
+
+ATTRIBUTE Alc-Firewall-Info                 48      string
+
+ATTRIBUTE Alc-Xconnect-Tunnel-Local-Ipv6    49     ipv6addr
+
+ATTRIBUTE Alc-IPsec-LAA-IPv4-Svr-Name       50      string
+ATTRIBUTE Alc-IPsec-LAA-IPv6-Svr-Name       51      string
+ATTRIBUTE Alc-IPsec-LAA-IPv4-Svc-Name       52      string
+ATTRIBUTE Alc-IPsec-LAA-IPv6-Svc-Name       53      string
+
+ATTRIBUTE Alc-Gtp-Bearer-Fteid              56      string
+
+ATTRIBUTE Alc-Gtp-Skip-Ipv4-Alloc-Override  57      integer
+VALUE     Alc-Gtp-Skip-Ipv4-Alloc-Override  on      1
+VALUE     Alc-Gtp-Skip-Ipv4-Alloc-Override  off     2
+
+
+ATTRIBUTE Alc-Xconnect-Tunnel-Home-Ipv6     59      ipv6addr
+
+END-VENDOR      Alcatel-IPD
+
+

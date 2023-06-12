@@ -1,0 +1,158 @@
+# Copyright 2023 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+name: sros-pysros-device-correlation
+
+topology:
+  nodes:
+    #SROS Nodes
+    pe1:
+      kind: vr-sros
+      image: vr-sros:23.3.R1
+      type: sr-1
+      license: /opt/srexperts/license-sros23.txt
+      startup-config: sros_config/pe1.cfg
+      mgmt-ipv4: 172.20.20.201
+      auto-remove: true
+      ports:
+        - 57001:22
+        - 57301:57400
+        - 57401:830
+    pe2:
+      kind: vr-sros
+      image: vr-sros:23.3.R1
+      type: sr-1
+      license: /opt/srexperts/license-sros23.txt
+      startup-config: sros_config/pe2.cfg
+      mgmt-ipv4: 172.20.20.202
+      auto-remove: true
+      ports:
+        - 57002:22
+        - 57302:57400
+        - 57402:830
+    pe3:
+      kind: vr-sros
+      image: vr-sros:23.3.R1
+      type: sr-1
+      license: /opt/srexperts/license-sros23.txt
+      startup-config: sros_config/pe3.cfg
+      mgmt-ipv4: 172.20.20.203
+      auto-remove: true
+      ports:
+        - 57003:22
+        - 57303:57400
+        - 57403:830
+    pe4:
+      kind: vr-sros
+      image: vr-sros:23.3.R1
+      type: sr-1
+      license: /opt/srexperts/license-sros23.txt
+      startup-config: sros_config/pe4.cfg
+      mgmt-ipv4: 172.20.20.204
+      auto-remove: true
+      ports:
+        - 57004:22
+        - 57304:57400
+        - 57404:830
+    #CE Nodes
+    ce1:
+      kind: vr-sros
+      image: vr-sros:23.3.R1
+      type: sr-1
+      license: /opt/srexperts/license-sros23.txt
+      startup-config: sros_config/ce1.cfg
+      mgmt-ipv4: 172.20.20.211
+      auto-remove: true
+      ports:
+        - 57005:22
+        - 57305:57400
+        - 57405:830
+    ce2:
+      kind: vr-sros
+      image: vr-sros:23.3.R1
+      type: sr-1
+      license: /opt/srexperts/license-sros23.txt
+      startup-config: sros_config/ce2.cfg
+      mgmt-ipv4: 172.20.20.212
+      auto-remove: true
+      ports:
+        - 57006:22
+        - 57306:57400
+        - 57406:830
+    ce3:
+      kind: vr-sros
+      image: vr-sros:23.3.R1
+      type: sr-1
+      license: /opt/srexperts/license-sros23.txt
+      startup-config: sros_config/ce3.cfg
+      mgmt-ipv4: 172.20.20.213
+      auto-remove: true
+      ports:
+        - 57007:22
+        - 57307:57400
+        - 57407:830
+    ce4:
+      kind: vr-sros
+      image: vr-sros:23.3.R1
+      type: sr-1
+      license: /opt/srexperts/license-sros23.txt
+      startup-config: sros_config/ce4.cfg
+      mgmt-ipv4: 172.20.20.214
+      auto-remove: true
+      ports:
+        - 57008:22
+        - 57308:57400
+        - 57408:830
+    #route-server
+    rs1:
+      kind: linux
+      image: ghcr.io/hellt/network-multitool
+      auto-remove: true
+      binds:
+        - gobgp:/gobgp
+      exec: 
+        - bash gobgp/gobgp.sh
+
+     #traffic-generator
+    tg1:
+      kind: linux
+      image: ghcr.io/hellt/network-multitool
+      auto-remove: true
+      exec:
+        - ip address add 10.15.11.0/31 dev eth1
+        - ip route add 10.14.2.0/31 via 10.15.11.1 dev eth1
+    tg2:
+      kind: linux
+      image: ghcr.io/hellt/network-multitool
+      auto-remove: true
+      exec:
+        - ip address add 10.14.2.1/31 dev eth1
+        - ip route add 10.15.11.0/31 via 10.14.2.0 dev eth1
+
+  links:
+    # #pe1 links
+    - endpoints: ["pe1:eth1", "ce1:eth1"]
+    - endpoints: ["pe1:eth2", "ce2:eth2"]
+    - endpoints: ["pe1:eth3", "pe2:eth3"]
+    - endpoints: ["pe1:eth4", "pe4:eth2"]
+    - endpoints: ["pe1:eth5", "pe3:eth1"]
+    #pe2 links
+    - endpoints: ["pe2:eth1", "ce2:eth1"]
+    - endpoints: ["pe2:eth2", "ce1:eth2"]
+    - endpoints: ["pe2:eth4", "pe3:eth2"]
+    #lag-links between pe2 and pe4
+    - endpoints: ["pe2:eth5", "pe4:eth1"]
+    - endpoints: ["pe2:eth6", "pe4:eth5"]
+    #pe3 links
+    - endpoints: ["pe3:eth3", "pe4:eth3"]
+    - endpoints: ["pe3:eth4", "ce3:eth1"]
+    #pe4 links
+    - endpoints: ["pe4:eth4", "ce4:eth1"]
+    #rs1 links
+    - endpoints: ["rs1:eth1", "ce3:eth2"]
+    - endpoints: ["rs1:eth2", "ce4:eth2"]
+    - endpoints: ["rs1:eth3", "pe1:eth6"]
+    #iperf links
+    - endpoints: ["ce1:eth3", "tg1:eth1"]
+    - endpoints: ["ce4:eth3", "tg2:eth1"]

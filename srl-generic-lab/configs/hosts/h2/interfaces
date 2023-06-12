@@ -1,0 +1,5 @@
+auto eth1
+iface eth1 inet static
+address 100.102.2.12
+netmask 255.255.255.0
+mtu 1400

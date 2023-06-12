@@ -1,0 +1,126 @@
+# Copyright 2023 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+name: srl-generic
+
+mgmt:
+  network: srl-mgmt
+  ipv4-subnet: 172.20.0.0/24
+
+topology:
+  defaults:
+    kind: srl
+  kinds:
+    srl:
+      type: ixrd3l
+      image: ghcr.io/nokia/srlinux:23.3.2
+    linux:
+      image: akpinar/alpine:latest
+
+  nodes:
+    spine1:
+      kind: srl
+      startup-config: configs/fabric/spine1.cfg
+      mgmt-ipv4: 172.20.0.21
+      ports:
+        - "51001:22"
+        - "51301:57400"
+        - "51101:80"
+    spine2:
+      kind: srl
+      startup-config: configs/fabric/spine2.cfg
+      mgmt-ipv4: 172.20.0.22
+      ports:
+        - "51002:22"
+        - "51302:57400"
+        - "51102:80"
+    leaf1:
+      kind: srl
+      startup-config: configs/fabric/leaf1.cfg
+      mgmt-ipv4: 172.20.0.11
+      ports:
+        - "51003:22"
+        - "51303:57400"
+        - "51103:80"
+    leaf2:
+      kind: srl
+      startup-config: configs/fabric/leaf2.cfg
+      mgmt-ipv4: 172.20.0.12
+      ports:
+        - "51004:22"
+        - "51304:57400"
+        - "51104:80"
+    leaf3:
+      kind: srl
+      startup-config: configs/fabric/leaf3.cfg
+      mgmt-ipv4: 172.20.0.13
+      ports:
+        - "51005:22"
+        - "51305:57400"
+        - "51105:80"
+    leaf4:
+      kind: srl
+      startup-config: configs/fabric/leaf4.cfg
+      mgmt-ipv4: 172.20.0.14
+      ports:
+        - "51006:22"
+        - "51306:57400"
+        - "51106:80"
+    h1:
+      kind: linux
+      mgmt-ipv4: 172.20.0.31
+      binds:
+        - ./configs/hosts/h1/interfaces:/etc/network/interfaces
+        - ./configs/hosts/h1/staticroute:/etc/conf.d/staticroute
+      exec:
+        - /root/restart-services.sh
+      ports:
+        - "51007:22"
+    h2:
+      kind: linux
+      mgmt-ipv4: 172.20.0.32
+      binds:
+        - ./configs/hosts/h2/interfaces:/etc/network/interfaces
+        - ./configs/hosts/h2/staticroute:/etc/conf.d/staticroute
+      exec:
+        - /root/restart-services.sh
+      ports:
+        - "51008:22"
+    h3:
+      kind: linux
+      mgmt-ipv4: 172.20.0.33
+      binds:
+        - ./configs/hosts/h3/interfaces:/etc/network/interfaces
+        - ./configs/hosts/h3/staticroute:/etc/conf.d/staticroute
+      exec:
+        - /root/restart-services.sh
+      ports:
+        - "51009:22"
+    h4:
+      kind: linux
+      mgmt-ipv4: 172.20.0.34
+      binds:
+        - ./configs/hosts/h4/interfaces:/etc/network/interfaces
+        - ./configs/hosts/h4/staticroute:/etc/conf.d/staticroute
+      exec:
+        - /root/restart-services.sh
+      ports:
+        - "51010:22"
+
+  links:
+    - endpoints: ["spine1:e1-3", "leaf1:e1-31"]
+    - endpoints: ["spine1:e1-5", "leaf2:e1-31"]
+    - endpoints: ["spine1:e1-7", "leaf3:e1-31"]
+    - endpoints: ["spine1:e1-9", "leaf4:e1-31"]
+    - endpoints: ["spine2:e1-3", "leaf1:e1-32"]
+    - endpoints: ["spine2:e1-5", "leaf2:e1-32"]
+    - endpoints: ["spine2:e1-7", "leaf3:e1-32"]
+    - endpoints: ["spine2:e1-9", "leaf4:e1-32"]
+
+    - endpoints: ["leaf1:e1-11", "h1:eth1"]
+    - endpoints: ["leaf2:e1-11", "h1:eth2"]
+    - endpoints: ["leaf2:e1-12", "h2:eth1"]
+    - endpoints: ["leaf3:e1-13", "h3:eth1"]
+    - endpoints: ["leaf4:e1-13", "h3:eth2"]
+    - endpoints: ["leaf4:e1-14", "h4:eth1"]

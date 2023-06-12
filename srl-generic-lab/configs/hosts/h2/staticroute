@@ -1,0 +1,1 @@
+staticroute="net 100.102.0.0 netmask 255.255.0.0 gw 100.102.2.1"

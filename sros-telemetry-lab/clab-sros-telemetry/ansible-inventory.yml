@@ -1,0 +1,34 @@
+# Copyright 2023 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+all:
+  children:
+    linux:
+      hosts:
+        client1:
+          ansible_host: 172.81.0.31
+        client2:
+          ansible_host: 172.81.0.32
+        gnmic:
+          ansible_host: 172.81.0.41
+        grafana:
+          ansible_host: 172.81.0.43
+        loki:
+          ansible_host: 172.81.0.46
+        prometheus:
+          ansible_host: 172.81.0.42
+        promtail:
+          ansible_host: 172.81.0.45
+        syslog:
+          ansible_host: 172.81.0.44
+    vr-sros:
+      hosts:
+        P1:
+          ansible_host: 172.81.0.11
+        P2:
+          ansible_host: 172.81.0.12
+        PE1:
+          ansible_host: 172.81.0.21
+        PE2:
+          ansible_host: 172.81.0.22

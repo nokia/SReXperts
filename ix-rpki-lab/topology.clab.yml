@@ -66,7 +66,7 @@ topology:
     srlinux:
       mgmt-ipv4: 192.168.121.103
       kind: srl
-      type: "ixrd5" # 32x400G
+      type: "ixrd3l" # 32x400G
       image: ghcr.io/nokia/srlinux:${SRLINUX_VERSION:=23.3.2}
       ports:
         - "52002:22"

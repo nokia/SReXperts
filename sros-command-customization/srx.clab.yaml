@@ -1,0 +1,28 @@
+# Copyright 2023 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+name: srx
+
+topology:
+  kinds:
+    vr-sros:
+      kind: vr-sros
+      image: europe-west1-docker.pkg.dev/nhc-f4160d67/containerlab/vr-sros:23.3.R1
+      type: sr-1
+      license: /opt/srexperts/license-sros23.txt
+      binds:
+        - ./scripts/lldp_neighbor.py:/tftpboot/lldp_neighbor.py
+  nodes:
+    wan1:
+      kind: vr-sros
+      startup-config: ./configs/wan1.cfg
+    wan2:
+      kind: vr-sros
+      startup-config: ./configs/wan2.cfg
+
+  links:
+    # wan1 <-> wan2 connections
+    - endpoints: ["wan1:eth1", "wan2:eth1"]
+    - endpoints: ["wan1:eth2", "wan2:eth2"]
+

@@ -1,0 +1,107 @@
+# Copyright 2023 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+name: sros-eh
+
+mgmt:
+  network: sros-eh              # management network name
+  bridge:  sros-mgmt      # management network name
+  ipv4-subnet: 172.109.211.0/24       # ipv4 range
+  ipv4-gw: 172.109.211.1
+
+topology:
+  kinds:
+    vr-sros:
+      image: europe-west1-docker.pkg.dev/nhc-f4160d67/containerlab/vr-sros:23.3.R1
+      license: /opt/srexperts/license-sros23.txt
+      binds:
+        - scripts/opergroup_bgp_sros.py:/tftpboot/opergroup_bgp_sros.py
+        - scripts/latest-ehs-output.py:/tftpboot/latest-ehs-output.py
+        - scripts/prefix_list_ehs.py:/tftpboot/prefix_list_ehs.py
+        - scripts/post-boot-exec.cfg:/tftpboot/post-boot-exec.cfg
+    linux:
+      image: ghcr.io/hendriksthomas/network-multitool
+      cmd: sh -c "sleep 10; ip r d default via 172.109.211.1; ifup eth1; ./docker/entrypoint.sh; bash"
+
+  nodes:
+    internet_rr1:
+      kind: vr-sros
+      mgmt-ipv4: 172.109.211.100
+      startup-config: configs/internet_rr1.cfg
+      ports:
+        - "59007:22"
+        - "59407:830"
+    internet_rr2:
+      kind: vr-sros
+      mgmt-ipv4: 172.109.211.99
+      startup-config: configs/internet_rr2.cfg
+      ports:
+        - "59008:22"
+        - "59408:830"
+    internet_rr3:
+      kind: vr-sros
+      mgmt-ipv4: 172.109.211.98
+      startup-config: configs/internet_rr3.cfg
+      ports:
+        - "59009:22"
+        - "59409:830"
+    helper1:
+      kind: vr-sros
+      mgmt-ipv4: 172.109.211.97
+      startup-config: configs/helper1.cfg
+      ports:
+        - "59006:22"
+        - "59406:830"
+    sros1:
+      kind: vr-sros
+      mgmt-ipv4: 172.109.211.101
+      startup-config: configs/sros1.cfg
+      ports:
+        - "59001:22"
+        - "59401:830"
+    sros2:
+      kind: vr-sros
+      mgmt-ipv4: 172.109.211.102
+      startup-config: configs/sros2.cfg
+      ports:
+        - "59002:22"
+        - "59402:830"
+    tester1:
+      mgmt-ipv4: 172.109.211.31
+      kind: linux
+      binds:
+        - configs/tester1_interfaces:/etc/network/interfaces
+        - configs/tester_hosts:/etc/hosts
+      ports:
+        - "59003:22"
+    tester2:
+      mgmt-ipv4: 172.109.211.32
+      kind: linux
+      binds:
+        - configs/tester2_interfaces:/etc/network/interfaces
+        - configs/tester_hosts:/etc/hosts
+      ports:
+        - "59004:22"
+    server1:
+      mgmt-ipv4: 172.109.211.33
+      kind: linux
+      binds:
+        - configs/server1_interfaces:/etc/network/interfaces
+      cmd: sh -c "sleep 10; ip r d default via 172.109.211.1; ifup eth1; /usr/sbin/nginx -g 'daemon off;'"
+      ports:
+        - "59005:22"
+
+  links:
+    - endpoints: ["sros1:eth1","sros2:eth1"]
+    # 
+    - endpoints: ["sros1:eth2","helper1:eth1"]
+    - endpoints: ["sros2:eth2","helper1:eth2"]
+    #
+    - endpoints: ["helper1:eth3","internet_rr1:eth4"]
+    - endpoints: ["helper1:eth4","internet_rr2:eth4"]
+    - endpoints: ["helper1:eth5","internet_rr3:eth4"]
+    #
+    - endpoints: ["tester1:eth1","sros1:eth3"]
+    - endpoints: ["tester2:eth1","sros2:eth3"]
+    - endpoints: ["server1:eth1","helper1:eth6"]

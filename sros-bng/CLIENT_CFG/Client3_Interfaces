@@ -1,0 +1,19 @@
+auto lo
+iface lo inet loopback
+
+auto eth1
+iface eth1 inet manual
+  post-up /sbin/ip l a link eth1 name eth1.100 type vlan id 100
+  post-up ifup eth1.100 &
+  pre-down ifdown eth1.100 &
+  pre-down ifdown eth1.100 &
+  pre-down ip l d link eth1 name eth1.100 type vlan id 100
+
+auto eth1.100
+iface eth1.100 inet dhcp
+  hwaddress ether 00:00:00:03:03:03
+  udhcpc_opts -x 0x3d:0FF1CE03 -x 0x51:7365727665722e6f666669636533
+#                               # translates to server.office3 in hex
+iface eth1.100 inet6 manual
+  hwaddress ether 00:00:00:03:03:03
+  #pre-up udhcpc6 -b -i eth1.100 -d

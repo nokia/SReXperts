@@ -1,0 +1,29 @@
+# Copyright 2023 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+global:
+  config:
+    as: 25999
+    router-id: 55.55.55.55
+neighbors:
+  - config:
+      neighbor-address: 10.55.13.0
+      peer-as: 25913
+    afi-safis:
+      - config:
+          afi-safi-name: ipv4-unicast
+      - config:
+          afi-safi-name: l2vpn-evpn
+  - config:
+      neighbor-address: 10.55.14.0
+      peer-as: 25914
+    afi-safis:
+      - config:
+          afi-safi-name: ipv4-unicast
+  - config:
+      neighbor-address: 10.55.1.1
+      peer-as: 25991
+    afi-safis:
+      - config:
+          afi-safi-name: ipv4-unicast

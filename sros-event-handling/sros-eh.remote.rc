@@ -1,0 +1,12 @@
+IP="<VM IP>"
+alias tester1="ssh root@$IP -p 59003"
+alias tester2="ssh root@$IP -p 59004"
+alias server1="ssh root@$IP -p 59005"
+alias sros1="ssh admin@$IP -p 59001"
+alias sros2="ssh admin@$IP -p 59002"
+alias internet_rr1="ssh admin@$IP -p 59007 "
+alias internet_rr2="ssh admin@$IP -p 59008"
+alias internet_rr3="ssh admin@$IP -p 59009"
+alias helper1="ssh admin@$IP -p 59006"
+echo -e "OK!\nJust type aliases to ssh. Run 'sros1', 'tester1' or helper1' to log in to nodes."
+

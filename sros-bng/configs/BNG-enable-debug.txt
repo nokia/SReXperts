@@ -1,0 +1,2 @@
+//debug python python-script "dhcp-script.py" script-all-info
+//debug python python-script "radius-script.py" script-all-info

@@ -1,0 +1,27 @@
+# Copyright 2023 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+name: ansible
+
+topology:
+  nodes:
+    srl1:
+      kind: nokia_srlinux
+      image: ghcr.io/nokia/srlinux:23.3.2
+      mgmt-ipv4: 172.20.20.11
+      ports:
+        - "53011:22"
+        - "53111:80"
+        - "53211:443"
+    srl2:
+      kind: nokia_srlinux
+      image: ghcr.io/nokia/srlinux:23.3.2
+      mgmt-ipv4: 172.20.20.12
+      ports:
+        - "53012:22"
+        - "53112:80"
+        - "53212:443"
+
+  links:
+    - endpoints: ["srl1:e1-1", "srl2:e1-1"]

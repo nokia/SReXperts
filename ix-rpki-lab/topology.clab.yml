@@ -30,7 +30,7 @@ topology:
       kind: vr-sros
       # type: 'sr-1x-48d' # 48x800G, requires 23.3.R1
       # image: vrnetlab/vr-sros:${SROS_VERSION:=23.3.R1}
-      image: europe-west1-docker.pkg.dev/nhc-f4160d67/containerlab/vr-sros:23.3.R1
+      image: vr-sros:23.3.R1
       license: /opt/srexperts/license-sros23.txt
       ports:
         - 52001:22

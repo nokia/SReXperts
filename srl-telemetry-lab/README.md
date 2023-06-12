@@ -174,7 +174,7 @@ Adjust the `gnmic` config to collect statistics for the `mgmt0` interface, such 
   The panel is already configured to show IN/OUT statistics for the `gnmic_srl_if_traffic_rate_in_bps` metric, you just need to make sure that a certain gnmic's subscription config includes the `mgmt0` interface statistics.
 <details>
   <summary> Still stuck? Click here</summary>
-  The statistic blob in `gnmic-config.yml` you're looking for is `srl_if_stats`.
+  The statistic blob in `gnmic-config.yml` you're looking for is `srl_if_traffic_rate`.
 </details>
 </details>
 

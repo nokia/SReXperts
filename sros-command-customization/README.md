@@ -118,3 +118,13 @@ Lcl Port      Scope Remote Chassis ID  Index  Remote Port                       
 ======================================================================================================================
 Number of neighbors : 1
 ```
+
+### Task 3
+
+In the third task we will create an simple script to show the command customization by calculating the difference in octects and calculate the bandwidth of ingress as an example and display it as a table.
+
+Run the script from the `script` folder:
+
+```
+python ports_octets_cal.py
+```

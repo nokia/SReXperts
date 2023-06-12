@@ -8,8 +8,7 @@ Inside this lab you will use pySROS to generate a customized view of the routing
 
 ## Drawing
 
-
-![topo](./_images/sros-pysros-eh.png)
+![topo](./_images/sros-stateful.png)
 
 ## High level tasks to complete this project
 
@@ -47,8 +46,8 @@ All tasks for the lab use-case can be completed on the provided nodes. The goal 
 
 If you wish to have direct external access from your machine, use the public IP address of the VM and the external port numbers as per the table below:
 
-| Node          | Software |  Direct SSH (Ext.)      | NETCONF (Ext.) | 
-| -----         | ---------| ---------------------- | -------------- | 
+| Node          | Software |  Direct SSH (Ext.)      | NETCONF (Ext.) |
+| -----         | ---------| ---------------------- | -------------- |
 | sros1         |  SR OS release 23.3.R1 |`ssh admin@IP:41001`   | `IP:41401`     |
 | sros2         |  SR OS release 23.3.R1 |`ssh admin@IP:41002`   | `IP:41402`     |
 
@@ -60,8 +59,8 @@ sros-stateful-show.rc and sros-stateful-show.remote.rc are included in the lab. 
 * [pySROS repo](https://github.com/nokia/pysros)
 * [SR OS documentation](https://documentation.nokia.com/sr/)
 
-
 ## Tasks
+
 * **Connect to either sros1 or sros2 and observe how the custom CLI command is configured, rename it or make your own if desired.**
 Configuration for custom commands is contained in `/configure system management-interface cli md-cli environment command-alias`.
 
@@ -73,6 +72,7 @@ Take a look at pySROS' documentation, specifically the libraries adapted for SR 
 
 * **Add File I/O to the script such that the output is written to the router's file system.**
 Store your script's outputs in the the sros_stateful folder on cf3:/. To accomplish this, again refer to the pySROS libraries as they include I/O. Some potentially useful commands to see the output your script is producing:
+
     ```
     /file
     change-directory sros_stateful

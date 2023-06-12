@@ -20,13 +20,13 @@ The Leaf and Spine nodes are running containerized Nokia SR Linux (7220 IXR D3L)
 
 Topology diagram:
 
-![pic](https://github.com/hansthienpondt/SReXperts/assets/17744051/1724972b-395c-470b-8f8c-1356e4afe914)
+![pic](https://gitlab.com/rdodin/pics/-/wikis/uploads/8ea1c123f17eab8d4569c8d800fb6493/image.png)
 
 Every node in the data center fabric is configured with eBGP as an underlay routing protocol. iBGP EVPN used to setup overlay ip-vrf and mac-vrf services.
 
 Hosts are connected to the respective overlay services as per the diagram below:
 
-![image](https://github.com/hansthienpondt/SReXperts/assets/17744051/a7088c77-f7af-409d-acbe-f87341f1e802)
+![image](https://gitlab.com/rdodin/pics/-/wikis/uploads/aaf85bdaf5fe9a9a378446eea2c05e4f/image.png)
 
 ## Deploying the lab
 
@@ -73,7 +73,7 @@ Optionally, you may source the `srl-generic.rc` file to create convenient bash a
 
 The eBGP is configured on the inter-switch links between Spine and Leaf routers.
 
-![pic](https://github.com/hansthienpondt/SReXperts/assets/17744051/c5ef8017-b902-4cb9-aa83-82cdd2b0e899)
+![pic](https://gitlab.com/rdodin/pics/-/wikis/uploads/70900b1faaaa1fe385378c3d7df135f6/image.png)
 
 Connect to nodes and check the inter-switch links, eBGP sessions, AS numbers of Leaf and Spine, underlay network reachability between nodes by pinging the system IP addresses.
 
@@ -100,7 +100,7 @@ And the state information:
 
 EVPN use MP-BGP as control plane protocol between the tunnel endpoints. Typically, route-reflectors(RRs) are configured for the scalability. In this lab, spine routers are configured as RRs. All the leaf routers are peering with the spine routers for iBGP EVPN routes.
 
-![pic](https://github.com/hansthienpondt/SReXperts/assets/17744051/4931dbd1-1e40-4c6d-b805-3b03dc86a240)
+![pic](https://gitlab.com/rdodin/pics/-/wikis/uploads/919d908f2b7b33c4fd93f490bf5e0ef6/image.png)
 
 Connect to the nodes and check RR configuration on spines, iBGP EVPN sessions across the data center fabric.
 
@@ -120,7 +120,7 @@ Connect to the SR Linux nodes to check the EVPN service building blocks; IP-VRF 
 
 Look again at the overlay topology for this part:
 
-![pic](https://github.com/hansthienpondt/SReXperts/assets/17744051/d5a3661c-e1af-4526-adf3-5226d377a994)
+![image](https://gitlab.com/rdodin/pics/-/wikis/uploads/b60a887995e199a4ca373657628ac486/image.png)
 
 Some useful commands:
 
@@ -153,3 +153,8 @@ Check the mac/ip table entries and EVPN route advertisements on the related SR L
 - `show network-instance default tunnel-table ipv4`
 - `show tunnel-interface vxlan1 vxlan-interface * detail`
 - `info from state tunnel vxlan-tunnel vtep * statistics`
+
+## References
+
+- [SR Linux documentation](https://documentation.nokia.com/srlinux/)
+- [Learn SR Linux](https://learn.srlinux.dev/)

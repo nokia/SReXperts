@@ -1,0 +1,4 @@
+*.bak
+.venv/
+.idea/
+*.code-workspace

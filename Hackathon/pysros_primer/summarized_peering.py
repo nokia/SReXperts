@@ -13,7 +13,7 @@ def get_connection():
             connection_object = connect()
             return connection_object
         except Exception as error:
-            raise SystemExit(error)
+            raise SystemExit(error) from error
     else:
         raise SystemExit("Only for use locally on the SR OS MD-CLI")
 
@@ -34,7 +34,7 @@ def obtain_bgp_data(connection_object):
 def build_table(bgp_config_data, bgp_state_data):
     summary = "SReXperts 2023"
     columns = [
-        (20, "Peer"),
+        (30, "Peer"),
         (20, "Group"),
         (20, "State"),
         (30, "Negotiated capabilities"),

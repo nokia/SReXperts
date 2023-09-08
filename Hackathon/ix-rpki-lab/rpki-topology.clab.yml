@@ -7,16 +7,16 @@
 name: IXP-Peering-with-RPKI
 
 mgmt:
-  network: netlab_mgmt
+  network: ixp_mgmt
   ipv4-subnet: 192.168.121.0/24
 
 topology:
   nodes:
     IXP:
       mgmt-ipv4: 192.168.121.101
-      kind: srl
-      type: 'ixrd2l'
-      image: ghcr.io/nokia/srlinux:${SRLINUX_VERSION:=23.3.2}
+      kind: nokia_srlinux
+      type: ixrd2l
+      image: ghcr.io/nokia/srlinux:${SRLINUX_VERSION:=23.7.1}
       startup-config: |
         /interface ethernet-1/1 subinterface 0 type bridged
         /interface ethernet-1/2 subinterface 0 type bridged
@@ -27,15 +27,15 @@ topology:
 
     sros:
       mgmt-ipv4: 192.168.121.102
-      kind: vr-sros
-      type: 'sr-1'
+      kind: vr-nokia_sros
+      type: sr-1
       # image: vrnetlab/vr-sros
-      image: europe-west1-docker.pkg.dev/nhc-f4160d67/containerlab/vr-sros:${SROS_VERSION:=23.3.R1}
+      image: vr-sros:${SROS_VERSION:=23.7.R1}
       license: /opt/srexperts/license-sros23.txt
       ports:
-      - 52001:22
-      - 52301:57400
-      - 52401:830
+        - 50000-51000:22
+        - 50000-51000:57400
+        - 50000-51000:830
       startup-config: |
         /configure policy-options policy-statement accept-all default-action action-type accept
         /configure port 1/1/c1 admin-state enable connector breakout c1-100g
@@ -70,19 +70,19 @@ topology:
 
     srlinux:
       mgmt-ipv4: 192.168.121.103
-      kind: srl
-      type: 'ixrd2l'
+      kind: nokia_srlinux
+      type: ixrd2l
       # image: ghcr.io/nokia/srlinux:${SRLINUX_VERSION:=23.3.2}
       image: eccloud/srl-rpki-agent:latest # based on SR Linux 23.3.2
       ports:
-      - "52002:22"
-      - "52302:57400"
-      - "52102:80"
+        - 50000-51000:22
+        - 50000-51000:57400
+        - 50000-51000:80
       extras:
-        srl-agents: ['./srl-rpki-agent.yml']
+        srl-agents: ["./srl-rpki-agent.yml"]
       binds:
-      # Make agent source code editable from outside
-      - srl-rpki-agent-to-modify.py:/opt/demo-agents/rpki-agent/srl-rpki-agent.py
+        # Make agent source code editable from outside
+        - srl-rpki-agent-to-modify.py:/opt/demo-agents/rpki-agent/srl-rpki-agent.py
       startup-config: |
         /routing-policy policy accept-all default-action policy-result accept
         /interface ethernet-1/1
@@ -132,9 +132,9 @@ topology:
       image: rpki/stayrtr # see https://github.com/bgp/stayrtr, default source is https://console.rpki-client.org/vrps.json
 
   links:
-  - endpoints:
-    - "IXP:e1-1"
-    - "sros:eth1"
-  - endpoints:
-    - "IXP:e1-2"
-    - "srlinux:e1-1"
+    - endpoints:
+        - "IXP:e1-1"
+        - "sros:eth1"
+    - endpoints:
+        - "IXP:e1-2"
+        - "srlinux:e1-1"

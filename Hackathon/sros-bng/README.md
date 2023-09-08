@@ -70,10 +70,12 @@ ssh admin@clab-hackathon-bng-bng
 
 ## Tasks
 
+**Important! Read the task's instructions until the end, it contains useful information.**
+
 * **task1**
     familiarize yourself with the BNG setup and the currently active subscribers by logging in to the BNG node. Some commands that might come in helpful throughout this lab are shown below
     ```
-    / show service id 5050 ipoe session all
+    / show service id 5050 ipoe session
     / clear service id 5050 ipoe session all
     / show service active-subscribers
     / show service id 5050 dhcp lease-state
@@ -95,6 +97,9 @@ ssh admin@clab-hackathon-bng-bng
 * **task2**
     As you will see, the DHCP client configuration of all clients includes hex-encoded client-id (`0ff1ce0[X]`), where `X` is the client ID. Your task consists of writing a pySROS script that will copy the client ID into the circuit-id field so that it may be used to identify the subscriber. This will cause clients 1 & 2 to be able to successfully obtain an IP address on interface `eth1.100`.
 
+    Resources you might find helpful (**look especially at the examples all the way at the bottom for the correct format of the datastructure**):
+    - [SR BNG Python3 ALC DHCPv4 documentation](https://documentation.nokia.com/sr/23-7-1/tpsda-python-3-api/alc-dhcpv4.html)
+    
     For this exercise, it is only necessary to fill out `exercise_1()` of the `dhcp-script.py`. Note that both files need to be on the BNG node. Upon successful completion of this first exercise, you will see the output below:
 
     ```
@@ -122,9 +127,6 @@ ssh admin@clab-hackathon-bng-bng
     ===============================================================================
     ```
 
-    Resources you might find helpful:
-    - [SR BNG Python3 ALC DHCPv4 documentation](https://documentation.nokia.com/sr/23-3-1/tpsda-python-3-api/alc-dhcpv4.html)
-
     <br>
 * **task3**
     Client 3 is still not able to subscribe to the BNG, because the radius server uses the hostname for authentication, instead of the MAC address used for the first two clients:
@@ -147,9 +149,12 @@ ssh admin@clab-hackathon-bng-bng
     The correct DHCP "Client FQDN" (option 81) field has already been added to the DHCP configuration of client 3. Fill out `exercise_2()` in `dhcp-script.py` and `radius-script`.py to complete this exercise.
 
     Resources you might find helpful:
-    - [SR BNG Python3 ALC Radius documentation](https://documentation.nokia.com/sr/23-3-1/tpsda-python-3-api/alc-radius.html)
-    - [SR BNG Python3 ALC cache documentation](https://documentation.nokia.com/sr/23-3-1/tpsda-python-3-api/alc-cache.html)
-    
+    - [SR BNG Python3 ALC Radius documentation](https://documentation.nokia.com/sr/23-7-1/tpsda-python-3-api/alc-radius.html)
+    - [SR BNG Python3 ALC cache documentation](https://documentation.nokia.com/sr/23-7-1/tpsda-python-3-api/alc-cache.html)
+   
+    Hints:
+      - The Nokia 'vendor' ID for retrieval of vendor-specific attributes is 3561, the vendor type is 1
+
     <br>
 
     **NOTE: some clarifications to the ALC cache library**

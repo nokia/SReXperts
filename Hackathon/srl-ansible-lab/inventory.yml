@@ -10,7 +10,10 @@ clab:
     ansible_network_os: nokia.srlinux.srlinux
   hosts:
     clab-ansible-srl1:
-      # if you need to access the nodes via Internet, uncomment and set the following variables:
-      # ansible_host:
-      # ansible_port:
+      # if you need to access the nodes via Internet, uncomment and set the following variables
+      # to match your VM DNS name and external ports
+      # ansible_host: 1.srexperts.net
+      # ansible_httpapi_port: 50328
     clab-ansible-srl2:
+      # ansible_host: 1.srexperts.net
+      # ansible_httpapi_port: 50325

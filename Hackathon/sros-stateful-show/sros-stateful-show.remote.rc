@@ -1,4 +1,0 @@
-IP="<VM IP@>"
-alias sros1="ssh admin@$IP -p 41001"
-alias sros2="ssh admin@$IP -p 41002"
-echo -e "OK!\nJust type aliases to ssh. Run 'sros1' or 'sros2'to log in to the nodes."

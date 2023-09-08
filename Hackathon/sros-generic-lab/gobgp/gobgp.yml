@@ -4,26 +4,29 @@
 
 global:
   config:
-    as: 25999
+    as: 64599
     router-id: 55.55.55.55
 neighbors:
   - config:
       neighbor-address: 10.55.13.0
-      peer-as: 25913
+      peer-as: 65103
     afi-safis:
       - config:
           afi-safi-name: ipv4-unicast
-      - config:
-          afi-safi-name: l2vpn-evpn
   - config:
       neighbor-address: 10.55.14.0
-      peer-as: 25914
+      peer-as: 65104
     afi-safis:
       - config:
           afi-safi-name: ipv4-unicast
   - config:
       neighbor-address: 10.55.1.1
-      peer-as: 25991
+      peer-as: 65000
     afi-safis:
       - config:
           afi-safi-name: ipv4-unicast
+      - config:
+          afi-safi-name: ipv6-unicast
+      - config:
+          afi-safi-name: l2vpn-evpn
+

@@ -5,15 +5,17 @@
 name: sros-pysros-elb
 
 topology:
+  kinds:
+      vr-nokia_sros:
+        image: vr-sros:23.7.R1
+        license: /opt/srexperts/license-sros23.txt
   nodes:
     node0:
-      kind: vr-sros
-      image: europe-west1-docker.pkg.dev/nhc-f4160d67/containerlab/vr-sros:23.3.R1
-      license: /opt/srexperts/license-sros23.txt
+      kind: vr-nokia_sros
       mgmt-ipv4: 172.20.20.20
       auto-remove: true
       ports:
-        - 58000:22
-        - 58400:830
+        - 50000-51000:22
+        - 50000-51000:830
 
 

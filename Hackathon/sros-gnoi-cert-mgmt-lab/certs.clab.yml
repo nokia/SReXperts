@@ -6,10 +6,17 @@ name: certs
 
 topology:
   defaults:
-    kind: vr-sros
+    kind: vr-nokia_sros
   kinds:
     vr-sros:
-      image: europe-west1-docker.pkg.dev/nhc-f4160d67/containerlab/vr-sros:23.3.R1
+      image: vr-sros:23.7.R1
       license: /opt/srexperts/license-sros23.txt
+      ports:
+        - 50000-51000:22
+        - 50000-51000:57400
   nodes:
     sr1:
+      kind: vr-sros
+      mgmt-ipv4: 172.20.20.2
+
+

@@ -6,9 +6,7 @@
 # configure IP address
 bash /gobgp/ipaddr.sh
 # start gobgpd daemon
-sleep 180
-gobgpd -t yaml -f /gobgp/gobgp.yml &
-sleep 5
+gobgpd -t yaml -f /gobgp/gobgp.yml --disable-stdlog &
 
 # make ipv4 BGP announcement
 bash /gobgp/ipv4.sh

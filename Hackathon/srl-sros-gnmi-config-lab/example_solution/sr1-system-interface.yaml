@@ -1,0 +1,5 @@
+admin-state: enable
+ipv4:
+    primary:
+        address: 3.1.1.1
+        prefix-length: 32

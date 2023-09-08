@@ -35,12 +35,12 @@ To access the nodes from the Lab VM, use the addresses presented in the table be
 | srl1 | `ssh admin@clab-ansible-srl1` | `clab-ansible-srl1:80` | `clab-ansible-srl1:443` |
 | srl2 | `ssh admin@clab-ansible-srl2` | `clab-ansible-srl2:80` | `clab-ansible-srl2:443` |
 
-If you wish to have direct external access from your machine, use the public IP address of the VM and the external port numbers as per the table below:
+If you wish to have direct external access from your machine, use the public DNS name of the VM and the external port numbers as per the output of `show-ports` command executed on a lab VM:
 
-| Node | SSH (pass: `NokiaSrl1!`) | HTTP       | HTTPS      |
-| ---- | ------------------------ | ---------- | ---------- |
-| srl1 | `ssh admin@IP:53011`     | `IP:53111` | `IP:53211` |
-| srl2 | `ssh admin@IP:53012`     | `IP:53112` | `IP:53212` |
+| Node | SSH (pass: `NokiaSrl1!`)      | HTTP                         | HTTPS                         |
+| ---- | ----------------------------- | ---------------------------- | ----------------------------- |
+| srl1 | `ssh -p <ext-port> admin@DNS` | `DNS:<ext-port-for-port-80>` | `DNS:<ext-port-for-port-443>` |
+| srl2 | `ssh -p <ext-port> admin@DNS` | `DNS:<ext-port-for-port-80>` | `DNS:<ext-port-for-port-443>` |
 
 In the context of SR Linux's Ansible collection, we are primarily interested in the HTTP(S) ports, as they are used by the collection to communicate with the device.
 
@@ -62,11 +62,15 @@ ansible.utils     2.10.3
 nokia.srlinux     0.3.0
 ```
 
-SR Linux Ansible collection is [documented at learn.srlinux.dev](https://learn.srlinux.dev/ansible/collection/) portal with a good number of examples and use cases. You will have to refer to the documentation to understand how the modules are composed and complete the lab tasks.
+SR Linux Ansible collection docs can be found at [learn.srlinux.dev](https://learn.srlinux.dev/ansible/collection/) portal with a good number of examples and use cases. You will have to refer to the documentation to understand how the modules are composed and complete the lab tasks.
 
 ### Inventory
 
 The lab comes with a pre-configured Ansible inventory file that defines the nodes and their connection parameters. The inventory file is located in the `srl-ansible-lab` directory and is named [`inventory.yml`](inventory.yml).
+
+Note that Containerlab also auto-generates an Ansible inventory file for each lab; it can be found under clab-ansible/ansible-inventory.yml
+
+If you want to use Ansible from your machine, you will have to copy the inventory file to your machine and adjust the connection parameters to match the ports and addresses of the nodes given the lab VM external DNS name and exposed ports.
 
 ## Tasks
 
@@ -76,9 +80,14 @@ Start with reading the [collection documentation](https://learn.srlinux.dev/ansi
 
 ### 2. Get the nodes' version
 
-The first task is to get the version of the nodes using `state` datastore of SR Linux. You will have to leverage `get` module.
+The first task is to get the version of the nodes using `state` datastore of SR Linux. You will have to leverage the `get` module.
 
 To identify which path to use to get the version information you can use [the SR Linux'es YANG Browser](https://yang.srlinux.dev).
+
+The result should be an Ansible playbook 'get_node_version.yml' that prints out the versions:
+```
+ansible-playbook ./get_node_version.yml -i inventory.yml -v
+```
 
 ### 3. Configure IP interfaces
 

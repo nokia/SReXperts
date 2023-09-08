@@ -1,3 +1,7 @@
+# Copyright 2023 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
 from pysros.management import connect
 from pysros.ehs import get_event
 from utime import localtime, strftime

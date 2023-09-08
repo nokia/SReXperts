@@ -19,7 +19,7 @@ ARGS_MAP = {
 }
 
 
-def poor_argparse():
+def poor_argparse(connection):
     #Funtion used to parse provided args as argparse is not available
     #NB : Return error = False in the dict if arg parsing fails
     arg_list = sys.argv
@@ -27,18 +27,10 @@ def poor_argparse():
     # https://docs.python.org/3/library/stdtypes.html#boolean-operations-and-or-not
     if len(arg_list) == 0:
         return {}
-    elif len(arg_list) == 1 or arg_list[1] == '-h': 
-        print(
-'''Command options :
-watch <xpath>|"<show/tools command>" [-i <interval>] [-r <repeat>] [-e <exclude_regex>] [-a]
-
-<xpath>                 xpath to monitor / Example : state/router[router-name=Base]/route-table
-<show/tools command>    Show/tools command to monitor / NB : Requires ""
-<interval>              Interval in second(s) between each check / Default = 3
-<repeat>                Number of check(s) / Default = 10
-<exclude_regex>         Regex to exclude from the result(s) 
--a                      Compare each check to the first recorded reference
-''')
+    elif len(arg_list) == 1 or arg_list[1] == '-h':
+        cfg_path = '/nokia-conf:configure/system/script-control'
+        print_output = [ policy_name[0] for policy_name in connection.running.get(cfg_path)['script-policy']]
+        print('''Requires the name of an EHS as input. Valid options are ''' + str(print_output))
         sys.exit()
     else :
         args = {}
@@ -57,14 +49,14 @@ def get_script_results_location(connection, ehs):
     cfg_path = '/nokia-conf:configure/system/script-control'
     all_ehs_cfg = connection.running.get(cfg_path)['script-policy']
     for policy_name, policy in all_ehs_cfg.items():
-        if policy_name[0] == ehs or ( "*" in ehs and re.match(ehs.replace('.*', '*').replace('*', '.*'), policy_name[0])) and policy_name[1] == "admin": 
+        if policy_name[0] == ehs or ( "*" in ehs and re.match(ehs.replace('.*', '*').replace('*', '.*'), policy_name[0])) and policy_name[1] == "admin":
             return policy["results"].data
     return {}
 
 
 def main():
     c = connect(host="127.0.0.1", username="admin", port="830", password="admin")
-    args = poor_argparse()
+    args = poor_argparse(c)
     path_to_results = get_script_results_location(c, args["ehs"])
     ehs_result_files = c.cli("/file list %s" % path_to_results )
     individual_files = [('_' + x.split('\n')[0]) for x in ehs_result_files.split(' _')[1:]]
@@ -73,7 +65,7 @@ def main():
         print()
         #print(c.cli("/file show %s | match '    main()' post-lines 300 " % (path_to_results+individual_files[-1])).replace('main()', ''))
         # fixed
-        print(c.cli("/file show %s" % (path_to_results+individual_files[-1])).replace('main()', '')) 
+        print(c.cli("/file show %s" % (path_to_results+individual_files[-1])).replace('main()', ''))
         #print(c.cli("/file show %s | match '    main()' post-lines 300 " % ("cf3:\\results_ehs_python_script\\_20220613-072752-UTC.692104.out")))
     c.disconnect()
 

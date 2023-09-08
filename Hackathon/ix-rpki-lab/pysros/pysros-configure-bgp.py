@@ -25,46 +25,60 @@ from pysros.exceptions import ModelProcessingError
 # discouraged in operational applications.
 creds = {"username": "admin", "password": "admin"}
 
-def query_peeringdb(asn: int, ix: str) -> typing.Tuple[typing.Optional[str],typing.Optional[str],typing.Optional[str]]:
-  """
-  Lookup ASN in PeeringDB and return ipv4,ipv6 peering IPs at given IX
-  """
 
-  url = f"https://www.peeringdb.com/api/netixlan?asn={asn}&name__contains={ix.replace(' ','%20')}"
-  logging.info( f"PeeringDB query: {url}" )
-  resp = requests.get(url=url)
-  pdb_json = json.loads(resp.text)
-  print( pdb_json )
-  if 'data' in pdb_json and pdb_json['data']:
-    site = pdb_json['data'][0]
-    return ( site['name'], site['ipaddr4'], site['ipaddr6'] )
-  return ( None, None, None )
+def query_peeringdb(
+    asn: int, ix: str
+) -> typing.Tuple[typing.Optional[str], typing.Optional[str], typing.Optional[str]]:
+    """
+    Lookup ASN in PeeringDB and return ipv4,ipv6 peering IPs at given IX
+    """
+
+    url = f"https://www.peeringdb.com/api/netixlan?asn={asn}&name__contains={ix.replace(' ','%20')}"
+    logging.info(f"PeeringDB query: {url}")
+    resp = requests.get(url=url)
+    pdb_json = json.loads(resp.text)
+    print(pdb_json)
+    if "data" in pdb_json and pdb_json["data"]:
+        site = pdb_json["data"][0]
+        return (site["name"], site["ipaddr4"], site["ipaddr6"])
+    return (None, None, None)
+
 
 def get_prefixlist(asn: int):
-  """
-  Retrieve list of prefixes registered in IRR for the given AS
-  """
-  url = f"https://irrexplorer.nlnog.net/api/prefixes/asn/AS{asn}"
-  logging.info( f"irrexplorer query: {url}" )
-  resp = requests.get(url=url)
+    """
+    Retrieve list of prefixes registered in IRR for the given AS
+    """
+    url = f"https://irrexplorer.nlnog.net/api/prefixes/asn/AS{asn}"
+    logging.info(f"irrexplorer query: {url}")
+    resp = requests.get(url=url)
+    logging.info(f"irrexplorer reply: {resp.text}")
+    pfl_json = json.loads(resp.text)
+    # Could use bgpOrigins (AS list) too
+    source = (
+        pfl_json["directOrigin"]
+        if "directOrigin" in pfl_json and pfl_json["directOrigin"]
+        else pfl_json["overlaps"]
+    )
+    return [i["prefix"] for i in source if i["goodnessOverall"] >= 1]
 
-  pfl_json = json.loads(resp.text)
-  # Could use bgpOrigins (AS list) too
-  return [ i["prefix"] for i in pfl_json["overlaps"] if i["goodnessOverall"]==1 ]
 
 def add_peers(*, connection, peers):
     """Generate the configuration for each BGP peer, configure it"""
     print("Adding BGP peers...")
     for peer in peers:
         try:
-            for a in ('ip4','ip6'):
+            for a in ("ip4", "ip6"):
                 if peer[a]:
                     # Configure the full prefix list in 1 Netconf transaction, per address type
                     # Composite key ip-prefix + type
-                    pfx_list = { (p, "exact") : {} for p in peer["prefixlist"] if (a=='ip4' and '.' in p) or (a=='ip6' and ':' in p) }
+                    pfx_list = {
+                        (p, "exact"): {}
+                        for p in peer["prefixlist"]
+                        if (a == "ip4" and "." in p) or (a == "ip6" and ":" in p)
+                    }
                     connection.candidate.set(
                         f"/nokia-conf:configure/policy-options/prefix-list[name=rpki-pfx-{peer['as']}-{a}]",
-                        { "prefix": pfx_list } if pfx_list else {}
+                        {"prefix": pfx_list} if pfx_list else {},
                     )
 
                     # Create a corresponding import policy
@@ -72,17 +86,13 @@ def add_peers(*, connection, peers):
                     policy = {
                         "nokia-conf:entry": {
                             10: {
-                                "from": {
-                                    "prefix-list": [ f"rpki-pfx-{peer['as']}-{a}" ]
-                                },
-                                "action": {
-                                    "action-type": "accept"
-                                }
+                                "from": {"prefix-list": [f"rpki-pfx-{peer['as']}-{a}"]},
+                                "action": {"action-type": "accept"},
                             }
                         },
                         "nokia-conf:default-action": {
-                            "action-type": "reject"   # Or accept with lower preference, optionally adding a community
-                        }
+                            "action-type": "reject"  # Or accept with lower preference, optionally adding a community
+                        },
                     }
                     connection.candidate.set(
                         f"/nokia-conf:configure/policy-options/policy-statement[name={policy_name}]",
@@ -92,9 +102,9 @@ def add_peers(*, connection, peers):
                     # Create neighbor
                     neighbor = {
                         "group": "ebgp",
-                        "peer-as": peer['as'],
+                        "peer-as": peer["as"],
                         "description": f"Provisioned by pySROS - {peer['desc']}",
-                        "import": { "policy": [ policy_name ] },
+                        "import": {"policy": [policy_name]},
                     }
                     connection.candidate.set(
                         f"/nokia-conf:configure/router[router-name=Base]/bgp/neighbor[ip-address={peer[a]}]",
@@ -103,6 +113,7 @@ def add_peers(*, connection, peers):
         except Exception as error:  # pylint: disable=broad-except
             print("Failed to create", peer, "Error:", error)
             continue
+
 
 def get_connection(host=None, credentials=None):
     """Function definition to obtain a Connection object to a specific SR OS device
@@ -155,15 +166,28 @@ def get_connection(host=None, credentials=None):
 def main():
     """Provide a list of hosts to add the users too and this main function connects
     to each device in turn and adds the user."""
-    inventory_hosts = ["clab-IXP-Peering-sros"] # Hardcoded to SR OS host from 1st topology...
-    peer_asns = [ os.getenv('AS2') or 24875 ]
+    inventory_hosts = [
+        "clab-IXP-Peering-sros"
+    ]  # Hardcoded to SR OS host from 1st topology...
+    peer_asns = [os.getenv("AS2") or 24875]
     for asn in peer_asns:
-        (site,ip4,ip6) = query_peeringdb( asn=asn, ix=os.getenv('IXP') or 'AMS-IX')
+        (site, ip4, ip6) = query_peeringdb(asn=asn, ix=os.getenv("IXP") or "AMS-IX")
         prefixlist = get_prefixlist(asn=asn)
         for host in inventory_hosts:
             try:
                 connection_object = get_connection(host, creds)
-                add_peers(connection=connection_object, peers=[{ 'as': asn, 'ip4': ip4, 'ip6': ip6, 'desc': site, 'prefixlist': prefixlist }])
+                add_peers(
+                    connection=connection_object,
+                    peers=[
+                        {
+                            "as": int(asn),
+                            "ip4": ip4,
+                            "ip6": ip6,
+                            "desc": site,
+                            "prefixlist": prefixlist,
+                        }
+                    ],
+                )
             except Exception:  # pylint: disable=broad-except
                 continue
 

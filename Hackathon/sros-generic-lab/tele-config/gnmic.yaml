@@ -12,73 +12,139 @@
 
 username: admin
 password: admin
-skip-verify: true
-encoding: json_ietf
+encoding: json
+insecure: true
 log: true
 
 loader:
   type: docker
   filters:
     - containers:
-      - label=clab-node-kind: srl
-        label=containerlab: lab14
+      - label=clab-node-kind: vr-sros
+        label=containerlab: generic
 targets:
   #SROS
   clab-sros-srx2023-ce1:57400:
-    insecure: true
-    subscriptions:
-      - sub1
   clab-sros-srx2023-ce2:57400:
-    insecure: true
-    subscriptions:
-      - sub1
   clab-sros-srx2023-ce3:57400:
-    insecure: true
-    subscriptions:
-      - sub1
   clab-sros-srx2023-ce4:57400:
-    insecure: true
-    subscriptions:
-      - sub1
   clab-sros-srx2023-pe1:57400:
-    insecure: true
-    subscriptions:
-      - sub1
   clab-sros-srx2023-pe2:57400:
-    insecure: true
-    subscriptions:
-      - sub1
   clab-sros-srx2023-pe3:57400:
-    insecure: true
-    subscriptions:
-      - sub1
   clab-sros-srx2023-pe4:57400:
-    insecure: true
-    subscriptions:
-      - sub1
 
 subscriptions:
-  sub1:
+  sros_ports_stats:
     paths:
-      - /state/port/ethernet/statistics
-      - /state/router/interface/ipv4/statistics
+      - /state/port/oper-state
+      - /state/port/statistics/
+      - /state/port/ethernet/statistics/
     stream-mode: sample
     sample-interval: 5s
+  
+  router_bgp:
+    paths:
+      - /state/router/bgp/statistics/
+      - /state/router/bgp/statistics/routes-per-family/
+      - /state/router/bgp/neighbor/statistics/
+    stream-mode: sample
+    sample-interval: 5s
+  
+  router_interface:
+    paths:
+      - /state/router/interface/ipv4/statistics/
+      - /state/router/interface/ipv6/statistics/
+      - /state/router/interface/statistics/
+    stream-mode: sample
+    sample-interval: 5s
+  
+  router_isis:
+    paths:
+      - /state/router/isis/statistics/
+    stream-mode: sample
+    sample-interval: 5s
+
+  router_route_table:
+    paths:
+      - /state/router/route-table/unicast/ipv4/statistics/
+      - /state/router/route-table/unicast/ipv6/statistics/
+    stream-mode: sample
+    sample-interval: 5s
+
+  system:
+    paths:
+      - /state/system/cpu[sample-period=1]
+      - /state/system/memory-pools/
+    stream-mode: sample
+    sample-interval: 5s
+
 
 outputs:     
   prom-output:
     type: prometheus
     listen: "clab-sros-srx2023-gnmic:9804"
-    gnmi-cache: true
-    debug: true
+    expiration: 60s
+    cache:
+      expiration: 60s
     strings-as-labels: true
+    metric-prefix: gnmic
+    append-subscription-name: false
     service-registration:
       address: clab-sros-srx2023-consul-agent:8500
     event-processors:
-      - group_by_interface
+      - add-labels
+      - trim-regex
+      - group-by-interface
+      - up-down-map
 
 processors:
-  group_by_interface:
+  group-by-interface:
     event-group-by:
       tags:
         - interface_name
+  add-labels:
+    # processor type
+    event-extract-tags:
+      value-names:
+        - /state/router/route-table/unicast/(?P<family>[a-zA-Z0-9-_:]+)/statistics/(?P<protocol>[a-zA-Z0-9-_:]+)/([a-zA-Z0-9-_:]+)
+        - /state/router/bgp/statistics/routes-per-family/(?P<family>[a-zA-Z0-9-_:]+)/([a-zA-Z0-9-_:]+)
+        - /state/router/interface/(?P<family>[a-zA-Z0-9-_:]+)/statistics/([a-zA-Z0-9-_:]+)
+        - /state/router/bgp/neighbor/statistics/family-prefix/(?P<family>[a-zA-Z0-9-_:]+)/([a-zA-Z0-9-_:]+)
+  trim-regex:
+    event-strings:
+      value-names:
+        - ".*"
+      transforms:
+        - replace:
+            apply-on: "name"
+            keep: false
+            old: "/state/router/route-table/unicast/([a-zA-Z0-9-_:]+)/statistics/([a-zA-Z0-9-_:]+)/([a-zA-Z0-9-_:]+)"
+            new: "/state/router/route-table/unicast/$3"
+        - replace:
+            apply-on: "name"
+            keep: false
+            old: "/state/router/bgp/statistics/routes-per-family/([a-zA-Z0-9-_:]+)/([a-zA-Z0-9-_:]+)"
+            new: "/state/router/bgp/statistics/routes-per-family/$2"
+        - replace:
+            apply-on: "name"
+            keep: false
+            old: "/state/router/interface/([a-zA-Z0-9-_:]+)/statistics/([a-zA-Z0-9-_:]+)"
+            new: "/state/router/interface/statistics/$2"
+        - replace:
+            apply-on: "name"
+            keep: false
+            old: "/state/router/bgp/neighbor/statistics/family-prefix/([a-zA-Z0-9-_:]+)/([a-zA-Z0-9-_:]+)"
+            new: "/state/router/bgp/neighbor/statistics/family-prefix/$2"
+  up-down-map:
+    event-strings:
+      value-names:
+        - "/state/port/oper-state"
+      transforms:
+        - replace:
+            apply-on: "value"
+            old: "up"
+            new: "1"
+        - replace:
+            apply-on: "value"
+            old: "down"
+            new: "0"

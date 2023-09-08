@@ -12,27 +12,24 @@ mgmt:
 
 topology:
   kinds:
-    vr-sros:
-      image: europe-west1-docker.pkg.dev/nhc-f4160d67/containerlab/vr-sros:23.3.R1
-      license: /opt/srexperts/license-sros23.txt    
+    vr-nokia_sros:
+      image: vr-sros:23.7.R1
+      license: /opt/srexperts/license-sros23.txt
       binds:
         - scripts/sros_stateful_route_table.py:/tftpboot/sros_stateful_route_table.py
         - scripts/post-boot-exec.cfg:/tftpboot/post-boot-exec.cfg
-
+      ports:
+        - 50000-51000:22
+        - 50000-51000:830
   nodes:
     sros1:
-      kind: vr-sros
+      kind: vr-nokia_sros
       mgmt-ipv4: 172.109.212.101
       startup-config: configs/sros1.cfg
-      ports:
-        - "40001:22"
-        - "40401:830"
     sros2:
-      kind: vr-sros
+      kind: vr-nokia_sros
       mgmt-ipv4: 172.109.212.102
       startup-config: configs/sros2.cfg
-      ports:
-        - "40002:22"
-        - "40402:830"
+
   links:
     - endpoints: ["sros1:eth1","sros2:eth1"]

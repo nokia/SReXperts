@@ -12,7 +12,7 @@ mgmt:
 topology:
   kinds:
     vr-sros:
-      image: vr-sros:23.3.R1
+      image: vr-sros:23.7.R1
       type: "cp: cpu=2 ram=4 chassis=sr-1e slot=A card=cpm-e ___ lc: cpu=2 ram=4 max_nics=20 chassis=sr-1e slot=1 card=iom-e mda/1=me40-1gb-csfp mda/2=isa2-bb mda/3=isa2-bb mda/4=isa2-bb" 
       license: /opt/srexperts/license-sros23.txt
     linux:

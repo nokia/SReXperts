@@ -37,7 +37,10 @@ def get_connection():
     """
     try:
         connection_object = connect(
-            host="10.0.1.13", username="admin", password="admin"
+            host="clab-srx-sros1",
+            username="admin",
+            password="admin",
+            hostkey_verify=False
         )
     except RuntimeError as error1:
         print("Failed to connect.  Error:", error1)
@@ -68,77 +71,19 @@ def print_table(rows, col_min_widths):
     cyan = "\u001b[35;1m"
     reset_color = "\u001b[0m"
     extra_text = (
-        green
-        + "EMOJIs : "
-        + reset_color
-        + yellow
-        + "\U0001f600"
-        + reset_color
-        + " "
-        + brown
-        + "\U0001f4a9"
-        + reset_color
-        + " "
-        + red
-        + "\U0001F920"
-        + reset_color
+        green + "EMOJIs : " + reset_color +
+        yellow + "\U0001f600" + reset_color + " " +
+        brown + "\U0001f4a9" + reset_color + " " +
+        red + "\U0001F920" + reset_color
     )
 
     cols = [
-        (
-            6
-            + (
-                col_min_widths[0]
-                if col_min_widths[0] > len("Lcl Port")
-                else len("Lcl Port")
-            ),
-            "Lcl Port",
-        ),
-        (
-            1
-            + (
-                col_min_widths[1]
-                if col_min_widths[1] > len("Scope")
-                else len("Scope")
-            ),
-            "Scope",
-        ),
-        (
-            2
-            + (
-                col_min_widths[2]
-                if col_min_widths[2] > len("Remote Chassis ID")
-                else len("Remote Chassis ID")
-            ),
-            "Remote Chassis ID",
-        ),
-        (
-            2
-            + (
-                col_min_widths[3]
-                if col_min_widths[3] > len("Index")
-                else len("Index")
-            ),
-            "Index",
-        ),
-        (
-            2
-            + (
-                col_min_widths[4]
-                if col_min_widths[4] > len("Remote Port")
-                else len("Remote Port")
-            ),
-            "Remote Port",
-        ),
-        (
-            1
-            + (
-                col_min_widths[5]
-                if col_min_widths[5] > len("Remote Sys Name")
-                else len("Remote Sys Name")
-            ),
-            "Remote Sys Name",
-        ),
+        (6 + max(col_min_widths[0], len("Lcl Port")), "Lcl Port"),
+        (1 + max(col_min_widths[1], len("Scope")), "Scope"),
+        (2 + max ( col_min_widths[2], len("Remote Chassis ID")), "Remote Chassis ID"),
+        (2 + max ( col_min_widths[3], len("Index")), "Index"),
+        (2 + max ( col_min_widths[4], len("Remote Port")), "Remote Port"),
+        (1 + max ( col_min_widths[5], len("Remote Sys Name")), "Remote Sys Name"),
     ]
 
     # Initalize the Table object with the heading and columns.

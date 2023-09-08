@@ -3,8 +3,9 @@
 # Licensed under the BSD 3-Clause License.
 # SPDX-License-Identifier: BSD-3-Clause
 
+cp ../certs.clab.yml .
 
-sudo clab dep -t lab/certs.clab.yaml -c
+sudo clab dep -t certs.clab.yml -c
 
 targets="$(docker ps -f label=containerlab=certs --format {{.Names}} | paste -s -d, -)"
 

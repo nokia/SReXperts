@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 name: st # short for streaming telemetry ;)
-prefix: ""
 
 mgmt:
   network: st
@@ -15,8 +14,11 @@ topology:
 
   kinds:
     nokia_srlinux:
-      image: ghcr.io/nokia/srlinux:23.3.1
+      image: ghcr.io/nokia/srlinux:23.7.1
       type: ixrd2l
+      ports:
+        - 50000-51000:22
+        - 50000-51000:57400
     linux:
       image: ghcr.io/hellt/network-multitool
 
@@ -27,40 +29,25 @@ topology:
       group: spine
       startup-config: configs/fabric/spine1.cfg
       mgmt-ipv4: 172.80.80.21
-      ports:
-        - "55021:22"
-        - "55321:57400"
     spine2:
       type: ixrd3l
       group: spine
       startup-config: configs/fabric/spine2.cfg
       mgmt-ipv4: 172.80.80.22
-      ports:
-        - "55022:22"
-        - "55322:57400"
 
     ### LEAFS ###
     leaf1:
       startup-config: configs/fabric/leaf1.cfg
       mgmt-ipv4: 172.80.80.11
       group: leaf
-      ports:
-        - "55011:22"
-        - "55311:57400"
     leaf2:
       startup-config: configs/fabric/leaf2.cfg
       mgmt-ipv4: 172.80.80.12
       group: leaf
-      ports:
-        - "55012:22"
-        - "55312:57400"
     leaf3:
       startup-config: configs/fabric/leaf3.cfg
       mgmt-ipv4: 172.80.80.13
       group: leaf
-      ports:
-        - "55013:22"
-        - "55313:57400"
 
     ### CLIENTS ###
     client1:
@@ -95,7 +82,7 @@ topology:
     gnmic:
       kind: linux
       mgmt-ipv4: 172.80.80.41
-      image: ghcr.io/openconfig/gnmic:0.30.0
+      image: ghcr.io/openconfig/gnmic:0.31.7
       binds:
         - gnmic-config.yml:/gnmic-config.yml:ro
       cmd: --config /gnmic-config.yml --log subscribe
@@ -109,19 +96,19 @@ topology:
         - configs/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       cmd: --config.file=/etc/prometheus/prometheus.yml
       ports:
-        - 55142:9090
+        - 50000-51000:9090
       group: "10"
 
     grafana:
       kind: linux
       mgmt-ipv4: 172.80.80.43
-      image: grafana/grafana:9.5.2
+      image: grafana/grafana:9.5.8
       binds:
         - configs/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yaml:ro
         - configs/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yaml:ro
         - configs/grafana/dashboards:/var/lib/grafana/dashboards
       ports:
-        - 55143:3000
+        - 50000-51000:3000
       env:
         GF_INSTALL_PLUGINS: https://algenty.github.io/flowcharting-repository/archives/agenty-flowcharting-panel-1.0.0d.220606199-SNAPSHOT.zip;agenty-flowcharting-panel
         # env vars to enable anonymous access
@@ -159,7 +146,7 @@ topology:
         - configs/loki:/etc/loki
       cmd: --config.file=/etc/loki/loki-config.yml
       ports:
-        - 55146:3100
+        - 50000-51000:3100
 
   links:
     - endpoints: ["spine1:e1-1", "leaf1:e1-49"]

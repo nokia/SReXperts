@@ -1,0 +1,86 @@
+# Copyright 2023 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+interface:
+  - name: system0
+    admin-state: enable
+    subinterface:
+      - index: 0
+        admin-state: enable
+        ipv4:
+          admin-state: enable
+          address: 
+            - ip-prefix: 1.2.1.1/32
+  - name: ethernet-1/49
+    admin-state: enable
+    subinterface:
+      - index: 0
+        admin-state: enable
+        description: to spine1
+        ipv4:
+          admin-state: enable
+          address: 
+            - ip-prefix: 10.2.1.2/30
+  - name: ethernet-1/50
+    admin-state: enable
+    subinterface:
+      - index: 0
+        admin-state: enable
+        description: to spine2
+        ipv4:
+          admin-state: enable
+          address: 
+            - ip-prefix: 10.2.2.2/30
+routing-policy:
+  policy:
+    - name: bgp-import
+      statement:
+        - name: accept-bgp
+          match:
+            protocol: bgp
+          action:
+            policy-result: accept
+    - name: bgp-export
+      statement:
+        - name: accept-local
+          match:
+            protocol: local
+          action:
+            policy-result: accept
+        - name: accept-bgp
+          match:
+            protocol: bgp
+          action:
+            policy-result: accept
+network-instance:
+  - name: default
+    interface:
+      - name: system0.0
+      - name: ethernet-1/49.0
+      - name: ethernet-1/50.0
+    protocols:
+      bgp:
+        autonomous-system: 65012
+        router-id: 1.2.1.1
+        afi-safi:
+          - afi-safi-name: ipv4-unicast
+            admin-state: enable
+        group:
+          - group-name: ebgp
+            admin-state: enable
+            export-policy: bgp-export
+            import-policy: bgp-import
+            local-as:
+              as-number: 65012
+        neighbor:
+          - peer-address: 10.2.1.1
+            description: spine1
+            admin-state: enable
+            peer-group: ebgp
+            peer-as: 65021
+          - peer-address: 10.2.2.1
+            description: spine2
+            admin-state: enable
+            peer-group: ebgp
+            peer-as: 65022

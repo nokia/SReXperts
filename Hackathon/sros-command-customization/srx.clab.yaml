@@ -6,23 +6,24 @@ name: srx
 
 topology:
   kinds:
-    vr-sros:
-      kind: vr-sros
-      image: europe-west1-docker.pkg.dev/nhc-f4160d67/containerlab/vr-sros:23.3.R1
+    vr-nokia_sros:
+      image: vr-sros:23.7.R1
       type: sr-1
       license: /opt/srexperts/license-sros23.txt
       binds:
         - ./scripts/lldp_neighbor.py:/tftpboot/lldp_neighbor.py
+      ports:
+        - 50000-51000:22
+        - 50000-51000:830
   nodes:
-    wan1:
-      kind: vr-sros
-      startup-config: ./configs/wan1.cfg
-    wan2:
-      kind: vr-sros
-      startup-config: ./configs/wan2.cfg
+    sros1:
+      kind: vr-nokia_sros
+      startup-config: ./configs/sros1.cfg
+    sros2:
+      kind: vr-nokia_sros
+      startup-config: ./configs/sros2.cfg
 
   links:
-    # wan1 <-> wan2 connections
-    - endpoints: ["wan1:eth1", "wan2:eth1"]
-    - endpoints: ["wan1:eth2", "wan2:eth2"]
-
+    # sros1 <-> sros2 connections
+    - endpoints: ["sros1:eth1", "sros2:eth1"]
+    - endpoints: ["sros1:eth2", "sros2:eth2"]

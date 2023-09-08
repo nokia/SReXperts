@@ -1,4 +1,14 @@
 *.bak
 .venv/
+venv/
+.env
 .idea/
-*.code-workspace
+*/srl-sros-gnmi-config-lab/solution
+*/sros-event-handling/solution
+*/sros-stateful-show/solution
+**/clab-*
+**/*.key
+**/.*.clab.yml.bak
+**/*.lic
+.DS_Store
+.vscode

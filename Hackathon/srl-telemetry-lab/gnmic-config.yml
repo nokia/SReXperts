@@ -10,11 +10,11 @@ skip-verify: true
 encoding: json_ietf
 
 targets:
-  leaf1:
-  leaf2:
-  leaf3:
-  spine1:
-  spine2:
+  clab-st-leaf1:
+  clab-st-leaf2:
+  clab-st-leaf3:
+  clab-st-spine1:
+  clab-st-spine2:
 
 subscriptions:
   srl_if_oper_state:

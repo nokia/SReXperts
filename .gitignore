@@ -1,7 +1,6 @@
 *.bak
 .venv/
 venv/
-.env
 .idea/
 */srl-sros-gnmi-config-lab/solution
 */sros-event-handling/solution

@@ -20,7 +20,7 @@ topology:
         - 50000-51000:22
         - 50000-51000:57400
     linux:
-      image: ghcr.io/hellt/network-multitool
+      image: ghcr.io/srl-labs/network-multitool
 
   nodes:
     ### SPINES ###

@@ -1,0 +1,61 @@
+
+---
+- name: pe
+  block:
+    - name: Obtain interface
+      ansible.netcommon.netconf_get:
+        source: running
+        filter: <configure xmlns="urn:nokia.com:sros:ns:yang:sr:conf"><router><router-name>Base</router-name><interface><interface-name/></interface></router></configure>
+        display: json
+      register: interface_names
+      when: group_names[0] == "pe"
+    
+    - set_fact:
+        original_interface: "{{ interface_names.output.data.configure.router.interface | regex_search('to_ce\\d+', multiline=True, ignorecase=True) }}"
+      when: (group_names[0] == "pe") and (interface_names is defined)
+    
+    - name: Obtain specific interface
+      ansible.netcommon.netconf_get:
+        source: running
+        filter: <configure xmlns="urn:nokia.com:sros:ns:yang:sr:conf"><router><router-name>Base</router-name><interface><interface-name>{{ original_interface }}</interface-name></interface></router></configure>
+        display: json
+      register: specific_interface
+      when: group_names[0] == "pe"
+    
+    - set_fact:
+        original_ip: "{{ specific_interface.output.data.configure.router.interface.ipv4.primary.address }}"
+        original_port: "{{ specific_interface.output.data.configure.router.interface.port }}"
+      when: (group_names[0] == "pe") and (specific_interface.output.data.configure.router.interface.ipv4.primary.address is defined)
+    
+    
+    - name: Configure PE
+      ansible.netcommon.netconf_config:
+        format: xml
+        lock: always
+        target: candidate
+        content: "{{ lookup('template', 'vprn_config.xml.j2') }}"
+      when: (group_names[0] == "pe") and (original_interface is defined) and (original_ip is defined) and (original_port is defined)
+
+
+- name: ce
+  block:
+    - name: Obtain interface
+      ansible.netcommon.netconf_get:
+        source: running
+        filter: <configure xmlns="urn:nokia.com:sros:ns:yang:sr:conf"><router><router-name>Base</router-name><interface><interface-name/></interface></router></configure>
+        display: json
+      register: interface_names
+      when: group_names[0] == "ce"
+    
+    - set_fact:
+        original_interface: "{{ interface_names.output.data.configure.router.interface | regex_search('to_pe\\d+', multiline=True, ignorecase=True) }}"
+        iperf_interface: "{{ interface_names.output.data.configure.router.interface | regex_search('to_iperf-(client|server)', multiline=True, ignorecase=True) }}"
+      when: (group_names[0] == "ce") and (interface_names is defined)
+    
+    - name: Configure CE
+      ansible.netcommon.netconf_config:
+        format: xml
+        lock: always
+        target: candidate
+        content: "{{ lookup('template', 'ce_ospf_config.xml.j2') }}"
+      when: (group_names[0] == "ce") and (original_interface is defined) and (iperf_interface is defined)

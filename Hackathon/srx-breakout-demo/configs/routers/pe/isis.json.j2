@@ -1,0 +1,44 @@
+{
+    "nokia-conf:configure": {
+        "router": [
+            {
+                "router-name": "Base",
+                "isis": [
+                    {
+                        "isis-instance": 0,
+                        "admin-state": "enable",
+                        "authentication-key": "{{ isis_password }}",
+                        "authentication-type": "password",
+                        "advertise-passive-only": true,
+                        "authentication-check": true,
+                        "level-capability": "2",
+                        "area-address": ["{{ isis_area }}"],
+                        "interface": [
+                            {
+                                "interface-name": "system",
+                                "passive": true,
+                                "ipv4-node-sid": {
+                                    "index": "{{ rtr_number }}"
+                                }
+                            }{%if links %},
+                            {% for intf in links %}
+                            {        
+                                "interface-name": "to_{{ links[intf]['remote_node'] }}",
+                                "admin-state": "enable",
+                                "interface-type": "point-to-point"
+                            }{% if not loop.last %},{% endif %}{% endfor %}
+                            {% endif %}
+                        ],
+                        "level": [
+                            {
+                                "level-number": "2",
+                                "hello-padding": "none",
+                                "wide-metrics-only": true
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

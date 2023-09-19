@@ -1,0 +1,8 @@
+ansible_user: admin
+ansible_password: admin
+ansible_network_os: nokia.sros.md
+ansible_connection: ansible.netcommon.netconf
+ansible_ssh_common_args: '-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+ansible_host_key_auto_add: yes
+ansible_host_key_checking: False
+

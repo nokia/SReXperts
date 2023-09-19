@@ -1,0 +1,28 @@
+username: admin
+password: admin
+skip-verify: true
+log: true
+
+
+
+loader:
+  type: docker
+
+
+outputs:
+  prom-remote:
+    type: prometheus_write
+    url: http://clab-srx-demo-prometheus:9090/api/v1/write
+    buffer-size: 10000
+    metadata:
+      include: true
+    event-processors:
+      - group_by_interface
+      # - up-down-map
+
+
+processors:
+  group_by_interface:
+    event-group-by:
+      tags:
+        - interface_interface_name

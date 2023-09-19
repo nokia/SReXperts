@@ -1,8 +1,5 @@
 FROM ubuntu:latest
 
-ENV http_proxy=http://135.245.192.7:8000
-ENV https_proxy=http://135.245.192.7:8000
-
 COPY requirements.txt requirements.txt
 
 # install some useful tools

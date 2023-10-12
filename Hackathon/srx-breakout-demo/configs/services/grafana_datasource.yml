@@ -1,0 +1,22 @@
+apiVersion: 1
+deleteDatasources:
+  - name: InfluxDB
+    orgId: 1
+datasources:
+  # - name: telemetry
+  #   type: influxdb
+  #   access: server
+  #   url: http://clab-srx-demo-influxdb:8086
+  #   jsonData:
+  #     version: Flux
+  #     organization: nokia
+  #     defaultBucket: telemetry
+  #     tlsSkipVerify: true
+  #   secureJsonData:
+  #     token: zu6JkRuuzgkwvEaoYmhjU4LDyPokuiaSFE98CA2j4fgwF8LQCuqUkL9-vFcK6qYCDTWmQk4SHVUCw65re1eB3w==
+  - name: telemetry
+    type: prometheus
+    access: server
+    url: http://clab-srx-demo-prometheus:9090
+    jsonData:
+      manageAlerts: false

@@ -1,0 +1,25 @@
+ <config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <configure xmlns="urn:nokia.com:sros:ns:yang:sr:conf" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:nokia-attr="urn:nokia.com:sros:ns:yang:sr:attributes">
+        <router>
+            <router-name>Base</router-name>
+            <ospf>
+                <ospf-instance>0</ospf-instance>
+                <admin-state>enable</admin-state>
+                <export-policy>PERMIT-ALL</export-policy>
+                <import-policy>PERMIT-ALL</import-policy>
+                <area>
+                    <area-id>0.0.0.0</area-id>
+                    <interface>
+                        <interface-name>system</interface-name>
+                    </interface>
+                    <interface>
+                        <interface-name>{{ original_interface }}</interface-name>
+                    </interface>
+                    <interface>
+                        <interface-name>{{ iperf_interface }}</interface-name>
+                    </interface>
+                </area>
+            </ospf>
+        </router>
+    </configure>
+</config>

@@ -265,7 +265,7 @@ Bonus: To explore automated SR OS provisioning, see [pysros/README.md](pysros/RE
 
 In order to secure the Internet, many providers have adopted or are adopting RPKI([RFC6810](https://datatracker.ietf.org/doc/rfc6810/)) to implement more restrictive BGP policies. RPKI provides infrastructure and protocols to verify the proper authorization of a given AS to announce a given prefix.
 
-Nokia SR OS offers a native implementation of RPKI (see [NANOG67](https://archive.nanog.org/sites/default/files/GrHankins.pdf)), but SR Linux does not yet have this capability. In this exercise, we are going to add RPKI functionality using a custom Python agent.
+Nokia SR OS offers a native implementation of RPKI (see [NANOG67](https://archive.nanog.org/sites/default/files/Hankins_Track_Practical_Bgp.pdf)), but SR Linux does not yet have this capability. In this exercise, we are going to add RPKI functionality using a custom Python agent.
 
 1. Destroy the lab from the first 3 steps: `sudo clab destroy -c -t topology.clab.yml`
 2. Start the RPKI lab topology (substituting your parameters):

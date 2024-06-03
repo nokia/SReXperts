@@ -1,0 +1,20 @@
+auto lo
+iface lo inet loopback
+
+auto eth1
+
+# VLAN 1
+auto eth1.1
+iface eth1.1
+    address 10.64.41.21/24
+    address fd00:fde8:0:41::21/64
+    post-up ip r a 10.0.0.0/8 via 10.64.41.1 dev eth1.1
+    post-up ip -6 r a fd00:fde8::/32 via fd00:fde8:0:41::1 dev eth1.1
+
+# VLAN 102
+auto eth1.102
+iface eth1.102
+    address 192.168.41.21/24
+    address fd00:ffdd:0:41::21/64
+    post-up ip r a 192.168.0.0/16 via 192.168.41.1 dev eth1.102
+    post-up ip -6 r a fd00:ffdd::/32 via fd00:ffdd:0:41::1 dev eth1.102

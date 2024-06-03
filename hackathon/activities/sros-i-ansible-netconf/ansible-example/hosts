@@ -1,0 +1,9 @@
+[sros_routers]
+pe1 ansible_host=clab-srexperts-pe1
+
+[sros_routers:children]
+core
+
+[core]
+p1 ansible_host=clab-srexperts-p1
+p2 ansible_host=clab-srexperts-p2

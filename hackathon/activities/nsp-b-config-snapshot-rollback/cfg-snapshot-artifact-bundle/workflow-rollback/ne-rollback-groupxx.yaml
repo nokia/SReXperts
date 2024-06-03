@@ -1,0 +1,141 @@
+# Copyright 2024 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+version: '2.0'
+
+ne-rollback-groupxx:
+  type: direct
+  tags:
+    - LSO
+
+  input:
+    - neId
+    - backup_operation: null
+    - backupFilename: null
+    - backupFilePath: null
+
+  vars:
+    RestoreStatus: "unknown"
+    lsoInfo: "Failed"  
+    fsUrl: https://file-service.nsp-psa-restricted.svc.cluster.local/nsp-file-service-app/rest/api/v1/file/downloadFile?filePath
+ 
+  output:
+    lsoInfo: <% $.lsoInfo %>
+
+  output-on-error:
+    lsoInfo: "Error: <% $.lsoInfo %>"
+
+  tasks:
+    lsoStageMapping:
+      action: std.noop
+      publish:
+        RestoreStatus: "Initiating NE Restore Process"
+        operation_type: <% switch($.backup_operation != null => $.backup_operation.split("'")[1], $.backup_operation = null => null ) %>
+        operation_name: <% switch($.backup_operation != null => $.backup_operation.split("'")[3], $.backup_operation = null => null ) %>
+        backupNeSwVersion: <% switch($.backup_operation = null and ("TiMOS" in $.backupFilePath) = true  => $.backupFilePath.split("/")[-2], $.backup_operation = null and ("TiMOS" in $.backupFilePath) = false  => null, $.backup_operation != null => null ) %>
+        lsoWorkflowStageMapping:
+          ne-rollback-groupxx:
+            - getBackupFileName
+            - downLoadConfigFile
+            - restoreConfigOnNE
+      on-success:
+        - decideMode
+
+    decideMode:
+      action: nsp.https
+      input:
+        url: "https://network-supervision/NetworkSupervision/rest/api/v1/networkElements/?filter=neId='<% $.neId %>'"
+      publish:
+        lsoInfo: <% task().result %>      
+        productType: <% task().result.content.response.data[0].product.split(" ").join("_") %>
+        neName: <% task().result.content.response.data[0].neName %>
+        nodeIp: <% task().result.content.response.data[0].ipAddress %>
+        nodeMode: <% task().result.content.response.data[0].sourceType %>
+        currentSoftwareVersion: <% regex("-[A-Za-z]?-?").replace(task().result.content.response.data[0].version, "-") %>
+      publish-on-error:
+        lsoStageError: <% task().result %>
+        lsoInfo: "Fetching of NE details from Network Supervision app has failed"
+      on-success:
+        - getBackupFileName: <% ($.backupFilename = null and $.backup_operation != null) %>      
+      on-error:
+        - RestoreFailure
+
+    getBackupFileName:
+      action: nsp.https
+      input:
+        url: "https://lsom-service/lsom/v1/restconf/data/nsp-lso-operation:lso-operations/operation=<% $.operation_type %>,<% $.operation_name %>/executions/execution=<% $.neName %>_Execute/<% $.operation_type %>:<% $.operation_type %>-execution"
+      publish:
+        lsoInfo: <% task().result %>
+        #backupFilename: <% task().result.content[$.operation_type+':'+$.operation_type+'-execution'].backupFilename %>
+        #backupNeSwVersion: <% task().result.content[$.operation_type+':'+$.operation_type+'-execution'].neSoftwareVersion %>
+        backupFileName: <% task().result.content[$.operation_type+':'+$.operation_type+'-execution'].backupFilePath %>
+      publish-on-error:
+        lsoStageError: <% task().result %>
+        lsoInfo: "Failed to fetch Backup file details from LSO execution"
+      on-success:
+        - RestoreFailed: <% $.backupFileName = null  %>
+        #- runRestoreOnClassicNode: <% ($.nodeMode = "nfmp") and ($.currentSoftwareVersion = $.backupNeSwVersion) and ($.backupFilename != null) %>
+        - downLoadConfigFile: <% ($.nodeMode = "mdm")  %>       
+      on-error:
+        - RestoreFailure
+
+    RestoreFailed:
+      action: std.fail
+      input: 
+        error_data: "Restore failed. Backup filename empty"
+      publish-on-error:
+        lsoInfo: <% task().result %>
+        lsoStageError: <% task().result %>    
+  
+    downLoadConfigFile:
+      action: nsp.https
+      input:
+        method: GET
+        url: <% $.fsUrl %>=<% $.backupFileName %>       
+      publish:
+        lsoInfo: "Downloaded the Config"
+        neConfig: <% task().result.content %>
+      publish-on-error:
+        lsoInfo: "ERROR: Unable to write config to file"
+        lsoStageError: <% task().result %>
+      on-success:
+        - restoreConfigOnNE 
+      on-error:
+        - RestoreFailure
+    
+    restoreConfigOnNE:
+      action: nsp.https
+      input:
+        url: https://restconf-gateway/restconf/data/network-device-mgr:network-devices/network-device=<% $.neId %>/root
+        method: PATCH
+        contentType: application/yang-patch+json         
+        accept: application/yang-data+json
+        body: 
+          ietf-yang-patch:yang-patch:
+            patch-id: 69d3e0aa-ec81-4e6f-ae30-6d6709d2808b
+            edit:
+            - operation: replace
+              target: nokia-conf:/configure
+              edit-id: 5b85e20b-7a6b-403b-944a-2c2d7124979e
+              value:
+                 <% $.neConfig %>
+      publish:
+        restConfConfig: <%task(deploySRMD)%>
+      on-success:
+        - RestoreSuccessful
+      on-error:
+        - RestoreFailure
+
+    RestoreFailure:
+      join: 0
+      action: std.fail
+      input: 
+        error_data: <% $.lsoStageError.lsoInfo %> 
+      publish-on-error:
+        lsoInfo: <% task().result %>
+
+    RestoreSuccessful:
+      join: 0 
+      publish:
+        lsoInfo: "Restore successful"

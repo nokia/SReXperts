@@ -1,0 +1,251 @@
+# Copyright 2020 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+username: admin
+password: SReXperts2024
+port: 57400
+timeout: 10s
+skip-verify: true
+encoding: json_ietf
+
+loader:
+  type: docker
+  #address: unix:///var/run/docker.sock
+  address: unix:///run/docker.sock
+  filters:
+    # filter 1
+    - containers:
+        # containers returned by `docker ps -f "label=clab-node-kind=srl"`
+        - label: clab-node-kind=nokia_srlinux
+      network:
+        # networks returned by `docker network ls -f "label=containerlab"`
+        label: containerlab
+      port: "57400"
+      config:
+        username: admin
+        password: SReXperts2024
+        skip-verify: true
+        encoding: proto
+        subscriptions:
+          - srl_platform
+          - srl_apps
+          - srl_if_stats
+          - srl_if_lag_stats
+          - srl_net_instance
+          - srl_bgp_stats
+          - srl_event_handler_stats
+    # filter 2
+    - containers:
+        # containers returned by `docker ps -f "label=clab-node-kind=ceos"`
+        - label: clab-node-kind=nokia_sros
+        # containers returned by `docker ps -f "label=clab-node-kind=vr-sros"`
+      network:
+        # networks returned by `docker network ls -f "name=mgmt"`
+        label: containerlab
+      # the value of label=gnmi-port exported by each container`
+      port: "57400"
+      config:
+        username: admin
+        password: SReXperts2024
+        insecure: true
+        encoding: json
+        subscriptions:
+          - sros_ports_stats
+          - sros_router_bgp
+          - sros_router_interface
+          - sros_router_isis
+          - sros_router_route_table
+          - sros_system
+          - sros_service_stats
+
+subscriptions:
+  srl_platform:
+    paths:
+      - /platform/control[slot=*]/cpu[index=all]/total
+      - /platform/control[slot=*]/memory
+    mode: stream
+    stream-mode: sample
+    sample-interval: 5s
+
+  srl_apps:
+    paths:
+      - /system/app-management/application[name=*]
+    mode: stream
+    stream-mode: sample
+    sample-interval: 5s
+
+  srl_if_stats:
+    paths:
+      - /interface[name=ethernet-1/*]/statistics
+      - /interface[name=*]/subinterface[index=*]/statistics/
+      - /interface[name=ethernet-1/*]/oper-state
+      - /interface[name=ethernet-1/*]/traffic-rate
+    mode: stream
+    stream-mode: sample
+    sample-interval: 5s
+
+  srl_if_lag_stats:
+    paths:
+      - /interface[name=*]/lag/member[name=*]/lacp/statistics
+    mode: stream
+    stream-mode: sample
+    sample-interval: 5s
+  
+  srl_net_instance:
+    paths:
+      - /network-instance[name=*]/oper-state
+      - /network-instance[name=*]/route-table/ipv4-unicast/statistics/
+      - /network-instance[name=*]/route-table/ipv6-unicast/statistics/
+    mode: stream
+    stream-mode: sample
+    sample-interval: 5s
+
+  srl_bgp_stats:
+    paths:
+      - /network-instance[name=*]/protocols/bgp/statistics
+      - /network-instance[name=*]/protocols/bgp/group[group-name=*]/statistics
+    mode: stream
+    stream-mode: sample
+    sample-interval: 5s
+
+  srl_event_handler_stats:
+    paths:
+      - /system/event-handler/instance[name=*]/statistics/
+    mode: stream
+    stream-mode: sample
+    sample-interval: 5s
+
+  sros_ports_stats:
+    paths:
+      - /state/port/oper-state
+      - /state/port/statistics/
+      - /state/port/ethernet/statistics/
+    stream-mode: sample
+    sample-interval: 5s
+  
+  sros_router_bgp:
+    paths:
+      - /state/router/bgp/statistics/
+      - /state/router/bgp/statistics/routes-per-family/
+      - /state/router/bgp/neighbor/statistics/
+    stream-mode: sample
+    sample-interval: 5s
+  
+  sros_router_interface:
+    paths:
+      - /state/router/interface/ipv4/statistics/
+      - /state/router/interface/ipv6/statistics/
+      - /state/router/interface/statistics/
+    stream-mode: sample
+    sample-interval: 5s
+  
+  sros_router_isis:
+    paths:
+      - /state/router/isis/statistics/
+    stream-mode: sample
+    sample-interval: 5s
+
+  sros_router_route_table:
+    paths:
+      - /state/router/route-table/unicast/ipv4/statistics/
+      - /state/router/route-table/unicast/ipv6/statistics/
+    stream-mode: sample
+    sample-interval: 5s
+
+  sros_system:
+    paths:
+      - /state/system/cpu[sample-period=1]
+      - /state/system/memory-pools/
+    stream-mode: sample
+    sample-interval: 5s
+
+  sros_service_stats:
+    paths:
+      - /state/service/vpls[service-name=*]/oper-state
+      - /state/service/vprn[service-name=*]/oper-state
+    mode: stream
+    stream-mode: sample
+    sample-interval: 5s
+
+outputs:
+  prom:
+    type: prometheus
+    listen: :9273
+    path: /metrics
+    export-timestamps: true
+    strings-as-labels: true
+    debug: false
+    event-processors:
+      - trim-sros-prefixes
+      - add-labels
+      - trim-regex
+      - group-by-interface
+      - up-down-map
+
+  # stdout:
+  #   type: file
+  #   file-type: stdout
+  #   event-processors:
+  #     - proc-convert-strings-to-int
+  #     - trim-prefixes
+
+processors:
+  trim-sros-prefixes:
+    event-strings:
+      value-names:
+        - "^/state/.*"
+      transforms:
+        - trim-prefix:
+            apply-on: "name"
+            prefix: "/state"
+  add-labels:
+    # processor type
+    event-extract-tags:
+      value-names:
+        - /router/route-table/unicast/(?P<family>[a-zA-Z0-9-_:]+)/statistics/(?P<protocol>[a-zA-Z0-9-_:]+)/([a-zA-Z0-9-_:]+)
+        - /router/bgp/statistics/routes-per-family/(?P<family>[a-zA-Z0-9-_:]+)/([a-zA-Z0-9-_:]+)
+        - /router/interface/(?P<family>[a-zA-Z0-9-_:]+)/statistics/([a-zA-Z0-9-_:]+)
+        - /router/bgp/neighbor/statistics/family-prefix/(?P<family>[a-zA-Z0-9-_:]+)/([a-zA-Z0-9-_:]+)
+  trim-regex:
+    event-strings:
+      value-names:
+        - ".*"
+      transforms:
+        - replace:
+            apply-on: "name"
+            keep: false
+            old: "/router/route-table/unicast/([a-zA-Z0-9-_:]+)/statistics/([a-zA-Z0-9-_:]+)/([a-zA-Z0-9-_:]+)"
+            new: "/router/route-table/unicast/$3"
+        - replace:
+            apply-on: "name"
+            keep: false
+            old: "/router/bgp/statistics/routes-per-family/([a-zA-Z0-9-_:]+)/([a-zA-Z0-9-_:]+)"
+            new: "/router/bgp/statistics/routes-per-family/$2"
+        - replace:
+            apply-on: "name"
+            keep: false
+            old: "/router/interface/([a-zA-Z0-9-_:]+)/statistics/([a-zA-Z0-9-_:]+)"
+            new: "/router/interface/statistics/$2"
+        - replace:
+            apply-on: "name"
+            keep: false
+            old: "/router/bgp/neighbor/statistics/family-prefix/([a-zA-Z0-9-_:]+)/([a-zA-Z0-9-_:]+)"
+            new: "/router/bgp/neighbor/statistics/family-prefix/$2"
+  group-by-interface:
+    event-group-by:
+      tags:
+        - interface_name
+  up-down-map:
+    event-strings:
+      value-names:
+        - oper-state
+      transforms:
+        - replace:
+            apply-on: "value"
+            old: "up"
+            new: "1"
+        - replace:
+            apply-on: "value"
+            old: "down"
+            new: "0"

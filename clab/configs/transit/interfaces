@@ -1,0 +1,19 @@
+auto lo
+iface lo inet loopback
+
+auto eth1
+iface eth1
+    address 10.64.54.0/31
+    address fd00:fde8:0:54::0/127
+
+auto eth2
+iface eth2
+    address 10.64.54.2/31
+    address fd00:fde8:0:54::2/127
+
+auto eth3
+iface eth3
+    address 10.64.51.3/24
+    address fd00:fc00:0:51::3/64
+
+

@@ -1,0 +1,11 @@
+# Copyright 2024 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+service-name: test2
+service-id: 2222
+customer: "1"
+interface-name: test2
+ipv4-address: 192.168.6.52
+ipv4-prefix-length: 24
+sap-id: "1/1/c6/1:2222"

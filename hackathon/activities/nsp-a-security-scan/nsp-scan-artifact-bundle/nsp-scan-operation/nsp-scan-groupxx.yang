@@ -1,0 +1,60 @@
+module nsp-scan-groupxx {
+  yang-version 1.1;
+  namespace "urn:nokia:nsp:model:lso:operation:nsp-scan-groupxx";
+  prefix scan;
+
+  import nsp-lso-operation {
+    prefix nlo;
+  }
+
+  organization
+    "Nokia";
+  contact
+    "Nokia NSP Support Web <https://www.nokia.com>";
+  description
+    "Operation Manager Scan Demo - Operation Model";
+
+  revision 2023-10-10 {
+    description
+      "Initial revision.";
+    reference
+      "";
+  }
+
+  augment "/nlo:lso-operations/nlo:operation" {
+    description
+      "Augmentation of operation input.";
+  }
+
+  augment "/nlo:lso-operations/nlo:operation/nlo:executions/nlo:execution" {
+    when "../../operation-type='nsp-scan-groupxx'";
+    description
+      "Augmentation of operation output.";
+    container nsp-scan-groupxx-execution {
+      description
+        "State data container for scan execution.";
+
+        leaf nerechability { 
+          type string; 
+          description 
+            "Indicates the device rechability."; 
+        }
+        leaf maxtime { 
+          type string; 
+          description 
+            "Indicates the maximum time taken for scan."; 
+        } 
+        leaf avgtime { 
+          type string; 
+          description 
+            "Indicates the average time taken for scan "; 
+        } 
+        leaf mintime { 
+          type string; 
+          description 
+            "Indicates the minimum time taken for scan"; 
+        }  
+
+    }
+  }
+}

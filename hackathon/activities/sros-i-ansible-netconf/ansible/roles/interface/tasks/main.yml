@@ -1,0 +1,13 @@
+# Copyright 2024 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+---
+- name: "Generate Interface Configuration XML"
+  connection: local
+  template: src=interface.j2 backup=no dest={{ playbook_dir }}/roles/interface/files/interface{{ inventory_hostname }}.xml
+
+- name: Loading configuration with netconf
+  connection: netconf
+  ansible.netcommon.netconf_config:
+     content: "{{ lookup('file', './interface{{ inventory_hostname }}.xml') }}"

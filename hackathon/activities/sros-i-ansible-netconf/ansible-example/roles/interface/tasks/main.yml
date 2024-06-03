@@ -1,0 +1,39 @@
+# Copyright 2024 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+---
+- name: "Generate Interface Configuration XML"
+  connection: local
+  template: src=interface.j2 backup=no dest={{ playbook_dir }}/roles/interface/files/interface{{ inventory_hostname }}.xml
+
+- name: Loading configuration with netconf
+  connection: netconf
+  ansible.netcommon.netconf_config:
+     content: "{{ lookup('file', './interface{{ inventory_hostname }}.xml') }}"
+     commit: false
+     lock: never
+
+- name: Preparing compare RPC
+  connection: local
+  template: src=compare.j2 backup=no dest={{ playbook_dir }}/roles/interface/files/compare-{{ inventory_hostname }}.xml
+
+- name: Send the compare RPC to the target host
+  ansible.netcommon.netconf_rpc:
+    content: "{{ lookup('file', './compare-{{ inventory_hostname }}.xml') }}"
+    rpc: action
+    xmlns: urn:ietf:params:xml:ns:yang:1
+  register: comparison_out
+
+- name: Show comparison output on stdout
+  debug: var=comparison_out.stdout_lines
+
+- name: Preparing commit RPC
+  connection: local
+  template: src=commit.j2 backup=no dest={{ playbook_dir }}/roles/interface/files/commit-{{ inventory_hostname }}.xml
+
+- name: Send the commit RPC to the target host
+  ansible.netcommon.netconf_rpc:
+    content: "{{ lookup('file', './commit-{{ inventory_hostname }}.xml') }}"
+    rpc: commit
+    xmlns: urn:ietf:params:xml:ns:netconf:base:1.0

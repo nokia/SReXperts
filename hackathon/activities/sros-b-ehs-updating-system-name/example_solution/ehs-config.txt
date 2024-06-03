@@ -1,0 +1,56 @@
+############# Configure python-script "ehs" #############
+    /configure python python-script "ehs" admin-state enable
+    /configure python python-script "ehs" urls ["tftp://172.31.255.29/ehs.py"]
+    /configure python python-script "ehs" version python3
+    /configure python python-script "latest-ehs-output" admin-state enable
+    /configure python python-script "latest-ehs-output" urls ["tftp://172.31.255.29/latest-ehs-output.py"]
+    /configure python python-script "latest-ehs-output" version python3
+
+############# Make directory cf3:/ehs/ for results #############
+    /file make-directory ehs
+
+############# Configure script-policy "ehs" owner "ehs" #############
+    /configure system script-control script-policy "ehs" owner "admin" admin-state enable
+    /configure system script-control script-policy "ehs" owner "admin" results "cf3:/ehs/"
+    /configure system script-control script-policy "ehs" owner "admin" python-script name "ehs"
+
+############# Configure log-events #############
+    /configure  log log-events security event ssh_user_login 
+    /configure  log log-events security event ssh_user_logout
+
+############# Configure event-handling handler #############
+    /configure log event-handling handler "ehs" admin-state enable
+    /configure log event-handling handler "ehs" entry 10 admin-state enable
+    /configure log event-handling handler "ehs" entry 10 script-policy name "ehs"
+    /configure log event-handling handler "ehs" entry 10 script-policy owner "admin"
+
+############# Configure log filter #############
+    /configure log filter "user_login" default-action forward
+    /configure log filter "user_login" named-entry "user-login" action forward
+    /configure log filter "user_logout" default-action forward
+    /configure log filter "user_logout" named-entry "user-logout" action forward
+
+############# Configure log event-trigger #############
+    /configure log event-trigger security event ssh_user_login admin-state enable
+    /configure log event-trigger security event ssh_user_login entry 10 filter "user_login"
+    /configure log event-trigger security event ssh_user_login entry 10 handler "ehs"
+    /configure log event-trigger security event ssh_user_logout admin-state enable
+    /configure log event-trigger security event ssh_user_logout entry 10 filter "user_logout"
+    /configure log event-trigger security event ssh_user_logout entry 10 handler "ehs"
+--------------------------------------------------------------------------------------------------
+
+
+
+
+############# Optionally Configure alias "show latest-ehs-output" #############
+    /configure system management-interface cli md-cli environment command-alias alias "latest-ehs-output" admin-state enable
+    /configure system management-interface cli md-cli environment command-alias alias "latest-ehs-output" python-script "latest-ehs-output"
+    /configure system management-interface cli md-cli environment command-alias alias "latest-ehs-output" mount-point "/show" 
+
+############# Optionally Configure login-script to see the "latest-ehs-output" in login #############
+ login.scr
+-------------------------------------------------------------------------------
+pyexec tftp://172.31.255.29/latest-ehs-output.py ehs
+
+===============================================================================
+    /configure system login-control login-scripts global-script "tftp://172.31.255.29/login.scr"

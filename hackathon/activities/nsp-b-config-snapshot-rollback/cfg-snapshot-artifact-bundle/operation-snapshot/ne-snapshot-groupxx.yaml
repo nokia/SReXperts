@@ -1,0 +1,15 @@
+# Copyright 2024 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+phases:
+  - phase: "Execute"
+    description: Backup NE  Config
+    concurrency_count: 30
+    phase_timeout: 15
+    ne_families:
+      - family_type: 7750 SR, 7950 XRS, 7450 ESS, 7250 IXR
+        ne_versions:
+          - version: all
+            workflow_name: ne-snapshot-groupxx
+            workflow_inputs:

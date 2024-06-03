@@ -1,0 +1,4 @@
+ansible_ssh_user: <username>
+ansible_ssh_pass: <password>
+ansible_ssh_common_args: '-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+ansible_connection: ansible.netcommon.netconf

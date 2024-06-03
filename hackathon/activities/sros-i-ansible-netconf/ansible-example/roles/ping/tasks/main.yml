@@ -1,0 +1,18 @@
+# Copyright 2024 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+---
+- name: "Create a ping action ICMP payload"
+  connection: local
+  template: src=ping.j2 backup=no dest={{ playbook_dir }}/roles/ping/files/ping-{{ inventory_hostname }}.xml
+
+- name: Send the payload to the router and register output as a variable
+  ansible.netcommon.netconf_rpc:
+    content: "{{ lookup('file', './ping-{{ inventory_hostname }}.xml') }}"
+    rpc: action
+    xmlns: urn:ietf:params:xml:ns:yang:1
+  register: ping_output
+
+- name: Print the output of a ping NETCONF action to stdout
+  debug: var=ping_output.stdout_lines

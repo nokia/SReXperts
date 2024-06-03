@@ -1,0 +1,54 @@
+---
+version: '2.0'
+
+nspWebUI.portNElist:
+  description: |
+      action: nspWebUI.portNElist
+      since: NSP 21.3
+      short_description: Queries the list of NSP ports for a given NE
+      description:
+        - This action is targeted to be used by schema-form suggests/pickers
+        - RESTCONF API is used
+      input:
+        token_auth:
+          description: To comply with schema-form and provide user context
+          type: String
+          mandatory: False
+        neId:
+          description: Network Element ID
+          type: String
+          mandatory: True
+      output:
+        type: list of dicts
+        description: inventory of ethernet ports for a NE
+      example_responses:
+        Success: |
+          result:
+            - neId: 1041::cafe:4
+              componentId: shelf=1/cardSlot=1/card=1/port=ethernet-1/5
+              neName: bern
+              portName: ethernet-1/5
+            - neId: 1041::cafe:4
+              componentId: shelf=1/cardSlot=1/card=1/port=ethernet-1/4
+              neName: bern
+              portName: ethernet-1/4
+            - neId: 1041::cafe:4
+              componentId: shelf=1/cardSlot=1/card=1/port=ethernet-1/2
+              neName: bern
+              portName: ethernet-1/2
+            - neId: 1041::cafe:4
+              componentId: shelf=1/cardSlot=1/card=1/port=ethernet-1/1
+              neName: bern
+              portName: ethernet-1/1
+  base: nsp.https
+  base-input:
+    url: https://restconf-gateway/restconf/data/nsp-equipment:network/network-element=<% $.neId %>/hardware-component/port?fields=ne-id;ne-name;name;component-id;oper-state;port-details/port-type
+    body:
+      input:
+    resultFilter: $.content.get('nsp-equipment:port').where($.get('port-details').first().get('port-type') = 'ethernet-port').where($.get('oper-state') = 'enabled').select({neId=>$.get('ne-id'),neName=>$.get('ne-name'),componentId=>$.get('component-id'),portName=>$.get('name'),opState=>$.get('oper-state'),portType=>$.get('port-details').first().get('port-type')})
+    method: GET
+    auth: <% $.token_auth %>
+  input:
+    - token_auth
+    - neId
+  output: <% $.content %>

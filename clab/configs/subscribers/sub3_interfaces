@@ -1,0 +1,17 @@
+auto lo
+iface lo inet loopback
+
+auto eth1
+allow-hotplug eth1
+iface eth1 inet manual
+    hwaddress 00:D0:F6:03:03:03
+
+# VLAN 100
+auto eth1.100
+allow-hotplug eth1.100
+iface eth1.100
+  use dhcp
+  udhcpc_opts -x 0x3d:0FF1CE03 -x 0x51:00037365727665722e6f666669636533
+#                               # translates to server.office3 in hex
+iface eth1.100 inet6 dhcp
+

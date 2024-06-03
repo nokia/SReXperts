@@ -1,0 +1,10 @@
+    /configure system login-control login-scripts global-script "tftp://172.31.255.29/login.scr"
+----------------------------------------------------------------------------------
+
+[gl:/configure system login-control]
+A:admin@pe4# info
+    login-scripts {
+        global-script "tftp://172.31.255.29/login.scr"
+    }
+
+

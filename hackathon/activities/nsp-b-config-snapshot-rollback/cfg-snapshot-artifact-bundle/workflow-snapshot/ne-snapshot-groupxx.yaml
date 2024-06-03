@@ -1,0 +1,133 @@
+# Copyright 2024 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+version: "1.0"
+
+ne-snapshot-groupxx:
+  type: direct
+  tags:
+    - LSO
+
+  input:
+    - neId
+    - backupFilePath: ''
+
+  output:
+    backupFilePath: <% $.backupFilePath %>
+    
+  output-on-error:
+    lsoInfo: <% $.lsoInfo %>
+    lsoStageError: <% $.lsoStageError %>
+    
+  vars:
+    lsoInfo: "Failed"
+    lsoStageError: "Unknown"
+    fsDir: /lsom/neBackup
+    restconfUrl: https://restconf-gateway/restconf
+    fsUrl: https://file-service.nsp-psa-restricted.svc.cluster.local/nsp-file-service-app/rest/api/v1
+   
+  tasks:
+    lsoStageMapping:
+      action: std.noop
+      publish:
+        fsDir: "/lsom/neBackup"
+        configFileName: config_<% now().format("%Y-%m-%d_%H-%M-%S") %>.cfg
+
+        lsoWorkflowStageMapping:
+          ne-snapshot-groupxx:
+          - getNodeDetails
+          - nodeInfoAddon
+          - mdSRConfigMDC
+          - writeConfigToFile
+  
+      on-success:
+        - getNodeDetails
+        
+    getNodeDetails:
+      action: nsp.https
+      input:
+        method: POST
+        url: <% $.restconfUrl %>/operations/nsp-inventory:find
+        body: 
+          input:
+            xpath-filter: /nsp-ne-control:ne-control/discovered-ne[ne-id='<% $.neId %>']
+            fields: ne-id;ne-name;version;communication-state;ne-vendor;ne-family
+        resultFilter: $.content.get("nsp-inventory:output").data
+      publish:        
+        nodeInfo: <% switch(task().result.content.len() > 0 => task().result.content.first(), true => {}) %>        
+      publish-on-error:
+        lsoInfo: "ERROR: Failed to get node details"
+        lsoStageError: <% task().result %>
+      on-success:
+        - nodeNotFound: <% not task().result.content or task().result.content.first().get("communication-state") != up %>
+        - nodeInfoAddon: <% task().result.content and task().result.content.first().get("communication-state") = up %>
+
+    nodeNotFound:
+      action: std.fail
+      publish-on-error:
+        lsoInfo: "ERROR: Failed to get node details"
+        lsoStageError: Node with ne-id='<% $.neId %>' not found in inventory or node is not rechable
+
+    nodeInfoAddon:
+      action: std.noop
+      publish:
+        dirName: <% $.fsDir %>/<% $.nodeInfo.get("ne-vendor") %>/<% $.nodeInfo.get("ne-family").replace(" ","_")  %>/<% $.nodeInfo.get("ne-name") %>/<% $.nodeInfo.get("version") %>/        
+      on-success:       
+        - mdSRConfigMDC :  <% json_dump($.nodeInfo).indexOf("mdm-ami-cmodel") != -1 %> 
+      publish-on-error:
+        lsoInfo: "ERROR: Failed to create dir"
+        lsoStageError: <% task().result %> 
+
+    mdSRConfigMDC:
+      action: nsp.https
+      input:
+        url: https://restconf-gateway/restconf/data/network-device-mgr:network-devices/network-device=<% $.neId %>/root/nokia-conf:configure 
+        method: GET        
+      publish:
+        lsoInfo: <% task().result.content %> 
+        mdcConfig: <% json_dump(task().result.content) %> 
+      publish-on-error:
+        lsoInfo: "ERROR: Failed to get node info"
+        lsoStageError: <% task().result %>      
+      on-success:
+        - checkBackupDirExist
+   
+    checkBackupDirExist:
+      action: nsp.https
+      input:
+        method: GET
+        url: <% $.fsUrl %>/directory?dirName=<% $.dirName %>
+      on-success:
+        - writeConfigToFile
+      on-error:
+        - createBackupDir
+
+    createBackupDir:
+      action: nsp.https
+      input:
+        method: POST
+        url: <% $.fsUrl %>/directory?dirName=<% $.dirName %>
+        resultFilter : $.content.data.fileName
+      publish-on-error:
+        lsoStageError: <% task().result %>
+        lsoInfo: "Error: Backup directory creation has failed. Please check if it has enough disc space or if its functional" 
+      on-success:
+        - writeConfigToFile
+
+    writeConfigToFile:
+      action: nsp.https
+      input:
+        method: POST
+        url: <% $.fsUrl %>/file/uploadTextToFile
+        body:
+          dirName: <% $.dirName %>
+          fileName: <% $.configFileName %>
+          text: <% $.mdcConfig  %>
+          overwrite: true
+      publish:
+        lsoInfo: "NE  Config backup completed"
+        backupFilePath: <% $.dirName %>/<% $.configFileName %>
+      publish-on-error:
+        lsoInfo: "ERROR: Unable to write config to file"
+        lsoStageError: <% task().result %>

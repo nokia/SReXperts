@@ -47,7 +47,7 @@ The following tasks recommended in this activity and example solutions are inclu
 1. Traffic flow between `pe1` and `pe2`
 2. Create an IPv6 filter configuration on a router using a provided Ansible playbook.
 3. Apply the IPv6 filter created in the previous step using a provided Ansible playbook to a network interface.
-4. Undo the changes made in step 4 using the same playbook.
+4. Undo the changes made in step 3 using the same playbook.
 5. NETCONF Comparison in Ansible playbooks
 
     5.1. Implicit and explicit commits\

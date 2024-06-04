@@ -83,7 +83,7 @@ There are four supported RPCs in [gNMI](https://www.openconfig.net/docs/gnmi/gnm
 
 [gNMIc](https://gnmic.openconfig.net) was developed by Nokia and donated to the Openconfig project. It allows subscribing to streaming telemetry data from network devices and export it to a variety of destinations. In this lab, gnmic is used to subscribe to the telemetry data from the lab routers and export it to the prometheus time-series database.
 
-The gnmic configuration file ([config.yml](../../clab/configs/gnmic/config.yml)), is applied to the gnmic container at the startup and instructs it to subscribe to the telemetry data and export it to the prometheus time-series database.
+The gnmic configuration file ([config.yml](../../../clab/configs/gnmic/config.yml)), is applied to the gnmic container at the startup and instructs it to subscribe to thebbb telemetry data and export it to the prometheus time-series database.
 
 #### Using gNMIc From CLI
 

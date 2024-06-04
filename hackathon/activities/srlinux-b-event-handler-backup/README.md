@@ -44,7 +44,7 @@ While logged in to a VM with the standard `nokia` user, create the `~/backups` d
 
 We need to create our Python event handling script on an SR Linux box, and prepare the event handler configuration context:
 
-Log into the node, go to the linux CLI (by typing `bash network-instance-mgmt`) and create the script `remote-backup.py` in the `/etc/opt/srlinux/eventmgr` directory.
+Log into the node, go to the linux CLI (by typing `bash network-instance mgmt`) and create the script `remote-backup.py` in the `/etc/opt/srlinux/eventmgr` directory.
 
 ```bash
 --{ running }--[  ]--

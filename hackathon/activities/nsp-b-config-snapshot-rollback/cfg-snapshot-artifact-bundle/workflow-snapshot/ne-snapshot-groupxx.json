@@ -1,0 +1,24 @@
+{
+    "type": "object",
+    "properties": [
+        {
+            "name": "neId",
+            "title": "NE ID",
+            "description": "description for neId",
+            "columnSpan": 4,
+            "newRow": true,
+            "readOnly": false,
+            "required": false,
+            "type": "string",
+            "component": {
+                "input": "autoComplete"
+            },
+            "suggest": {
+                "action": "nspWebUI.neList",
+                "name": [
+                    "neId"
+                ]
+            }
+        }
+    ]
+}

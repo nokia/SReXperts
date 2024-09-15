@@ -6,7 +6,7 @@
 | Skill Level       | Intermediate/Advanced                                                    |
 | Tools Used        | SR Linux, Python                                                         |
 
-Before attempting this exercise, it is recommended that you have already completed the [beginner level exercise](../srl-cli-plugin-show-version). In that tutorial you will learn the basic structure of a CLI plugin on SR Linux.
+Before attempting this exercise, it is recommended that you have already completed the [beginner level exercise](../srlinux-i-plugin-show-version). In that tutorial you will learn the basic structure of a CLI plugin on SR Linux.
 
 This lab demonstrates how to construct a custom CLI plugin for SR Linux. During this lab, the user will learn how to create a new _show command_ plugin which will collect, parse and display useful information about each BGP peer on the router.
 
@@ -138,9 +138,9 @@ Warning: Permanently added 'clab-srexperts-peering2' (ED25519) to the list of kn
 :                                                              :
 : Get started: https://learn.srlinux.dev                       :
 : Container:   https://go.srlinux.dev/container-image          :
-: Docs:        https://doc.srlinux.dev/24-3                    :
-: Rel. notes:  https://doc.srlinux.dev/rn24-3-2                :
-: YANG:        https://yang.srlinux.dev/release/v24.3.2        :
+: Docs:        https://doc.srlinux.dev/24-7                    :
+: Rel. notes:  https://doc.srlinux.dev/rn24-7-1                :
+: YANG:        https://yang.srlinux.dev/release/v24.7.1        :
 : Discord:     https://go.srlinux.dev/discord                  :
 : Contact:     https://go.srlinux.dev/contact-sales            :
 ................................................................
@@ -185,9 +185,9 @@ Warning: Permanently added 'clab-srexperts-peering2' (ED25519) to the list of kn
 :                                                              :
 : Get started: https://learn.srlinux.dev                       :
 : Container:   https://go.srlinux.dev/container-image          :
-: Docs:        https://doc.srlinux.dev/24-3                    :
-: Rel. notes:  https://doc.srlinux.dev/rn24-3-2                :
-: YANG:        https://yang.srlinux.dev/release/v24.3.2        :
+: Docs:        https://doc.srlinux.dev/24-7                    :
+: Rel. notes:  https://doc.srlinux.dev/rn24-7-1                :
+: YANG:        https://yang.srlinux.dev/release/v24.7.1        :
 : Discord:     https://go.srlinux.dev/discord                  :
 : Contact:     https://go.srlinux.dev/contact-sales            :
 ................................................................
@@ -351,9 +351,9 @@ Warning: Permanently added 'clab-srexperts-peering2' (ED25519) to the list of kn
 :                                                              :
 : Get started: https://learn.srlinux.dev                       :
 : Container:   https://go.srlinux.dev/container-image          :
-: Docs:        https://doc.srlinux.dev/24-3                    :
-: Rel. notes:  https://doc.srlinux.dev/rn24-3-2                :
-: YANG:        https://yang.srlinux.dev/release/v24.3.2        :
+: Docs:        https://doc.srlinux.dev/24-7                    :
+: Rel. notes:  https://doc.srlinux.dev/rn24-7-1                :
+: YANG:        https://yang.srlinux.dev/release/v24.7.1        :
 : Discord:     https://go.srlinux.dev/discord                  :
 : Contact:     https://go.srlinux.dev/contact-sales            :
 ................................................................
@@ -589,7 +589,7 @@ A:peering2# pwc xpath
 
 But there is also an off-box solution! Nokia has an [online YANG browser for SR Linux](https://yang.srlinux.dev/) that is very fast and full-featured, allowing you to view the data model in many different forms.
 
-Visit the site, choose version 24.3.2 and you will be taken to the default view, which is the path browser.
+Visit the site, choose version 24.7.1 and you will be taken to the default view, which is the path browser.
 
 Try typing in 'autonomous-system' or 'local-as' and see if you can find a path.
 

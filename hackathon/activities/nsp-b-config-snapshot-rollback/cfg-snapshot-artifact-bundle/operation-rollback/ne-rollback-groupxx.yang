@@ -1,7 +1,7 @@
 module ne-rollback-groupxx {
   yang-version 1.1;
   namespace "urn:nokia:nsp:model:lso:operation:ne-rollback-groupxx";
-  prefix referencesnapshot;
+  prefix rollback;
 
   import nsp-lso-operation {
     prefix nlo;
@@ -20,7 +20,7 @@ module ne-rollback-groupxx {
     when "operation-type='ne-rollback-groupxx'";
     description
       "Augmentation of ne-rollback-groupxx operation config data.";
-	  
+          
     container ne-rollback-groupxx-operation  {
       description
         "Config data container for the NE restore operation.";
@@ -43,5 +43,14 @@ module ne-rollback-groupxx {
       }
     }
   }
- 
+
+  augment "/nlo:lso-operations/nlo:operation/nlo:executions/nlo:execution" {
+    when "../../operation-type='ne-rollback-groupxx'";
+    description
+      "Augmentation of execution state data.";
+    container ne-rollback-groupxx-execution {
+      description
+        "State data container for NE restore execution.";
+    }
+  }
 }

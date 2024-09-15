@@ -12,7 +12,8 @@ Let's see how this script will look like with shell scripting:
 #!/bin/bash
 
 ## Setting the home directory
-cur_dir=/home/nokia/srl-gnoi-chris (Replace with your current working directory)
+# (Replace with your current working directory)
+cur_dir=/home/nokia/srl-gnoi
 
 ## Running gNOI to get the configuration file
 /usr/local/bin/gnoic -a clab-srexperts-leaf11 --skip-verify -u admin -p SReXperts2024 file get --file /etc/opt/srlinux/config.json --dst $cur_dir/
@@ -46,10 +47,10 @@ Let's schedule the script to run every 10 minutes on the server.
 Use `crontab -e` to edit the crontab and add the below line at the end.
 
 ```
-0,10,20,30,40,50 * * * * /usr/bin/bash /home/nokia/srl-gnoi-chris/backup.sh>/dev/null 2>&1
+0,10,20,30,40,50 * * * * /usr/bin/bash /home/nokia/srl-gnoi/backup.sh>/dev/null 2>&1
 ```
 
-Check the `/home/nokia/srl-gnoi-chris/backups` directory to verify that that the backups are being taken periodically.
+Check the `/home/nokia/srl-gnoi/backups` directory to verify that that the backups are being taken periodically.
 
 ## Bulk File Transfers - Solution
 
@@ -72,7 +73,8 @@ clab-srexperts-leaf11
 #!/bin/bash
 
 ## Setting the home directory
-cur_dir=/home/nokia/srl-gnoi-chris (Replace with your current working directory)
+# (Replace with your current working directory)
+cur_dir=/home/nokia/srl-gnoi
 
 ## Running through the list of devices
 for i in `awk '{print $0}' $cur_dir/node-list.txt`
@@ -98,8 +100,8 @@ Now that our script is ready, let's run it
 ```
 # chmod +x file-transfer.sh
 # ./file-transfer.sh
-INFO[0000] "clab-srexperts-leaf11:57400" sending file="/home/nokia/srl-gnoi-chris/my-gpt.deb" hash 
-INFO[0000] "clab-srexperts-leaf11:57400" file "/home/nokia/srl-gnoi-chris/my-gpt.deb" written successfully 
+INFO[0000] "clab-srexperts-leaf11:57400" sending file="/home/nokia/srl-gnoi/my-gpt.deb" hash 
+INFO[0000] "clab-srexperts-leaf11:57400" file "/home/nokia/srl-gnoi/my-gpt.deb" written successfully 
 File transferred successfully to clab-srexperts-leaf11
 ```
 
@@ -137,7 +139,7 @@ clab-srexperts-leaf11
 #!/bin/bash
 
 ## Setting the home directory
-cur_dir=/home/nokia/srl-gnoi-chris (Replace with your current working directory)
+cur_dir=/home/nokia/srl-gnoi (Replace with your current working directory)
 
 ## Running through the list of devices
 for i in `awk '{print $0}' $cur_dir/node-list.txt`

@@ -28,7 +28,7 @@ Below are some resources you might find interesting:
 
 - [pyGNMI](https://github.com/akarneliuk/pygnmi): a python package to work with gNMI targets
 - [gNMIc](https://gnmic.openconfig.net/): a command-line utility for interacting with the GNMI interface
-- [SR Linux YANG browser](https://yang.srlinux.dev/v24.3.2): use this to look for gNMI paths
+- [SR Linux YANG browser](https://yang.srlinux.dev/v24.7.1): use this to look for gNMI paths
 - [Nokia GNMI Documentation](https://documentation.nokia.com/srlinux/24-3/books/system-mgmt/gnmi.html)
 
 ## Setting up a Python virtual environment

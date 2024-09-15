@@ -45,7 +45,6 @@ There are 4 remote procedure calls (RPC) services defined by the gNMI specificat
 | Capabilities | Provides the client with information about the device, such as gNMI version, used data models and supported encodings. Frequently used to test the gNMI connection. |
 | GET          | Retrieve information from the device, typically small amount of data.                                                                                               |
 | SET          | Is used to set, modify or delete configuration on a network device.                                                                                                 |
-
 | Subscribe | Used for streaming telemetry - receiving a stream of state or configuration data from the device. Subscribe RPC supports different modes: In a SAMPLE mode, the data is returned with a cadence governed by a client-provided interval; in an ON-CHANGE mode data is streamed every time there is a change in the subscribed data elements. |
 
 ## gNMIc as a command line interface to gNMI
@@ -122,7 +121,7 @@ Now that you know the YANG path for the *host-name*, use gNMIc GET operation to 
 Now we would like to fetch the *traffic-rate* of our interfaces. Try to find in the [YANG Browser](https://yang.srlinux.dev/v24.3.1) the YANG path for traffic-rate and fire again a gNMIc GET operation. You will notice there is a match in the YANG browser for ingress-bps and egress-bps.
 
 ```bash
->$ sudo gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e json_ietf get --path /interface[name=*]/traffic-rate/in-bps
+>$ sudo gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e json_ietf get --path '/interface[name=*]/traffic-rate/in-bps'
 [
   {
     "source": "clab-srexperts-leaf11",
@@ -157,7 +156,7 @@ Now we would like to fetch the *traffic-rate* of our interfaces. Try to find in 
 Notice that you will receive traffic rates for all interface available on the device. This is because we are matching all interfaces in the YANG path. Try to fetch now only the traffic-rate for interface ethernet-1/49
 
 ```bash
->$ sudo gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e json_ietf get --path /interface[name=ethernet-1/49]/traffic-rate/in-bps
+>$ sudo gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e json_ietf get --path '/interface[name=ethernet-1/49]/traffic-rate/in-bps'
 [
   {
     "source": "clab-srexperts-leaf11",
@@ -181,7 +180,7 @@ Let's start now with some real streaming of telemetry data. Instead of performin
 Choose now for a subscribe command with stream-mode sample with a sample-interval of 5 seconds. The traffic-rate should now pop on on your terminal every 5 seconds.
 
 ```bash
->$ sudo gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e json_ietf subscribe --stream-mode sample --sample-interval 5s --path /interface[name=ethernet-1/49]/traffic-rate/in-bps
+>$ sudo gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e json_ietf subscribe --stream-mode sample --sample-interval 5s --path '/interface[name=ethernet-1/49]/traffic-rate/in-bps'
 
 {
   "source": "clab-srexperts-leaf11",
@@ -207,7 +206,7 @@ Search in the [YANG Browser](https://yang.srlinux.dev/v24.3.1) for the YANG path
 Change now the stream mode to on-change and try to fetch the oper-state of the interface. You should notice that we only will receive an update when the operational state of interface ethernet-1/2 changes.
 
 ```bash
->$ sudo gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e json_ietf subscribe --stream-mode on-change --path /interface[name=ethernet-1/2]/oper-state
+>$ sudo gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e json_ietf subscribe --stream-mode on-change --path '/interface[name=ethernet-1/2]/oper-state'
 {
   "source": "clab-srexperts-leaf11",
   "subscription-name": "default-1715183276",
@@ -282,7 +281,7 @@ Let's have a closer look at the telemetry stack components and try to understand
 
 If you have been following the lab from the start, you should now be familiar with gNMIc. It is an Openconfig project developed by Nokia that allows subscribing to streaming telemetry data from network devices and export it to a variety of destinations. In this lab, gNMIc is used to subscribe to the telemetry data from the fabric nodes and export it to the prometheus time-series database.
 
-The gNMIc configuration file [config.yml](../../clab/configs/gnmic/config.yml) is applied to the gNMIc container at startup. It instructs the container to subscribe to telemetry data and export it to the Prometheus time-series database. Examine the file to locate where the YANG paths are defined. You should also note Prometheus is defined as an output. This file should look familiar, as it aligns with what we defined earlier [here](#optional).
+The gNMIc configuration file [config.yml](../../../clab/configs/gnmic/config.yml) is applied to the gNMIc container at startup. It instructs the container to subscribe to telemetry data and export it to the Prometheus time-series database. Examine the file to locate where the YANG paths are defined. You should also note Prometheus is defined as an output. This file should look familiar, as it aligns with what we defined earlier [here](#optional).
 
 ```yaml
 username: admin
@@ -310,9 +309,9 @@ subscriptions:
 
 #### Prometheus
 
-[Prometheus](https://prometheus.io) is a popular open-source time-series database. It is used in this lab to store the telemetry data exported by gnmic. The prometheus configuration file ([prometheus.yml](../../clab/configs/prometheus/prometheus.yml)) has a minimal configuration and instructs prometheus to scrape the data from the gnmic collector with a 5s interval. Metrics are stored with the timestamp (Time Series Data) at which they were recorded, alongside optional key-value pairs called labels.
+[Prometheus](https://prometheus.io) is a popular open-source time-series database. It is used in this lab to store the telemetry data exported by gnmic. The prometheus configuration file ([prometheus.yml](../../../clab/configs/prometheus/prometheus.yml)) has a minimal configuration and instructs prometheus to scrape the data from the gnmic collector with a 5s interval. Metrics are stored with the timestamp (Time Series Data) at which they were recorded, alongside optional key-value pairs called labels.
 
-\**If you need to adjust the data that is scraped by prometheus you have to edit the [config.yml](../../clab/configs/gnmic/config.yml) file.*
+\**If you need to adjust the data that is scraped by prometheus you have to edit the [config.yml](../../../clab/configs/gnmic/config.yml) file.*
 
 > To open up [Prometheus](https://prometheus.io/) UI on your laptop use `http://<group-id>.srexperts.net:9090` address.
 
@@ -326,7 +325,7 @@ subscriptions:
 
 > To open up [Grafana](https://grafana.com) UI on your laptop use `http://<group-id>.srexperts.net:3000` address.
 
-Grafana is pre-configured with anonymous access enabled so that you can view the dashboards without authentication. To edit the dashboards you have to login with the username `admin` and password `admin`. The login button is in the top right corner of the Grafana UI.
+Grafana is pre-configured with anonymous access enabled so that you can view the dashboards without authentication. To edit the dashboards you have to login with the username `admin` and password `SReXperts2024`. The login button is in the top right corner of the Grafana UI.
 
 There are some preconfigured dashboards avalailable. Navigate to the `SR Linux Telemetry` dashboard as described below to have a look and feel of what is available. Check which panels are available and what data they show. Try to understand how the data is collected and how it is visualized.
 

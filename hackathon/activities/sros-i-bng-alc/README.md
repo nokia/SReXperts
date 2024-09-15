@@ -48,7 +48,64 @@ RADIUS server logs can be accessed either by addressing the container using dock
 ## Verify the subscribers exist in the system
 Use `show service active-subscribers` to verify subscribers are online. Initially, two subscribers exist in the system. The subscribers are assigned a generic subscriber identifier by the system. This identifier is formed by combining the device MAC and the SAP identifier the subscriber arrived on, separated by a pipe symbol (|). Though uniquely identifying the user, this doesn't give much information that can be correlated to perks or permissions the subscriber may or may not have.
 
-For this activity it is important that two subscribers, `00:d0:f6:01:01:01|1/1/c3/1:100` and `00:d0:f6:02:02:02|1/1/c3/1:100` exist in the system initially. Please alert someone if this is not the case.
+For this activity it is important that two subscribers, `00:d0:f6:01:01:01|1/1/c3/1:100` and `00:d0:f6:02:02:02|1/1/c3/1:100` exist in the system initially.
+
+<details>
+<summary>Expected initial situation</summary>
+
+```
+[/]
+A:admin@pe4# /show service active-subscribers
+
+===============================================================================
+Active Subscribers
+===============================================================================
+-------------------------------------------------------------------------------
+Subscriber 00:d0:f6:01:01:01|1/1/c3/1:100
+            (SUB_PROF1)
+-------------------------------------------------------------------------------
+NAT Policy    : NAT_POL1
+Outside IP    : 10.67.200.1
+Ports         : 1024-1055
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+(1) SLA Profile Instance sap:[1/1/c3/1:100] - sla:SLA_PROF1
+-------------------------------------------------------------------------------
+IP Address
+                MAC Address        Session            Origin       Svc        Fwd
+-------------------------------------------------------------------------------
+10.24.1.112
+                00:d0:f6:01:01:01  IPoE               DHCP         401        Y
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Subscriber 00:d0:f6:02:02:02|1/1/c3/1:100
+            (SUB_PROF1)
+-------------------------------------------------------------------------------
+NAT Policy    : NAT_POL1
+Outside IP    : 10.67.200.0
+Ports         : 1024-1055
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+(1) SLA Profile Instance sap:[1/1/c3/1:100] - sla:SLA_PROF1
+-------------------------------------------------------------------------------
+IP Address
+                MAC Address        Session            Origin       Svc        Fwd
+-------------------------------------------------------------------------------
+10.24.1.113
+                00:d0:f6:02:02:02  IPoE               DHCP         401        Y
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Number of active subscribers : 2
+===============================================================================
+```
+
+</details>
+
+Please alert someone if this is not the case.
 
 ## Task 1: Modify the default subscriber ID
 Fortunately, SR OS makes this configurable. Issue `edit-config global` to enter the `global` configuration mode and explore the configuration tree under `/configure subscriber-mgmt`. See if you can find a way to change the identifier assigned to the subscribers. The `tree flat detail` command paired with appropriate `match` statements can be of use here. Look for configuration under the `auto-sub-id` keyword. Use `commit` to apply any changes you have made in the candidate datastore to the running datastore.
@@ -62,10 +119,42 @@ Confirm your configuration change has an effect in changing the chosen subscribe
 
 You may not see any subscribers in the system. This could be normal depending on your applied configuration change as some fields that can be used to identify subscribers aren't being received by the router. If you don't see any subscribers, verify that this is indeed the issue using `/show log log-id 99` or `/show subscriber-mgmt errors sap all`. Fortunately, we can fix this! Move on to the next section to learn how.
 
+<details>
+<summary>Expected configuration change</summary>
+
+```
+    configure {
+        subscriber-mgmt {
+            auto-sub-id {
+                ipoe-key [circuit-id]
+            }
+        }
+    }
+```
+
+</details>
+
+<details>
+<summary>Expected new subscriber IDs (after removing them from the router and clients renewing)</summary>
+
+```
+    (ro)[/]
+    A:admin@pe4# show service active-subscribers
+
+    ===============================================================================
+    Active Subscribers
+    ===============================================================================
+    -------------------------------------------------------------------------------
+    No active subscribers found
+    ===============================================================================
+```
+
+</details>
+
 ## Task 2: Shaking things up with Python
 Adapting the subscriber identifier to certain well-known values is nice, though it does not cover all cases. For now, the subscriber hosts are set up to provide a Client ID (option 61) in their DHCP requests. You may have encountered the `circuit-id` and `remote-id` configuration options in the previous step. These refer to Circuit ID (option 82, sub-option 1) and Remote ID (option 82, sub-option 2) respectively. In this task, using `alc` and Python, you will copy or move the values contained in the Client ID to either the Circuit ID or the Remote ID, such that the system can use it as a subscriber identifier. For the remainder of this lab, the `circuit-id` configuration is assumed.
 
-1. Create a file `task2.py` in a location where the router can access it. `/home/nokia/clab-srexperts/pe4/tftpboot/` is recommended as it allows access from the router using TFTP. Files placed in this location be used from the BNG after replacing the directory path with `tftp://172.31.255.29/`. Starting from this snippet, add the logic required to copy or move the value contained in the Client ID to either the Circuit ID or the Remote ID.
+1. Create a file `task2.py` in a location where the router can access it. `/home/nokia/clab-srexperts/pe4/tftpboot/` is recommended as it allows access from the router using TFTP. This file location on the Linux hypervisor provided to you is mounted inside the SR OS container as part of the containerlab deployment. Files placed in this location can be accessed from the BNG after replacing the directory path with `tftp://172.31.255.29/`, the IP address is internal to the SR OS container. Starting from this snippet, add the logic required to copy or move the value contained in the Client ID to the Circuit ID field.
 ```
 from alc import dhcpv4
 def task_2():
@@ -190,6 +279,61 @@ if __name__ == "__main__":
 3. Clear the IPoE sessions in the system and let the subscriber hosts renew their leases. Confirm the Client ID value sent by the subscribers is now used as the subscriber ID value in SR OS.
 
 In [examples/task2.py](./examples/task2.py) a possible implementation of the file to be created in this task is provided. Feel free to refer to it for help or ideas.
+
+<details>
+<summary>Expected new subscriber IDs (after removing them from the router and clients renewing)</summary>
+
+```
+    [/]
+    A:admin@pe4# /show service active-subscribers
+
+    ===============================================================================
+    Active Subscribers
+    ===============================================================================
+    -------------------------------------------------------------------------------
+    Subscriber 0ff1ce01
+               (SUB_PROF1)
+    -------------------------------------------------------------------------------
+    NAT Policy    : NAT_POL1
+    Outside IP    : 10.67.200.2
+    Ports         : 1024-1055
+
+    -------------------------------------------------------------------------------
+    -------------------------------------------------------------------------------
+    (1) SLA Profile Instance sap:[1/1/c3/1:100] - sla:SLA_PROF1
+    -------------------------------------------------------------------------------
+    IP Address
+                  MAC Address        Session            Origin       Svc        Fwd
+    -------------------------------------------------------------------------------
+    10.24.1.112
+                  00:d0:f6:01:01:01  IPoE               DHCP         401        Y
+    -------------------------------------------------------------------------------
+
+    -------------------------------------------------------------------------------
+    Subscriber 0ff1ce02
+               (SUB_PROF1)
+    -------------------------------------------------------------------------------
+    NAT Policy    : NAT_POL1
+    Outside IP    : 10.67.200.3
+    Ports         : 1024-1055
+
+    -------------------------------------------------------------------------------
+    -------------------------------------------------------------------------------
+    (1) SLA Profile Instance sap:[1/1/c3/1:100] - sla:SLA_PROF1
+    -------------------------------------------------------------------------------
+    IP Address
+                  MAC Address        Session            Origin       Svc        Fwd
+    -------------------------------------------------------------------------------
+    10.24.1.113
+                  00:d0:f6:02:02:02  IPoE               DHCP         401        Y
+    -------------------------------------------------------------------------------
+
+    -------------------------------------------------------------------------------
+    Number of active subscribers : 2
+    ===============================================================================
+```
+
+</details>
 
 ## Task 3: Adding more logic and caching information to re-use
 We are now able to use information sent by the subscriber device when creating a subscriber ID. That's nice, can the same be achieved for information coming from the RADIUS server?
@@ -324,6 +468,101 @@ Commands that may come in useful for this task:
 
 In [examples/task3_radius.py](./examples/task3_radius.py) and [examples/task3_dhcp.py](./examples/task3_dhcp.py) possible implementations of the files to be created in this task are provided. Feel free to refer to them for help or ideas.
 
+<details>
+<summary>Expected configuration changes</summary>
+
+```
+    configure {
+        aaa {
+            radius {
+                server-policy "RadAuthPolicy1" {
+                    python-policy "python-policy"
+                }
+            }
+        }
+        python {
+            python-script "task3_dhcp" {
+                admin-state enable
+                urls ["tftp://172.31.255.29/task3_dhcp.py"]
+                version python3
+            }
+            python-script "task3_radius" {
+                admin-state enable
+                urls ["tftp://172.31.255.29/task3_radius.py"]
+                version python3
+            }
+            python-policy "python-policy" {
+                dhcp discover direction ingress {
+                    script "task3_dhcp"
+                }
+                dhcp request direction ingress {
+                    script "task3_dhcp"
+                }
+                radius access-accept direction ingress {
+                    script "task3_radius"
+                }
+            }
+        }
+    }
+```
+</details>
+
+<details>
+<summary>Expected new subscriber IDs (after removing them from the router and clients renewing)</summary>
+
+```
+    [/]
+    A:admin@pe4# /show service active-subscribers
+
+    ===============================================================================
+    Active Subscribers
+    ===============================================================================
+    -------------------------------------------------------------------------------
+    Subscriber 0ff1ce0100cafe
+               (SUB_PROF1)
+    -------------------------------------------------------------------------------
+    NAT Policy    : NAT_POL1
+    Outside IP    : 10.67.200.5
+    Ports         : 1024-1055
+
+    -------------------------------------------------------------------------------
+    -------------------------------------------------------------------------------
+    (1) SLA Profile Instance sap:[1/1/c3/1:100] - sla:SLA_PROF1
+    -------------------------------------------------------------------------------
+    IP Address
+                  MAC Address        Session            Origin       Svc        Fwd
+    -------------------------------------------------------------------------------
+    10.24.1.112
+                  00:d0:f6:01:01:01  IPoE               DHCP         401        Y
+    -------------------------------------------------------------------------------
+
+    -------------------------------------------------------------------------------
+    Subscriber 0ff1ce0200beef
+               (SUB_PROF1)
+    -------------------------------------------------------------------------------
+    NAT Policy    : NAT_POL1
+    Outside IP    : 10.67.200.4
+    Ports         : 1024-1055
+
+    -------------------------------------------------------------------------------
+    -------------------------------------------------------------------------------
+    (1) SLA Profile Instance sap:[1/1/c3/1:100] - sla:SLA_PROF1
+    -------------------------------------------------------------------------------
+    IP Address
+                  MAC Address        Session            Origin       Svc        Fwd
+    -------------------------------------------------------------------------------
+    10.24.1.113
+                  00:d0:f6:02:02:02  IPoE               DHCP         401        Y
+    -------------------------------------------------------------------------------
+
+    -------------------------------------------------------------------------------
+    Number of active subscribers : 2
+    ===============================================================================
+```
+
+</details>
+
+
 ## Task 4: Two's company, three's a crowd
 This whole time, two subscribers have existed in the system using all sorts of subscriber identifiers. As you may or may not have seen, the topology comes equipped with 3 subscribers. This means we are missing a subscriber. An oversight in the RADIUS server provisioning caused the third subscriber to be expected to authenticate not using its MAC address as the Username, but by its assigned hostname "server.office3".
 
@@ -336,8 +575,101 @@ This task is meant as one to combine and use what you have learned in the previo
 3. Apply this new script to the correct combination of packet type and direction to ensure the RADIUS server receives the changed value.
 4. Confirm there are now three subscribers in the system, ensure the other subscribers weren't impacted by your changes. It should still be possible for `sub1` and `sub2` to create new IPoE sessions.
 
-In [examples/task4_radius.py](./examples/task4_radius.py) a possible implementation of the file to be created in this task is provided. Feel free to refer to it for help or ideas. Included in [examples/task3_dhcp.py](./examples/task3_dhcp.py) are a few commented lines that can be used to implement the changes required in the DHCP interactions for this task.
+In [examples/task4_radius.py](./examples/task4_radius.py) a possible implementation of the file to be created in this task is provided. Feel free to refer to it for help or ideas. Included in [examples/task3_dhcp.py](./examples/task3_dhcp.py) are a few commented lines that can be used to implement the changes required in the DHCP interactions for this task. When using the example solution, ensure the cache is empty before validating your work. This can be done using the `clear` command included above.
 
+
+<details>
+<summary>Expected configuration changes</summary>
+
+```
+    configure {
+        python {
+            python-script "task4_radius" {
+                admin-state enable
+                urls ["tftp://172.31.255.29/task4_radius.py"]
+                version python3
+            }
+            python-policy "python-policy" {
+                radius access-request direction egress {
+                    script "task4_radius"
+                }
+            }
+        }
+    }
+```
+</details>
+<details>
+<summary>Expected new subscriber IDs (after removing them from the router and clients renewing)</summary>
+
+```
+    [/]
+    A:admin@pe4# /show service active-subscribers
+
+    ===============================================================================
+    Active Subscribers
+    ===============================================================================
+    -------------------------------------------------------------------------------
+    Subscriber 0ff1ce0100cafe
+               (SUB_PROF1)
+    -------------------------------------------------------------------------------
+    NAT Policy    : NAT_POL1
+    Outside IP    : 10.67.200.0
+    Ports         : 1056-1087
+
+    -------------------------------------------------------------------------------
+    -------------------------------------------------------------------------------
+    (1) SLA Profile Instance sap:[1/1/c3/1:100] - sla:SLA_PROF1
+    -------------------------------------------------------------------------------
+    IP Address
+                  MAC Address        Session            Origin       Svc        Fwd
+    -------------------------------------------------------------------------------
+    10.24.1.112
+                  00:d0:f6:01:01:01  IPoE               DHCP         401        Y
+    -------------------------------------------------------------------------------
+
+    -------------------------------------------------------------------------------
+    Subscriber 0ff1ce0200beef
+               (SUB_PROF1)
+    -------------------------------------------------------------------------------
+    NAT Policy    : NAT_POL1
+    Outside IP    : 10.67.200.1
+    Ports         : 1056-1087
+
+    -------------------------------------------------------------------------------
+    -------------------------------------------------------------------------------
+    (1) SLA Profile Instance sap:[1/1/c3/1:100] - sla:SLA_PROF1
+    -------------------------------------------------------------------------------
+    IP Address
+                  MAC Address        Session            Origin       Svc        Fwd
+    -------------------------------------------------------------------------------
+    10.24.1.113
+                  00:d0:f6:02:02:02  IPoE               DHCP         401        Y
+    -------------------------------------------------------------------------------
+
+    -------------------------------------------------------------------------------
+    Subscriber 0ff1ce0300babe
+               (SUB_PROF1)
+    -------------------------------------------------------------------------------
+    NAT Policy    : NAT_POL1
+    Outside IP    : 10.67.200.10
+    Ports         : 1024-1055
+
+    -------------------------------------------------------------------------------
+    -------------------------------------------------------------------------------
+    (1) SLA Profile Instance sap:[1/1/c3/1:100] - sla:SLA_PROF1
+    -------------------------------------------------------------------------------
+    IP Address
+                  MAC Address        Session            Origin       Svc        Fwd
+    -------------------------------------------------------------------------------
+    10.24.1.114
+                  00:d0:f6:03:03:03  IPoE               DHCP         401        Y
+    -------------------------------------------------------------------------------
+
+    -------------------------------------------------------------------------------
+    Number of active subscribers : 3
+    ===============================================================================
+```
+</details>
 
 ## Task 5 (optional): Some suggestions for additional work
 1. In this lab, IP addresses are being assigned via RADIUS. Using what you've learned, can you take this power away from the RADIUS server?

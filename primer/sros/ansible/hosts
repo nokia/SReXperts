@@ -1,0 +1,6 @@
+routers:
+  hosts:
+    p1:
+      ansible_host: clab-srexperts-p1
+      ansible_user: admin
+      ansible_pass: SReXperts2024

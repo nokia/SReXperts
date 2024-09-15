@@ -22,7 +22,7 @@ def event_handler_main(in_json_str):
         "actions": [
             {
                 "run-script": {
-                    "cmdline": f"sudo ip netns exec srbase-mgmt /usr/bin/scp -i ~/id_rsa -o StrictHostKeyChecking=no /etc/opt/srlinux/config.json {target}config-{timestamp}.json"
+                    "cmdline": f"sudo ip netns exec srbase-mgmt /usr/bin/scp -i ~/id_rsa -o StrictHostKeyChecking=no /etc/opt/srlinux/config.json {target}/config-{timestamp}.json"
                 }
             }
         ]

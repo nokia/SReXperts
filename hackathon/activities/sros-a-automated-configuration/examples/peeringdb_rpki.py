@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 """Example implementation for the second leg of the automated-configuration
-usecase for the Hackathon in SReXperts EMEA 2024.
+usecase for the Hackathon in SReXperts Americas 2024.
 
-Tested on: SR OS 24.3.R2-1
+Tested on: SR OS 24.7.R1
 """
 
 import argparse
@@ -255,7 +255,7 @@ def main():
         prog="peeringdb_rpki.py",
         description="Using input parameters, perform either "
         + "one of the tasks of the automated configuration "
-        + "usecase in SReXperts EMEA 2024.\nSpecify a target"
+        + "usecase in SReXperts Americas 2024.\nSpecify a target"
         + " SR OS node, an AS number, an IXP location and a "
         + " task number to execute.",
     )

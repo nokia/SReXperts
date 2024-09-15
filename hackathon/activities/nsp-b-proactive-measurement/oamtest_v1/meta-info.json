@@ -1,0 +1,40 @@
+{
+  "supports-network-state-suspend": true,
+  "geo-location": {
+    "has-geo-location": false,
+    "layer": "device"
+  },
+  "composite": false,
+  "supports-asynchronous-operations": false,
+  "live-state-retrieval": false,
+  "support-nested-type-in-es": false,
+  "author": "NSP DevOps",
+  "target-component": [
+    {
+      "i18n-text": "Test Id",
+      "name": "testId",
+      "value-type": "NUMBER",
+      "order": 1
+    }
+  ],
+  "supports-health": "never",
+  "mapping-engine": "js-scripted-graal",
+  "label": [
+    "ApprovedMisalignments",
+    "GraalJS",
+    "SReXperts2024"
+  ],
+  "priority": 50,
+  "version": "1",
+  "targetted-device": [
+    {
+      "function": "getTargettedDevices",
+      "index": 0
+    }
+  ],
+  "return-config-as-json": true,
+  "build": "-",
+  "lifecycle-state": "released",
+  "notify-intent-instance-events": false,
+  "intent-type": "oamtest"
+}

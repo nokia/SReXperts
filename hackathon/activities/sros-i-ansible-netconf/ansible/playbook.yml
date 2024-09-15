@@ -5,7 +5,7 @@
 # Nokia SROS Ansible Automation Modules for SReXperts 2024
 # Authors: Mohammad Zaman (mohammad.zaman@nokia.com), Thomas Hendriks (thomas.hendriks@nokia.com)
 
-#Ansible playbook to configure Nokia SROS over NetConf Interface
+# Ansible playbook to configure Nokia SROS over NetConf Interface
 
 # This role will push IP-Filter Config to the node
 - name: Configuring ACL IP-Filters

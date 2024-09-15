@@ -134,13 +134,11 @@ A Get RPC reads and streams the contents of a file from a target location. The f
 - the file does not exist
 - there is a problem reading the file
 
-Create a directory on the VM and name it `sros-gnoi-<yourname>`. We will transfer the `bof.cfg` file from the router to this directory. Verify the file was transferred to the VM.
-
-For example, if your name is Chris, the directory will be named sros-gnoi-chris.
+Create a directory on the VM and name it `sros-gnoi`. We will transfer the `bof.cfg` file from the router to this directory. Verify the file was transferred to the VM.
 
 ```
-# mkdir sros-gnoi-chris
-# cd sros-gnoi-chris
+# mkdir sros-gnoi
+# cd sros-gnoi
 ```
 
 ```

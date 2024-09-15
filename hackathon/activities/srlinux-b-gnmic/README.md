@@ -8,9 +8,9 @@
 
 ## Introduction
 
-Get started with gNMI on Nokia SR Linux in just five simple steps! This exercise will teach you how to leverage gNMI to perform configuration management and streaming telemetry tasks on Nokia SR Linux Network OS. After learning the concepts, you may treat yourself to some short chanllenges we prepared for you in the [Tasks section](#tasks).
+Get started with gNMI on Nokia SR Linux in just five simple steps! This exercise will teach you how to leverage gNMI to perform configuration management and streaming telemetry tasks on Nokia SR Linux Network OS. After learning the concepts, you may treat yourself to some short challenges we prepared for you in the [Tasks section](#tasks).
 
-**gNMI** (gRPC Network Management Interface) is a gRPC-based network management protocol [defined by the Openconfig group](https://github.com/openconfig/reference/blob/master/rpc/gnmi/gnmi-specification.md) that is used for configuration management and streaming telemetry. gRPC uses Google protocol buffers (protobuf) to describe the Remote Procedure Calls (RPC) and encoded data on the wire.
+**gNMI** (gRPC Network Management Interface) is a gRPC-based network management protocol [defined by Openconfig](https://github.com/openconfig/reference/blob/master/rpc/gnmi/gnmi-specification.md) that is used for configuration management and streaming telemetry. gRPC uses Google protocol buffers (protobuf) to describe the Remote Procedure Calls (RPC) and encoded data on the wire.
 
 gNMI supports the following RPCs:
 
@@ -19,7 +19,7 @@ gNMI supports the following RPCs:
 * Set - Perform configuration management.
 * Subscribe - stream configuration and state data.
 
-**gNMIc** is an [open-source tool](https://gnmic.openconfig.net/) which is part of the openconfig group contributed by Nokia. gNMIc provides full support for Capabilities, Get, Set and Subscribe RPCs with collector capabilities.
+**gNMIc** is an [open-source tool](https://gnmic.openconfig.net/) which is part of openconfig contributed by Nokia. gNMIc provides full support for Capabilities, Get, Set and Subscribe RPCs with collector capabilities.
 
 **Nokia SR Linux** supports the full set of gNMI RPCs and allows operators to leverage both configuration and streaming telemetry capabilities enabled by gNMI interface.
 
@@ -85,7 +85,7 @@ The `oper-state up` leaf verifies that our gRPC server running fine and we shoul
 
 There are several gNMI clients that one can use to interface with gNMI-enabled devices, we will use gNMIc CLI tool in this exercise as it is the most feature rich tool for this task.
 
-gNMIc is already installed on the server where we run the lab topology, so you don't have to install it. But even if you would have to, it is as easy as running a single [install script](https://gnmic.openconfig.net/install/).
+gNMIc is already installed on the server where we run the lab topology, **so you don't have to install it**. But even if you would have to, it is as easy as running a single [install script](https://gnmic.openconfig.net/install/).
 
 ## Step 3: Capabilities
 
@@ -96,6 +96,8 @@ Using `gnmic` CLI tool perform the following command to query the capabilities:
 ```bash
 gnmic -a clab-srexperts-leaf11:57400 -u admin -p SReXperts2024 --skip-verify capabilities
 ```
+
+> Note: this is executed from the bash shell on your linux instance <groupID.srexperts.net>
 
 > Note, the port 57400 that we specified to highlight the default port number used by SR Linux. The port can be omitted as well, since gNMIc uses port 57400 whenever the port is not set explicitly.
 
@@ -162,7 +164,9 @@ Let's try and get the configuration data for an interface `ethernet-1/1` from th
 gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify get --path "/interface[name=ethernet-1/1]" -e json_ietf --type CONFIG
 ```
 
-Note, how we set the required data encoding (`json-ietf`) and provided the `CONFIG` data type to the command.
+> Note: this is executed from the bash shell on your linux instance <groupID.srexperts.net>
+
+> Note, how we set the required data encoding (`json-ietf`) and provided the `CONFIG` data type to the command.
 
 *Expected Output:*
 
@@ -221,6 +225,8 @@ We can see how the output changes when we request the state data for the same in
 gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify get --path "/interface[name=ethernet-1/1]" -e json_ietf --type STATE
 ```
 
+> Note: this is executed from the bash shell on your linux instance <groupID.srexperts.net>
+
 *Expected output:*
 
 ```json
@@ -276,6 +282,8 @@ The most simple way to update a single value on the device is by providing the n
 gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify set --update-path "/interface[name=ethernet-1/1]/subinterface[index=101]/description" --update-value "setting from gnmic at srexperts2024"
 ```
 
+> Note: this is executed from the bash shell on your linux instance <groupID.srexperts.net>
+
 As you can see, we leverage two flags `--update-path` to point to the leaf we want to update and `--update-value` to provide the value we want to be set for that leaf.
 
 *Expected output:*
@@ -309,11 +317,13 @@ gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e JSON_I
 
 ```
 
+> Note: this is executed from the bash shell on your linux instance <groupID.srexperts.net>
+
 The last argument in the command refers to a `subif.json` file. Clearly this is the file that contains the data about the subinterface we want to create. But how to figure out what content can we put in the file?
 
 This is, again, sourced from the YANG model of the device that defines all configuration and state data. You can use the YANG browser to identify what elements are nested one under another, or leverage the SR Linux CLI to get the data in json format.
 
-For example, using the Tree Browser of our YANG Browser you open up an interface/subinterface tree - <https://yang.srlinux.dev/v24.3.2/tree?path=%2Finterface%5Bname%3D*%5D%2Fsubinterface%5Bindex%3D*%5D%2Findex> - and see what data comprises a subinterface and its nested elements.
+For example, using the Tree Browser of our YANG Browser you open up an interface/subinterface tree - <https://yang.srlinux.dev/v24.7.1/tree?path=%2Finterface%5Bname%3D*%5D%2Fsubinterface%5Bindex%3D*%5D%2Findex> - and see what data comprises a subinterface and its nested elements.
 
 Alternatively, you may connect to the `leaf11` and inspect one of the existing interface configurations to understand what can go into the subinterface config. To do that, ssh into the node, and enter into the context of any existing interface, for example:
 
@@ -382,16 +392,25 @@ To demonstrate this, we can entirely replace the original subinterface 99 with t
 ```json
 {
   "index": 99,
-  "type": "routed",
-  "description": "replaced from gnmic at srexperts2024"
+  "type": "bridged",
+  "description": "replaced from gnmic at srexperts2024",
+  "vlan": {
+    "encap": {
+      "single-tagged": {
+        "vlan-id": 99
+      }
+    }
+  }
 }
 ```
 
 Note, how for the replace operation we changed the flag names to `replace-path` and `replace-file` accordingly.
 
 ```bash
-gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify set --replace-path "/interface[name=ethernet-1/1]/subinterface[index=99]" --replace-file routedsubif.json
+gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e JSON_IETF set --replace-path "/interface[name=ethernet-1/1]/subinterface[index=99]" --replace-file routedsubif.json
 ```
+
+> Note: this is executed from the bash shell on your linux instance <groupID.srexperts.net>
 
 *Expected Output*
 
@@ -416,6 +435,8 @@ Finally, gNMI Set can delete configuration elements as well. Let's delete the su
 ```bash
 gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify set --delete "/interface[name=ethernet-1/1]/subinterface[index=99]"
 ```
+
+> Note: this is executed from the bash shell on your linux instance <groupID.srexperts.net>
 
 *Expected Output*
 
@@ -450,6 +471,8 @@ This makes ONCE mode useful to retrieve big chunks of data without waiting for t
 ```bash
 gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify sub --path "/interface[name=ethernet-1/1]/subinterface[index=1]" --mode once
 ```
+
+> Note: this is executed from the bash shell on your linux instance <groupID.srexperts.net>
 
 *Expected Output*
 
@@ -496,6 +519,8 @@ In the example below we would subscribe to the CPU utilization of the control pl
 ```bash
 gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify sub --path "/platform/control[slot=*]/cpu[index=all]/total" --stream-mode sample --sample-interval 1s
 ```
+
+> Note: this is executed from the bash shell on your linux instance <groupID.srexperts.net>
 
 *Expected output*
 
@@ -547,6 +572,8 @@ Like in the example above, where we subscribe with on change mode to the operati
 ```bash
 gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify subscribe --stream-mode on_change --path /interface/oper-state
 ```
+
+> Note: this is executed from the bash shell on your linux instance <groupID.srexperts.net>
 
 Expected output:
 

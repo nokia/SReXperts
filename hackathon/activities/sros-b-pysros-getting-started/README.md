@@ -1,25 +1,27 @@
 # Getting Started with Python for SR OS Using pySROS
 
+| Item              | Details                                 |
+| ----------------- | --------------------------------------- |
+| Short Description | Getting started with pySROS             |
+| Skill Level       | Beginner                                |
+| Tools Used        | SR OS, Python (with the pysros library) |
+
 The pySROS libraries provide a model-driven management interface for Python developers to integrate with Nokia SR OS.
 The libraries provide an API for developers to create applications that can interact with Nokia SR OS devices, whether those applications are executed from a development machine or directly on the router.
-
-**Grading: Beginner**
-
-**Elements: SR OS, pySROS**
 
 ## Accessing a lab node
 
 In this lab you will interact with the model-driven SR OS router `PE4`. To access it, use:
 
 ```
-ssh -l admin clab-srexperts-pe4
+ssh admin@clab-srexperts-pe4
 ```
 
 ## High level tasks to complete this project
 
 1. **Make a connection**
 
-    Make a connection to get access to the model-driven interfaces of SR OS. Documentation assistance can be found in the [connection and data handling section here](https://network.developer.nokia.com/static/sr/learn/pysros/latest/pysros.html#module-pysros.management).
+    Make a connection to get access to the model-driven interfaces of SR OS. Documentation assistance can be found in the [connection and data handling section](https://network.developer.nokia.com/static/sr/learn/pysros/latest/pysros.html#module-pysros.management).
 
 
    
@@ -98,7 +100,7 @@ ssh -l admin clab-srexperts-pe4
 
 
 ## Task 1: Getting Connected 
-A connection to the device is essential for executing pySROS scripts either locally or remotely. Obtaining a `Connection` object *requires* a few things if you are executing off-box:
+A connection to the device is essential for executing pySROS scripts either locally or remotely. Obtaining a `Connection` object *requires* a few parameters if you are executing off-box:
 
   - Hostname
   - Username
@@ -123,7 +125,7 @@ When obtaining a `Connection` object directly on the device, the parameters are 
 
 ## Task 2: Obtain data from running/candidate and state using `get()` function
 
-Create a simple Python script using the pySROS libraries to obtain some data and print it to the screen. This may be done on the device itself using the file edit command, or in `/home/nokia/clab-srexperts/pe4/tftpboot/get.py` that can be run locally on the router via `pyexec tftp://172.31.255.29/get.py` command, either on your local machine or the lab server.
+Create a simple Python script using the pySROS libraries to obtain some data and print it to the screen. This may be done on the device itself using the `file edit` command, or in `/home/nokia/clab-srexperts/pe4/tftpboot/get.py` that can be run locally on the router via `pyexec tftp://172.31.255.29/get.py` command, either on your local machine or the lab server.
 
 To test your code remotely ensure your Connection object has all the required parameters and just run it. Communication with the node will be handled by pySROS.
 
@@ -179,7 +181,7 @@ The `set()` method takes a number of inputs.  See the documentation [here](https
     path = "/nokia-conf:configure/service"
     ```
        
-* **Payload** is the value (pySROS data structure) providing the input data for the set() function.
+* **Payload** is the value (pySROS data structure) providing the input data for the `set()` function.
 
      ```
      payload = {

@@ -13,8 +13,6 @@ import requests
 from dotenv import find_dotenv, load_dotenv
 from requests.auth import HTTPProxyAuth
 
-INSTANCE_ID = FILL IN YOUR INSTANCE ID HERE
-
 def getBasicAuthentication(user, pw):
     return b64encode(bytes(user + ':' + pw,'utf-8')).decode('utf-8')
 
@@ -64,15 +62,14 @@ def findBasicConfigIntents(nsp_server, version, bearerAuth, proxies, method = re
     )
 
 
-def sendBasicConfigIntent(nsp_server, version, bearerAuth, proxies, method = requests.post, addendum = ""):
+def sendBasicConfigIntent(nsp_server, version, bearerAuth, proxies, target, method = requests.post, addendum = ""):
     payload = json.dumps({
         "ibn:intent": {
-            "target": f"fd00:fde8::{INSTANCE_ID}:13",
+            "target": target,
             "intent-type": "basicconfig"+version,
             "intent-type-version": 1,
             "required-network-state": "active",
-#            "ibn:intent-specific-data": {"basicconfig"+version+":basicconfig"+version:{}}
-            "ibn:intent-specific-data": {"basicconfig"+version+":basicconfig"+version:{}}
+            "ibn:intent-specific-data": {}
         }
     })
     url = 'https://' + nsp_server + '/restconf/data/ibn:ibn'
@@ -112,6 +109,7 @@ def main():
     parser.add_argument('--server', dest="nsp_server", required=False, default="")
     parser.add_argument('--user', dest="nsp_user", required=False, default="")
     parser.add_argument('--pass', dest="nsp_pass", required=False, default="")
+    parser.add_argument('--inst', dest="inst_id", required=False, default="")
     args = parser.parse_args()
 
     load_dotenv(find_dotenv())  # Load the .env file.
@@ -120,6 +118,7 @@ def main():
     nsp_server          = args.nsp_server if args.nsp_server else os.getenv("NSP_SERVER")
     nsp_username        = args.nsp_user if args.nsp_user else os.getenv("NSP_USERNAME")
     nsp_password        = args.nsp_pass if args.nsp_pass else os.getenv("NSP_PASSWORD")
+    INSTANCE_ID         = args.inst_id if args.inst_id else os.getenv("INSTANCE_ID")
 
     basicAuth = {
         'Content-Type': 'application/json',
@@ -134,14 +133,15 @@ def main():
         'Authorization': 'Bearer ' + token,
     }
 
-    #findBasicConfigIntents(nsp_server, "", bearerAuth, proxies)
-    #sendBasicConfigIntent(nsp_server, "", bearerAuth, proxies)
+    # findBasicConfigIntents(nsp_server, "", bearerAuth, proxies)
+    # sendBasicConfigIntent(nsp_server, "", bearerAuth, proxies)
 
-    #sendBasicConfigIntent(nsp_server, f"-inst{INSTANCE_ID}", bearerAuth, proxies)
-    #findBasicConfigIntents(nsp_server, f"-inst{INSTANCE_ID}", bearerAuth, proxies)
+    # findBasicConfigIntents(nsp_server, f"-inst{INSTANCE_ID}", bearerAuth, proxies)
 
-    auditBasicConfigIntent(nsp_server, f"-inst{INSTANCE_ID}", urllib.parse.quote_plus(f"fd00:fde8::{INSTANCE_ID}:11"), bearerAuth, proxies)
-    synchronizeBasicConfigIntent(nsp_server, f"-inst{INSTANCE_ID}", urllib.parse.quote_plus(f"fd00:fde8::{INSTANCE_ID}:11"), bearerAuth, proxies)
+    # sendBasicConfigIntent(nsp_server, f"-inst{INSTANCE_ID}", bearerAuth, proxies, f"fd00:fde8::{INSTANCE_ID}:13")
+
+    # auditBasicConfigIntent(nsp_server, f"-inst{INSTANCE_ID}", urllib.parse.quote_plus(f"fd00:fde8::{INSTANCE_ID}:12"), bearerAuth, proxies)
+    # synchronizeBasicConfigIntent(nsp_server, f"-inst{INSTANCE_ID}", urllib.parse.quote_plus(f"fd00:fde8::{INSTANCE_ID}:12"), bearerAuth, proxies)
 
     revokeToken(nsp_server, token, basicAuth, proxies)
 

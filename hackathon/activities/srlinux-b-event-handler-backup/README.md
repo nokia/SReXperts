@@ -31,12 +31,12 @@ ssh admin@clab-srexperts-leaf21
 Below are some resources you might find interesting:
 
 - [Event handler documentation](https://documentation.nokia.com/srlinux/24-3/books/event-handler/event-handler-configuration.html?Chandler#event-handler-config)
-- [SRLinux YANG browser](https://yang.srlinux.dev/v24.3.2): use this to look for gNMI paths
+- [SRLinux YANG browser](https://yang.srlinux.dev/v24.7.1): use this to look for gNMI paths
 - [Introduction to operational groups tutorial](https://learn.srlinux.dev/tutorials/programmability/event-handler/oper-group/oper-group-intro/): a different use-case leveraging the Event Handler by shutting down all downlink interfaces when the BGP sessions to both route reflectors fails
 
 ## Step 1: creating the backups directory
 
-As the whole purpose of this exercise is to store the device backups outside of the device filesystem, we first need to create a remote backup location that is reachable from an SR Linux device. For example, we can use the VM that runs the lab as a backup (`<your-lab>.srexperts.net`).
+As the whole purpose of this exercise is to store the device backups outside of the device filesystem, we first need to create a remote backup location that is reachable from an SR Linux device. For example, we can use the VM that runs the lab as a backup (`<groupID>.srexperts.net`).
 
 While logged in to a VM with the standard `nokia` user, create the `~/backups` directory.
 
@@ -67,8 +67,8 @@ total 36
 Using the [documentation](https://documentation.nokia.com/srlinux/24-3/books/event-handler/event-handler-configuration.html?handler#event-handler-config), refer to the python script you created in step 1. The following information should be added to the configuration context:
 
 - The location to the python script you created in step 1
-- A path monitoring the last time the configuration was changed (tip: use the [SRL YANG browser](https://yang.srlinux.dev/v24.3.2))
-- A static value indicating the target destination (`nokia@<your-lab-ip>.srexperts.net:~/backups`)
+- A path monitoring the last time the configuration was changed (tip: use the [SRL YANG browser](https://yang.srlinux.dev/v24.7.1))
+- A static value indicating the target destination (`nokia@<groupID>.srexperts.net:~/backups`)
 
 **NOTE:**
 
@@ -108,7 +108,7 @@ On the hypervisor: add the contents of the generated `~/id_rsa.pub` file on your
 Validation (on the SRL box)
 
 ```bash
-root@leaf21:/home/admin# ssh -i ~/id_rsa nokia@10.128.<your_lab>.1
+root@leaf21:/home/admin# ssh -i ~/id_rsa nokia@10.128.<groupID>.1
 Linux rd-srx-ws1-155afda 6.1.0-0.deb11.17-cloud-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.69-1~bpo11+1 (2024-01-05) x86_64
 
 Last login: Wed May 15 14:32:13 2024 from 10.150.29.173
@@ -134,7 +134,7 @@ You can instruct the event handler to run a bash script: the returned `action` l
 
 ## Step 5 - test
 
-This lab has been completed when the user does `admin save stay` and the startup file is correctly copied to the target destination. The file must:
+This lab has been completed when the user does `commit save stay` or `save startup` and the startup file is correctly copied to the target destination. The file must:
 
 - contain the changes that were made (hence the `save` to commit them to the startup file)
 - contain the timestamp of when the last change was done (important! the name should be different every time the script is executed)

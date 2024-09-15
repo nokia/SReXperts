@@ -11,7 +11,7 @@
 2. Familiarity with NSP Workflow Manager
 3. Familiarity with NSP Operations Manager
 
-For improved DevOps experience, consider using the IM vsCode extension from [marketplace](https://marketplace.visualstudio.com/items?itemName=Nokia.nokia-wfm).
+For improved DevOps experience, consider using the WFM vsCode extension from [marketplace](https://marketplace.visualstudio.com/items?itemName=Nokia.nokia-wfm).
 
 ## Objective
 
@@ -76,16 +76,16 @@ Under the assumption your are in group 33, do the following:
 - replace `groupxx` with `group33` in file `nsp-scan-workflow/nsp-scan-groupxx.yaml` (2 occurences)
 - create a zip archive with the content of folder `nsp-scan-artifact-bundle` names `nsp-scan-group33.zip`
 
-Dependending on your local operating system, you may take advantage of command line tools.
-Here an example on how to do it on MacOS X:
+Depending on your local operating system, you may take advantage of command line tools.
+Here an example on how to do it on MacOS or Linux:
 
 ```
-# cd nsp-a-security-scan
-# mv nsp-scan-operation/nsp-scan-groupxx.yaml nsp-scan-operation/nsp-scan-group33.yaml
-# mv nsp-scan-operation/nsp-scan-groupxx.yang nsp-scan-operation/nsp-scan-group33.yang
-# mv nsp-scan-workflow/nsp-scan-groupxx.yaml  nsp-scan-workflow/nsp-scan-group33.yaml
-# sed -i '' s/groupxx/group33/g metadata.json nsp*/*
-# zip -r nsp-scan-group33.zip *
+export instance=group33
+cp -r nsp-scan-artifact-bundle /tmp
+cd /tmp/nsp-scan-artifact-bundle
+find . -name '*groupxx*' -exec bash -c 'mv "$0" "${0//groupxx/$instance}"' {} \;
+find . -type f -exec sed -i '' s/groupxx/$instance/g {} \;
+zip -r /tmp/nsp-scan-$instance.zip *
 ```
 
 3. Login to NSP. Access details will be provided during the hackathon.

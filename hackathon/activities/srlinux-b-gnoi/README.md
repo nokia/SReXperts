@@ -23,10 +23,6 @@ If you prefer to listen rather than read, take a look at this [NANOG Video](http
 
 There are many clients that support gNOI services, the most common one is [gNOIc](https://gnoic.kmrd.dev/) developed by Nokia.
 
-## SReXperts Hackathon
-
-As part of this SReXperts Hackathon, we will be exploring gNOI file services on SR Linux.
-
 ## gNOI File Service
 
 In the gNOI file service, OpenConfig defines a generic interface to perform file operational tasks. For information see [gNOI specification](https://github.com/openconfig/gnoi/blob/master/file/file.proto)
@@ -141,8 +137,10 @@ The target node returns an error if:
 
 Let's go ahead and list files in the /opt/srlinux directory. We will be using the `--skip-verify` flag in gNOIc to indicate that the target should skip the signature verification steps.
 
+```bash
+gnoic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify file stat --path /opt/srlinux
 ```
-# gnoic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify file stat --path /opt/srlinux
+```
 +-----------------------------+-------------------------+---------------------------+------------+------------+------+
 |         Target Name         |          Path           |       LastModified        |    Perm    |   Umask    | Size |
 +-----------------------------+-------------------------+---------------------------+------------+------------+------+
@@ -171,23 +169,26 @@ The target node returns an error if:
 - An error occurs while reading the file.
 - The file does not exist.
 
-Create a directory on the VM and name it `srl-gnoi-<yourname>`. We will transfer the `srl_boot.log` file from the router to this directory. Verify the file was transferred to the VM.
+Create a directory on the VM and name it `srl-gnoi`. We will transfer the `srl_boot.log` file from the router to this directory. Verify the file was transferred to the VM.
 
 ```
-For example, if your name is Chris, the directory will be named srl-gnoi-chris.
 
-# mkdir srl-gnoi-chris
-# cd srl-gnoi-chris
+# mkdir srl-gnoi
+# cd srl-gnoi
 ```
 
+```bash
+gnoic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify file get --file /var/log/srlinux/srl_boot.log --dst .
 ```
-# gnoic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify file get --file /var/log/srlinux/srl_boot.log --dst .
+```
 INFO[0000] "clab-srexperts-leaf11:57400" received 27572 bytes 
 INFO[0000] "clab-srexperts-leaf11:57400" file "/var/log/srlinux/srl_boot.log" saved 
 ```
 
+```bash
+tail var/log/srlinux/srl_boot.log
 ```
-# tail var/log/srlinux/srl_boot.log
+```
 [23:52:35.906]:[sr_boot_run.sh]: Entering srl_boot_run.sh
 [23:52:35.923]:[11_sr_createuser.sh]: Executed: 'sudo sed -i s/^[       ]*#[    ]*\(HOME_MODE[  ]\+0700.*\)/\1/ /etc/login.defs'
 [23:52:35.955]:[11_sr_createuser.sh]: Executed: '/usr/sbin/groupadd ntwkadmin -g 997'
@@ -208,12 +209,14 @@ The target node returns an error if:
 
 Select or create a file on your VM (in your own directory) to be transferred over to the device. Verify the file transferred on the router.
 
-```
-# echo "show interface" > show-int.txt
+```bash
+echo "show interface" > show-int.txt
 ```
 
+```bash
+gnoic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify file put --file show-int.txt --dst /home/admin/show-int.txt
 ```
-# gnoic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify file put --file show-int.txt --dst /home/admin/show-int.txt
+```
 INFO[0000] "clab-srexperts-leaf11:57400" sending file="show-int.txt" hash 
 INFO[0000] "clab-srexperts-leaf11:57400" file "show-int.txt" written successfully
 ```
@@ -242,8 +245,10 @@ The target node returns an error if:
 - The file does not exist.
 - The path references a directory instead of a file.
 
+```bash
+gnoic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify file remove --path /home/admin/show-int.txt
 ```
-# gnoic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify file remove --path /home/admin/show-int.txt
+```
 INFO[0000] "clab-srexperts-leaf11:57400" file "/home/admin/show-int.txt" removed successfully 
 ```
 
@@ -261,7 +266,7 @@ cat: show-int.txt: No such file or directory
 
 Now that you are an expert on gNOI, let's start using gNOI for some real world scenarios.
 
-### Confiuration Backups
+### Configuration Backups
 
 The goal of this hackathon activity is to establish regular configuration backups of your SR Linux device on an external machine.
 

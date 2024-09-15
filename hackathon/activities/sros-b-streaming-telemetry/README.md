@@ -152,7 +152,7 @@ Click for more information on [gNMIC Search](https://gnmic.openconfig.net/cmd/pa
 
 #### Reviewing gNMIC Collector Configuration
 
-**Take a look through the [config.yml](../../clab/configs/gnmic/config.yml) and try to figure out what is going on before moving on to the explanations.**
+**Take a look through the [config.yml](../../../clab/configs/gnmic/config.yml) and try to figure out what is going on before moving on to the explanations.**
 
 \*_TIP: The [gNMIc User Guide](https://gnmic.openconfig.net/user_guide/configuration_intro/) is a great place to reference._
 
@@ -162,7 +162,7 @@ This section reviews each of the main parts of the configuration for the collect
 
 **Global Flags Section**
 
-At the top of the [config.yml](../../clab/configs/gnmic/config.yml) are the [global flags](https://gnmic.openconfig.net/user_guide/configuration_file/#global-flags):
+At the top of the [config.yml](../../../clab/configs/gnmic/config.yml) are the [global flags](https://gnmic.openconfig.net/user_guide/configuration_file/#global-flags):
 
 ```
 username: admin
@@ -225,15 +225,15 @@ _Please refer to the [documentation](https://gnmic.openconfig.net/user_guide/eve
 
 ### Prometheus
 
-[Prometheus](https://prometheus.io) is a popular open-source time-series database. It is used in this lab to store the telemetry data exported by gnmic. The prometheus configuration file - [prometheus.yml](../../clab/configs/prometheus/prometheus.yml) - has a minimal configuration and instructs prometheus to scrape the data from the gnmic collector with a 5s interval.
+[Prometheus](https://prometheus.io) is a popular open-source time-series database. It is used in this lab to store the telemetry data exported by gnmic. The prometheus configuration file - [prometheus.yml](../../../clab/configs/prometheus/prometheus.yml) - has a minimal configuration and instructs prometheus to scrape the data from the gnmic collector with a 5s interval.
 
 Time Series Data:
 
 - Metrics are stored with the timestamp at which they were recorded, alongside optional key-value pairs called labels.
 
-The [prometheus.yml](../../clab/configs/prometheus/prometheus.yml) file used in this lab is very basic. It simply defines a scrape interval and the server name and port to scrape.
+The [prometheus.yml](../../../clab/configs/prometheus/prometheus.yml) file used in this lab is very basic. It simply defines a scrape interval and the server name and port to scrape.
 
-\*_To change the metrics being delivered to [grafana](https://grafana.com), the [config.yml](../../clab/configs/gnmic/config.yml) is the only location where changes need to be made. [Prometheus](https://github.com/prometheus) will scrape all available metrics from [gnmic](https://gnmic.openconfig.net)._
+\*_To change the metrics being delivered to [grafana](https://grafana.com), the [config.yml](../../../clab/configs/gnmic/config.yml) is the only location where changes need to be made. [Prometheus](https://github.com/prometheus) will scrape all available metrics from [gnmic](https://gnmic.openconfig.net)._
 
 > To be able to view the [prometheus](https://github.com/prometheus) dashboard on your laptop, use ssh forwarding: \
 > `ssh -NL 9090:10.128.<lab id>.72:9090 <user>@<lab server>`\
@@ -356,9 +356,9 @@ It is possible to test a new subscription from the cli using [gnmic](https://gnm
 
 #### Add New Subscription
 
-In order to add additional metrics, the [config.yml](../../clab/configs/gnmic/config.yml) will need to be updated.
+In order to add additional metrics, the [config.yml](../../../clab/configs/gnmic/config.yml) will need to be updated.
 
-Edit the [config.yml](../../clab/configs/gnmic/config.yml) file, adding the following new subscription:
+Edit the [config.yml](../../../clab/configs/gnmic/config.yml) file, adding the following new subscription:
 
 ```
   sros_ssh_connections:

@@ -146,7 +146,7 @@ Have a look through the files and subfolders in the `filter` role's directory to
 
 Additional information about this directory structure is available in [the Ansible documentation](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#role-directory-structure).
 
-For the predefined roles, variables are used to identify when certain attributes need to be sent as payload and when they should be omitted instead. Explore the [host_vars/p1](./ansible/host_vars/p1) file and compare it to [roles/filter/templates/filter.j2](./ansible/roles/filter/templates/filter.j2) to see what that looks like. Observe that the `roles/filter/templates/filter.j2` file resembles the MD-CLI's [YANG model](https://github.com/nokia/7x50_YangModels/blob/master/latest_sros_24.3/nokia-submodule/nokia-conf-filter.yang) for ipv6-filters with [Jinja2-style logic statements](https://palletsprojects.com/p/jinja/) (Jinja2 is a templating language) added.
+For the predefined roles, variables are used to identify when certain attributes need to be sent as payload and when they should be omitted instead. Explore the [host_vars/p1](./ansible/host_vars/p1) file and compare it to [roles/filter/templates/filter.j2](./ansible/roles/filter/templates/filter.j2) to see what that looks like. Observe that the `roles/filter/templates/filter.j2` file resembles the MD-CLI's [YANG model](https://github.com/nokia/7x50_YangModels/blob/master/latest_sros_24.7/nokia-submodule/nokia-conf-filter.yang) for ipv6-filters with [Jinja2-style logic statements](https://palletsprojects.com/p/jinja/) (Jinja2 is a templating language) added.
 
 The logic in the template file means that if a target host doesn't have any variables set for a particular task to resolve, the role can be executed against the target host and there will be no changes made as the generated payload will not contain anything. This offers flexibility and means specific hosts need not always be specified.
 
@@ -367,7 +367,7 @@ quit-config
 
 This is all well and good, however now we don't commit the configuration so essentially the previous steps have been a step back in terms of functionality. Fortunately, we now know how to use the `netconf_rpc` module and commit of itself is an RPC so we are not at all in trouble here. Once again modify the `interface` role's tasks and add a commit action. No template file is provided this time, so there are slightly more changes to execute:
 
-- Create the `commit.j2` template in the `templates` folder for your `interface` role based on what is in the `compare.j2` template and [the SR OS Yang model](https://github.com/nokia/7x50_YangModels/blob/2a28af0e7fba2170eeec83315aafe27f54e221f2/latest_sros_24.3/ietf/nokia-sr-ietf-netconf-augments.yang#L263). The Nokia Developer Portal's Ansible examples may also be of use.
+- Create the `commit.j2` template in the `templates` folder for your `interface` role based on what is in the `compare.j2` template and [the SR OS Yang model](https://github.com/nokia/7x50_YangModels/blob/master/latest_sros_24.7/ietf/nokia-sr-ietf-netconf-augments.yang#L263). The [Nokia Developer Portal's Ansible examples](https://network.developer.nokia.com/sr/learn/sr-os-ansible/) may also be of use.
 - Add a `generate-commit` task to the `interface` role's `tasks/main.yml` that generates a file in the `files/` directory that contains the payload of your commit RPC. The example solution assumes that `commit-{{ inventory_hostname}}.xml` as a naming scheme is used.
 - Add a `send-commit` task to the `interface` role's `tasks/main.yml` that takes the generated file as input, and sends the correct RPC to the target host.
 
@@ -386,7 +386,7 @@ We started this activity by logging in to the `pe1` node to trigger a ping comma
 
 In addition to an improved flow, being able to use pings from within your playbook gives some options to verify connectivity between sites and / or measure latency and make educated decisions based on that. With Nokia's model-driven SR OS, the result of a ping sent via NETCONF is itself YANG-modeled (as an `action` statement), making it even simpler to integrate into your Ansible playbooks. Scraping a CLI text output is fairly cumbersome, after all.
 
-This task starts from the [playbook.yml](./ansible/playbook.yml) file. For this task you will have to write your own role `ping` using what you learnt in the previous tasks and sections. Your role should implement a NETCONF `action` RPC that sends a single ICMP Echo Request from `pe1`, `p1` and `p2`  to `pe2` and prints the received output to stdout. The YANG model for the ping command in model-driven SR OS is available [here](https://github.com/nokia/7x50_YangModels/blob/master/latest_sros_24.3/nokia-oper-global.yang#L9217).
+This task starts from the [playbook.yml](./ansible/playbook.yml) file. For this task you will have to write your own role `ping` using what you learnt in the previous tasks and sections. Your role should implement a NETCONF `action` RPC that sends a single ICMP Echo Request from `pe1`, `p1` and `p2`  to `pe2` and prints the received output to stdout. The YANG model for the ping command in model-driven SR OS is available [here](https://github.com/nokia/7x50_YangModels/blob/master/latest_sros_24.7/nokia-oper-global.yang#L9217).
 
 As a high-level overview, this is an approach you could take:
 

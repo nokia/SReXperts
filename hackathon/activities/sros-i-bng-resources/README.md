@@ -176,7 +176,7 @@ Using CRON and pySROS on the SR OS device, implement a solution that increases t
 
 Feel free to refer to [nat.py](./examples/nat.py) in the [examples](./examples/) folder for inspiration or ask for assistance. In general, these steps are required:
 
-1. Find the information that lets you determine the average amount of consumed NAT bindings per host in `/state` using either the [YANG-model](https://github.com/nokia/7x50_YangModels/blob/2a28af0e7fba2170eeec83315aafe27f54e221f2/latest_sros_24.3/nokia-submodule/nokia-state-svc-nat.yang#L45) or the MD-CLI. The information to look for is in a `sessions` context.
+1. Find the information that lets you determine the average amount of consumed NAT bindings per host in `/state` using either the [YANG-model](https://github.com/nokia/7x50_YangModels/blob/master/latest_sros_24.7/nokia-submodule/nokia-state-svc-nat.yang#L45) or the MD-CLI. The information to look for is in a `sessions` context.
 
 2. Create a Python script that finds this information, determines if the maximum number of NAT bindings is acceptable and changes the value if not. Create your file in `/home/nokia/clab-srexperts/pe4/tftpboot/` on your Hackathon instance. This file will automatically become available to `pe4` at `tftp://172.31.255.29/`. Use a name for the script that makes sense for you. In the remaining subtasks, we will use `nat.py` as the filename.
 
@@ -187,7 +187,7 @@ Your script would collect data from
 /nokia-conf:configure/service/nat/nat-policy[name="NAT_POL1"]/session-limits/max
 ```
 
-and update the configuration of the latter. Examples of how to go about this are available [here](https://documentation.nokia.com/sr/24-3/pysros/examples.html#examples). The example script outputs look like
+and update the configuration of the latter. Examples of how to go about this are available [here](https://documentation.nokia.com/sr/24-7/pysros/examples.html#examples). The example script outputs look like
 
 ```
 [/]

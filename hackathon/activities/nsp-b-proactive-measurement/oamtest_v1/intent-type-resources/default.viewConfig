@@ -1,0 +1,98 @@
+{
+  "oamtest.endpoint-a": {
+    "displayKey": "ne-id",
+    "componentProps": {
+      "isPagination": true,
+      "isObject": false,
+      "paginationProps": {
+        "pageLabel": "Page"
+      }
+    },
+    "suggest": "getNodes",
+    "title": "Endpoint A",
+    "type": "leafref",
+    "properties": [
+      {
+        "floatingFilter": true,
+        "name": "ne-id",
+        "description": "Device ID",
+        "title": "NE ID",
+        "type": "string"
+      },
+      {
+        "floatingFilter": true,
+        "name": "ne-name",
+        "description": "Device Name",
+        "title": "NE NAME",
+        "type": "string"
+      },
+      {
+        "floatingFilter": true,
+        "name": "ip-address",
+        "description": "Management IP",
+        "title": "MANAGEMENT IP",
+        "type": "string"
+      },
+      {
+        "floatingFilter": true,
+        "name": "type",
+        "title": "CHASSIS TYPE",
+        "type": "string"
+      },
+      {
+        "floatingFilter": true,
+        "name": "version",
+        "title": "VERSION",
+        "type": "string"
+      }
+    ]
+  },
+  "oamtest.endpoint-b": {
+    "displayKey": "ne-id",
+    "componentProps": {
+      "isPagination": true,
+      "isObject": false,
+      "paginationProps": {
+        "pageLabel": "Page"
+      }
+    },
+    "suggest": "getNodes",
+    "title": "Endpoint B",
+    "type": "leafref",
+    "properties": [
+      {
+        "floatingFilter": true,
+        "name": "ne-id",
+        "description": "Device ID",
+        "title": "NE ID",
+        "type": "string"
+      },
+      {
+        "floatingFilter": true,
+        "name": "ne-name",
+        "description": "Device Name",
+        "title": "NE NAME",
+        "type": "string"
+      },
+      {
+        "floatingFilter": true,
+        "name": "ip-address",
+        "description": "Management IP",
+        "title": "MANAGEMENT IP",
+        "type": "string"
+      },
+      {
+        "floatingFilter": true,
+        "name": "type",
+        "title": "CHASSIS TYPE",
+        "type": "string"
+      },
+      {
+        "floatingFilter": true,
+        "name": "version",
+        "title": "VERSION",
+        "type": "string"
+      }
+    ]
+  }
+}

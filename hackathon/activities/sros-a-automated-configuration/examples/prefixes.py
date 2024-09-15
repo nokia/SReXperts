@@ -3,12 +3,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 """Example implementation for the first leg of the automated-configuration
-usecase for the Hackathon in SReXperts EMEA 2024.
+usecase for the Hackathon in SReXperts Americas 2024.
 
 Calls out to Maxmind API and configures prefix lists on MD SR OS using
 pySROS. This version of the file runs remotely and is standalone.
 
-Tested on: SR OS 24.3.R2-1
+Tested on: SR OS 24.7.R1
 """
 
 import os

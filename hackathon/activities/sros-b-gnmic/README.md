@@ -199,7 +199,7 @@ Values can be set or updated using the keyword `update-value` with the `set` ope
 *Run the following command:*
 
 ```
-gnmic -a clab-srexperts-p1 -u admin -p SReXperts2024  --port 57400 --insecure set --update-path "/configure/port[port-id="1/1/c1"]/description" --update-value "setting from gNMIc at srexperts2024"
+gnmic -a clab-srexperts-p1 -u admin -p SReXperts2024  --port 57400 --insecure set --update-path "/configure/port[port-id="1/1/c10"]/description" --update-value "setting from gNMIc at srexperts2024"
 ```
 
 *Expected output:*
@@ -212,7 +212,7 @@ gnmic -a clab-srexperts-p1 -u admin -p SReXperts2024  --port 57400 --insecure se
   "results": [
     {
       "operation": "UPDATE",
-      "path": "configure/port[port-id=1/1/c1]/description"
+      "path": "configure/port[port-id=1/1/c10]/description"
     }
   ]
 }

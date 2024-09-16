@@ -59,7 +59,7 @@ It should not take long!
 
 #### To download, customize and install bundle:
 1. Clone this repo to your local system.
-2. Adjust the artifact-bundle content in [nsp-scan-artifact-bundle](./nsp-scan-artifact-bundle) for your group and build the artifact bundle.
+2. Adjust the artifact-bundle content in [nsp-scan-artifact-bundle](./cfg-snapshot-artifact-bundle) for your group and build the artifact bundle.
 
 Content of the folder is:
 ```

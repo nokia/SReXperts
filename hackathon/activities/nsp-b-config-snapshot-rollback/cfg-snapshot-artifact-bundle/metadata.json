@@ -1,17 +1,17 @@
 {
   "meta-data-header": {
-    "version": "1.0.0",
+    "version": "1.0.1",
     "buildNumber": "1",
     "formatVersion": "1.0",
     "createdBy": "SREXPERTS",
-    "creationDate": "Wed, 01 May 2024 10:00:00 UTC",
+    "creationDate": "Tue, 03 Sep 2024 10:00:00 UTC",
     "title": "Operation Manager Snapshot/Rollback NE Config",
     "description": "take device snapshot and rollback"
   },
   "artifact-meta-data": [
     {
       "name": "operation-rollback-groupxx",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "targetApplication": "lsom-server-app",
       "applicationCompatibility": "23.11+",
       "artifact-content": [
@@ -34,7 +34,7 @@
     },
     {
       "name": "operation-snapshot-groupxx",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "targetApplication": "lsom-server-app",
       "applicationCompatibility": "23.11+",
       "artifact-content": [
@@ -57,7 +57,7 @@
     },
     {
       "name": "workflow-rollback-groupxx",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "targetApplication": "workflow-manager",
       "applicationCompatibility": "23.11+",
       "artifact-content": [
@@ -75,12 +75,17 @@
     },
     {
       "name": "workflow-snapshot-groupxx",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "targetApplication": "workflow-manager",
       "applicationCompatibility": "23.11+",
       "artifact-content": [
         {
           "fileName": "ne-snapshot-groupxx.yaml",
+          "path": "workflow-snapshot",
+          "type": "application/octet-stream"
+        },
+        {
+          "fileName": "ne-snapshot-groupxx.json",
           "path": "workflow-snapshot",
           "type": "application/octet-stream"
         },
@@ -91,9 +96,5 @@
         }
       ]
     }
-
-
- 
-
   ]
 }

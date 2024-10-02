@@ -150,7 +150,7 @@ A:leaf11# info from state system name host-name
     Go to the plugins directory if you are not there yet `/opt/srlinux/python/virtual-env/lib/python3.11/dist-packages/srlinux/mgmt/cli/plugins/reports/`. This is where the Python source code for the native CLI commands are located. Copy the `version.py` to `/etc/opt/srlinux/cli/plugins` and name the new file `my_version.py`
 
     ```bash
-    cp version.py /etc/opt/srlinux/cli/plugins/my_version.py
+    sudo cp version.py /etc/opt/srlinux/cli/plugins/my_version.py
     ```
 
 2. Modify the code of `my_version.py` by changing the name of the command to `show my_version` and modify the help string in the `load()` method.
@@ -211,12 +211,12 @@ class MyFormatter(Formatter):
 "|\t\___ \| |_) / _ \\\  /| '_ \ / _ \ '__| __/ __|           |",
 "|\t ___) |  _ <  __//  \| |_) |  __/ |  | |_\__ \           |",
 "|\t|____/|_| \_\___/_/\_\ .__/ \___|_|   \__|___/           |",
-"|\t ____   ___ ____  _  |_|  \033[5;92m ____       _                 \033[00m |",
-"|\t|___ \ / _ \___ \| || |   \033[5;92m|  _ \ __ _| |_ __ ___   __ _ \033[00m |",
-"|\t  __) | | | |__) | || |_  \033[5;92m| |_) / _` | | '_ ` _ \ / _` |\033[00m |",
-"|\t / __/| |_| / __/|__   _| \033[5;92m|  __/ (_| | | | | | | | (_| |\033[00m |",
-"|\t|_____|\___/_____|  |_|   \033[5;92m|_|   \__,_|_|_| |_| |_|\__,_|\033[00m |",
-"|\t                                                         |"]
+"|\t ____   ___ ____  _  |_|  \033[5;92m__     __                    \033[00m  |",
+"|\t|___ \ / _ \___ \| || |   \033[5;92m\ \   / /__  __ _  __ _ ___  \033[00m  |",
+"|\t  __) | | | |__) | || |_  \033[5;92m \ \ / / _ \/ _` |/ _` / __| \033[00m  |",
+"|\t / __/| |_| / __/|__   _| \033[5;92m  \ V /  __/ (_| | (_| \__ \ \033[00m  |",
+"|\t|_____|\___/_____|  |_|   \033[5;92m   \_/ \___|\__, |\__,_|___/ \033[00m  |",
+"|\t                          \033[5;92m            |___/ \033[00m             |"]
 
 
     def __init__(self):
@@ -249,4 +249,4 @@ class MyFormatter(Formatter):
 
 14. You have reached the end of this tutorial. If you would like to add other state information to your cli command please feel free to do so.
 
-    ![palma](./img/palma.png)
+    ![vegas](./img/vegas.png)

@@ -7,7 +7,7 @@
     "operation-model": "ne-rollback-groupxx.yang",
     "profile": "ne-rollback-groupxx.yaml",
     "life-cycle-state": "released",
-    "additional-tag": ["LSO", "SR OS"],
-    "version": "1.0.0"
+    "additional-tag": ["SReXperts"],
+    "version": "1.0.1"
   }
 }

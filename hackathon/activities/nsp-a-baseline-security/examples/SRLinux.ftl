@@ -49,7 +49,7 @@
                             "type": "ipv4",
                             "entry": [
                                 {
-                                    "sequence-id": 470,
+                                    "sequence-id": 1050,
                                     "match": {
                                         "ipv4": {
                                             "protocol": "tcp"
@@ -68,7 +68,7 @@
                             "type": "ipv6",
                             "entry": [
                                 {
-                                    "sequence-id": 520,
+                                    "sequence-id": 1050,
                                     "match": {
                                         "ipv6": {
                                             "next-header": 6

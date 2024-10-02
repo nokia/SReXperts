@@ -28,7 +28,7 @@ Gather practical experience using
 * vsCode extension for NSP IM
 
 ## Access to the Lab
-Access details to NSP will be provided in the hackathon. There is no requirement to access the NEs directly.
+Access details to NSP will be provided in the hackathon.
 
 ## Steps
 
@@ -70,7 +70,7 @@ After the intent has been created, enter the following CLI commands (same sessio
 # /update /configure
 ```
 
-At the beginning you see the `!` indicator, that a change was applied.
+If you recognize a prompt with the `!` indicator, a change to running was applied.
 The compare command lists the OAM related configuration that was added.
 
 Apply a configuration change to your network element.
@@ -100,7 +100,7 @@ Under vsCode settings provide your credentials (NSP IP, username, password, port
 
 Select `Create intent-type` in the context menu of `Intent Manager`.
 Use `oamtest-groupXX` as intent-type name, while XX is your group number!
-Select `latencySRX24` as template.
+Select `SRX24 oamTwampLight` as template.
 
 *Note: Alternatively you can `clone` the existing `oamtest` intent-type using the NSP WebUI.
 In this case you need to modify the YANG module, script, and viewConfig to reflect the new intent-type name.*

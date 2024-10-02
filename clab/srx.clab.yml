@@ -14,11 +14,11 @@ topology:
     image: ghcr.io/srl-labs/network-multitool
   kinds:
     nokia_sros:
-      image: vr-sros:24.3.R2
+      image: vr-sros:24.7.R1
       #image: registry.srlinux.dev/pub/vr-sros:24.3.R2-1
       license: /opt/srexperts/license-sros24.txt
     nokia_srlinux:
-      image: ghcr.io/nokia/srlinux:24.3.2
+      image: ghcr.io/nokia/srlinux:24.7.1
       stages:
         create:
           wait-for:
@@ -459,13 +459,15 @@ topology:
     gnmic:
       kind: linux
       mgmt-ipv4:  10.128.${INSTANCE_ID}.71
-      image: ghcr.io/openconfig/gnmic:0.36.2
+      image: ghcr.io/openconfig/gnmic:0.38.2
       binds:
         - configs/gnmic/config.yml:/gnmic-config.yml:ro
         - /var/run/docker.sock:/var/run/docker.sock:ro
       cmd: --config /gnmic-config.yml --log subscribe
       group: "10" # group 10 is assigned to the nodes of a telemetry stack
-
+      env:
+        GNMIC_PASSWORD: ${EVENT_PASSWORD}
+    
     prometheus:
       kind: linux
       mgmt-ipv4: 10.128.${INSTANCE_ID}.72

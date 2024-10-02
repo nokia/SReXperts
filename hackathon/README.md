@@ -66,20 +66,12 @@ Each pre-provided activity comes with a README of it's own, please click the pre
 
 | Link to pre-provided activity | NOS | Difficulty |
 | --- | --- | --- |
-| [Pre-requiste to any NSP use-case: Lab Discovery](./activities/nsp-b-lab-discovery) | NSP | Basic |
-| [Config snapshot & Rollback](./activities/nsp-b-config-snapshot-rollback) | NSP | Basic |
-| [Pro-active measurement](./activities/nsp-b-proactive-measurement) | NSP | Basic |
-| [Kafka closed loop automation](./activities/nsp-i-kafka-closed-loop-automation) | NSP | Intermediate |
-| [Security baselining](./activities/nsp-a-baseline-security) | NSP | Advanced |
-| [Security scanning](./activities/nsp-a-security-scan) | NSP | Advanced |
-| [Using NSP APIs](./activities/nsp-a-using-nsp-apis) | NSP | Advanced |
 | [CLI aliasing](./activities/srlinux-b-cli-aliasing) | SR Linux | Basic |
 | [Event handler](./activities/srlinux-b-event-handler-backup) | SR Linux | Basic |
 | [gNMIc](./activities/srlinux-b-gnmic) | SR Linux | Basic |
 | [gNOIc](./activities/srlinux-b-gnoi) | SR Linux | Basic |
 | [Logging](./activities/srlinux-b-loki-logging) | SR Linux | Basic |
 | [Streaming telemetry](./activities/srlinux-b-streaming-telemetry) | SR Linux | Basic |
-| [Configuration using Ansible intents](./activities/srlinux-i-ansible-intent) | SR Linux | Intermediate |
 | [Create a CLI plugin](./activities/srlinux-i-cli-plugin-show-version) | SR Linux | Intermediate | 
 | [Customize the CLI](./activities/srlinux-i-custom-cli) | SR Linux | Intermediate |
 | [Using gNMI with Python](./activities/srlinux-i-pygnmi) | SR Linux | Intermediate |
@@ -97,6 +89,13 @@ Each pre-provided activity comes with a README of it's own, please click the pre
 | [Explore pySROS best practices and limits](./activities/sros-i-pysros-limit-testing) | SR OS | Intermediate |
 | [RPKI & automated peering configuration](./activities/sros-a-automated-configuration) | SR OS | Advanced |
 | [Combining pySROS and the Event Handling System (EHS)](./activities/sros-a-event-handling) | SR OS | Advanced |
+| [Pre-requiste to any NSP use-case: Lab Discovery](./activities/nsp-b-lab-discovery) | NSP | Basic |
+| [Config snapshot & Rollback](./activities/nsp-b-config-snapshot-rollback) | NSP | Basic |
+| [Pro-active measurement](./activities/nsp-b-proactive-measurement) | NSP | Basic |
+| [Kafka closed loop automation](./activities/nsp-i-kafka-closed-loop-automation) | NSP | Intermediate |
+| [Security baselining](./activities/nsp-a-baseline-security) | NSP | Advanced |
+| [Security scanning](./activities/nsp-a-security-scan) | NSP | Advanced |
+| [Using NSP APIs](./activities/nsp-a-using-nsp-apis) | NSP | Advanced |
 
 #### Topology
 
@@ -155,7 +154,7 @@ sudo containerlab inspect -a
 +----+--------------+-----------+---------------------------+--------------+------------------------------------+---------------+---------+----------------+--------------+
 | #  |  Topo Path   | Lab Name  |           Name            | Container ID |               Image                |     Kind      |  State  |  IPv4 Address  | IPv6 Address |
 +----+--------------+-----------+---------------------------+--------------+------------------------------------+---------------+---------+----------------+--------------+
-|  1 | srx.clab.yml | srexperts | clab-srexperts-agg1       | 674410c9af85 | ghcr.io/nokia/srlinux:24.3.2       | nokia_srlinux | running | 10.128.1.52/24 | N/A          |
+|  1 | srx.clab.yml | srexperts | clab-srexperts-agg1       | 674410c9af85 | ghcr.io/nokia/srlinux:24.7.1       | nokia_srlinux | running | 10.128.1.52/24 | N/A          |
 |  2 |              |           | clab-srexperts-client01   | 84d10798f3e1 | ghcr.io/srl-labs/network-multitool | linux         | running | 10.128.1.25/24 | N/A          |
 |  3 |              |           | clab-srexperts-client02   | 4097ff655bd0 | ghcr.io/srl-labs/network-multitool | linux         | running | 10.128.1.26/24 | N/A          |
 |  4 |              |           | clab-srexperts-client03   | 2b4bc0f5beda | ghcr.io/srl-labs/network-multitool | linux         | running | 10.128.1.27/24 | N/A          |
@@ -167,31 +166,31 @@ sudo containerlab inspect -a
 | 10 |              |           | clab-srexperts-dns        | 908441c7e174 | ghcr.io/srl-labs/network-multitool | linux         | running | 10.128.1.15/24 | N/A          |
 | 11 |              |           | clab-srexperts-gnmic      | 49fd00767f0a | ghcr.io/openconfig/gnmic:0.36.2    | linux         | running | 10.128.1.71/24 | N/A          |
 | 12 |              |           | clab-srexperts-grafana    | ae9792b4685a | grafana/grafana:10.3.5             | linux         | running | 10.128.1.73/24 | N/A          |
-| 13 |              |           | clab-srexperts-ixp1       | 8f2e2a34ec1d | ghcr.io/nokia/srlinux:24.3.2       | nokia_srlinux | running | 10.128.1.51/24 | N/A          |
-| 14 |              |           | clab-srexperts-leaf11     | ae40f8086951 | ghcr.io/nokia/srlinux:24.3.2       | nokia_srlinux | running | 10.128.1.33/24 | N/A          |
-| 15 |              |           | clab-srexperts-leaf12     | 5b8ef1f0851f | ghcr.io/nokia/srlinux:24.3.2       | nokia_srlinux | running | 10.128.1.34/24 | N/A          |
-| 16 |              |           | clab-srexperts-leaf13     | 0b6cdb0f1f74 | ghcr.io/nokia/srlinux:24.3.2       | nokia_srlinux | running | 10.128.1.35/24 | N/A          |
-| 17 |              |           | clab-srexperts-leaf21     | fbe450f93f20 | ghcr.io/nokia/srlinux:24.3.2       | nokia_srlinux | running | 10.128.1.41/24 | N/A          |
+| 13 |              |           | clab-srexperts-ixp1       | 8f2e2a34ec1d | ghcr.io/nokia/srlinux:24.7.1       | nokia_srlinux | running | 10.128.1.51/24 | N/A          |
+| 14 |              |           | clab-srexperts-leaf11     | ae40f8086951 | ghcr.io/nokia/srlinux:24.7.1       | nokia_srlinux | running | 10.128.1.33/24 | N/A          |
+| 15 |              |           | clab-srexperts-leaf12     | 5b8ef1f0851f | ghcr.io/nokia/srlinux:24.7.1       | nokia_srlinux | running | 10.128.1.34/24 | N/A          |
+| 16 |              |           | clab-srexperts-leaf13     | 0b6cdb0f1f74 | ghcr.io/nokia/srlinux:24.7.1       | nokia_srlinux | running | 10.128.1.35/24 | N/A          |
+| 17 |              |           | clab-srexperts-leaf21     | fbe450f93f20 | ghcr.io/nokia/srlinux:24.7.1       | nokia_srlinux | running | 10.128.1.41/24 | N/A          |
 | 18 |              |           | clab-srexperts-loki       | 81e922e2255b | grafana/loki:2.9.7                 | linux         | running | 10.128.1.76/24 | N/A          |
-| 19 |              |           | clab-srexperts-p1         | 9a7be92bc261 | vr-sros:24.3.R2                    | nokia_sros    | running | 10.128.1.11/24 | N/A          |
-| 20 |              |           | clab-srexperts-p2         | dcf131b23d80 | vr-sros:24.3.R2                    | nokia_sros    | running | 10.128.1.12/24 | N/A          |
-| 21 |              |           | clab-srexperts-pe1        | eb95be700e43 | vr-sros:24.3.R2                    | nokia_sros    | running | 10.128.1.21/24 | N/A          |
-| 22 |              |           | clab-srexperts-pe2        | 331942c949ee | vr-sros:24.3.R2                    | nokia_sros    | running | 10.128.1.22/24 | N/A          |
-| 23 |              |           | clab-srexperts-pe3        | b75dae1a645a | vr-sros:24.3.R2                    | nokia_sros    | running | 10.128.1.23/24 | N/A          |
-| 24 |              |           | clab-srexperts-pe4        | 35b7bb4c8a9e | vr-sros:24.3.R2                    | nokia_sros    | running | 10.128.1.24/24 | N/A          |
-| 25 |              |           | clab-srexperts-peering2   | 53d62d034b51 | ghcr.io/nokia/srlinux:24.3.2       | nokia_srlinux | running | 10.128.1.53/24 | N/A          |
+| 19 |              |           | clab-srexperts-p1         | 9a7be92bc261 | vr-sros:24.7.R1                    | nokia_sros    | running | 10.128.1.11/24 | N/A          |
+| 20 |              |           | clab-srexperts-p2         | dcf131b23d80 | vr-sros:24.7.R1                    | nokia_sros    | running | 10.128.1.12/24 | N/A          |
+| 21 |              |           | clab-srexperts-pe1        | eb95be700e43 | vr-sros:24.7.R1                    | nokia_sros    | running | 10.128.1.21/24 | N/A          |
+| 22 |              |           | clab-srexperts-pe2        | 331942c949ee | vr-sros:24.7.R1                    | nokia_sros    | running | 10.128.1.22/24 | N/A          |
+| 23 |              |           | clab-srexperts-pe3        | b75dae1a645a | vr-sros:24.7.R1                    | nokia_sros    | running | 10.128.1.23/24 | N/A          |
+| 24 |              |           | clab-srexperts-pe4        | 35b7bb4c8a9e | vr-sros:24.7.R1                    | nokia_sros    | running | 10.128.1.24/24 | N/A          |
+| 25 |              |           | clab-srexperts-peering2   | 53d62d034b51 | ghcr.io/nokia/srlinux:24.7.1       | nokia_srlinux | running | 10.128.1.53/24 | N/A          |
 | 26 |              |           | clab-srexperts-prometheus | 6411ad6c5712 | prom/prometheus:v2.51.2            | linux         | running | 10.128.1.72/24 | N/A          |
 | 27 |              |           | clab-srexperts-promtail   | 4db67735ce8b | grafana/promtail:2.9.7             | linux         | running | 10.128.1.75/24 | N/A          |
 | 28 |              |           | clab-srexperts-radius     | 9ce33544e642 | ghcr.io/srl-labs/network-multitool | linux         | running | 10.128.1.14/24 | N/A          |
 | 29 |              |           | clab-srexperts-rpki       | 2fed2c9c9306 | rpki/stayrtr                       | linux         | running | 10.128.1.55/24 | N/A          |
-| 30 |              |           | clab-srexperts-spine11    | 56298e38e060 | ghcr.io/nokia/srlinux:24.3.2       | nokia_srlinux | running | 10.128.1.31/24 | N/A          |
-| 31 |              |           | clab-srexperts-spine12    | ae95193f1764 | ghcr.io/nokia/srlinux:24.3.2       | nokia_srlinux | running | 10.128.1.32/24 | N/A          |
+| 30 |              |           | clab-srexperts-spine11    | 56298e38e060 | ghcr.io/nokia/srlinux:24.7.1       | nokia_srlinux | running | 10.128.1.31/24 | N/A          |
+| 31 |              |           | clab-srexperts-spine12    | ae95193f1764 | ghcr.io/nokia/srlinux:24.7.1       | nokia_srlinux | running | 10.128.1.32/24 | N/A          |
 | 32 |              |           | clab-srexperts-sub1       | 7198475d0d38 | ghcr.io/srl-labs/network-multitool | linux         | running | 10.128.1.61/24 | N/A          |
 | 33 |              |           | clab-srexperts-sub2       | 7b1e568aa8bc | ghcr.io/srl-labs/network-multitool | linux         | running | 10.128.1.62/24 | N/A          |
 | 34 |              |           | clab-srexperts-sub3       | 2bfa959cf182 | ghcr.io/srl-labs/network-multitool | linux         | running | 10.128.1.63/24 | N/A          |
 | 35 |              |           | clab-srexperts-syslog     | 7df2f459faf4 | linuxserver/syslog-ng:4.5.0        | linux         | running | 10.128.1.74/24 | N/A          |
 | 36 |              |           | clab-srexperts-transit1   | 7836cd8cde2c | ghcr.io/srl-labs/network-multitool | linux         | running | 10.128.1.54/24 | N/A          |
-| 37 |              |           | clab-srexperts-vRR        | bca098b72c01 | vr-sros:24.3.R2                    | nokia_sros    | running | 10.128.1.13/24 | N/A          |
+| 37 |              |           | clab-srexperts-vRR        | bca098b72c01 | vr-sros:24.7.R1                    | nokia_sros    | running | 10.128.1.13/24 | N/A          |
 +----+--------------+-----------+---------------------------+--------------+------------------------------------+---------------+---------+----------------+--------------+
 ```
 
@@ -373,7 +372,7 @@ gh repo clone nokia/SReXperts
 
 ### SR OS
 
-* [SR OS Release 24.3](https://documentation.nokia.com/sr/24-3/index.html)
+* [SR OS Release 24.7](https://documentation.nokia.com/sr/24-7/index.html)
 * [pySROS](https://network.developer.nokia.com/static/sr/learn/pysros/latest/index.html)
 * [Network Developer Portal](https://network.developer.nokia.com/sr/learn/)
 

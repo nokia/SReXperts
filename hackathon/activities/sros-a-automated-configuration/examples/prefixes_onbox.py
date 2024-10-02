@@ -3,14 +3,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 """Example implementation for the first leg of the automated-configuration
-usecase for the Hackathon in SReXperts EMEA 2024.
+usecase for the Hackathon in SReXperts Americas 2024.
 
 Consumes a list of prefixes stored in `prefixes.txt` and converts it into a
 prefix-list configuration on the router. This version of the file runs locally
 and requires a secondary component that regularly updates the `prefixes.txt`
 file.
 
-Tested on: SR OS 24.3.R2-1
+Tested on: SR OS 24.7.R1
 """
 
 import json

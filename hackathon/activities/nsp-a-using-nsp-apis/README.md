@@ -48,8 +48,8 @@ For additional assistance and documentation, please refer to the developer porta
 
 ### Prerequisites:
 - Ensure you have Postman installed on your machine. If not, download and install it from [https://www.postman.com/downloads/](https://www.postman.com/downloads/).
-- Import the collection JSON file provided into Postman (`Network Programming via NSP APIs - SReXpert EMEA 2024.postman_collection.json`).
-- Import the environment file provided (`Hackhathon SReXperts EMEA 2024.postman_environment.json`) into Postman.
+- Import the collection JSON file provided into Postman (`Network Programming via NSP APIs - SReXpert Americas 2024.postman_collection.json`).
+- Import the environment file provided (`Hackhathon SReXperts Americas 2024.postman_environment.json`) into Postman.
 
 ### Steps:
 
@@ -103,7 +103,7 @@ If this is your first NSP activity for this hackathon, ensure to first execute t
    - Run the "Delete RESTCONF subscriptions" request.
    - Confirm that the request successfully deletes the specified RESTCONF subscription via NSP UI.
 
-**Note:** Ensure that the environment file (`Hackhathon SReXperts EMEA 2024.postman_environment.json`) is imported and correctly configured with the required variables (`server`, `user`, `password`, `neId`) before executing each request.
+**Note:** Ensure that the environment file (`Hackhathon SReXperts Americas 2024.postman_environment.json`) is imported and correctly configured with the required variables (`server`, `user`, `password`, `neId`) before executing each request.
 
 ## Python script API interaction - Steps
 
@@ -116,7 +116,7 @@ If this is your first NSP activity for this hackathon, ensure to first execute t
 5. Open a new terminal in VSCode and install Jupyter by running the command: `pip install jupyter`.
 6. Create a new Jupyter notebook in VSCode by opening the Command Palette (Ctrl+Shift+P), typing "Jupyter: Create New Blank Notebook", and selecting it.
 - Make sure you have the necessary Python libraries installed: requests, json, base64, re, urllib.
-- Open Jupyter Notebook and the file (`Network Programming via NSP APIs - SReXpert EMEA 2024.ipynb`).
+- Open Jupyter Notebook and the file (`Network Programming via NSP APIs - SReXpert Americas 2024.ipynb`).
 - Copy the provided script into a new cell in your Jupyter Notebook.
 
 
@@ -234,7 +234,7 @@ To customize the Postman collection and extend functionality to support CPU and 
 
 By following these steps, you can expand the functionality of the Postman collection to support monitoring of CPU and memory utilization in NSP.
 
-## Customizing Python Jupiter Notebook
+## Customizing Jupyter Notebook
 
 ### Introduction
 
@@ -244,7 +244,7 @@ Following are the steps to customize the provided Python Jupyter Notebook to per
 
 1. **Open the Jupyter Notebook**:
    - Open the Jupyter Notebook file in your preferred Python environment.
-   - Copy the file (Network Programming via NSP APIs - SReXpert EMEA 2024.ipynb) as Custom - Network Programming via NSP APIs - SReXpert EMEA 2024.ipynb.
+   - Copy the file (Network Programming via NSP APIs - SReXpert Americas 2024.ipynb) as Custom - Network Programming via NSP APIs - SReXpert Americas 2024.ipynb.
 
 2. **Check NSP Setup Information**:
    - Check the `username`, `password`, and `NSP_server_IP` variables with the appropriate values for your NSP environment.

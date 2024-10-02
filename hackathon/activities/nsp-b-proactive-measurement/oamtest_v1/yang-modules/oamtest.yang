@@ -1,0 +1,27 @@
+module oamtest {
+  namespace "http://www.nokia.com/management-solutions/oamtest";
+  prefix oamtest;
+  
+  organization
+    "NSP DevOps";
+  contact
+    "NSP DevOps";
+  description
+    "";
+
+  revision "2024-09-11" {
+    description
+      "Initial revision.";
+  }
+
+  container oamtest {
+    leaf endpoint-a {
+        type string;
+        mandatory true;
+    }
+    leaf endpoint-b {
+        type string;
+        mandatory true;
+    }
+  }
+}

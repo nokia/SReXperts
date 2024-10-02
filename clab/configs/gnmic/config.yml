@@ -3,11 +3,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 username: admin
-password: SReXperts2024
+password: ${GNMIC_PASSWORD}
 port: 57400
 timeout: 10s
-skip-verify: true
-encoding: json_ietf
 
 loader:
   type: docker
@@ -24,7 +22,6 @@ loader:
       port: "57400"
       config:
         username: admin
-        password: SReXperts2024
         skip-verify: true
         encoding: proto
         subscriptions:
@@ -47,7 +44,6 @@ loader:
       port: "57400"
       config:
         username: admin
-        password: SReXperts2024
         insecure: true
         encoding: json
         subscriptions:

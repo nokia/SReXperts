@@ -20,7 +20,7 @@ ssh admin@clab-srexperts-p1
 
 ## Task 1: Coloring the CLI
 
-In this first task, we will start from the existing command `show router interface`. Depending on your terminal client of choice and its settings, the output of this command is shown in various colors with possible highlights. With pySROS, we can override the existing CLI command to introduce coloring to the default show commands such that the CLI itself has the appropriate highlighting regardless of the client used. Starting from the output of the aforementioned command,
+In this first task, we will start from the existing command `show router interface`. Depending on your terminal client of choice and its settings, the output of this command is shown in various colors with possible highlights. With pySROS, we can override the existing CLI command to introduce coloring to the default show commands such that the CLI itself has the appropriate highlighting regardless of the client used (if the client supports colored output). Starting from the output of the aforementioned command:
 
 ```
 [/]
@@ -41,9 +41,9 @@ p2_1                             Up        Up/Up       Network 1/1/c11/1
 <... truncated>
 ```
 
-, in this task, we will introduce highlighting for operational states, IPv4 and IPv6 addresses, interface names and port identifiers. This task consists of three subtasks. First, we'll need some pySROS code that will give us our desired output. Then, this will have to be set up as a command alias. Finally, the script's remote output and functioning will be verified. We'll start with the Python code that produces our desired output and make it available for the router.
+In this task, we will introduce highlighting for operational states, IPv4 and IPv6 addresses, interface names and port identifiers. This task consists of three subtasks. First, we'll need some pySROS code that will give us our desired output. Then, this will have to be set up as a command alias. Finally, the script's remote output and functioning will be verified. We'll start with the Python code that produces our desired output and make it available for the router.
 
-1. Start from the file [colored_interface.py](./examples/colored_interface.py) in the [examples](./examples/) folder and prepare it for on-box execution of the file by copying it to `/home/nokia/clab-srexperts/p1/tftpboot/`. At that point, you should be able to execute and test the script through the on-board interpreter:
+1. Start from the file [colored_interface.py](./examples/colored_interface.py) in the [examples](./examples/) folder and prepare it for on-box execution of the file by copying it to `/home/nokia/clab-srexperts/p1/tftpboot/`. This folder on your Hackathon instance is mounted inside the SR OS container by containerlab and reachable from SR OS via `tftp`. At that point, you will be able to execute and test the script through the on-board interpreter:
 ```
 [/]
 A:admin@p1# pyexec tftp://172.31.255.29/colored_interface.py
@@ -72,6 +72,24 @@ def color(color, text):
     return text
 ```
 An article with information on the topic of changing colors is available [here](https://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html). Adding and removing colors may cause the columns to shift in the output of the provided script, feel free to investigate!
+
+<details>
+<summary>Example completed variables and `color` function</summary>
+
+```
+RED = "\u001b[31;1m"
+MAGENTA = "\u001b[35;1m"
+YELLOW = "\u001b[33;1m"
+WHITE = "\u001b[37;1m"
+GREEN = "\u001b[32;1m"
+RESET_COLOR = "\u001b[0m"
+
+
+def color(color, text):
+    return color + text + RESET_COLOR
+```
+
+</details>
 
 2. Configure the script as a command alias of your choosing.
     1. As a first step, we have to create the Python script object that will be called by the alias. To do that, add the following configuration:
@@ -115,7 +133,9 @@ An article with information on the topic of changing colors is available [here](
 
 Try looking for your command under `/show router` in the context-sensitive help menu displayed via `?`. The description of the alias is shown there. This way you can include some information about your command in the CLI, in addition to the command itself.
 
-Does your command work? Would this have worked if we used `interface` instead of `colored_interface` as the name for the alias?
+Does your command work? If not, make sure the latest version of your script is being used by the configured alias and issue `/perform python python-script reload script "colored_interface"` to load any additional changes made to the script file into the version of the script that is stored in the router's memory.
+
+Would this have worked if we used `interface` instead of `colored_interface` as the name for the alias?
 
 4. When run remotely, the call to `pysros.management.connect` requires additional information. Update the code and replace the call to connect by changing
 ```
@@ -171,10 +191,49 @@ Number of neighbors : 2
 ```
 
 Clearly, the output is similar and solves our truncation issue. Thanks to the unicode support, some extra's can be added as unicode includes emoji's as well. This script, as before, works remotely in the same way it does on the device.
-1. Build your own version of `lldp_neighbor.py`, optionally taking inspiration from the provided version and make sure the target LLDP information output shown above is achieved. Place your file at `/home/nokia/clab-srexperts/p1/tftpboot/lldp_neighbor.py` to make it available for the SR OS node at `tftp://172.31.255.29/lldp_neighbor.py`.
+1. Build your own version of `lldp_neighbor.py`, optionally taking inspiration from the provided version and make sure the target LLDP information output shown above is achieved. Place your file at `/home/nokia/clab-srexperts/p1/tftpboot/lldp_neighbor.py` on your provided Hackathon instance to make it available for the SR OS node at `tftp://172.31.255.29/lldp_neighbor.py`.
 2. Override the system's native `show system lldp neighbor` with the appropriate command-alias pointing to your Python version.
 
 For this task, and in general, once you have created a `python-script` object that points to your Python file, the version that is in memory will remain there even when you are updating the file. You can dynamically reload the file using `/perform python python-script reload script <script name>`.
+
+
+<details>
+<summary>Example configuration to add for the lldp neighbor command-alias</summary>
+
+```
+    configure {
+        python {
+            python-script "lldp_neighbor" {
+                admin-state enable
+                urls ["tftp://172.31.255.29/lldp_neighbor.py"]
+                version python3
+            }
+        }
+    }
+    configure {
+        system {
+            management-interface {
+                cli {
+                    md-cli {
+                        environment {
+                            command-alias {
+                                alias "neighbor" {
+                                    admin-state enable
+                                    description "Display LLDP neighbor information without truncated text in columns."
+                                    python-script "lldp_neighbor"
+                                    mount-point "/show system lldp" { }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+```
+
+</details>
+
 
 ## Task 3: Telemetry subscriptions at a glance
 Another opportunity is encountered when trying to glean which gRPC subscription contains the path you're currently trying to use or troubleshoot, depending on the situation. In the SR OS model-driven CLI, we can display this information using show commands of the form `/show system telemetry grpc subscription # paths`. This works, however in most cases requires trial and error to find the correct identifier matching the subscription you're interested in. The desired path is never in the first subscription you try.

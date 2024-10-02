@@ -1,8 +1,10 @@
 # Use EHS to display a message when someone logs in
 
-**Grading: Beginner**
-
-**Elements: SR OS, pySROS**
+| Item              | Details                                                                 |
+| ----------------- | ----------------------------------------------------------------------- |
+| Short Description | Use SR OS Event Handler System to display a message when a login occurs |
+| Skill Level       | Beginner                                                                |
+| Tools Used        | SR OS, Event Handler, Python (with the pysros library)                                        |
 
 The Event Handling System (EHS) is a framework that allows operator-defined behavior to be configured on the router. 
 
@@ -36,7 +38,7 @@ When developing an EHS Python application, the event attributes are passed to th
 In this lab you will interact with the model-driven SR OS router `pe4`. To access it, use:
 
 ```
-ssh -l admin clab-srexperts-pe4
+ssh admin@clab-srexperts-pe4
 ```
 
 ## Event Handling Basic Configuration
@@ -105,7 +107,7 @@ configure {
 
 ### Step 5:
 
-To connect the `script-policy` to an event that can be triggered through logs the `event-handling handler` need to be configured:
+To connect the `script-policy` to an event that can be triggered through logs, the `event-handling handler` need to be configured:
 
 ```
 configure {

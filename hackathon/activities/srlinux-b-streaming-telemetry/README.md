@@ -90,8 +90,6 @@ From the output you can find that for us to retrieve the *host-name* we will nee
 
 The YANG browser lets you do a search through the SR Linux YANG model. By simply typing for certain keywords, the YANG browser will return any matches found.
 
-<img width="708" alt="yangbrowser" src="https://github.com/jgcumming/srx2024-hackplanning/assets/33862202/ab13e924-7f2d-4750-b7a9-6841c2e9b2fc">
-
 ## TASK
 
 ### 1 gNMI GET

@@ -68,8 +68,8 @@ A vSIM qcow2 image for SR OS release 24.3.3 is present in your environemnt under
 ls -lrt /opt/srexperts/images
 ```
 ```
-total 937888
--rw-r--r-- 1 nokia nokia 474218496 Jul 24 23:34 sros-vsim.qcow2
+total 464644
+-rw-r--r-- 1 root root 475791360 Oct  8 08:12 sros-vsim.qcow2
 ```
 
 We will use a software called [vrnetlab](https://github.com/hellt/vrnetlab/) to create a docker image from a vSIM image.
@@ -102,7 +102,9 @@ sudo docker image list
 ```
 ```
 REPOSITORY                                 TAG         IMAGE ID       CREATED              SIZE
-vrnetlab/vr-sros                           24.3.R3     36a2e22c7267   About a minute ago   766MB
+...
+vrnetlab/nokia_vsr                         24.3.R3     1b8042dbbb41   11 seconds ago       767MB
+...
 ```
 
 Our SR OS docker image is now ready for use.
@@ -364,10 +366,11 @@ sudo clab deploy -t lab.clab.yml
 
 ## Clean up all deployed labs
 
-As the last step, you may destroy and cleanup all the deployed labs in your environment.
+As the last step, you may destroy and cleanup the deployed labs in your environment:
 
 ```
-sudo clab destroy --all --cleanup
+sudo clab destroy -t lab.clab.yml --cleanup
+sudo clab destroy -t startup-clab.yml --cleanup
 ```
 
 

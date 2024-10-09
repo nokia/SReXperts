@@ -14,11 +14,12 @@ loader:
   filters:
     # filter 1
     - containers:
-        # containers returned by `docker ps -f "label=clab-node-kind=srl"`
+        # containers returned by `docker ps -f "label=clab-node-kind=nokia_srlinux"`
         - label: clab-node-kind=nokia_srlinux
       network:
-        # networks returned by `docker network ls -f "label=containerlab"`
-        label: containerlab
+        # networks returned by `docker network ls -f "name=srexperts"`
+        name: srexperts
+        #label: containerlab
       port: "57400"
       config:
         username: admin
@@ -34,12 +35,12 @@ loader:
           - srl_event_handler_stats
     # filter 2
     - containers:
-        # containers returned by `docker ps -f "label=clab-node-kind=ceos"`
+        # containers returned by `docker ps -f "label=clab-node-kind=nokia_sros"`
         - label: clab-node-kind=nokia_sros
-        # containers returned by `docker ps -f "label=clab-node-kind=vr-sros"`
       network:
-        # networks returned by `docker network ls -f "name=mgmt"`
-        label: containerlab
+        # networks returned by `docker network ls -f "name=srexperts"`
+        name: srexperts
+        #label: containerlab
       # the value of label=gnmi-port exported by each container`
       port: "57400"
       config:

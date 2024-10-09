@@ -246,7 +246,7 @@ Start by creating the root object and add the network-instance child. Note that 
 def _my_schema(self):
     root = FixedSchemaRoot()
     netinst = root.add_child(
-        'netinst'
+        'network-instance'
         key='name',
         fields = [ 'name', 'local-as' ]
     )
@@ -262,7 +262,7 @@ def _my_schema(self):
 def _my_schema(self):
     root = FixedSchemaRoot()
     netinst = root.add_child(
-        'netinst',
+        'network-instance',
         key = 'name',
         fields = [ 'name', 'local-as' ]
         )

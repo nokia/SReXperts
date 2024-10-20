@@ -1,6 +1,6 @@
 # Solutions for SR Linux gNOI Hackathon Activity
 
-## Confiuration Backups - Solution
+## Configuration Backups - Solution
 
 The goal of this hackathon activity is to establish regular configuration backups of your SR Linux device on an external machine.
 
@@ -8,7 +8,7 @@ Try writing a script in the language of your choice that will use gNOI file serv
 
 Let's see how this script will look like with shell scripting:
 
-```
+```bash
 #!/bin/bash
 
 ## Setting the home directory
@@ -25,10 +25,10 @@ mv $cur_dir/etc/opt/srlinux/config.json $cur_dir/backups/config.json.$(date +%F-
 
 Now that our script is ready, let's run it once to verify whether it works.
 
-```
-# chmod +x backup.sh
-# mkdir backups
-# ./backup.sh
+```bash
+chmod +x backup.sh
+mkdir backups
+./backup.sh
 INFO[0000] "clab-srexperts-leaf11:57400" received 64000 bytes 
 INFO[0000] "clab-srexperts-leaf11:57400" received 42411 bytes 
 INFO[0000] "clab-srexperts-leaf11:57400" file "/etc/opt/srlinux/config.json" saved 
@@ -64,12 +64,12 @@ Let's see how this script will look like with shell scripting. In our example, w
 
 Our file with the list of nodes looks like this:
 
-```
+```bash
 # cat node-list.txt
 clab-srexperts-leaf11
 ```
 
-```
+```bash
 #!/bin/bash
 
 ## Setting the home directory
@@ -86,12 +86,12 @@ for i in `awk '{print $0}' $cur_dir/node-list.txt`
                 ## List the package on the device
                 filename=`gnoic -a $i -u admin -p SReXperts2024 --skip-verify file stat --path /tmp/my-gpt.deb --format json | grep path | awk -F'\"' '{print $4}'`
                 ## Check if file package exists on the device
-				if test "$filename" = "/tmp/my-gpt.deb"
-					then
-					echo "File transferred successfully to $i"
-				else
-					echo "File not transferred to $i. Please try again."
-				fi
+    if test "$filename" = "/tmp/my-gpt.deb"
+     then
+     echo "File transferred successfully to $i"
+    else
+     echo "File not transferred to $i. Please try again."
+    fi
         done
 ```
 
@@ -115,7 +115,6 @@ A:leaf11# bash ls /tmp/my-gpt.deb
 
 Note - The same use case also applies to file transfer of software images as part of the software upgrade process. SR Linux also supports the gNOI OS service that can be used to transfer the software image and perform the software upgrade.
 
-
 ## Bulk File Deletions - Solution
 
 Let's assume we completed a network wide software upgrade 6 months ago and now we can initiate a deletion of the old software files from our devices in order to reduce the flash disk usage.
@@ -135,7 +134,7 @@ Our file with the list of nodes looks like this:
 clab-srexperts-leaf11
 ```
 
-```
+```bash
 #!/bin/bash
 
 ## Setting the home directory
@@ -145,13 +144,13 @@ cur_dir=/home/nokia/srl-gnoi (Replace with your current working directory)
 for i in `awk '{print $0}' $cur_dir/node-list.txt`
         do
                 ## Initializing the filename variable
-				filename=""
-				## Delete the file on the device
-				gnoic -a $i -u admin -p SReXperts2024 --skip-verify file remove --path /tmp/my-gpt.deb
+    filename=""
+    ## Delete the file on the device
+    gnoic -a $i -u admin -p SReXperts2024 --skip-verify file remove --path /tmp/my-gpt.deb
                 ## List the file on the device to confirm file is deleted
-				filename=`gnoic -a $i -u admin -p SReXperts2024 --skip-verify file stat --path /tmp --format json | grep my-gpt.deb | awk -F'\"' '{print $4}'`
+    filename=`gnoic -a $i -u admin -p SReXperts2024 --skip-verify file stat --path /tmp --format json | grep my-gpt.deb | awk -F'\"' '{print $4}'`
                 ## Check if filename returned is valid.
-				if test "$filename" = ""
+    if test "$filename" = ""
                 then
                         echo "File deleted successfully from $i"
                 else
@@ -168,6 +167,7 @@ Now that our script is ready, let's run it
 INFO[0000] "clab-srexperts-leaf11:57400" file "/tmp/my-gpt.deb" removed successfully 
 File deleted successfully from clab-srexperts-leaf11
 ```
+
 Verify that the file was deleted on the router.
 
 ```

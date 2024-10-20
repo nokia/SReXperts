@@ -15,12 +15,12 @@ A Streaming Telemetry stack consists of:
 - Time-series Database (e.g. Prometheus) to collect, store and aggregate the collected metrics.
 - Visualization tool (e.g. Grafana) to visualize the collected data and run queries on top of it.
 
-gNMI is a modern gRPC-based network management interface that is currently the most popular protocol to collect Streaming Telemetry data from the networking devices. It is imoprtant to understand, that Streaming Telemetry with gNMI operates on the configuration and state data streamed from the network devices, but it does not provide flow extraction/sampling like netflow/ipfix.
+gNMI is a modern gRPC-based network management interface that is currently the most popular protocol to collect Streaming Telemetry data from the networking devices. It is important to understand, that Streaming Telemetry with gNMI operates on the configuration and state data streamed from the network devices, but it does not provide flow extraction/sampling like netflow/ipfix.
 
 ## Objective
 
 The goal of this exercise is to let you get familiar with streaming telemetry on SR Linux by making use of gNMI (gRPC Network Management Interface) to retrieve data from the nodes using
-a gNMI client tool called [gNMIc](https://gnmic.openconfig.net/). You will then learn how the telemetry stack works by collecting additional data and visualize these in Grafana. By the end of this lab, you will learn:
+a gNMI client tool called [gNMIc](https://gnmic.openconfig.net/). You will learn how the telemetry stack works by collecting additional data and visualize these in Grafana, and in particular:
 
 - differences between SNMP and streaming telemetry
 - how to identify and subscribe to streaming telemetry metrics
@@ -43,18 +43,20 @@ There are 4 remote procedure calls (RPC) services defined by the gNMI specificat
 | RPC type     | Description                                                                                                                                                         |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Capabilities | Provides the client with information about the device, such as gNMI version, used data models and supported encodings. Frequently used to test the gNMI connection. |
-| GET          | Retrieve information from the device, typically small amount of data.                                                                                               |
-| SET          | Is used to set, modify or delete configuration on a network device.                                                                                                 |
+| Get          | Retrieve information from the device, typically small amount of data.                                                                                               |
+| Set          | Is used to set, modify or delete configuration on a network device.                                                                                                 |
 | Subscribe | Used for streaming telemetry - receiving a stream of state or configuration data from the device. Subscribe RPC supports different modes: In a SAMPLE mode, the data is returned with a cadence governed by a client-provided interval; in an ON-CHANGE mode data is streamed every time there is a change in the subscribed data elements. |
 
 ## gNMIc as a command line interface to gNMI
 
-[gNMIc](https://gnmic.openconfig.net/) is a command line tool developed by Nokia and donated to the OpenConfig project. It lets you interact with the gNMI server running on the SR Linux nodes. It can be used to run the various RPCs we discused above against SR Linux.
+[gNMIc](https://gnmic.openconfig.net/) is a command line tool developed by Nokia and donated to the OpenConfig project. It lets you interact with the gNMI server running on the SR Linux nodes. It can be used to run the various RPCs we discussed above against SR Linux.
 
-Log into your lab server and run the help command of the `gnmic` tool. Look at the available commands this tool offers. You should recognize the 4 gNMI RPCs: Capabilities, GET, SET, and Subscribe.
+Log into your lab server and run the help command of the `gnmic` tool. Look at the available commands this tool offers. You should recognize the 4 gNMI RPCs: Capabilities, Get, Set, and Subscribe.
+
+> Note, that gnmic CLI tool is already installed on the lab server/VM.
 
 ```bash
->$ gnmic --help
+$ gnmic --help
 run gnmi rpcs from the terminal (https://gnmic.openconfig.net)
 
 Usage:
@@ -75,7 +77,13 @@ Available Commands:
 
 The next step is fetching or subscribing to data on SR Linux. Since SR Linux is a fully YANG-modelled NOS, we need the identify the gNMI paths that point to the data we want to fetch. You can find these paths in the SR Linux CLI.
 
-Open a second terminal where you log into `clab-srexperts-leaf11`. Let's say we want to retrieve the *host-name* of this device. You can find the XPath by running the following command in SR Linux CLI
+Open a second terminal where you log into `clab-srexperts-leaf11`:
+
+```bash
+ssh admin@clab-srexperts-leaf11
+```
+
+Let's say we want to retrieve the `host-name` of this device. You can find the XPath by running the following command in SR Linux CLI
 
 ```bash
 --{ running }--[  ]--
@@ -83,23 +91,20 @@ A:leaf11# tree xpath system name
 /system/name
 /system/name/domain-name:
 /system/name/host-name:
-
 ```
 
-From the output you can find that for us to retrieve the *host-name* we will need to use the following XPath `/system/name/host-name`. Advanced CLI users who are well aware of the SR Linux YANG model can use this approach, but in many cases we don't know where or what we are looking for. This is when [YANG Browser](https://yang.srlinux.dev/v24.3.1) might come handy.
+From the output you can see that to retrieve the `host-name` we will need to use the following XPath `/system/name/host-name`. Advanced CLI users who are well aware of the SR Linux YANG model can use this approach, but in many cases we don't know where or what we are looking for. This is when [YANG Browser](https://yang.srlinux.dev/v24.7.1) might come handy.
 
 The YANG browser lets you do a search through the SR Linux YANG model. By simply typing for certain keywords, the YANG browser will return any matches found.
 
-<img width="708" alt="yangbrowser" src="https://github.com/jgcumming/srx2024-hackplanning/assets/33862202/ab13e924-7f2d-4750-b7a9-6841c2e9b2fc">
+## Tasks
 
-## TASK
-
-### 1 gNMI GET
+### 1 gNMI Get
 
 Now that you know the YANG path for the *host-name*, use gNMIc GET operation to fetch the *host-name* of `clab-srexperts-leaf11`
 
 ```bash
->$ gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e json_ietf get --path /system/name/host-name
+$ gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e json_ietf get --path /system/name/host-name
 [
   {
     "source": "clab-srexperts-leaf11",
@@ -118,10 +123,10 @@ Now that you know the YANG path for the *host-name*, use gNMIc GET operation to 
 
 ```
 
-Now we would like to fetch the *traffic-rate* of our interfaces. Try to find in the [YANG Browser](https://yang.srlinux.dev/v24.3.1) the YANG path for traffic-rate and fire again a gNMIc GET operation. You will notice there is a match in the YANG browser for ingress-bps and egress-bps.
+Now we would like to fetch the *traffic-rate* of our interfaces. Try to find in the [YANG Browser](https://yang.srlinux.dev/v24.7.1) the YANG path for traffic-rate and fire again a gNMIc GET operation. You will notice there is a match in the YANG browser for ingress-bps and egress-bps.
 
 ```bash
->$ sudo gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e json_ietf get --path '/interface[name=*]/traffic-rate/in-bps'
+$ sudo gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e json_ietf get --path '/interface[name=*]/traffic-rate/in-bps'
 [
   {
     "source": "clab-srexperts-leaf11",
@@ -156,7 +161,7 @@ Now we would like to fetch the *traffic-rate* of our interfaces. Try to find in 
 Notice that you will receive traffic rates for all interface available on the device. This is because we are matching all interfaces in the YANG path. Try to fetch now only the traffic-rate for interface ethernet-1/49
 
 ```bash
->$ sudo gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e json_ietf get --path '/interface[name=ethernet-1/49]/traffic-rate/in-bps'
+$ sudo gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e json_ietf get --path '/interface[name=ethernet-1/49]/traffic-rate/in-bps'
 [
   {
     "source": "clab-srexperts-leaf11",
@@ -174,13 +179,13 @@ Notice that you will receive traffic rates for all interface available on the de
 ]
 ```
 
-### 2 gNMIc Subscribe
+### 2 gNMI Subscribe
 
 Let's start now with some real streaming of telemetry data. Instead of performing a gNMI GET, we will now use the Subscribe RPC service to stream back the traffic-rate for interface ethernet-1/49 every 5 seconds.
 Choose now for a subscribe command with stream-mode sample with a sample-interval of 5 seconds. The traffic-rate should now pop on on your terminal every 5 seconds.
 
 ```bash
->$ sudo gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e json_ietf subscribe --stream-mode sample --sample-interval 5s --path '/interface[name=ethernet-1/49]/traffic-rate/in-bps'
+$ sudo gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e json_ietf subscribe --stream-mode sample --sample-interval 5s --path '/interface[name=ethernet-1/49]/traffic-rate/in-bps'
 
 {
   "source": "clab-srexperts-leaf11",
@@ -200,13 +205,13 @@ Choose now for a subscribe command with stream-mode sample with a sample-interva
 
 ```
 
-Choosing for stream mode sample is useful when you have fast changing data, but there are other cases where your operational data doesn't change freuqently. Think about BGP neighborship state and interface operational states. It wouldn't be useful to receive their status every 5 seconds if it almost never changes. It would be much more efficient if we only receive an update when their state changes. For these cases you can use the on-change stream mode.
+Choosing for stream mode sample is useful when you have fast changing data, but there are other cases where your operational data doesn't change frequently. Think about BGP neighborship state and interface operational states. It wouldn't be useful to receive their status every 5 seconds if it almost never changes. It would be much more efficient if we only receive an update when their state changes. For these cases you can use the on-change stream mode.
 
-Search in the [YANG Browser](https://yang.srlinux.dev/v24.3.1) for the YANG path corresponding to the *oper-state* of interface ethernet-1/2.
-Change now the stream mode to on-change and try to fetch the oper-state of the interface. You should notice that we only will receive an update when the operational state of interface ethernet-1/2 changes.
+Search in the [YANG Browser](https://yang.srlinux.dev/v24.7.1) for the YANG path corresponding to the *oper-state* of `ethernet-1/2` interface.  
+Change now the stream mode to on-change and try to fetch the oper-state of the interface. You should notice that we only will receive an update when the operational state of `ethernet-1/2` interface changes.
 
 ```bash
->$ sudo gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e json_ietf subscribe --stream-mode on-change --path '/interface[name=ethernet-1/2]/oper-state'
+$ sudo gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e json_ietf subscribe --stream-mode on-change --path '/interface[name=ethernet-1/2]/oper-state'
 {
   "source": "clab-srexperts-leaf11",
   "subscription-name": "default-1715183276",
@@ -239,7 +244,7 @@ Change now the stream mode to on-change and try to fetch the oper-state of the i
 
 #### Optional
 
-Defining subscriptions with subscribe command's CLI flags is a quick and easy way to test and work with gNMI subscribtions. A downside of that approach is that commands can get lengthy when defining multiple subscriptions. To make your life a bit more easy you can define your subscriptions in a configuration YAML file.
+Defining subscriptions with subscribe command's CLI flags is a quick and easy way to test and work with gNMI subscriptions. A downside of that approach is that commands can get lengthy when defining multiple subscriptions. To make your life a bit more easy you can define your subscriptions in a configuration YAML file.
 
 ```bash
 gnmic subscribe --config gnmi-config.yaml
@@ -327,7 +332,7 @@ subscriptions:
 
 Grafana is pre-configured with anonymous access enabled so that you can view the dashboards without authentication. To edit the dashboards you have to login with the username `admin` and password `SReXperts2024`. The login button is in the top right corner of the Grafana UI.
 
-There are some preconfigured dashboards avalailable. Navigate to the `SR Linux Telemetry` dashboard as described below to have a look and feel of what is available. Check which panels are available and what data they show. Try to understand how the data is collected and how it is visualized.
+There are some preconfigured dashboards available. Navigate to the `SR Linux Telemetry` dashboard as described below to have a look and feel of what is available. Check which panels are available and what data they show. Try to understand how the data is collected and how it is visualized.
 
 ![pic](./img/grafana-nav.gif)
 
@@ -339,7 +344,7 @@ If you look to the `SR Linux Telemetry` dashboard you will see a panel named *BG
 
 ![pic](./img/bgp-panel.JPG)
 
-Your task is to create a dashboard that visualizes if there are any BGP sessions down in the data center fabric. There is no metric that corresponds to the amount of BGP down session, but we can calculate it from the total amount of BGP Total peers available and subtract the total amount BGP sessons in Up state.
+Your task is to create a dashboard that visualizes if there are any BGP sessions down in the data center fabric. There is no metric that corresponds to the amount of BGP down session, but we can calculate it from the total amount of BGP Total peers available and subtract the total amount BGP sessions in Up state.
 
 ### 1 Create a new dashboard
 
@@ -353,15 +358,15 @@ Your task is to create a dashboard that visualizes if there are any BGP sessions
 8. Click `Time series` in the upper right to expand the dropdown menu
 9. Choose `Gauge` from the dropdown
 
-You pannel should now look like this with gauges showing only the `total peers`
+Your pannel should now look like this with gauges showing only the `total peers`
 
 ![pic](./img/create-panel.JPG)
 
 ### 2 Calculate total BGP session that are down
 
-10. In the Metric browser subtract `network_instance_protocols_bgp_statistics_total_peers` with `network_instance_protocols_bgp_statistics_up_peers`
-11. In the `Panel options` section on the right, type `Down BGP session in DC fabric` in the `Title` box
-12. Click `apply` in the upper right corner
+1. In the Metric browser subtract `network_instance_protocols_bgp_statistics_total_peers` with `network_instance_protocols_bgp_statistics_up_peers`
+2. In the `Panel options` section on the right, type `Down BGP session in DC fabric` in the `Title` box
+3. Click `apply` in the upper right corner
 
 You should now see the total amount of BGP session down in the fabric
 

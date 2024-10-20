@@ -1,35 +1,35 @@
 # Using gNOI with SR Linux
 
-| Item | Details |
-| --- | --- |
+| Item              | Details                                              |
+| ----------------- | ---------------------------------------------------- |
 | Short Description | Use gNOI file service for managing files on SR Linux |
-| Skill Level | Beginner |
-| Tools Used | SR Linux, gNOIc, Programming language of your choice |
+| Skill Level       | Beginner                                             |
+| Tools Used        | SR Linux, gNOIc, Programming language of your choice |
 
 The gRPC Network Operations Interface (gNOI) defines a set of gRPC-based micro-services for executing operational commands on network devices. [gNOI service](https://github.com/openconfig/gnoi) is defined by OpenConfig.
 
 gNOI supports Remote Procedure Calls (RPC) that can be used for Device reset, File operations, Hardware health check, Software upgrade and some general services like ping. gNOI like other gRPC services works in a client-server model where the client sends a RPC request to the server which executes the requested action and returns a response.
 
 ```
-gNOI client (on VM) -------------(Request)-------------> gNOI server (SRLinux)
-gNOI client (on VM) <------------(Response)------------- gNOI server (SRLinux)
+gNOI client (on VM) -------------(Request)-------------> gNOI server (SR Linux)
+gNOI client (on VM) <------------(Response)------------- gNOI server (SR Linux)
 ```
 
 For an easy read on gNOI RPCs and their parameters, visit [gNxI Documentation](https://gnxi.srlinux.dev/) developed by Nokia SR Linux team using the same gNxI RPC information from GitHub.
 
-Refer to [Nokia SR Linux guide](https://documentation.nokia.com/srlinux/24-3/books/system-mgmt/gnoi-system-mgmt.html) for more information on SR Linux implementation of gNOI services.
+Refer to [Nokia SR Linux guide](https://documentation.nokia.com/srlinux/24-7/books/system-mgmt/gnoi-system-mgmt.html) for more information on SR Linux implementation of gNOI services.
 
 If you prefer to listen rather than read, take a look at this [NANOG Video](https://www.youtube.com/watch?v=DldQtjPjKDk) by Nokia on gNOI services and a demo of SR Linux software upgrade using gNOI.
 
-There are many clients that support gNOI services, the most common one is [gNOIc](https://gnoic.kmrd.dev/) developed by Nokia.
+There are many several CLI clients that support gNOI services, the most common one is [gNOIc](https://gnoic.kmrd.dev/) - an open source client by Nokia.
 
 ## gNOI File Service
 
-In the gNOI file service, OpenConfig defines a generic interface to perform file operational tasks. For information see [gNOI specification](https://github.com/openconfig/gnoi/blob/master/file/file.proto)
+In the gNOI File service, OpenConfig defines a generic interface to perform file operational tasks. For information see [gNOI specification](https://github.com/openconfig/gnoi/blob/master/file/file.proto)
 
 SR Linux supports the following gNOI file RPCs:
 
-- Get RPC 
+- Get RPC
 - Put RPC
 - Stat RPC
 - Remove RPC
@@ -38,29 +38,26 @@ SR Linux supports the following gNOI file RPCs:
 
 ### SR Linux Configuration for gNOI
 
-Choose a SR Linux device in your topology.
+You can choose any SR Linux device in your topology to perform gNOI operations, we will use the `leaf11` node in this document.
 
-Login to the SR Linux device and configure/verify the following. When deploying a SR Linux container using [Containerlab](https://containerlab.dev/), gRPC and gNOI are enabled by Containerlab by default. It is ready to use.
+When we deployed the lab environment using [Containerlab](https://containerlab.dev/), gRPC and gNOI are enabled by Containerlab by default. It is ready to use, but still it is good to verify the configuration.
 
-The below example is provided as a reference for an insecure connection that should only be used in lab environments. By default, Containerlab sets up a secured TLS connection for gRPC services.
-
-```
-set / system grpc-server mgmt admin-state enable
-set / system grpc-server mgmt network-instance mgmt
-set / system grpc-server mgmt services [ gnoi ]
+Login to the SR Linux device:
 
 ```
+ssh admin@clab-srexperts-leaf11
+```
 
-To view configuration, use `info from running /system grpc-server mgmt`.
-Below is the actual configuration pushed by Containerlab to all SR Linux nodes. Check that this configuration exists in your lab environment.
+and verify the that gnoi service is enabled on the SR Linux node.
 
 ```
---{ running }--[  ]--
-A:leaf11# info system grpc-server mgmt
+--{ + running }--[  ]--
+A:g2-leaf11# info system grpc-server mgmt
     system {
         grpc-server mgmt {
             admin-state enable
             rate-limit 65000
+            session-limit 100
             tls-profile clab-profile
             network-instance mgmt
             trace-options [
@@ -79,32 +76,11 @@ A:leaf11# info system grpc-server mgmt
             }
         }
     }
-
---{ running }--[  ]--
-
---{ running }--[  ]--
-A:leaf11# info system tls server-profile clab-profile
-    system {
-        tls {
-            server-profile clab-profile {
-                key $aes1$ATDdSPG9IXSBnW8=$/IvtXhKLj5l1H9
-                certificate "-----BEGIN CERTIFICATE-----
-MIID0jCCArqgAwIBAgICBnowDQYJKoZIhvcNAQELBQAwVTELMAkGA1UEBhMCVVMx
-ZVmupvtACHHh5GiTgiXO9xXoATYDVA==
------END CERTIFICATE-----
-"
-                authenticate-client false
-            }
-        }
-    }
-
---{ running }--[  ]--
 ```
-
 
 ### gNOI client
 
-gNOIc is already installed on the server that runs the lab topology.
+gNOIc CLI tool is already installed on the server that runs the lab topology.
 
 To test this, run the below command on the VM:
 
@@ -132,6 +108,7 @@ The Stat RPC returns metadata about files on the target node.
 If the path specified in the StatRequest references a directory, the StatResponse returns the metadata for all files and folders, including the parent directory. If the path references a direct path to a file, the StatResponse returns metadata for the specified file only.
 
 The target node returns an error if:
+
 - The file does not exist.
 - An error occurs while accessing the metadata.
 
@@ -140,6 +117,7 @@ Let's go ahead and list files in the /opt/srlinux directory. We will be using th
 ```bash
 gnoic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify file stat --path /opt/srlinux
 ```
+
 ```
 +-----------------------------+-------------------------+---------------------------+------------+------------+------+
 |         Target Name         |          Path           |       LastModified        |    Perm    |   Umask    | Size |
@@ -171,15 +149,15 @@ The target node returns an error if:
 
 Create a directory on the VM and name it `srl-gnoi`. We will transfer the `srl_boot.log` file from the router to this directory. Verify the file was transferred to the VM.
 
-```
-
-# mkdir srl-gnoi
-# cd srl-gnoi
+```bash
+mkdir srl-gnoi
+cd srl-gnoi
 ```
 
 ```bash
 gnoic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify file get --file /var/log/srlinux/srl_boot.log --dst .
 ```
+
 ```
 INFO[0000] "clab-srexperts-leaf11:57400" received 27572 bytes 
 INFO[0000] "clab-srexperts-leaf11:57400" file "/var/log/srlinux/srl_boot.log" saved 
@@ -188,6 +166,7 @@ INFO[0000] "clab-srexperts-leaf11:57400" file "/var/log/srlinux/srl_boot.log" sa
 ```bash
 tail var/log/srlinux/srl_boot.log
 ```
+
 ```
 [23:52:35.906]:[sr_boot_run.sh]: Entering srl_boot_run.sh
 [23:52:35.923]:[11_sr_createuser.sh]: Executed: 'sudo sed -i s/^[       ]*#[    ]*\(HOME_MODE[  ]\+0700.*\)/\1/ /etc/login.defs'
@@ -216,14 +195,15 @@ echo "show interface" > show-int.txt
 ```bash
 gnoic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify file put --file show-int.txt --dst /home/admin/show-int.txt
 ```
+
 ```
 INFO[0000] "clab-srexperts-leaf11:57400" sending file="show-int.txt" hash 
 INFO[0000] "clab-srexperts-leaf11:57400" file "show-int.txt" written successfully
 ```
 
-```
 On the router:
 
+```
 --{ running }--[  ]--
 A:leaf11# bash cat show-int.txt
 show interface
@@ -231,7 +211,7 @@ show interface
 --{ running }--[  ]--
 ```
 
-Tip: Try executing the file we just transferred using the `source` command in SR Linux.
+Try "loading" the file we just transferred using the `source` command in SR Linux and see what happens.
 
 ### Removing Files from SR Linux
 
@@ -248,13 +228,14 @@ The target node returns an error if:
 ```bash
 gnoic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify file remove --path /home/admin/show-int.txt
 ```
+
 ```
 INFO[0000] "clab-srexperts-leaf11:57400" file "/home/admin/show-int.txt" removed successfully 
 ```
 
-```
 On the router:
 
+```
 --{ running }--[  ]--
 A:leaf11# bash cat show-int.txt
 cat: show-int.txt: No such file or directory
@@ -264,7 +245,7 @@ cat: show-int.txt: No such file or directory
 
 ## Practical scenarios with gNOI
 
-Now that you are an expert on gNOI, let's start using gNOI for some real world scenarios.
+Now that you are an gNOI expert, let's see how gNOI is used in some real-world scenarios.
 
 ### Configuration Backups
 
@@ -300,9 +281,8 @@ For ideas and solutions, refer to the [Solutions](./solutions/README.md) page.
 
 ## Summary
 
-In this hackathon activity, we learned about using gRPC gNOI service for file management. We used Get, Put, List and Delete RPCs for real world use cases.
+In this hackathon activity, we learned how to use gRPC gNOI service for the file management. We used Get, Put, List and Delete RPCs for real world use cases.
 
 Now that you are an expert in gNOI, start thinking of taking advantage of this service in your network. For any questions, please reach out to any of the members in the Hackathon team or contact your Account team.
 
-Thank you for choosing this use case ! We hope you enjoyed this activity.
-
+Thank you for choosing this use case! We hope you enjoyed this activity.

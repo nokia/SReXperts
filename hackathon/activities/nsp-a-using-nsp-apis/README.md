@@ -31,7 +31,7 @@ Participants will receive detailed explanations of the provided resources, enabl
 For additional assistance and documentation, please refer to the developer portal or reach out to Nokia support if access is required:
 * [NSP Developer Portal](https://network.developer.nokia.com/)
 * [NSP API Documentation](https://network.developer.nokia.com/api-documentation/)
-* [NSP Telemetry API Documentation 24.4](https://network.developer.nokia.com/learn/24_4/network-operations/network-and-service-assurance/telemetry/model-driven-mediation-mdm-telemetry/mdm-telemetry-use/)
+* [NSP Telemetry API Documentation 24.8](https://network.developer.nokia.com/learn/24_8/network-functions/data-collection-and-analysis/telemetry/mdm-telemetry-use/)
 * [Workflow Manager Guide](https://network.developer.nokia.com/learn/24_4/network-programmability-automation-frameworks/workflow-manager-framework/wfm-workflow-development/)
 
 ## Postman Collection API interaction - Steps
@@ -48,8 +48,8 @@ For additional assistance and documentation, please refer to the developer porta
 
 ### Prerequisites:
 - Ensure you have Postman installed on your machine. If not, download and install it from [https://www.postman.com/downloads/](https://www.postman.com/downloads/).
-- Import the collection JSON file provided into Postman (`Network Programming via NSP APIs - SReXpert Americas 2024.postman_collection.json`).
-- Import the environment file provided (`Hackhathon SReXperts Americas 2024.postman_environment.json`) into Postman.
+- Import the collection JSON file provided into Postman (`Network Programming via NSP APIs - SReXpert APAC 2024.postman_collection.json`).
+- Import the environment file provided (`Hackhathon SReXperts APAC 2024.postman_environment.json`) into Postman.
 
 ### Steps:
 
@@ -59,7 +59,7 @@ If this is your first NSP activity for this hackathon, ensure to first execute t
 
 1. **Initial Authentication - Get Token**
    - Open Postman.
-   - Ensure that the environment variables `server`, `user`, and `password` are imported from the environment file and correctly set.
+   - Ensure that the environment variables `server`, `user`, and `password` are imported from the environment file and correctly set. Note: replace the user with your user id.
    - Run the "Initial Authentication - Get Token" request.
    - Verify that the request executes successfully and retrieves the access token. The token will be automatically stored as a global variable for subsequent requests.
 
@@ -72,7 +72,7 @@ If this is your first NSP activity for this hackathon, ensure to first execute t
 3. **Create Subscription Ports in neId**
    - Ensure the access token obtained in step 1 is available as a global variable.
    - Set the environment variable `neId` with the specific Network Element ID.
-   - Run the "Create subscription ports in neId" request. [NSP Telemetry API Documentation 24.4 - Restconf Subscription](https://network.developer.nokia.com/learn/24_4/network-operations/network-and-service-assurance/telemetry/model-driven-mediation-mdm-telemetry/mdm-telemetry-use/#Use_Case_1%C2%A0RESTCONF_Subscription_Management%C2%A0) explains the meaning of variables and how they can be used. For the current subscription main parameters are:
+   - Run the "Create subscription ports in neId" request. [NSP Telemetry API Documentation 24.8 - Restconf Subscription](https://network.developer.nokia.com/learn/24_8/network-functions/data-collection-and-analysis/telemetry/mdm-telemetry-use/#Use_Case_1%C2%A0RESTCONF_Subscription_Management%C2%A0) explains the meaning of variables and how they can be used. For the current subscription main parameters are:
 
 	- **name**:
         - The "name" of a subscription must be unique and cannot be modified during the lifetime of the subscription. It typically describes the purpose or function of the subscription.
@@ -103,7 +103,7 @@ If this is your first NSP activity for this hackathon, ensure to first execute t
    - Run the "Delete RESTCONF subscriptions" request.
    - Confirm that the request successfully deletes the specified RESTCONF subscription via NSP UI.
 
-**Note:** Ensure that the environment file (`Hackhathon SReXperts Americas 2024.postman_environment.json`) is imported and correctly configured with the required variables (`server`, `user`, `password`, `neId`) before executing each request.
+**Note:** Ensure that the environment file (`Hackhathon SReXperts APAC 2024.postman_environment.json`) is imported and correctly configured with the required variables (`server`, `user`, `password`, `neId`) before executing each request.
 
 ## Python script API interaction - Steps
 
@@ -116,7 +116,7 @@ If this is your first NSP activity for this hackathon, ensure to first execute t
 5. Open a new terminal in VSCode and install Jupyter by running the command: `pip install jupyter`.
 6. Create a new Jupyter notebook in VSCode by opening the Command Palette (Ctrl+Shift+P), typing "Jupyter: Create New Blank Notebook", and selecting it.
 - Make sure you have the necessary Python libraries installed: requests, json, base64, re, urllib.
-- Open Jupyter Notebook and the file (`Network Programming via NSP APIs - SReXpert Americas 2024.ipynb`).
+- Open Jupyter Notebook and the file (`Network Programming via NSP APIs - SReXpert APAC 2024.ipynb`).
 - Copy the provided script into a new cell in your Jupyter Notebook.
 
 
@@ -124,7 +124,7 @@ If this is your first NSP activity for this hackathon, ensure to first execute t
 ### Steps:
 
 1. **Set up NSP Information:**
-   - Modify the `username`, `password`, and `NSP_server_IP` variables with your NSP server credentials and IP address.
+   - Modify the `username`, `password`, and `NSP_server_IP` variables with your NSP server credentials and IP address. Note: replace the user with your user id.
 
 2. **Specify Use Case Target Information:**
    - Set the `NeId` variable to the specific Network Element ID.
@@ -178,7 +178,7 @@ The user can optionally execute the _deleteSubscriptionByKeyword_ to remove the 
 
 ### Introduction
 
-System information like CPU and memory utilization can be monitored in NSP. [NSP Telemetry API Documentation 24.4](https://network.developer.nokia.com/learn/24_4/network-operations/network-and-service-assurance/telemetry/model-driven-mediation-mdm-telemetry/mdm-telemetry-use/)
+System information like CPU and memory utilization can be monitored in NSP. [NSP Telemetry API Documentation 24.8](https://network.developer.nokia.com/learn/24_8/network-functions/data-collection-and-analysis/telemetry/mdm-telemetry-use/)
 
 ### Customizing Postman Collection
 
@@ -244,10 +244,10 @@ Following are the steps to customize the provided Python Jupyter Notebook to per
 
 1. **Open the Jupyter Notebook**:
    - Open the Jupyter Notebook file in your preferred Python environment.
-   - Copy the file (Network Programming via NSP APIs - SReXpert Americas 2024.ipynb) as Custom - Network Programming via NSP APIs - SReXpert Americas 2024.ipynb.
+   - Copy the file (Network Programming via NSP APIs - SReXpert APAC 2024.ipynb) as Custom - Network Programming via NSP APIs - SReXpert APAC 2024.ipynb.
 
 2. **Check NSP Setup Information**:
-   - Check the `username`, `password`, and `NSP_server_IP` variables with the appropriate values for your NSP environment.
+   - Check the `username`, `password`, and `NSP_server_IP` variables with the appropriate values for your NSP environment. Note: replace the user with your user id.
 
 3. **Update Use Case Target Information**:
    - If necessary, update the `NeId` variable with the specific Network Element ID.

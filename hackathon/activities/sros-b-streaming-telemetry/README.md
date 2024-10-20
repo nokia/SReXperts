@@ -92,10 +92,10 @@ Although [gnmic](https://gnmic.openconfig.net) is functioning as the streaming t
 Starting simple, recall there were four RPCs supported in [gNMI](https://www.openconfig.net/docs/gnmi/gnmi-specification/). Capabilities shows the supported models and encodings on the server.
 
 SSH to the lab server and run the capabilities RPC with gNMIc:
-`gnmic -a clab-srexperts-p1 -u admin -p admin --insecure capabilities`
+`gnmic -a clab-srexperts-p1 -u admin -p <password> --insecure capabilities`
 
 ```
-❯ gnmic -a clab-srexperts-p1 -u admin -p admin --insecure capabilities
+❯ gnmic -a clab-srexperts-p1 -u admin -p <password> --insecure capabilities
 gNMI version: 0.8.0
 supported models:
   - nokia-conf, Nokia, 24.3.R2-1
@@ -125,7 +125,7 @@ Present Working Context:
 Copy the path, and return to the lab server. This time perform a GET RPC using that path:
 
 ```
-❯ gnmic -a clab-srexperts-pe1 -u admin -p admin --insecure get --type all --path 'state/router[router-name=Base]/route-table/unicast/ipv4/statistics/isis/'
+❯ gnmic -a clab-srexperts-pe1 -u admin -p <password> --insecure get --type all --path 'state/router[router-name=Base]/route-table/unicast/ipv4/statistics/isis/'
 [
   {
     "source": "clab-srexperts-pe1",
@@ -216,8 +216,6 @@ For more detail, please reference the [documentation](https://gnmic.openconfig.n
 [Processors](https://gnmic.openconfig.net/user_guide/event_processors/intro/) provide a way to configure a set of functions that allow an event message to be transformed as necessary to create effective visualization in the dashboard.
 
 Understanding the [event message](https://gnmic.openconfig.net/user_guide/event_processors/intro/) is key to being able to understand how to transform the data.
-
-![event message](images/notification_message.png)
 
 > Looking at the event messages using [gNMIc](https://gnmic.openconfig.net) on the cli is useful for looking at the actual data and then deciding on an approach for transforming the data using [processors](https://gnmic.openconfig.net/user_guide/event_processors/intro/).
 
@@ -350,7 +348,7 @@ It is possible to test a new subscription from the cli using [gnmic](https://gnm
 
 1. Open an ssh session to the lab server.
 2. Run the following command from the cli
-   `gnmic -a clab-srexperts-p1 -u admin -p admin --insecure get --path /state/system/security/ssh/connections`
+   `gnmic -a clab-srexperts-p1 -u admin -p <password> --insecure get --path /state/system/security/ssh/connections`
 3. Open another ssh session to the lab server and from this new session, ssh to `clab-srexperts-p1`
 4. In the original lab server session, run the command again and note the different output.
 

@@ -63,7 +63,7 @@ Supported services          Version      Admin State
 -------------------------------------------------------------------------------
 gNMI                        0.8.0        Enabled
 gNOI CertificateManagement  0.1.0        Disabled
-gNOI File                   0.1.0        Enabled
+gNOI File                   0.1.0        Disabled
 gNOI System                 1.0.0        Disabled
 mdCli                       24.3.0       Disabled
 RibApi                      1.1.0        Enabled
@@ -75,12 +75,15 @@ A:admin@p1# show system security user
 ===============================================================================
 Users
 ===============================================================================
-User ID      New User Permissions                 Password Login   Failed Local
-             Pwd console ftp li snmp netconf grpc Expires  Attempt Logins Conf
+User ID      New Access                           Password Login   Failed Local
+             Pwd Permissions                      Expires  Attempt Logins Conf
 -------------------------------------------------------------------------------
-admin        n   y       y   n  n    y       y    never    651     427    y
+admin        n   bt cc fp gr -- nc sp -- sc tc    never    645     0      y
 -------------------------------------------------------------------------------
 Number of users : 1
+Permissions: (bt) Bluetooth, (cc) Console port CLI, (fp) FTP, (gr) gRPC,
+             (li) LI, (nc) NETCONF, (sp) SCP/SFTP, (sn) SNMP, (sc) SSH CLI,
+             (tc) Telnet CLI
 ===============================================================================
 ``` 
 
@@ -104,9 +107,9 @@ gnmic -a clab-srexperts-p1 -u admin -p SReXperts2024  --port 57400 --insecure ca
 ```
 gNMI version: 0.8.0
 supported models:
-  - nokia-conf, Nokia, 24.3.R2-1 
-  - nokia-state, Nokia, 24.3.R2-1
-  - nokia-li-state, Nokia, 24.3.R2-1
+  - nokia-conf, Nokia, 24.7.R1
+  - nokia-state, Nokia, 24.7.R1
+  - nokia-li-state, Nokia, 24.7.R1
 supported encodings:
   - JSON
   - BYTES

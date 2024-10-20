@@ -6,7 +6,7 @@
 | Skill Level       | Intermediate/Advanced                                                    |
 | Tools Used        | SR Linux, Python                                                         |
 
-Before attempting this exercise, it is recommended that you have already completed the [beginner level exercise](../srlinux-i-plugin-show-version). In that tutorial you will learn the basic structure of a CLI plugin on SR Linux.
+Before attempting this exercise, it is recommended that you have already completed the [beginner level exercise](../srlinux-i-cli-plugin-show-version). In that tutorial you will learn the basic structure of a CLI plugin on SR Linux.
 
 This lab demonstrates how to construct a custom CLI plugin for SR Linux. During this lab, the user will learn how to create a new _show command_ plugin which will collect, parse and display useful information about each BGP peer on the router.
 
@@ -20,7 +20,7 @@ In this exercise, you will create a completely new CLI show command by following
 - Populating the schema
 - Displaying and Verifying the output
 
-Each section will provide the user a learning activity to complete along with relavent documentation and instruction, the solutions will often be revealed inline using a drop-down, the full plugin as well as the skeleton will be found in the [solutions](solutions/) directory.
+Each section will provide the user a learning activity to complete along with relevant documentation and instruction, the solutions will often be revealed inline using a drop-down, the full plugin as well as the skeleton will be found in the [solutions](solutions/) directory.
 
 > Try to complete the activity on your own before checking the solution.
 
@@ -246,7 +246,7 @@ Start by creating the root object and add the network-instance child. Note that 
 def _my_schema(self):
     root = FixedSchemaRoot()
     netinst = root.add_child(
-        'netinst'
+        'network-instance'
         key='name',
         fields = [ 'name', 'local-as' ]
     )
@@ -262,7 +262,7 @@ def _my_schema(self):
 def _my_schema(self):
     root = FixedSchemaRoot()
     netinst = root.add_child(
-        'netinst',
+        'network-instance',
         key = 'name',
         fields = [ 'name', 'local-as' ]
         )
@@ -275,7 +275,7 @@ def _my_schema(self):
     return root
 ```
 
-💡 Think back to our yang data model and notice that in the solution for the neigh object, the **.add_child()** method is called on the 'netinst' object, not the 'root'. Also notice the 'neigh' object has a 'key' - this is because there are multiple neighbors whose key is the value of their 'peer-address'.
+💡 Think back to our yang data model and notice that in the solution for the neigh object, the **.add_child()** method is called on the 'network-instance' object, not the 'root'. Also notice the 'neigh' object has a 'key' - this is because there are multiple neighbors whose key is the value of their 'peer-address'.
 
 </details>
 
@@ -368,7 +368,7 @@ Type 'help' (and press <ENTER>) if you need any help using this.
 A:peering2#
 ```
 
-The `load()` method is executed and this time, we have the output showing our **syntax** object printed to the screen. This is a good indication that the command has been successfully added to the CLI heirarchy.
+The `load()` method is executed and this time, we have the output showing our **syntax** object printed to the screen. This is a good indication that the command has been successfully added to the CLI hierarchy.
 
 Now, type `show <tab>` and you will see our **bgp-by** command in the list of options,
 
@@ -986,7 +986,7 @@ A:peering2#
 
 Ok, now we have populated our schema data object with only the filtered values we are looking to display, we just need to format our output.
 
-First, clean all of the debugging out of your script, upload and relog into the router.
+First, clean all of the debugging out of your script, upload and re-login into the router.
 
 Now try to issue our command but add `| as json` to the end.
 

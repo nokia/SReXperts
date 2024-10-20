@@ -504,7 +504,7 @@ For the example solution, we re-use the configuration from task 1, amending it w
 5. Create a new `event-handler` for the BGP events, link it to the new script policy and reuse the existing `filter`.
 6. Play with the `admin-state` attribute on the BGP session to the route-reflector on `pe2` in order to simulate a failure and the restoration of the BGP session.
 
-Mind the `admin-state` configuration for the various configurations being added as some are disabled by default. For possible help and inspiration, an example solution is provided in [examples/bgp-opergroup.py](./examples/opergroup.py). This file includes a validated `log` configuration matching what is outlined above. If you are working on the file source code, ensure it is reloaded into the `python-script` object in the router's memory using `/perform python python-script reload script bgp-opergroup`.
+Mind the `admin-state` configuration for the various configurations being added as some are disabled by default. For possible help and inspiration, an example solution is provided in [examples/bgp-opergroup.py](./examples/bgp-opergroup.py). This file includes a validated `log` configuration matching what is outlined above. If you are working on the file source code, ensure it is reloaded into the `python-script` object in the router's memory using `/perform python python-script reload script bgp-opergroup`.
 
 Outputs of this example script are, for a BGP session (re-)establishment:
 

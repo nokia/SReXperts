@@ -4,7 +4,7 @@
 | ----------------- | ----------------------------------------------------- |
 | Short Description | Simplify SR Linux command line interface with Aliases |
 | Skill Level       | Beginner                                              |
-| Tools Used        | SR Linux                                              |
+| Tools Used        | SR Linux CLI                                          |
 
 ## Creating aliases for CLI commands in SR Linux
 
@@ -31,109 +31,119 @@ ssh admin@clab-srexperts-leaf11
 
 We will start with a very basic example. In order to create an alias, you will need to use the `environment alias` command followed by the alias you want to create and the existing command you want to replace.
 
- ![alias](./img/srl-alias.JPG)
+![alias](./img/srl-alias.JPG)
 
 To give a first example, imagine you want to mimic how a user enters configuration mode in a different system than SR Linux. You can simply create an alias for the `enter candidate` command.
 
-  ```sh
-  A:leaf11# environment alias "configure"  "enter candidate"
-  --{ running }--[  ]--
-  ```
+```sh
+A:leaf11# environment alias "configure" "enter candidate"
+--{ running }--[  ]--
+```
 
 Execute the newly created alias and notice how the prompt changes from running to configuration mode represented by `candidate shared default`.
 
-  ```sh
-  A:leaf11# configure
-  --{ candidate shared default }--[  ]--
-  ```
+```sh
+A:leaf11# configure
+--{ candidate shared default }--[  ]--
+```
 
 The SR Linux CLI includes many commands you're already familiar with from the Linux world, such as `grep` and the pipe `|` commands. These are very useful for filtering outputs, but using multiple piped commands can be cumbersome. Creating an alias can simplify this process.
 
 | Create alias command                            |      Alias can have more than one word       |                  Existing Command                   |                                               Piped Commands |
 | :---------------------------------------------- | :------------------------------------------: | :-------------------------------------------------: | -----------------------------------------------------------: |
-| $`\textcolor{green}{\text{environment alias}}`$ | $`\textcolor{red}{\text{"display up-int"}}`$ | $`\textcolor{blue}{\text{"show interface brief"}}`$ | $`\textcolor{purple}{\text{"\| grep ethernet \| grep up"}}`$ |
+| $\textcolor{green}{\text{environment alias}}$ | $\textcolor{red}{\text{"display up-int"}}$ | $\textcolor{blue}{\text{"show interface brief"}}$ | $\textcolor{purple}{\text{"\| grep ethernet \| grep up"}}$ |
 
-Create an alias `display up-int` for the following show command `show interface brief | grep ethernet | grep up` which shows all ethernet interfaces that are operational up. You should note that an alias can exist of multiple words.
+Create an alias `display up-int` for the following show command `show interface brief | grep ethernet | grep up` which shows all ethernet interfaces that are operational up. You should notice that an alias can contain multiple "commands".
 
-  ```sh
-   A:leaf11# environment alias "display up-int" "show interface brief | grep ethernet | grep up"
-  ```
+```sh
+A:leaf11# environment alias "display up-int" "show interface brief | grep ethernet | grep up"
+```
 
-Run the alias command.
+Run the newly created alias command to display ethernet interface that are up:
 
-  ```sh
-   A:leaf11# display up-int
+```sh
+  A:leaf11# display up-int
 
 | ethernet-1/1        | enable                                   | up                                       | 25G 
 | ethernet-1/2        | enable                                   | up                                       | 25G 
 | ethernet-1/49       | enable                                   | up                                       | 100G
 | ethernet-1/50       | enable                                   | up                                       | 100G  
 
-  ```
+```
 
 When using aliases auto-complete works in the same way as with regular commands.
 
-display $`\textcolor{grey}{\text{up-int}}`$
+display $\textcolor{grey}{\text{up-int}}$
 
 <p align="right">(<a href="#table-of-content">back to top</a>)</p>
 
 ## Alias with required parameters
 
-Sometimes you want to parameterize an alias to limit down the scope of the output just to show you the area of interest. Such aliases can have one or more **required** parameters. It is crucial to note that if these parameters are not provided, the CLI will return an error.
+Static aliases are nice, but the real power of the SR Linux CLI lies within the parametrized aliases.
 
-A parameter can be provided by making use of the curly brackets `{}`. By providing a value inside the curly brackets, e.g. `{name}`, you define this parameter to be required when running the alias. We will later see how we can add optional parameters.
+Sometimes you just want to parameterize an alias to narrow down the scope of the output and to show you the area of interest. Such aliases can have one or more **required** parameters. It is crucial to note that if these parameters are not provided, the CLI will return an error, hence the name "required".
 
- ![](./img/alias-required-param.JPG)
+A required parameter can be provided by surrounding it with the curly brackets `{}`. For example, if an alias contains a parameter like `{name}`, this parameter will be required when running the alias. And sure, we have optional parameters as well.
 
-Create the following alias to summarize the interface information in table format. Note we are using the required parameter `{name}` which will be substitute during runtime with your provided parameter, e.g. `ethernet-1/49` or `system0`.
+![req-param](./img/alias-required-param.JPG)
 
-  ```sh
+Create the following alias to summarize the interface information in a table format. Note we are using the required parameter `{name}` which will be substituted at runtime with your provided parameter, e.g. `ethernet-1/49` or `system0`.
+
+```sh
 environment alias "display interface {name}" "info from state / interface {name} | as table "
-  ```
+```
 
-Execute the alias and type `display interface <TAB>`, you should see a drop-down box will appear with all available parameter for you to choose from. These correspond to the `{name}` parameter described above.
+Enter the alias command and type `display interface` and hit `<TAB>`; you should see a drop-down box with all available parameters for you to choose from. These correspond to the `{name}` parameter described above.
 
-![](./img/alias-required-param-exec.JPG)
+![completion](./img/alias-required-param-exec.JPG)
+
+The values for the suggestions are taken directly from SR Linux management server on the fly and they correspond to the interface names, since you map `{name}` parameter positionally to the interface name in the alias command.
 
 What happens if you don't provide the parameter? Try it out!
 
 ![error](./img/alias-required-param-exec-error.JPG)
 
-As shown above, a required parameter appears between curly brackets in the alias string. This parameter must also be present with curly brackets in the existing CLI string, and its actual value will be substituted  when the alias is executed.
+Error! This is because the parameter surrounded by the curly brackets is required and we haven't provided it. When we provide it, it is used in the "aliased" command at the exact position where it is defined.
 
 <p align="right">(<a href="#table-of-content">back to top</a>)</p>
 
 ## Alias with optional parameters
 
-When a parameter is specified between curly brackets only on the alias value side, it becomes an optional parameter for the alias command. An optional parameter can be unnamed, indicated by just curly brackets {}, where the parameter itself is the value. Alternatively, it can be a named optional parameter, indicated by a keyword within curly brackets {name}, forming a keyword-value pair. To clarify, let's explore some examples.
+When a parameter is specified between the curly brackets **only** for the aliased command (meaning not present in the alias itself), it becomes an optional parameter. An optional parameter can be unnamed, indicated by just curly brackets `{}`, where the parameter itself is the value. Alternatively, it can be a named optional parameter, indicated by a keyword within curly brackets {name}, forming a key-value pair. Some examples incoming!
 
-![](./img/alias-optional-param.JPG)
+![opt-params](./img/alias-optional-param.JPG)
 
-In the example below you can see we create an unamed parameter `{}` for the interface names and a named parameter `{subint}` for the subinterface. Note that we define only parameters on the alias value side, this makes this alias an optional alias.
+In the example below you can see we create an unnamed parameter `{}` for the interface names and a named parameter `{subint}` for the subinterface. Note that we define only parameters on the alias command side, this makes this alias an optional alias.
 
-  ```sh
+```sh
 environment alias "display subinterface" "info from state / interface {} subinterface {subint} | as table"
-  ```
+```
 
-Execute the alias with only the unamed parameter
+When we enter the alias command (`display subinterface`) and press `<TAB>` we first get the autosuggestions for the unnamed parameter that lists all interfaces.
 
-![](./img/alias-unnamed-optional-param1.JPG)
+![unnamed](./img/alias-unnamed-optional-param1.JPG)
 
-Execute now the alias with the named and unamed parameter.
+Once we select the interface and click `<TAB>` again, we get the autosuggestions for the named `subint` parameter that lists all subinterfaces for the selected interface.
 
-![](./img/alias-named-optional-param1.JPG)
+![named opt](./img/alias-named-optional-param1.JPG)
 
-_Missing optional parameter is substituted by wildcard:_
+_Missing optional parameter is substituted by a wildcard:_
 
-![](./img/alias-no-param.JPG)
+![wildcard](./img/alias-no-param.JPG)
+
+## What have we learned?
+
+Aliases in SR Linux CLI is a powerful way to enhance your productivity by either creating a shortcut for a long existing command, or creating a command using `info from state` with filters and output modifiers to pick up the information you really need.
+
+All in all, mastering aliases will make you a CLI ninja, in a good way!
 
 <p align="right">(<a href="#table-of-content">back to top</a>)</p>
 
 ## Task
 
-Try to implement what you have learned so far by creating an alias for a long CLI command.
+We are sure you're ready for some challenge. Try to create an alias for a long CLI command, given the following input (or think of your own):
 
-I have a lengthy CLI command that displays the BFD status of the interfaces in a specific format. I want to visualize it in a table with specific columns. Since the command is extensive and I don't want to retype it every time, this is an ideal use case for an alias!
+> I have a lengthy CLI command that displays the BFD status of the interfaces in a specific format. I want to visualize it in a table with specific columns. Since the command is extensive and I don't want to retype it every time, this is an ideal use case for an alias!
 
 ```
 info from state bfd subinterface system0.0 | as table | filter fields admin-state desired-minimum-transmit-interval required-minimum-receive detection-multiplier minimum-echo-receive-interval max-hop-count
@@ -184,11 +194,11 @@ Aliases are ephemeral unless saved to the environment file. Yes, aliases are sav
 
 _Saving environment settings:_
 
-  ```sh
+```sh
 environment save home
 
 Saved configuration to /admin/.srlinuxrc
 --{ + running }--[  ]--
-  ```
+```
 
 <p align="right">(<a href="#table-of-content">back to top</a>)</p>

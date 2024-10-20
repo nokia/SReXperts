@@ -27,7 +27,7 @@ gNMI supports the following RPCs:
 
 ## Step 1: Configuring Nokia SR Linux
 
-gNMI has already been enabled on `leaf11` and other SR Linux nodes of the lab, since we use it for other exercises and activies, but you can verify how the configuration is done to understand what it takes to configure SR Linux to support gNMI.
+gNMI has already been enabled on `leaf11` and other SR Linux nodes of the lab, since we use it for other exercises, but you can verify how the configuration is done to understand what it takes to configure SR Linux to support gNMI.
 
 gNMI is one of the gRPC services that a user configures on SR Linux. The output below shows the configuration of the `mgmt` gRPC service on SR Linux device `leaf11` where you can see that `gnmi` is a member of the `services` list.
 
@@ -97,9 +97,8 @@ Using `gnmic` CLI tool perform the following command to query the capabilities:
 gnmic -a clab-srexperts-leaf11:57400 -u admin -p SReXperts2024 --skip-verify capabilities
 ```
 
-> Note: this is executed from the bash shell on your linux instance <groupID.srexperts.net>
-
-> Note, the port 57400 that we specified to highlight the default port number used by SR Linux. The port can be omitted as well, since gNMIc uses port 57400 whenever the port is not set explicitly.
+> Note: this is executed from the bash shell on your linux instance <groupID.srexperts.net>  
+> The port 57400 that we specified to highlight the default port number used by SR Linux. The port can be omitted as well, since gNMIc uses port 57400 whenever the port is not set explicitly.
 
 Since SR Linux's `mgmt` gRPC server uses TLS encryption we added the `--skip-verify` flag to make our life a little bit easier and not providing a CA certificate for TLS verification.
 
@@ -143,7 +142,7 @@ The output lists the gNMI version (0.10.0), the list of YANG models supported by
 
 ## Step 4: Get
 
-gNMI can be used to retrieve configuration and state information from the SR Linux nodes. zInformation is retrieved using the GET RPC that consists of the `GetRequest` and `GetResponse` messages.
+gNMI can be used to retrieve configuration and state information from the SR Linux nodes. Information is retrieved using the GET RPC that consists of the `GetRequest` and `GetResponse` messages.
 
 To indicate what part of the device's datastore we want to get we use the `path` field in the `GetRequest` message. The path is a string that represents the gNMI path that points to a particular point in the YANG data model of the device.
 
@@ -164,9 +163,8 @@ Let's try and get the configuration data for an interface `ethernet-1/1` from th
 gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify get --path "/interface[name=ethernet-1/1]" -e json_ietf --type CONFIG
 ```
 
-> Note: this is executed from the bash shell on your linux instance <groupID.srexperts.net>
-
-> Note, how we set the required data encoding (`json-ietf`) and provided the `CONFIG` data type to the command.
+> Note: this is executed from the bash shell on your linux instance <groupID.srexperts.net>  
+> We set the required data encoding (`json-ietf`) and provided the `CONFIG` data type to the command.
 
 *Expected Output:*
 
@@ -306,7 +304,7 @@ The returned data is nothing more than a confirmation, that the data has been se
 
 ### b. Set RPC with file-based input
 
-The downside of the inlined values for Set operations is that they are not suitable when you have to privide a non-scalar value, like a json blob. For example, when you want to create a new subinterface, you would need to provide more data than just a string like we did for the description.
+The downside of the inlined values for Set operations is that they are not suitable when you have to provide a non-scalar value, like a json blob. For example, when you want to create a new subinterface, you would need to provide more data than just a string like we did for the description.
 
 To assist with more complex inputs, gNMIc supports the file-based input. You can provide a file with the data you want to set and gNMIc will read the file and use the data to perform the Set operation.
 
@@ -314,9 +312,9 @@ To demonstrate this, lets create a new subinterface `99` under the `ethernet-1/1
 
 ```bash
 gnmic -a clab-srexperts-leaf11 -u admin -p SReXperts2024 --skip-verify -e JSON_IETF set --update-path "/interface[name=ethernet-1/1]/subinterface[index=99]" --update-file subif.json
-
 ```
 
+> Do not execute this command just yet, because we haven't created the `subif.json` file that should contain the data about the subinterface we want to create. We will get to it in a moment.  
 > Note: this is executed from the bash shell on your linux instance <groupID.srexperts.net>
 
 The last argument in the command refers to a `subif.json` file. Clearly this is the file that contains the data about the subinterface we want to create. But how to figure out what content can we put in the file?
@@ -350,7 +348,7 @@ A:leaf11# info | as json
 }
 ```
 
-Using one of the above methods we can construct our `subif.json` files that we will use in the gnmic commmand:
+Using one of the above methods we can construct our `subif.json` files that we will use in the gnmic command:
 
 ```json
 {

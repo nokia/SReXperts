@@ -91,7 +91,7 @@ inventory2telemetry:
           "subscription": [
             {
               "name": "Port-Utilization-<% $.neId %>-<% $.portName %>",
-              "description": "SRX - MDM Port Utilization for <% $.neId %> in port <% $.portName %>",
+              "description": "SRX - Port Utilization for <% $.neId %> in port <% $.portName %>",
               "period": 60,
               "sync-time": "00:00",
               "state": "enabled",

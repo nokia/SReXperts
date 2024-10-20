@@ -1,0 +1,685 @@
+{
+	"info": {
+		"_postman_id": "d3962129-90e9-4553-a483-6979cf3b2e00",
+		"name": "Network Programming via NSP APIs - SReXpert APAC 2024",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "7228015"
+	},
+	"item": [
+		{
+			"name": "Steps",
+			"item": [
+				{
+					"name": "Initial Authentication - Get Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonBody = JSON.parse(responseBody);",
+									"pm.globals.set(\"token\", jsonBody.access_token);",
+									"pm.globals.set(\"refreshToken\", jsonBody.refresh_token);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{user}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "string"
+								},
+								{
+									"key": "saveHelperData",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "showPassword",
+									"value": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"grant_type\": \"client_credentials\"\n}"
+						},
+						"url": {
+							"raw": "https://{{server}}/rest-gateway/rest/api/v1/auth/token",
+							"protocol": "https",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"rest-gateway",
+								"rest",
+								"api",
+								"v1",
+								"auth",
+								"token"
+							]
+						},
+						"description": "Request a token from the REST Gateway for the provided user"
+					},
+					"response": [
+						{
+							"name": "Initial Authentication - Get Token",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"grant_type\": \"client_credentials\"\n}"
+								},
+								"url": {
+									"raw": "https://{{server}}/rest-gateway/rest/api/v1/auth/token",
+									"protocol": "https",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"rest-gateway",
+										"rest",
+										"api",
+										"v1",
+										"auth",
+										"token"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": "{\n    \"access_token\": \"eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJjb0ZQdW1IUFVBcmtORlRVV0JHZFRpRl9nalVob1FkeDRWNl9hRDVyaGc4In0.eyJleHAiOjE3MTU4NTYxOTgsImlhdCI6MTcxNTg1MjU5OCwianRpIjoiZDNiZTQzNjktZjhlNS00Y2RkLWIwMWMtZGZmODE1MmJkOWMxIiwiaXNzIjoiaHR0cHM6Ly8xMzUuMjI4LjEzOC4yMjcvYXV0aC9yZWFsbXMvTm9raWEiLCJhdWQiOlsiTlNQIiwiYWNjb3VudCJdLCJzdWIiOiIxMzY3ZTc0Ny1mMTRkLTQxYjItOGY3Ni0yN2U1YjYxMTllZjQiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJOU1AtT1NTIiwic2Vzc2lvbl9zdGF0ZSI6IjgxNmU1MTBkLWE1MGQtNDYxZC04MzVkLTBjOTEzNTA1MDM1MiIsImFsbG93ZWQtb3JpZ2lucyI6WyIvKiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJkZWZhdWx0LXJvbGVzLW5va2lhIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJOU1AiOnsicm9sZXMiOlsiU3lzdGVtQWRtaW4iXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoiZW1haWwgbWVtYmVyc2hpcCBwcm9maWxlIG9wZW5pZCIsInNpZCI6IjgxNmU1MTBkLWE1MGQtNDYxZC04MzVkLTBjOTEzNTA1MDM1MiIsImdyb3VwX21lbWJlcnNoaXAiOlsiYWRtaW4iXSwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJhdXRoX3NvdXJjZSI6Ik5TUCIsInByZWZlcnJlZF91c2VybmFtZSI6ImFkbWluIn0.o1F--dx3ueAwbqkTQXpzHpncCcGX9Cv2ALTe2NJ4da44s5NApQVz7yXVlA_oVH0mm1AqtsGpAzAQvGCtJcDSMNEDimTMHcs-0Vh24H_rfP9RrHXes1HrhboQ4Pk8neHQzsVZgbXbiokV0tyX8CS9UDUFtrv9VHiKprkRbpnw9bVIuAGI-ZjXQv0PFWz56yltmLCOvrJO6SWpP_Jm0KeJx1YDSJRl5O5LShfr26PEP3_gsGZ0ZKThZN2LLGDJSKBg0Cuf0ACmSsulnpCvaUygedhAEFh4NSPfO7jIcDjsxlpipdsd_d6oCykIRBw4B8OyJ9Mx01bHRePTv5_7NivFyw\",\n    \"refresh_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI3OWI1ZDgzZi03ZDE3LTRiZDYtOGQwYy02OThiOTYzNjg1YzUifQ.eyJleHAiOjE3MTU4NTYxOTgsImlhdCI6MTcxNTg1MjU5OCwianRpIjoiMTZmNGM3MDEtZTQzOS00NTVjLWFhY2QtMTg0OThmMDM1NGU2IiwiaXNzIjoiaHR0cHM6Ly8xMzUuMjI4LjEzOC4yMjcvYXV0aC9yZWFsbXMvTm9raWEiLCJhdWQiOiJodHRwczovLzEzNS4yMjguMTM4LjIyNy9hdXRoL3JlYWxtcy9Ob2tpYSIsInN1YiI6IjEzNjdlNzQ3LWYxNGQtNDFiMi04Zjc2LTI3ZTViNjExOWVmNCIsInR5cCI6IlJlZnJlc2giLCJhenAiOiJOU1AtT1NTIiwic2Vzc2lvbl9zdGF0ZSI6IjgxNmU1MTBkLWE1MGQtNDYxZC04MzVkLTBjOTEzNTA1MDM1MiIsInNjb3BlIjoiZW1haWwgbWVtYmVyc2hpcCBwcm9maWxlIG9wZW5pZCIsInNpZCI6IjgxNmU1MTBkLWE1MGQtNDYxZC04MzVkLTBjOTEzNTA1MDM1MiJ9.Hs4fRiO9a0nGVmc5SYKpOoDJckkt9-XMCTBdCOGrYnI\",\n    \"token_type\": \"Bearer\",\n    \"expires_in\": 3600\n}"
+						}
+					]
+				},
+				{
+					"name": "get ports from specific neId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Count and print port names with Network Element ID\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var networkElementId = jsonData[\"nsp-equipment:port\"][0][\"ne-id\"]; // Assuming all ports belong to the same Network Element",
+									"    ",
+									"    console.log(\"Network Element ID:\", networkElementId);",
+									"    ",
+									"    var ports = jsonData[\"nsp-equipment:port\"];",
+									"    var filteredPorts = [];",
+									"    ",
+									"    if (ports && ports.length > 0) {",
+									"        ports.forEach(function(port) {",
+									"            var portName = port.name;",
+									"            var portSegments = portName.split(\"/\");",
+									"            if (portSegments.length === 4 && portSegments[0] === \"1\" && portSegments[1] === \"1\" && portSegments[2].startsWith(\"c\") && !isNaN(parseInt(portSegments[2].substr(1))) && !isNaN(parseInt(portSegments[3]))) {",
+									"                console.log(\"Port Name:\", portName);",
+									"                filteredPorts.push(portName);",
+									"            }",
+									"        });",
+									"        ",
+									"        console.log(\"Number of ports with format 1/1/cX/Y:\", filteredPorts.length);",
+									"    } else {",
+									"        console.log(\"No ports found in the response.\");",
+									"        pm.expect(ports).to.not.be.empty;",
+									"    }",
+									"    ",
+									"    // Save the filtered ports in a variable for later use",
+									"    pm.variables.set(\"filteredPorts\", filteredPorts);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{server}}/restconf/data/nsp-equipment:network/network-element={{neId}}/hardware-component/port",
+							"protocol": "https",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"restconf",
+								"data",
+								"nsp-equipment:network",
+								"network-element={{neId}}",
+								"hardware-component",
+								"port"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "get ports from specific NE",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://{{server}}/restconf/data/nsp-equipment:network/network-element={{neId}}/hardware-component/port",
+									"protocol": "https",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"restconf",
+										"data",
+										"nsp-equipment:network",
+										"network-element={{neId}}",
+										"hardware-component",
+										"port"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Thu, 16 May 2024 09:52:41 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-store, no-cache, max-age=0, must-revalidate"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "Thu, 01 Jan 1970 00:00:00 GMT"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "SAMEORIGIN"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "Set-Cookie",
+									"value": "ASSURANCE_JSESSIONID=D77B8CFB9E37F5B12D631090A964E94C; Expires=Sat, 15 Jun 2024 09:52:41 GMT; Path=/; Secure; HttpOnly"
+								},
+								{
+									"key": "total-count",
+									"value": "17"
+								},
+								{
+									"key": "start-index",
+									"value": "0"
+								},
+								{
+									"key": "end-index",
+									"value": "16"
+								},
+								{
+									"key": "vary",
+									"value": "accept-encoding"
+								},
+								{
+									"key": "Content-Encoding",
+									"value": "gzip"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"nsp-equipment:port\": [\n        {\n            \"@\": {\n                \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port\",\n                \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c1']\",\n                \"nsp-model:creation-time\": \"2024-10-08T12:49:50.175Z\",\n                \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.521Z\",\n                \"nsp-model:sources\": [\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c1']\",\n                    \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:Equipment:/port[port-id='1/1/c1']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c1']\"\n                ]\n            },\n            \"parent\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/card[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1']\",\n            \"mfg-deviations\": null,\n            \"equipment-extension-port:extension\": {\n                \"@\": {\n                    \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/equipment-extension-port:extension\",\n                    \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c1']/equipment-extension-port:extension\"\n                }\n            },\n            \"mfg-name\": null,\n            \"availability-state\": [],\n            \"description\": null,\n            \"mfg-assembly-number\": \"3HE\",\n            \"admin-state\": \"unlocked\",\n            \"ne-id\": \"fd00:fde8::2:21\",\n            \"clei-code\": null,\n            \"component-id\": \"shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c1\",\n            \"ne-name\": \"g2-pe1\",\n            \"children\": [\n                \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c1/breakout-port=1/1/c1/1']\"\n            ],\n            \"part-number\": \"SQF1000L4LNGG01B\",\n            \"standby-state\": \"providing-service\",\n            \"state-reason\": [],\n            \"class\": \"port\",\n            \"mac-address\": null,\n            \"oper-state\": \"enabled\",\n            \"mfg-date\": \"2015-10-15T00:00:00.0Z\",\n            \"hw-mac-address\": \"00:00:00:00:00:00\",\n            \"parent-rel-pos\": 1,\n            \"serial-num\": \"5XD804N00017    \",\n            \"port-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/port-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c1']/port-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.369Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.758Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c1']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c1']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:PortDetails:/port[port-id='1/1/c1']\"\n                        ]\n                    },\n                    \"rate\": null,\n                    \"port-mode\": \"trunk\",\n                    \"actual-rate-units\": \"unknown\",\n                    \"mtu-value\": null,\n                    \"duplex\": \"unknown\",\n                    \"port-type\": \"connector-port\",\n                    \"auto-negotiate\": \"unknown\",\n                    \"operational-duplex\": \"unknown\",\n                    \"port-index\": 1610899520,\n                    \"actual-rate\": null,\n                    \"encap-type\": \"null-encap\"\n                }\n            ],\n            \"network-element\": \"fd00:fde8::2:21\",\n            \"name\": \"1/1/c1\",\n            \"transceiver-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/transceiver-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c1']/transceiver-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.774Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.906Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:TransceiverDetails:/port[port-id='1/1/c1']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c1']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c1']\"\n                        ]\n                    },\n                    \"connector-code\": \"lc\",\n                    \"vendor-o-u-i\": \"00:00:5f\",\n                    \"diagnostic-capable\": true,\n                    \"laser-wave-length\": 1302.0,\n                    \"optical-compliance\": \"100GBASE-LR4\",\n                    \"specific-type\": \"cfp2-or-qsfp28\",\n                    \"media\": \"ethernet\",\n                    \"number-of-lanes\": 4,\n                    \"connector-type\": \"qsfp\",\n                    \"link-length-support\": \"10km for SMF\",\n                    \"laser-tunability\": \"Unequipped\"\n                }\n            ]\n        },\n        {\n            \"@\": {\n                \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port\",\n                \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c2']\",\n                \"nsp-model:creation-time\": \"2024-10-08T12:49:50.180Z\",\n                \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.530Z\",\n                \"nsp-model:sources\": [\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c2']\",\n                    \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:Equipment:/port[port-id='1/1/c2']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c2']\"\n                ]\n            },\n            \"parent\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/card[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1']\",\n            \"mfg-deviations\": null,\n            \"equipment-extension-port:extension\": {\n                \"@\": {\n                    \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/equipment-extension-port:extension\",\n                    \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c2']/equipment-extension-port:extension\"\n                }\n            },\n            \"mfg-name\": null,\n            \"availability-state\": [],\n            \"description\": null,\n            \"mfg-assembly-number\": \"3HE\",\n            \"admin-state\": \"unlocked\",\n            \"ne-id\": \"fd00:fde8::2:21\",\n            \"clei-code\": null,\n            \"component-id\": \"shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c2\",\n            \"ne-name\": \"g2-pe1\",\n            \"children\": [\n                \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c2/breakout-port=1/1/c2/1']\"\n            ],\n            \"part-number\": \"SQF1000L4LNGG01B\",\n            \"standby-state\": \"providing-service\",\n            \"state-reason\": [],\n            \"class\": \"port\",\n            \"mac-address\": null,\n            \"oper-state\": \"enabled\",\n            \"mfg-date\": \"2015-10-15T00:00:00.0Z\",\n            \"hw-mac-address\": \"00:00:00:00:00:00\",\n            \"parent-rel-pos\": 2,\n            \"serial-num\": \"5XD804N00017    \",\n            \"port-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/port-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c2']/port-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.371Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.758Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c2']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c2']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:PortDetails:/port[port-id='1/1/c2']\"\n                        ]\n                    },\n                    \"rate\": null,\n                    \"port-mode\": \"trunk\",\n                    \"actual-rate-units\": \"unknown\",\n                    \"mtu-value\": null,\n                    \"duplex\": \"unknown\",\n                    \"port-type\": \"connector-port\",\n                    \"auto-negotiate\": \"unknown\",\n                    \"operational-duplex\": \"unknown\",\n                    \"port-index\": 1610899584,\n                    \"actual-rate\": null,\n                    \"encap-type\": \"null-encap\"\n                }\n            ],\n            \"network-element\": \"fd00:fde8::2:21\",\n            \"name\": \"1/1/c2\",\n            \"transceiver-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/transceiver-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c2']/transceiver-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.778Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.909Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c2']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:TransceiverDetails:/port[port-id='1/1/c2']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c2']\"\n                        ]\n                    },\n                    \"connector-code\": \"lc\",\n                    \"vendor-o-u-i\": \"00:00:5f\",\n                    \"diagnostic-capable\": true,\n                    \"laser-wave-length\": 1302.0,\n                    \"optical-compliance\": \"100GBASE-LR4\",\n                    \"specific-type\": \"cfp2-or-qsfp28\",\n                    \"media\": \"ethernet\",\n                    \"number-of-lanes\": 4,\n                    \"connector-type\": \"qsfp\",\n                    \"link-length-support\": \"10km for SMF\",\n                    \"laser-tunability\": \"Unequipped\"\n                }\n            ]\n        },\n        {\n            \"@\": {\n                \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port\",\n                \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c3']\",\n                \"nsp-model:creation-time\": \"2024-10-08T12:49:50.184Z\",\n                \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.538Z\",\n                \"nsp-model:sources\": [\n                    \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:Equipment:/port[port-id='1/1/c3']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c3']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c3']\"\n                ]\n            },\n            \"parent\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/card[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1']\",\n            \"mfg-deviations\": null,\n            \"equipment-extension-port:extension\": {\n                \"@\": {\n                    \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/equipment-extension-port:extension\",\n                    \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c3']/equipment-extension-port:extension\"\n                }\n            },\n            \"mfg-name\": null,\n            \"availability-state\": [],\n            \"description\": null,\n            \"mfg-assembly-number\": \"3HE\",\n            \"admin-state\": \"unlocked\",\n            \"ne-id\": \"fd00:fde8::2:21\",\n            \"clei-code\": null,\n            \"component-id\": \"shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c3\",\n            \"ne-name\": \"g2-pe1\",\n            \"children\": [\n                \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c3/breakout-port=1/1/c3/1']\"\n            ],\n            \"part-number\": \"SQF1000L4LNGG01B\",\n            \"standby-state\": \"providing-service\",\n            \"state-reason\": [],\n            \"class\": \"port\",\n            \"mac-address\": null,\n            \"oper-state\": \"enabled\",\n            \"mfg-date\": \"2015-10-15T00:00:00.0Z\",\n            \"hw-mac-address\": \"00:00:00:00:00:00\",\n            \"parent-rel-pos\": 3,\n            \"serial-num\": \"5XD804N00017    \",\n            \"port-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/port-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c3']/port-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.361Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.758Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c3']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:PortDetails:/port[port-id='1/1/c3']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c3']\"\n                        ]\n                    },\n                    \"rate\": null,\n                    \"port-mode\": \"trunk\",\n                    \"actual-rate-units\": \"unknown\",\n                    \"mtu-value\": null,\n                    \"duplex\": \"unknown\",\n                    \"port-type\": \"connector-port\",\n                    \"auto-negotiate\": \"unknown\",\n                    \"operational-duplex\": \"unknown\",\n                    \"port-index\": 1610899648,\n                    \"actual-rate\": null,\n                    \"encap-type\": \"null-encap\"\n                }\n            ],\n            \"network-element\": \"fd00:fde8::2:21\",\n            \"name\": \"1/1/c3\",\n            \"transceiver-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/transceiver-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c3']/transceiver-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.763Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.895Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c3']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:TransceiverDetails:/port[port-id='1/1/c3']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c3']\"\n                        ]\n                    },\n                    \"connector-code\": \"lc\",\n                    \"vendor-o-u-i\": \"00:00:5f\",\n                    \"diagnostic-capable\": true,\n                    \"laser-wave-length\": 1302.0,\n                    \"optical-compliance\": \"100GBASE-LR4\",\n                    \"specific-type\": \"cfp2-or-qsfp28\",\n                    \"media\": \"ethernet\",\n                    \"number-of-lanes\": 4,\n                    \"connector-type\": \"qsfp\",\n                    \"link-length-support\": \"10km for SMF\",\n                    \"laser-tunability\": \"Unequipped\"\n                }\n            ]\n        },\n        {\n            \"@\": {\n                \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port\",\n                \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c4']\",\n                \"nsp-model:creation-time\": \"2024-10-08T12:49:50.189Z\",\n                \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.547Z\",\n                \"nsp-model:sources\": [\n                    \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:Equipment:/port[port-id='1/1/c4']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c4']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c4']\"\n                ]\n            },\n            \"parent\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/card[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1']\",\n            \"mfg-deviations\": null,\n            \"equipment-extension-port:extension\": {\n                \"@\": {\n                    \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/equipment-extension-port:extension\",\n                    \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c4']/equipment-extension-port:extension\"\n                }\n            },\n            \"mfg-name\": null,\n            \"availability-state\": [],\n            \"description\": null,\n            \"mfg-assembly-number\": \"3HE\",\n            \"admin-state\": \"unlocked\",\n            \"ne-id\": \"fd00:fde8::2:21\",\n            \"clei-code\": null,\n            \"component-id\": \"shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c4\",\n            \"ne-name\": \"g2-pe1\",\n            \"children\": [\n                \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c4/breakout-port=1/1/c4/1']\"\n            ],\n            \"part-number\": \"SQF1000L4LNGG01B\",\n            \"standby-state\": \"providing-service\",\n            \"state-reason\": [],\n            \"class\": \"port\",\n            \"mac-address\": null,\n            \"oper-state\": \"enabled\",\n            \"mfg-date\": \"2015-10-15T00:00:00.0Z\",\n            \"hw-mac-address\": \"00:00:00:00:00:00\",\n            \"parent-rel-pos\": 4,\n            \"serial-num\": \"5XD804N00017    \",\n            \"port-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/port-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c4']/port-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.365Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.758Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c4']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:PortDetails:/port[port-id='1/1/c4']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c4']\"\n                        ]\n                    },\n                    \"rate\": null,\n                    \"port-mode\": \"trunk\",\n                    \"actual-rate-units\": \"unknown\",\n                    \"mtu-value\": null,\n                    \"duplex\": \"unknown\",\n                    \"port-type\": \"connector-port\",\n                    \"auto-negotiate\": \"unknown\",\n                    \"operational-duplex\": \"unknown\",\n                    \"port-index\": 1610899712,\n                    \"actual-rate\": null,\n                    \"encap-type\": \"null-encap\"\n                }\n            ],\n            \"network-element\": \"fd00:fde8::2:21\",\n            \"name\": \"1/1/c4\",\n            \"transceiver-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/transceiver-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c4']/transceiver-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.770Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.902Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c4']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:TransceiverDetails:/port[port-id='1/1/c4']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c4']\"\n                        ]\n                    },\n                    \"connector-code\": \"lc\",\n                    \"vendor-o-u-i\": \"00:00:5f\",\n                    \"diagnostic-capable\": true,\n                    \"laser-wave-length\": 1302.0,\n                    \"optical-compliance\": \"100GBASE-LR4\",\n                    \"specific-type\": \"cfp2-or-qsfp28\",\n                    \"media\": \"ethernet\",\n                    \"number-of-lanes\": 4,\n                    \"connector-type\": \"qsfp\",\n                    \"link-length-support\": \"10km for SMF\",\n                    \"laser-tunability\": \"Unequipped\"\n                }\n            ]\n        },\n        {\n            \"@\": {\n                \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port\",\n                \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c5']\",\n                \"nsp-model:creation-time\": \"2024-10-08T12:49:50.193Z\",\n                \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.556Z\",\n                \"nsp-model:sources\": [\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c5']\",\n                    \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:Equipment:/port[port-id='1/1/c5']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c5']\"\n                ]\n            },\n            \"parent\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/card[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1']\",\n            \"mfg-deviations\": null,\n            \"equipment-extension-port:extension\": {\n                \"@\": {\n                    \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/equipment-extension-port:extension\",\n                    \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c5']/equipment-extension-port:extension\"\n                }\n            },\n            \"mfg-name\": null,\n            \"availability-state\": [],\n            \"description\": null,\n            \"mfg-assembly-number\": \"3HE\",\n            \"admin-state\": \"unlocked\",\n            \"ne-id\": \"fd00:fde8::2:21\",\n            \"clei-code\": null,\n            \"component-id\": \"shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c5\",\n            \"ne-name\": \"g2-pe1\",\n            \"children\": [\n                \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c5/breakout-port=1/1/c5/1']\"\n            ],\n            \"part-number\": \"SQF1000L4LNGG01B\",\n            \"standby-state\": \"providing-service\",\n            \"state-reason\": [],\n            \"class\": \"port\",\n            \"mac-address\": null,\n            \"oper-state\": \"enabled\",\n            \"mfg-date\": \"2015-10-15T00:00:00.0Z\",\n            \"hw-mac-address\": \"00:00:00:00:00:00\",\n            \"parent-rel-pos\": 5,\n            \"serial-num\": \"5XD804N00017    \",\n            \"port-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/port-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c5']/port-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.727Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.865Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c5']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:PortDetails:/port[port-id='1/1/c5']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c5']\"\n                        ]\n                    },\n                    \"rate\": null,\n                    \"port-mode\": \"trunk\",\n                    \"actual-rate-units\": \"unknown\",\n                    \"mtu-value\": null,\n                    \"duplex\": \"unknown\",\n                    \"port-type\": \"connector-port\",\n                    \"auto-negotiate\": \"unknown\",\n                    \"operational-duplex\": \"unknown\",\n                    \"port-index\": 1610899776,\n                    \"actual-rate\": null,\n                    \"encap-type\": \"null-encap\"\n                }\n            ],\n            \"network-element\": \"fd00:fde8::2:21\",\n            \"name\": \"1/1/c5\",\n            \"transceiver-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/transceiver-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c5']/transceiver-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.794Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.989Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c5']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:TransceiverDetails:/port[port-id='1/1/c5']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c5']\"\n                        ]\n                    },\n                    \"connector-code\": \"lc\",\n                    \"vendor-o-u-i\": \"00:00:5f\",\n                    \"diagnostic-capable\": true,\n                    \"laser-wave-length\": 1302.0,\n                    \"optical-compliance\": \"100GBASE-LR4\",\n                    \"specific-type\": \"cfp2-or-qsfp28\",\n                    \"media\": \"ethernet\",\n                    \"number-of-lanes\": 4,\n                    \"connector-type\": \"qsfp\",\n                    \"link-length-support\": \"10km for SMF\",\n                    \"laser-tunability\": \"Unequipped\"\n                }\n            ]\n        },\n        {\n            \"@\": {\n                \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port\",\n                \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c6']\",\n                \"nsp-model:creation-time\": \"2024-10-08T12:49:50.198Z\",\n                \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.565Z\",\n                \"nsp-model:sources\": [\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c6']\",\n                    \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:Equipment:/port[port-id='1/1/c6']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c6']\"\n                ]\n            },\n            \"parent\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/card[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1']\",\n            \"mfg-deviations\": null,\n            \"equipment-extension-port:extension\": {\n                \"@\": {\n                    \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/equipment-extension-port:extension\",\n                    \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c6']/equipment-extension-port:extension\"\n                }\n            },\n            \"mfg-name\": null,\n            \"availability-state\": [],\n            \"description\": null,\n            \"mfg-assembly-number\": \"3HE\",\n            \"admin-state\": \"unlocked\",\n            \"ne-id\": \"fd00:fde8::2:21\",\n            \"clei-code\": null,\n            \"component-id\": \"shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c6\",\n            \"ne-name\": \"g2-pe1\",\n            \"children\": [\n                \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c6/breakout-port=1/1/c6/1']\"\n            ],\n            \"part-number\": \"SQF1000L4LNGG01B\",\n            \"standby-state\": \"providing-service\",\n            \"state-reason\": [],\n            \"class\": \"port\",\n            \"mac-address\": null,\n            \"oper-state\": \"enabled\",\n            \"mfg-date\": \"2015-10-15T00:00:00.0Z\",\n            \"hw-mac-address\": \"00:00:00:00:00:00\",\n            \"parent-rel-pos\": 6,\n            \"serial-num\": \"5XD804N00017    \",\n            \"port-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/port-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c6']/port-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.731Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.868Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c6']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:PortDetails:/port[port-id='1/1/c6']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c6']\"\n                        ]\n                    },\n                    \"rate\": null,\n                    \"port-mode\": \"trunk\",\n                    \"actual-rate-units\": \"unknown\",\n                    \"mtu-value\": null,\n                    \"duplex\": \"unknown\",\n                    \"port-type\": \"connector-port\",\n                    \"auto-negotiate\": \"unknown\",\n                    \"operational-duplex\": \"unknown\",\n                    \"port-index\": 1610899840,\n                    \"actual-rate\": null,\n                    \"encap-type\": \"null-encap\"\n                }\n            ],\n            \"network-element\": \"fd00:fde8::2:21\",\n            \"name\": \"1/1/c6\",\n            \"transceiver-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/transceiver-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c6']/transceiver-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.796Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.993Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c6']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:TransceiverDetails:/port[port-id='1/1/c6']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c6']\"\n                        ]\n                    },\n                    \"connector-code\": \"lc\",\n                    \"vendor-o-u-i\": \"00:00:5f\",\n                    \"diagnostic-capable\": true,\n                    \"laser-wave-length\": 1302.0,\n                    \"optical-compliance\": \"100GBASE-LR4\",\n                    \"specific-type\": \"cfp2-or-qsfp28\",\n                    \"media\": \"ethernet\",\n                    \"number-of-lanes\": 4,\n                    \"connector-type\": \"qsfp\",\n                    \"link-length-support\": \"10km for SMF\",\n                    \"laser-tunability\": \"Unequipped\"\n                }\n            ]\n        },\n        {\n            \"@\": {\n                \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port\",\n                \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c7']\",\n                \"nsp-model:creation-time\": \"2024-10-08T12:49:50.202Z\",\n                \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.573Z\",\n                \"nsp-model:sources\": [\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c7']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c7']\",\n                    \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:Equipment:/port[port-id='1/1/c7']\"\n                ]\n            },\n            \"parent\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/card[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1']\",\n            \"mfg-deviations\": null,\n            \"equipment-extension-port:extension\": {\n                \"@\": {\n                    \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/equipment-extension-port:extension\",\n                    \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c7']/equipment-extension-port:extension\"\n                }\n            },\n            \"mfg-name\": null,\n            \"availability-state\": [],\n            \"description\": null,\n            \"mfg-assembly-number\": \"3HE\",\n            \"admin-state\": \"locked\",\n            \"ne-id\": \"fd00:fde8::2:21\",\n            \"clei-code\": null,\n            \"component-id\": \"shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c7\",\n            \"ne-name\": \"g2-pe1\",\n            \"children\": [],\n            \"part-number\": \"SQF1000L4LNGG01B\",\n            \"standby-state\": \"providing-service\",\n            \"state-reason\": [],\n            \"class\": \"port\",\n            \"mac-address\": null,\n            \"oper-state\": \"disabled\",\n            \"mfg-date\": \"2015-10-15T00:00:00.0Z\",\n            \"hw-mac-address\": \"00:00:00:00:00:00\",\n            \"parent-rel-pos\": 7,\n            \"serial-num\": \"5XD804N00017    \",\n            \"port-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/port-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c7']/port-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.374Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.764Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c7']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:PortDetails:/port[port-id='1/1/c7']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c7']\"\n                        ]\n                    },\n                    \"rate\": null,\n                    \"port-mode\": \"trunk\",\n                    \"actual-rate-units\": \"unknown\",\n                    \"mtu-value\": null,\n                    \"duplex\": \"unknown\",\n                    \"port-type\": \"connector-port\",\n                    \"auto-negotiate\": \"unknown\",\n                    \"operational-duplex\": \"unknown\",\n                    \"port-index\": 1610899904,\n                    \"actual-rate\": null,\n                    \"encap-type\": \"null-encap\"\n                }\n            ],\n            \"network-element\": \"fd00:fde8::2:21\",\n            \"name\": \"1/1/c7\",\n            \"transceiver-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/transceiver-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c7']/transceiver-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.781Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.913Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:TransceiverDetails:/port[port-id='1/1/c7']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c7']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c7']\"\n                        ]\n                    },\n                    \"connector-code\": \"lc\",\n                    \"vendor-o-u-i\": \"00:00:5f\",\n                    \"diagnostic-capable\": true,\n                    \"laser-wave-length\": 1302.0,\n                    \"optical-compliance\": \"100GBASE-LR4\",\n                    \"specific-type\": \"cfp2-or-qsfp28\",\n                    \"media\": \"ethernet\",\n                    \"number-of-lanes\": 4,\n                    \"connector-type\": \"qsfp\",\n                    \"link-length-support\": \"10km for SMF\",\n                    \"laser-tunability\": \"Unequipped\"\n                }\n            ]\n        },\n        {\n            \"@\": {\n                \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port\",\n                \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c8']\",\n                \"nsp-model:creation-time\": \"2024-10-08T12:49:50.207Z\",\n                \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.582Z\",\n                \"nsp-model:sources\": [\n                    \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:Equipment:/port[port-id='1/1/c8']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c8']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c8']\"\n                ]\n            },\n            \"parent\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/card[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1']\",\n            \"mfg-deviations\": null,\n            \"equipment-extension-port:extension\": {\n                \"@\": {\n                    \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/equipment-extension-port:extension\",\n                    \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c8']/equipment-extension-port:extension\"\n                }\n            },\n            \"mfg-name\": null,\n            \"availability-state\": [],\n            \"description\": null,\n            \"mfg-assembly-number\": \"3HE\",\n            \"admin-state\": \"locked\",\n            \"ne-id\": \"fd00:fde8::2:21\",\n            \"clei-code\": null,\n            \"component-id\": \"shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c8\",\n            \"ne-name\": \"g2-pe1\",\n            \"children\": [],\n            \"part-number\": \"SQF1000L4LNGG01B\",\n            \"standby-state\": \"providing-service\",\n            \"state-reason\": [],\n            \"class\": \"port\",\n            \"mac-address\": null,\n            \"oper-state\": \"disabled\",\n            \"mfg-date\": \"2015-10-15T00:00:00.0Z\",\n            \"hw-mac-address\": \"00:00:00:00:00:00\",\n            \"parent-rel-pos\": 8,\n            \"serial-num\": \"5XD804N00017    \",\n            \"port-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/port-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c8']/port-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.380Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.859Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c8']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:PortDetails:/port[port-id='1/1/c8']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c8']\"\n                        ]\n                    },\n                    \"rate\": null,\n                    \"port-mode\": \"trunk\",\n                    \"actual-rate-units\": \"unknown\",\n                    \"mtu-value\": null,\n                    \"duplex\": \"unknown\",\n                    \"port-type\": \"connector-port\",\n                    \"auto-negotiate\": \"unknown\",\n                    \"operational-duplex\": \"unknown\",\n                    \"port-index\": 1610899968,\n                    \"actual-rate\": null,\n                    \"encap-type\": \"null-encap\"\n                }\n            ],\n            \"network-element\": \"fd00:fde8::2:21\",\n            \"name\": \"1/1/c8\",\n            \"transceiver-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/transceiver-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c8']/transceiver-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.788Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.863Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c8']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:TransceiverDetails:/port[port-id='1/1/c8']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c8']\"\n                        ]\n                    },\n                    \"connector-code\": \"lc\",\n                    \"vendor-o-u-i\": \"00:00:5f\",\n                    \"diagnostic-capable\": true,\n                    \"laser-wave-length\": 1302.0,\n                    \"optical-compliance\": \"100GBASE-LR4\",\n                    \"specific-type\": \"cfp2-or-qsfp28\",\n                    \"media\": \"ethernet\",\n                    \"number-of-lanes\": 4,\n                    \"connector-type\": \"qsfp\",\n                    \"link-length-support\": \"10km for SMF\",\n                    \"laser-tunability\": \"Unequipped\"\n                }\n            ]\n        },\n        {\n            \"@\": {\n                \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port\",\n                \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c9']\",\n                \"nsp-model:creation-time\": \"2024-10-08T12:49:50.212Z\",\n                \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.591Z\",\n                \"nsp-model:sources\": [\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c9']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c9']\",\n                    \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:Equipment:/port[port-id='1/1/c9']\"\n                ]\n            },\n            \"parent\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/card[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1']\",\n            \"mfg-deviations\": null,\n            \"equipment-extension-port:extension\": {\n                \"@\": {\n                    \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/equipment-extension-port:extension\",\n                    \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c9']/equipment-extension-port:extension\"\n                }\n            },\n            \"mfg-name\": null,\n            \"availability-state\": [],\n            \"description\": null,\n            \"mfg-assembly-number\": \"3HE\",\n            \"admin-state\": \"locked\",\n            \"ne-id\": \"fd00:fde8::2:21\",\n            \"clei-code\": null,\n            \"component-id\": \"shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c9\",\n            \"ne-name\": \"g2-pe1\",\n            \"children\": [],\n            \"part-number\": \"SQF1000L4LNGG01B\",\n            \"standby-state\": \"providing-service\",\n            \"state-reason\": [],\n            \"class\": \"port\",\n            \"mac-address\": null,\n            \"oper-state\": \"disabled\",\n            \"mfg-date\": \"2015-10-15T00:00:00.0Z\",\n            \"hw-mac-address\": \"00:00:00:00:00:00\",\n            \"parent-rel-pos\": 9,\n            \"serial-num\": \"5XD804N00017    \",\n            \"port-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/port-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c9']/port-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.739Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.875Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c9']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:PortDetails:/port[port-id='1/1/c9']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c9']\"\n                        ]\n                    },\n                    \"rate\": null,\n                    \"port-mode\": \"trunk\",\n                    \"actual-rate-units\": \"unknown\",\n                    \"mtu-value\": null,\n                    \"duplex\": \"unknown\",\n                    \"port-type\": \"connector-port\",\n                    \"auto-negotiate\": \"unknown\",\n                    \"operational-duplex\": \"unknown\",\n                    \"port-index\": 1610900032,\n                    \"actual-rate\": null,\n                    \"encap-type\": \"null-encap\"\n                }\n            ],\n            \"network-element\": \"fd00:fde8::2:21\",\n            \"name\": \"1/1/c9\",\n            \"transceiver-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/transceiver-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c9']/transceiver-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.983Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:47Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c9']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:TransceiverDetails:/port[port-id='1/1/c9']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c9']\"\n                        ]\n                    },\n                    \"connector-code\": \"lc\",\n                    \"vendor-o-u-i\": \"00:00:5f\",\n                    \"diagnostic-capable\": true,\n                    \"laser-wave-length\": 1302.0,\n                    \"optical-compliance\": \"100GBASE-LR4\",\n                    \"specific-type\": \"cfp2-or-qsfp28\",\n                    \"media\": \"ethernet\",\n                    \"number-of-lanes\": 4,\n                    \"connector-type\": \"qsfp\",\n                    \"link-length-support\": \"10km for SMF\",\n                    \"laser-tunability\": \"Unequipped\"\n                }\n            ]\n        },\n        {\n            \"@\": {\n                \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port\",\n                \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c10']\",\n                \"nsp-model:creation-time\": \"2024-10-08T12:49:50.216Z\",\n                \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.600Z\",\n                \"nsp-model:sources\": [\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c10']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c10']\",\n                    \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:Equipment:/port[port-id='1/1/c10']\"\n                ]\n            },\n            \"parent\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/card[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1']\",\n            \"mfg-deviations\": null,\n            \"equipment-extension-port:extension\": {\n                \"@\": {\n                    \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/equipment-extension-port:extension\",\n                    \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c10']/equipment-extension-port:extension\"\n                }\n            },\n            \"mfg-name\": null,\n            \"availability-state\": [],\n            \"description\": null,\n            \"mfg-assembly-number\": \"3HE\",\n            \"admin-state\": \"locked\",\n            \"ne-id\": \"fd00:fde8::2:21\",\n            \"clei-code\": null,\n            \"component-id\": \"shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c10\",\n            \"ne-name\": \"g2-pe1\",\n            \"children\": [],\n            \"part-number\": \"SQF1000L4LNGG01B\",\n            \"standby-state\": \"providing-service\",\n            \"state-reason\": [],\n            \"class\": \"port\",\n            \"mac-address\": null,\n            \"oper-state\": \"disabled\",\n            \"mfg-date\": \"2015-10-15T00:00:00.0Z\",\n            \"hw-mac-address\": \"00:00:00:00:00:00\",\n            \"parent-rel-pos\": 10,\n            \"serial-num\": \"5XD804N00017    \",\n            \"port-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/port-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c10']/port-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.383Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.863Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:PortDetails:/port[port-id='1/1/c10']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c10']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c10']\"\n                        ]\n                    },\n                    \"rate\": null,\n                    \"port-mode\": \"trunk\",\n                    \"actual-rate-units\": \"unknown\",\n                    \"mtu-value\": null,\n                    \"duplex\": \"unknown\",\n                    \"port-type\": \"connector-port\",\n                    \"auto-negotiate\": \"unknown\",\n                    \"operational-duplex\": \"unknown\",\n                    \"port-index\": 1610900096,\n                    \"actual-rate\": null,\n                    \"encap-type\": \"null-encap\"\n                }\n            ],\n            \"network-element\": \"fd00:fde8::2:21\",\n            \"name\": \"1/1/c10\",\n            \"transceiver-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/transceiver-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c10']/transceiver-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.792Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.865Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:TransceiverDetails:/port[port-id='1/1/c10']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c10']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c10']\"\n                        ]\n                    },\n                    \"connector-code\": \"lc\",\n                    \"vendor-o-u-i\": \"00:00:5f\",\n                    \"diagnostic-capable\": true,\n                    \"laser-wave-length\": 1302.0,\n                    \"optical-compliance\": \"100GBASE-LR4\",\n                    \"specific-type\": \"cfp2-or-qsfp28\",\n                    \"media\": \"ethernet\",\n                    \"number-of-lanes\": 4,\n                    \"connector-type\": \"qsfp\",\n                    \"link-length-support\": \"10km for SMF\",\n                    \"laser-tunability\": \"Unequipped\"\n                }\n            ]\n        },\n        {\n            \"@\": {\n                \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port\",\n                \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c11']\",\n                \"nsp-model:creation-time\": \"2024-10-08T12:49:50.221Z\",\n                \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.604Z\",\n                \"nsp-model:sources\": [\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c11']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c11']\",\n                    \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:Equipment:/port[port-id='1/1/c11']\"\n                ]\n            },\n            \"parent\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/card[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1']\",\n            \"mfg-deviations\": null,\n            \"equipment-extension-port:extension\": {\n                \"@\": {\n                    \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/equipment-extension-port:extension\",\n                    \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c11']/equipment-extension-port:extension\"\n                }\n            },\n            \"mfg-name\": null,\n            \"availability-state\": [],\n            \"description\": null,\n            \"mfg-assembly-number\": \"3HE\",\n            \"admin-state\": \"locked\",\n            \"ne-id\": \"fd00:fde8::2:21\",\n            \"clei-code\": null,\n            \"component-id\": \"shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c11\",\n            \"ne-name\": \"g2-pe1\",\n            \"children\": [],\n            \"part-number\": \"SQF1000L4LNGG01B\",\n            \"standby-state\": \"providing-service\",\n            \"state-reason\": [],\n            \"class\": \"port\",\n            \"mac-address\": null,\n            \"oper-state\": \"disabled\",\n            \"mfg-date\": \"2015-10-15T00:00:00.0Z\",\n            \"hw-mac-address\": \"00:00:00:00:00:00\",\n            \"parent-rel-pos\": 11,\n            \"serial-num\": \"5XD804N00017    \",\n            \"port-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/port-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c11']/port-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.377Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.767Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c11']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c11']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:PortDetails:/port[port-id='1/1/c11']\"\n                        ]\n                    },\n                    \"rate\": null,\n                    \"port-mode\": \"trunk\",\n                    \"actual-rate-units\": \"unknown\",\n                    \"mtu-value\": null,\n                    \"duplex\": \"unknown\",\n                    \"port-type\": \"connector-port\",\n                    \"auto-negotiate\": \"unknown\",\n                    \"operational-duplex\": \"unknown\",\n                    \"port-index\": 1610900160,\n                    \"actual-rate\": null,\n                    \"encap-type\": \"null-encap\"\n                }\n            ],\n            \"network-element\": \"fd00:fde8::2:21\",\n            \"name\": \"1/1/c11\",\n            \"transceiver-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/transceiver-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c11']/transceiver-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.784Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.916Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c11']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c11']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:TransceiverDetails:/port[port-id='1/1/c11']\"\n                        ]\n                    },\n                    \"connector-code\": \"lc\",\n                    \"vendor-o-u-i\": \"00:00:5f\",\n                    \"diagnostic-capable\": true,\n                    \"laser-wave-length\": 1302.0,\n                    \"optical-compliance\": \"100GBASE-LR4\",\n                    \"specific-type\": \"cfp2-or-qsfp28\",\n                    \"media\": \"ethernet\",\n                    \"number-of-lanes\": 4,\n                    \"connector-type\": \"qsfp\",\n                    \"link-length-support\": \"10km for SMF\",\n                    \"laser-tunability\": \"Unequipped\"\n                }\n            ]\n        },\n        {\n            \"@\": {\n                \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port\",\n                \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c12']\",\n                \"nsp-model:creation-time\": \"2024-10-08T12:49:50.225Z\",\n                \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.630Z\",\n                \"nsp-model:sources\": [\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c12']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c12']\",\n                    \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:Equipment:/port[port-id='1/1/c12']\"\n                ]\n            },\n            \"parent\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/card[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1']\",\n            \"mfg-deviations\": null,\n            \"equipment-extension-port:extension\": {\n                \"@\": {\n                    \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/equipment-extension-port:extension\",\n                    \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c12']/equipment-extension-port:extension\"\n                }\n            },\n            \"mfg-name\": null,\n            \"availability-state\": [],\n            \"description\": null,\n            \"mfg-assembly-number\": \"3HE\",\n            \"admin-state\": \"locked\",\n            \"ne-id\": \"fd00:fde8::2:21\",\n            \"clei-code\": null,\n            \"component-id\": \"shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c12\",\n            \"ne-name\": \"g2-pe1\",\n            \"children\": [],\n            \"part-number\": \"SQF1000L4LNGG01B\",\n            \"standby-state\": \"providing-service\",\n            \"state-reason\": [],\n            \"class\": \"port\",\n            \"mac-address\": null,\n            \"oper-state\": \"disabled\",\n            \"mfg-date\": \"2015-10-15T00:00:00.0Z\",\n            \"hw-mac-address\": \"00:00:00:00:00:00\",\n            \"parent-rel-pos\": 12,\n            \"serial-num\": \"5XD804N00017    \",\n            \"port-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/port-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c12']/port-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.735Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.872Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c12']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c12']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:PortDetails:/port[port-id='1/1/c12']\"\n                        ]\n                    },\n                    \"rate\": null,\n                    \"port-mode\": \"trunk\",\n                    \"actual-rate-units\": \"unknown\",\n                    \"mtu-value\": null,\n                    \"duplex\": \"unknown\",\n                    \"port-type\": \"connector-port\",\n                    \"auto-negotiate\": \"unknown\",\n                    \"operational-duplex\": \"unknown\",\n                    \"port-index\": 1610900224,\n                    \"actual-rate\": null,\n                    \"encap-type\": \"null-encap\"\n                }\n            ],\n            \"network-element\": \"fd00:fde8::2:21\",\n            \"name\": \"1/1/c12\",\n            \"transceiver-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/transceiver-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c12']/transceiver-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.980Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.997Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c12']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c12']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:TransceiverDetails:/port[port-id='1/1/c12']\"\n                        ]\n                    },\n                    \"connector-code\": \"lc\",\n                    \"vendor-o-u-i\": \"00:00:5f\",\n                    \"diagnostic-capable\": true,\n                    \"laser-wave-length\": 1302.0,\n                    \"optical-compliance\": \"100GBASE-LR4\",\n                    \"specific-type\": \"cfp2-or-qsfp28\",\n                    \"media\": \"ethernet\",\n                    \"number-of-lanes\": 4,\n                    \"connector-type\": \"qsfp\",\n                    \"link-length-support\": \"10km for SMF\",\n                    \"laser-tunability\": \"Unequipped\"\n                }\n            ]\n        },\n        {\n            \"@\": {\n                \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port\",\n                \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c1/breakout-port=1/1/c1/1']\",\n                \"nsp-model:creation-time\": \"2024-10-08T12:49:50.230Z\",\n                \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.646Z\",\n                \"nsp-model:sources\": [\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c1/1']\",\n                    \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:Equipment:/port[port-id='1/1/c1/1']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c1/1']\"\n                ]\n            },\n            \"parent\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c1']\",\n            \"mfg-deviations\": null,\n            \"equipment-extension-port:extension\": {\n                \"@\": {\n                    \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/equipment-extension-port:extension\",\n                    \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c1/breakout-port=1/1/c1/1']/equipment-extension-port:extension\"\n                }\n            },\n            \"mfg-name\": null,\n            \"availability-state\": [],\n            \"description\": \"link to P1\",\n            \"mfg-assembly-number\": null,\n            \"admin-state\": \"unlocked\",\n            \"ne-id\": \"fd00:fde8::2:21\",\n            \"clei-code\": null,\n            \"component-id\": \"shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c1/breakout-port=1/1/c1/1\",\n            \"ne-name\": \"g2-pe1\",\n            \"children\": [],\n            \"part-number\": null,\n            \"standby-state\": \"providing-service\",\n            \"state-reason\": [],\n            \"class\": \"port\",\n            \"mac-address\": null,\n            \"oper-state\": \"enabled\",\n            \"mfg-date\": null,\n            \"hw-mac-address\": \"0c:00:6f:1a:ce:01\",\n            \"parent-rel-pos\": 1,\n            \"serial-num\": null,\n            \"port-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/port-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c1/breakout-port=1/1/c1/1']/port-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.359Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.758Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c1/1']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:PortDetails:/port[port-id='1/1/c1/1']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c1/1']\"\n                        ]\n                    },\n                    \"rate\": null,\n                    \"port-mode\": \"trunk\",\n                    \"actual-rate-units\": \"mbps\",\n                    \"mtu-value\": null,\n                    \"duplex\": \"unknown\",\n                    \"port-type\": \"ethernet-port\",\n                    \"auto-negotiate\": \"unknown\",\n                    \"operational-duplex\": \"full-duplex\",\n                    \"port-index\": 1610899521,\n                    \"actual-rate\": 100000.0,\n                    \"encap-type\": \"null-encap\"\n                }\n            ],\n            \"network-element\": \"fd00:fde8::2:21\",\n            \"name\": \"1/1/c1/1\",\n            \"transceiver-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/transceiver-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c1/breakout-port=1/1/c1/1']/transceiver-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.759Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.892Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c1/1']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:TransceiverDetails:/port[port-id='1/1/c1/1']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c1/1']\"\n                        ]\n                    },\n                    \"connector-code\": null,\n                    \"vendor-o-u-i\": null,\n                    \"diagnostic-capable\": false,\n                    \"laser-wave-length\": null,\n                    \"optical-compliance\": null,\n                    \"specific-type\": \"\",\n                    \"media\": \"N/A\",\n                    \"number-of-lanes\": null,\n                    \"connector-type\": null,\n                    \"link-length-support\": null,\n                    \"laser-tunability\": \"Unequipped\"\n                }\n            ]\n        },\n        {\n            \"@\": {\n                \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port\",\n                \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c2/breakout-port=1/1/c2/1']\",\n                \"nsp-model:creation-time\": \"2024-10-08T12:49:50.307Z\",\n                \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.663Z\",\n                \"nsp-model:sources\": [\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c2/1']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c2/1']\",\n                    \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:Equipment:/port[port-id='1/1/c2/1']\"\n                ]\n            },\n            \"parent\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c2']\",\n            \"mfg-deviations\": null,\n            \"equipment-extension-port:extension\": {\n                \"@\": {\n                    \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/equipment-extension-port:extension\",\n                    \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c2/breakout-port=1/1/c2/1']/equipment-extension-port:extension\"\n                }\n            },\n            \"mfg-name\": null,\n            \"availability-state\": [],\n            \"description\": \"link to P2\",\n            \"mfg-assembly-number\": null,\n            \"admin-state\": \"unlocked\",\n            \"ne-id\": \"fd00:fde8::2:21\",\n            \"clei-code\": null,\n            \"component-id\": \"shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c2/breakout-port=1/1/c2/1\",\n            \"ne-name\": \"g2-pe1\",\n            \"children\": [],\n            \"part-number\": null,\n            \"standby-state\": \"providing-service\",\n            \"state-reason\": [],\n            \"class\": \"port\",\n            \"mac-address\": null,\n            \"oper-state\": \"enabled\",\n            \"mfg-date\": null,\n            \"hw-mac-address\": \"0c:00:bc:c8:ba:02\",\n            \"parent-rel-pos\": 1,\n            \"serial-num\": null,\n            \"port-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/port-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c2/breakout-port=1/1/c2/1']/port-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.747Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.882Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c2/1']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c2/1']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:PortDetails:/port[port-id='1/1/c2/1']\"\n                        ]\n                    },\n                    \"rate\": null,\n                    \"port-mode\": \"trunk\",\n                    \"actual-rate-units\": \"mbps\",\n                    \"mtu-value\": null,\n                    \"duplex\": \"unknown\",\n                    \"port-type\": \"ethernet-port\",\n                    \"auto-negotiate\": \"unknown\",\n                    \"operational-duplex\": \"full-duplex\",\n                    \"port-index\": 1610899585,\n                    \"actual-rate\": 100000.0,\n                    \"encap-type\": \"null-encap\"\n                }\n            ],\n            \"network-element\": \"fd00:fde8::2:21\",\n            \"name\": \"1/1/c2/1\",\n            \"transceiver-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/transceiver-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c2/breakout-port=1/1/c2/1']/transceiver-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.990Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:47.007Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c2/1']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c2/1']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:TransceiverDetails:/port[port-id='1/1/c2/1']\"\n                        ]\n                    },\n                    \"connector-code\": null,\n                    \"vendor-o-u-i\": null,\n                    \"diagnostic-capable\": false,\n                    \"laser-wave-length\": null,\n                    \"optical-compliance\": null,\n                    \"specific-type\": \"\",\n                    \"media\": \"N/A\",\n                    \"number-of-lanes\": null,\n                    \"connector-type\": null,\n                    \"link-length-support\": null,\n                    \"laser-tunability\": \"Unequipped\"\n                }\n            ]\n        },\n        {\n            \"@\": {\n                \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port\",\n                \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c3/breakout-port=1/1/c3/1']\",\n                \"nsp-model:creation-time\": \"2024-10-08T12:49:50.315Z\",\n                \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.681Z\",\n                \"nsp-model:sources\": [\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c3/1']\",\n                    \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:Equipment:/port[port-id='1/1/c3/1']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c3/1']\"\n                ]\n            },\n            \"parent\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c3']\",\n            \"mfg-deviations\": null,\n            \"equipment-extension-port:extension\": {\n                \"@\": {\n                    \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/equipment-extension-port:extension\",\n                    \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c3/breakout-port=1/1/c3/1']/equipment-extension-port:extension\"\n                }\n            },\n            \"mfg-name\": null,\n            \"availability-state\": [],\n            \"description\": \"link to transit1\",\n            \"mfg-assembly-number\": null,\n            \"admin-state\": \"unlocked\",\n            \"ne-id\": \"fd00:fde8::2:21\",\n            \"clei-code\": null,\n            \"component-id\": \"shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c3/breakout-port=1/1/c3/1\",\n            \"ne-name\": \"g2-pe1\",\n            \"children\": [],\n            \"part-number\": null,\n            \"standby-state\": \"providing-service\",\n            \"state-reason\": [],\n            \"class\": \"port\",\n            \"mac-address\": null,\n            \"oper-state\": \"enabled\",\n            \"mfg-date\": null,\n            \"hw-mac-address\": \"0c:00:38:85:9e:03\",\n            \"parent-rel-pos\": 1,\n            \"serial-num\": null,\n            \"port-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/port-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c3/breakout-port=1/1/c3/1']/port-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.751Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.885Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c3/1']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c3/1']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:PortDetails:/port[port-id='1/1/c3/1']\"\n                        ]\n                    },\n                    \"rate\": null,\n                    \"port-mode\": \"hybrid\",\n                    \"actual-rate-units\": \"mbps\",\n                    \"mtu-value\": null,\n                    \"duplex\": \"unknown\",\n                    \"port-type\": \"ethernet-port\",\n                    \"auto-negotiate\": \"unknown\",\n                    \"operational-duplex\": \"full-duplex\",\n                    \"port-index\": 1610899649,\n                    \"actual-rate\": 100000.0,\n                    \"encap-type\": \"dot1q\"\n                }\n            ],\n            \"network-element\": \"fd00:fde8::2:21\",\n            \"name\": \"1/1/c3/1\",\n            \"transceiver-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/transceiver-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c3/breakout-port=1/1/c3/1']/transceiver-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.993Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:47.010Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:TransceiverDetails:/port[port-id='1/1/c3/1']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c3/1']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c3/1']\"\n                        ]\n                    },\n                    \"connector-code\": null,\n                    \"vendor-o-u-i\": null,\n                    \"diagnostic-capable\": false,\n                    \"laser-wave-length\": null,\n                    \"optical-compliance\": null,\n                    \"specific-type\": \"\",\n                    \"media\": \"N/A\",\n                    \"number-of-lanes\": null,\n                    \"connector-type\": null,\n                    \"link-length-support\": null,\n                    \"laser-tunability\": \"Unequipped\"\n                }\n            ]\n        },\n        {\n            \"@\": {\n                \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port\",\n                \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c4/breakout-port=1/1/c4/1']\",\n                \"nsp-model:creation-time\": \"2024-10-08T12:49:50.322Z\",\n                \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.697Z\",\n                \"nsp-model:sources\": [\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c4/1']\",\n                    \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:Equipment:/port[port-id='1/1/c4/1']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c4/1']\"\n                ]\n            },\n            \"parent\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c4']\",\n            \"mfg-deviations\": null,\n            \"equipment-extension-port:extension\": {\n                \"@\": {\n                    \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/equipment-extension-port:extension\",\n                    \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c4/breakout-port=1/1/c4/1']/equipment-extension-port:extension\"\n                }\n            },\n            \"mfg-name\": null,\n            \"availability-state\": [],\n            \"description\": \"link to ixp1\",\n            \"mfg-assembly-number\": null,\n            \"admin-state\": \"unlocked\",\n            \"ne-id\": \"fd00:fde8::2:21\",\n            \"clei-code\": null,\n            \"component-id\": \"shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c4/breakout-port=1/1/c4/1\",\n            \"ne-name\": \"g2-pe1\",\n            \"children\": [],\n            \"part-number\": null,\n            \"standby-state\": \"providing-service\",\n            \"state-reason\": [],\n            \"class\": \"port\",\n            \"mac-address\": null,\n            \"oper-state\": \"enabled\",\n            \"mfg-date\": null,\n            \"hw-mac-address\": \"0c:00:60:23:34:04\",\n            \"parent-rel-pos\": 1,\n            \"serial-num\": null,\n            \"port-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/port-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c4/breakout-port=1/1/c4/1']/port-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.362Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.758Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c4/1']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:PortDetails:/port[port-id='1/1/c4/1']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c4/1']\"\n                        ]\n                    },\n                    \"rate\": null,\n                    \"port-mode\": \"hybrid\",\n                    \"actual-rate-units\": \"mbps\",\n                    \"mtu-value\": null,\n                    \"duplex\": \"unknown\",\n                    \"port-type\": \"ethernet-port\",\n                    \"auto-negotiate\": \"unknown\",\n                    \"operational-duplex\": \"full-duplex\",\n                    \"port-index\": 1610899713,\n                    \"actual-rate\": 100000.0,\n                    \"encap-type\": \"dot1q\"\n                }\n            ],\n            \"network-element\": \"fd00:fde8::2:21\",\n            \"name\": \"1/1/c4/1\",\n            \"transceiver-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/transceiver-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c4/breakout-port=1/1/c4/1']/transceiver-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.766Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.899Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c4/1']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c4/1']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:TransceiverDetails:/port[port-id='1/1/c4/1']\"\n                        ]\n                    },\n                    \"connector-code\": null,\n                    \"vendor-o-u-i\": null,\n                    \"diagnostic-capable\": false,\n                    \"laser-wave-length\": null,\n                    \"optical-compliance\": null,\n                    \"specific-type\": \"\",\n                    \"media\": \"N/A\",\n                    \"number-of-lanes\": null,\n                    \"connector-type\": null,\n                    \"link-length-support\": null,\n                    \"laser-tunability\": \"Unequipped\"\n                }\n            ]\n        },\n        {\n            \"@\": {\n                \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port\",\n                \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c5/breakout-port=1/1/c5/1']\",\n                \"nsp-model:creation-time\": \"2024-10-08T12:49:50.328Z\",\n                \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.711Z\",\n                \"nsp-model:sources\": [\n                    \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:Equipment:/port[port-id='1/1/c5/1']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c5/1']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c5/1']\"\n                ]\n            },\n            \"parent\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c5']\",\n            \"mfg-deviations\": null,\n            \"equipment-extension-port:extension\": {\n                \"@\": {\n                    \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/equipment-extension-port:extension\",\n                    \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c5/breakout-port=1/1/c5/1']/equipment-extension-port:extension\"\n                }\n            },\n            \"mfg-name\": null,\n            \"availability-state\": [],\n            \"description\": \"link to leaf21\",\n            \"mfg-assembly-number\": null,\n            \"admin-state\": \"unlocked\",\n            \"ne-id\": \"fd00:fde8::2:21\",\n            \"clei-code\": null,\n            \"component-id\": \"shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c5/breakout-port=1/1/c5/1\",\n            \"ne-name\": \"g2-pe1\",\n            \"children\": [],\n            \"part-number\": null,\n            \"standby-state\": \"providing-service\",\n            \"state-reason\": [],\n            \"class\": \"port\",\n            \"mac-address\": null,\n            \"oper-state\": \"enabled\",\n            \"mfg-date\": null,\n            \"hw-mac-address\": \"0c:00:7f:f4:28:05\",\n            \"parent-rel-pos\": 1,\n            \"serial-num\": null,\n            \"port-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/port-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c5/breakout-port=1/1/c5/1']/port-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.742Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.878Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c5/1']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:PortDetails:/port[port-id='1/1/c5/1']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c5/1']\"\n                        ]\n                    },\n                    \"rate\": null,\n                    \"port-mode\": \"trunk\",\n                    \"actual-rate-units\": \"mbps\",\n                    \"mtu-value\": null,\n                    \"duplex\": \"unknown\",\n                    \"port-type\": \"ethernet-port\",\n                    \"auto-negotiate\": \"unknown\",\n                    \"operational-duplex\": \"full-duplex\",\n                    \"port-index\": 1610899777,\n                    \"actual-rate\": 100000.0,\n                    \"encap-type\": \"null-encap\"\n                }\n            ],\n            \"network-element\": \"fd00:fde8::2:21\",\n            \"name\": \"1/1/c5/1\",\n            \"transceiver-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/transceiver-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c5/breakout-port=1/1/c5/1']/transceiver-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.986Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:47.003Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c5/1']\",\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:TransceiverDetails:/port[port-id='1/1/c5/1']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c5/1']\"\n                        ]\n                    },\n                    \"connector-code\": null,\n                    \"vendor-o-u-i\": null,\n                    \"diagnostic-capable\": false,\n                    \"laser-wave-length\": null,\n                    \"optical-compliance\": null,\n                    \"specific-type\": \"\",\n                    \"media\": \"N/A\",\n                    \"number-of-lanes\": null,\n                    \"connector-type\": null,\n                    \"link-length-support\": null,\n                    \"laser-tunability\": \"Unequipped\"\n                }\n            ]\n        },\n        {\n            \"@\": {\n                \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port\",\n                \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c6/breakout-port=1/1/c6/1']\",\n                \"nsp-model:creation-time\": \"2024-10-08T12:49:50.334Z\",\n                \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.758Z\",\n                \"nsp-model:sources\": [\n                    \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:Equipment:/port[port-id='1/1/c6/1']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c6/1']\",\n                    \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c6/1']\"\n                ]\n            },\n            \"parent\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c6']\",\n            \"mfg-deviations\": null,\n            \"equipment-extension-port:extension\": {\n                \"@\": {\n                    \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/equipment-extension-port:extension\",\n                    \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c6/breakout-port=1/1/c6/1']/equipment-extension-port:extension\"\n                }\n            },\n            \"mfg-name\": null,\n            \"availability-state\": [],\n            \"description\": \"link to client01\",\n            \"mfg-assembly-number\": null,\n            \"admin-state\": \"unlocked\",\n            \"ne-id\": \"fd00:fde8::2:21\",\n            \"clei-code\": null,\n            \"component-id\": \"shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c6/breakout-port=1/1/c6/1\",\n            \"ne-name\": \"g2-pe1\",\n            \"children\": [],\n            \"part-number\": null,\n            \"standby-state\": \"providing-service\",\n            \"state-reason\": [],\n            \"class\": \"port\",\n            \"mac-address\": null,\n            \"oper-state\": \"enabled\",\n            \"mfg-date\": null,\n            \"hw-mac-address\": \"0c:00:8d:1f:fc:06\",\n            \"parent-rel-pos\": 1,\n            \"serial-num\": null,\n            \"port-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/port-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c6/breakout-port=1/1/c6/1']/port-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.356Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.758Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:PortDetails:/port[port-id='1/1/c6/1']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c6/1']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c6/1']\"\n                        ]\n                    },\n                    \"rate\": null,\n                    \"port-mode\": \"hybrid\",\n                    \"actual-rate-units\": \"mbps\",\n                    \"mtu-value\": null,\n                    \"duplex\": \"unknown\",\n                    \"port-type\": \"ethernet-port\",\n                    \"auto-negotiate\": \"unknown\",\n                    \"operational-duplex\": \"full-duplex\",\n                    \"port-index\": 1610899841,\n                    \"actual-rate\": 100000.0,\n                    \"encap-type\": \"dot1q\"\n                }\n            ],\n            \"network-element\": \"fd00:fde8::2:21\",\n            \"name\": \"1/1/c6/1\",\n            \"transceiver-details\": [\n                {\n                    \"@\": {\n                        \"nsp-model:schema-nodeid\": \"/nsp-equipment:network/network-element/hardware-component/port/transceiver-details\",\n                        \"nsp-model:identifier\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port[component-id='shelf=1/cardSlot=1/card=1/mdaSlot=1/mda=1/port=1/1/c6/breakout-port=1/1/c6/1']/transceiver-details\",\n                        \"nsp-model:creation-time\": \"2024-10-08T12:49:50.755Z\",\n                        \"nsp-model:last-modified-time\": \"2024-10-08T13:17:46.889Z\",\n                        \"nsp-model:sources\": [\n                            \"fdn:app:mdm-ami-cmodel:fd00:fde8::2:21:equipment:TransceiverDetails:/port[port-id='1/1/c6/1']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-state:state/port[port-id='1/1/c6/1']\",\n                            \"fdn:yang:nsp-network:/nsp-network:network/node[node-id='fd00:fde8::2:21']/node-root/nokia-conf:configure/port[port-id='1/1/c6/1']\"\n                        ]\n                    },\n                    \"connector-code\": null,\n                    \"vendor-o-u-i\": null,\n                    \"diagnostic-capable\": false,\n                    \"laser-wave-length\": null,\n                    \"optical-compliance\": null,\n                    \"specific-type\": \"\",\n                    \"media\": \"N/A\",\n                    \"number-of-lanes\": null,\n                    \"connector-type\": null,\n                    \"link-length-support\": null,\n                    \"laser-tunability\": \"Unequipped\"\n                }\n            ]\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "create subscription ports in neId",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"subscription\": [\n        {\n            \"name\": \"Port-Utilization-{{neId}}\",\n            \"description\": \"MDM Port Utilization for {{neId}}\",\n            \"period\": 10,\n            \"sync-time\": \"00:00\",\n            \"state\": \"enabled\",\n            \"type\": \"telemetry:/base/interfaces/utilization\",\n            \"filter\": \"/nsp-equipment:network/network-element[ne-id='{{neId}}']/hardware-component/port\",\n            \"notification\": \"enabled\",\n            \"db\": \"enabled\"\n        }\n    ]\n}\n"
+						},
+						"url": {
+							"raw": "https://{{server}}/restconf/data/md-subscription:/subscriptions/subscription",
+							"protocol": "https",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"restconf",
+								"data",
+								"md-subscription:",
+								"subscriptions",
+								"subscription"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "create subscription interface ne or port 1 response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"subscription\": [\n        {\n            \"name\": \"interface_filter_ne_port\",\n            \"description\": \"ne or port\",\n            \"period\": 30,\n            \"sync-time\": \"00:00\",\n            \"state\": \"enabled\",\n            \"type\": \"telemetry:/base/interfaces/interface\",\n            \"filter\": \"/nsp-equipment:network/network-element[ne-id='10.10.10.1'] | /nsp-equipment:network/network-element[ne-id='10.10.10.2']/hardware-component/port[component-id='shelf=1/card=1/mda=1/port=1/1/3']\",\n            \"notification\": \"enabled\",\n            \"db\": \"enabled\"\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "https://{{server}}/restconf/data/md-subscription:/subscriptions/subscription",
+									"protocol": "https",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"restconf",
+										"data",
+										"md-subscription:",
+										"subscriptions",
+										"subscription"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "plain",
+							"header": [
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "SAMEORIGIN"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "Content-Security-Policy",
+									"value": "frame-ancestors 'self' https://vSAM156-20.labs.ca.alcatel-lucent.com:* https://135.121.156.23:* https://vSAM156-23.labs.ca.alcatel-lucent.com:* https://135.121.156.20:*; connect-src 'self' wss://vSAM156-20.labs.ca.alcatel-lucent.com:* wss://135.121.156.23:* wss://vSAM156-23.labs.ca.alcatel-lucent.com:* wss://135.121.156.20:* https://vSAM156-20.labs.ca.alcatel-lucent.com:* https://135.121.156.23:* https://vSAM156-23.labs.ca.alcatel-lucent.com:* https://135.121.156.20:*; default-src 'self' data: https://vSAM156-20.labs.ca.alcatel-lucent.com:* https://135.121.156.23:* https://vSAM156-23.labs.ca.alcatel-lucent.com:* https://135.121.156.20:* 'unsafe-inline'"
+								},
+								{
+									"key": "Location",
+									"value": "/restconf/data/md-subscription:/subscriptions/subscription/subscription=interface_filter_ne_port"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache"
+								},
+								{
+									"key": "Content-Length",
+									"value": "0"
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 02 Jun 2020 22:56:00 GMT"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "get a RESTCONF Subscription by name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://{{server}}/restconf/data/md-subscription:/subscriptions/subscription=InterfaceStats_noFilters_F",
+							"protocol": "https",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"restconf",
+								"data",
+								"md-subscription:",
+								"subscriptions",
+								"subscription=InterfaceStats_noFilters_F"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "get a RESTCONF Subscription by name response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://{{server}}/restconf/data/md-subscription:/subscriptions/subscription=InterfaceStats_noFilters_F",
+									"protocol": "https",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"restconf",
+										"data",
+										"md-subscription:",
+										"subscriptions",
+										"subscription=InterfaceStats_noFilters_F"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Cache-Control",
+									"value": "private"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "Thu, 01 Jan 1970 00:00:00 GMT"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "SAMEORIGIN"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "Content-Security-Policy",
+									"value": "frame-ancestors 'self'"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json;charset=UTF-8"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Content-Encoding",
+									"value": "gzip"
+								},
+								{
+									"key": "Vary",
+									"value": "Accept-Encoding"
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 03 Dec 2019 19:17:31 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"subscription\": [\n        {\n            \"name\": \"Port-Utilization-fd00:fde8::2:21\",\n            \"description\": \"MDM Port Utilization for fd00:fde8::2:21\",\n            \"site-selector\": null,\n            \"filter\": \"/nsp-equipment:network/network-element[ne-id='fd00:fde8::2:21']/hardware-component/port\",\n            \"type\": \"telemetry:/base/interfaces/utilization\",\n            \"period\": 10,\n            \"state\": \"enabled\",\n            \"sync-time\": \"00:00\",\n            \"db\": \"enabled\",\n            \"notification\": \"enabled\",\n            \"rta-notification\": \"disabled\",\n            \"rta-indicator-notification\": \"disabled\",\n            \"file\": \"disabled\",\n            \"file-prefix\": null,\n            \"file-path\": null,\n            \"fields\": [],\n            \"notif-topic\": \"ns-eg-21133302-d715-4382-ad6d-65b69bbf4b00\",\n            \"client-id\": \"21133302-d715-4382-ad6d-65b69bbf4b00\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "delete RESTCONF subscriptions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://{{server}}/restconf/data/md-subscription:/subscriptions/subscription/subscription=Port-Utilization-{{neId}}",
+							"protocol": "https",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"restconf",
+								"data",
+								"md-subscription:",
+								"subscriptions",
+								"subscription",
+								"subscription=Port-Utilization-{{neId}}"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "delete RESTCONF subscription response",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "https://{{server}}/restconf/data/md-subscription:/subscriptions/subscription/subscription=InterfaceStats_noFilters_F",
+									"protocol": "https",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"restconf",
+										"data",
+										"md-subscription:",
+										"subscriptions",
+										"subscription",
+										"subscription=InterfaceStats_noFilters_F"
+									]
+								}
+							},
+							"status": "No Content",
+							"code": 204,
+							"_postman_previewlanguage": "plain",
+							"header": [
+								{
+									"key": "Cache-Control",
+									"value": "private"
+								},
+								{
+									"key": "Expires",
+									"value": "Thu, 01 Jan 1970 00:00:00 GMT"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "SAMEORIGIN"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "Content-Security-Policy",
+									"value": "frame-ancestors 'self'"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 02 Dec 2019 21:33:37 GMT"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

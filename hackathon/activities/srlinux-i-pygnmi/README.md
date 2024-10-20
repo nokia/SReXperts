@@ -178,6 +178,10 @@ Interface       Sub-interface    VLAN  Status
 ethernet-1/1              102     102  up
 ```
 
+## Solutions
+
+Solutions are available in the [solutions](solutions) directory of this activity
+
 ## What's next
 
 Feel free to think of your own automation ideas, or take a crack at pushing config with PyGNMI instead! And of course, don't forget to try out the other labs part of this hackathon.

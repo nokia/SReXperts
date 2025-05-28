@@ -1,0 +1,10 @@
+apiVersion: routingpolicies.eda.nokia.com/v1alpha1
+kind: Policy
+metadata:
+  name: accept-all
+  namespace: eda
+  labels:
+    role: hackathon-infra
+spec:
+  defaultAction:
+    policyResult: accept

@@ -1,5 +1,8 @@
 auto lo
 iface lo inet loopback
+# Activity#20 - SR Linux basic agent - Anycast IP address  
+iface lo inet static
+    address 192.168.31.1/32
 
 auto eth1
 
@@ -24,3 +27,17 @@ auto eth1.200
 iface eth1.200
     address 10.65.33.11/24
     post-up ip r a 10.65.0.0/16 via 10.65.33.1 dev eth1.200
+
+# VLAN 300 - SRL EDA
+auto eth1.300
+iface eth1.300
+    address 10.30.0.11/24
+    address fd00:fdfd:0:3000::11/64
+
+# VLAN 311 - SRL EDA
+auto eth1.311
+iface eth1.311
+    address 10.30.1.11/24
+    address fd00:fdfd:0:3001::11/64
+    post-up ip r a 10.30.0.0/16 via 10.30.1.1 dev eth1.311
+    post-up ip -6 r a fd00:fdfd::/32 via fd00:fdfd:0:3001::1 dev eth1.311

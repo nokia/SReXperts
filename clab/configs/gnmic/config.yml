@@ -23,7 +23,7 @@ loader:
       port: "57400"
       config:
         username: admin
-        skip-verify: true
+        insecure: true
         encoding: proto
         subscriptions:
           - srl_platform

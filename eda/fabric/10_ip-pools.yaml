@@ -1,0 +1,29 @@
+apiVersion: core.eda.nokia.com/v1
+kind: IPAllocationPool
+metadata:
+  name: srexperts-systemipv4
+  namespace: eda
+  labels:
+    role: hackathon-infra
+spec:
+  publishAllocations: true
+  segments:
+    - reservations:
+        - end: 10.46.${INSTANCE_ID}.30
+          start: 10.46.${INSTANCE_ID}.1
+      subnet: 10.46.${INSTANCE_ID}.0/24
+---
+apiVersion: core.eda.nokia.com/v1
+kind: IPAllocationPool
+metadata:
+  name: srexperts-systemipv6
+  namespace: eda
+  labels:
+    role: hackathon-infra
+spec:
+  publishAllocations: true
+  segments:
+    - reservations:
+        - end: fd00:fde8::${INSTANCE_ID}:30
+          start: fd00:fde8::${INSTANCE_ID}:1
+      subnet: fd00:fde8::${INSTANCE_ID}:0/120

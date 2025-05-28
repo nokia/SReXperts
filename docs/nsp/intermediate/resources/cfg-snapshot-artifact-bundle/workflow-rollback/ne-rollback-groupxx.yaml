@@ -1,0 +1,138 @@
+# Copyright 2025 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+---
+version: '2.0'
+
+ne-rollback-groupxx:
+  type: direct
+  tags:
+    - LSO
+    - SReXperts
+
+  input:
+    - neId
+    - backup_operation: null
+    - backupFilename: null
+    - backupFilePath: null
+
+  vars:
+    lsoInfo: "Failed"
+    lsoStageError: "Failed"
+ 
+  output:
+    lsoInfo: <% $.lsoInfo %>
+
+  output-on-error:
+    lsoInfo: <% $.lsoInfo %>
+
+  tasks:
+    lsoStageMapping:
+      action: std.noop
+      publish:
+        operation_type: <% switch($.backup_operation != null => $.backup_operation.split("'")[1], $.backup_operation = null => null ) %>
+        operation_name: <% switch($.backup_operation != null => $.backup_operation.split("'")[3], $.backup_operation = null => null ) %>
+        lsoWorkflowStageMapping:
+          ne-rollback-groupxx:
+            - getDeviceInfo
+            - getBackupInfo
+            - processBackupInfo
+            - readBackup
+            - rollbackConfig
+      on-success:
+        - getDeviceInfo
+
+    getDeviceInfo:
+      action: nsp.https
+      input:
+        method: POST
+        url: https://restconf-gateway/restconf/operations/nsp-inventory:find
+        body: 
+          input:
+            xpath-filter: /nsp-ne-control:ne-control/discovered-ne[ne-id='<% $.neId %>']
+            fields: ne-id;ne-name;version;communication-state;ne-vendor;ne-family
+        resultFilter: $.content.get("nsp-inventory:output").data
+      publish:
+        neInfo: <% switch(task().result.content.len() > 0 => task().result.content.first(), true => {}) %>
+      publish-on-error:
+        lsoInfo: "Failed: fetching node details"
+        lsoStageError: <% task().result %>
+      on-success:
+        - processDeviceInfo
+
+    processDeviceInfo:
+      action: std.noop
+      publish:
+        neName: <% $.neInfo.get("ne-name") %>
+        neSoftwareVersion: <% $.neInfo.get("version") %>
+      on-success:
+        - getBackupInfo: <% $.backupFilePath = null or $.backupFilename = null %>
+        - processBackupInfo: <% $.backupFilePath != null and $.backupFilename != null %>
+
+    getBackupInfo:
+      action: nsp.https
+      input:
+        url: https://restconf-gateway/restconf/data/nsp-lso-operation:lso-operations/operation=<% $.operation_type %>,<% $.operation_name %>/executions
+        resultFilter: $.content.get("nsp-lso-operation:executions").execution.first()
+      publish:
+        backupFilePath: <% switch(task().result.content.get($.operation_type+":"+$.operation_type+"-execution").containsKey('filePath') => task().result.content.get($.operation_type+":"+$.operation_type+"-execution").filePath, 1 => null) %>
+        backupFilename: <% switch(task().result.content.get($.operation_type+":"+$.operation_type+"-execution").containsKey('backupFilename') => task().result.content.get($.operation_type+":"+$.operation_type+"-execution").backupFilename, 1 => null) %>
+        backupSoftwareVersion: <% switch(task().result.content.get($.operation_type+":"+$.operation_type+"-execution").containsKey('neSoftwareVersion') => task().result.content.get($.operation_type+":"+$.operation_type+"-execution").neSoftwareVersion, 1 => null) %>
+      publish-on-error:
+        lsoInfo: "Failed: fetching Backup file details from execution"
+        lsoStageError: <% task().result %>
+      on-success:
+        - readBackup: <% $.neSoftwareVersion = $.backupSoftwareVersion %>
+        - RestoreNotAllowed: <% $.neSoftwareVersion != $.backupSoftwareVersion %>
+
+    processBackupInfo:
+      action: std.noop
+      publish:
+        backupSoftwareVersion: <% $.backupFilePath.split('/')[-2] %>
+      on-success:
+        - readBackup: <% $.neSoftwareVersion = $.backupSoftwareVersion %>
+        - RestoreNotAllowed: <% $.neSoftwareVersion != $.backupSoftwareVersion %>
+
+    RestoreNotAllowed:
+      action: std.fail
+      input: 
+        error_data: "Rollback is not allowed for snapshots taken with a different SR OS release"
+      publish-on-error:
+        lsoInfo: <% task().result %>
+        lsoStageError: <% task().result %>
+    
+    readBackup:
+      action: nsp.https
+      input:
+        method: GET
+        url: https://file-service/nsp-file-service-app/rest/api/v1/file/returnContentZipFile?filePath=/<% $.backupFilename.split('.zip')[0] %>/<% $.neName %>.nokia-conf.json&&zipFilePath=<% $.backupFilePath %>/<% $.backupFilename %>
+      publish:
+        jsonConfig: <% task().result.content.data %> 
+      publish-on-error:
+        lsoInfo: "Failed: reading the backup"
+        lsoStageError: <% task().result %> 
+      on-success:
+        - rollbackConfig
+    
+    rollbackConfig:
+      action: nsp.https
+      input:
+        url: https://restconf-gateway/restconf/data/network-device-mgr:network-devices/network-device=<% $.neId %>/root
+        method: PATCH
+        contentType: application/yang-patch+json         
+        accept: application/yang-data+json
+        body: 
+          ietf-yang-patch:yang-patch:
+            patch-id: <% generate_uuid('random') %>
+            edit:
+            - operation: replace
+              target: nokia-conf:/configure
+              edit-id: <% generate_uuid('random') %>
+              value: <% json_parse($.jsonConfig) %>
+      publish:
+        lsoInfo: "Restore successful"
+      publish-on-error:
+        lsoInfo: <% task().result %>
+        lsoStageError: <% $.lsoStageError %>
+...

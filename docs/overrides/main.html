@@ -1,0 +1,125 @@
+<!--
+ Copyright 2025 Nokia
+ Licensed under the BSD 3-Clause License.
+ SPDX-License-Identifier: BSD-3-Clause
+-->
+
+{% extends "base.html" %}
+
+<!-- Custom front matter -->
+{% block extrahead %}
+
+<!-- Determine title -->
+{% set title = config.site_name %}
+{% if page and page.meta and page.meta.title %}
+{% set title = title ~ " - " ~ page.meta.title %}
+{% elif page and page.title and not page.is_homepage %}
+{% set title = title ~ " - " ~ page.title %}
+{% endif %}
+
+<!-- The image needs to have an absolute URL -->
+{% set image = config.site_url ~ 'images/site-card.webp' %}
+
+<!-- Open graph meta tags -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="{{ title }}" />
+<meta property="og:description" content="{{ config.site_description }}" />
+<meta property="og:url" content="{{ page.canonical_url }}" />
+<meta property="og:image" content="{{ image }}" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+
+<!-- Twitter card tags -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="{{ title }}" />
+<meta name="twitter:description" content="{{ config.site_description }}" />
+<meta name="twitter:image" content="{{ image }}" />
+
+<!-- NOINDEX -->
+
+{% endblock %}
+
+<!-- Content -->
+{% block content %}
+
+{% set parts = page.url.split('/') | select('string') | list %}
+
+{{ super() }}
+
+{% if parts | length > 3 %}
+
+<hr style="margin-bottom: 15px;" />
+<form id="submitFeedback">
+  <p class="feedback-title" style="font-size: 25px; margin: 0px;">Feedback</p>
+  <table>
+    <thead>
+      <th></th>
+      <th></th>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Do you feel you have achieved <span style="font-style: italic;">something</span>?</td>
+        <td>
+          <div style="display: flex; align-items: center;">
+            <div style="display: flex; align-items: center;">
+              <input id="achieved-radio-1" type="radio" name="achieved" value="yes" style="height: 15px; width: 15px;" />
+              <label for="achieved-radio-1" style="margin-left: 8px;">Yes</label>
+            </div>
+            <div style="display: flex; align-items: center; padding-left: 16px;">
+              <input id="achieved-radio-2" type="radio" name="achieved" value="no" style="height: 15px; width: 15px;" />
+              <label for="achieved-radio-2" style="margin-left: 8px;">No</label>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>Was the difficulty level graded appropriately?</td>
+        <td>
+          <div style="display: flex; align-items: center;">
+            <div style="display: flex; align-items: center;">
+              <input id="graded-radio-1" type="radio" name="graded" value="yes" style="height: 15px; width: 15px;" />
+              <label for="graded-radio-1" style="margin-left: 8px;">Yes</label>
+            </div>
+            <div style="display: flex; align-items: center; padding-left: 16px;">
+              <input id="graded-radio-2" type="radio" name="graded" value="no" style="height: 15px; width: 15px;" />
+              <label for="graded-radio-2" style="margin-left: 8px;">No</label>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>How do you rate this activity?</td>
+        <td>
+          <div style="display: flex; align-items: center;">
+            <svg class="star" style="width: 16px; height: 16px; margin-left: 4px; color: currentColor;" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+              <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
+            </svg>
+            <svg class="star" style="width: 16px; height: 16px; margin-left: 4px; color: currentColor;" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+              <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
+            </svg>
+            <svg class="star" style="width: 16px; height: 16px; margin-left: 4px; color: currentColor;" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+              <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
+            </svg>
+            <svg class="star" style="width: 16px; height: 16px; margin-left: 4px; color: currentColor;" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+              <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
+            </svg>
+            <svg class="star" style="width: 16px; height: 16px; margin-left: 4px; color: currentColor;" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+              <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
+            </svg>
+          </div>
+          <input type="hidden" name="rating" id="rating"/>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" style="text-align: right;">
+          <button type="submit" class="md-button md-button--primary" style="padding: 6px 15px;">Submit</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</form>
+
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,90 @@
+apiVersion: services.eda.nokia.com/v1alpha1
+kind: VirtualNetwork
+metadata:
+  name: vnet201
+  namespace: eda
+  labels:
+    role: hackathon-infra
+spec:
+  bridgeDomains:
+    - name: macvrf101
+      spec:
+        evi: 101
+        eviPool: evi-pool
+        exportTarget: target:65000:101
+        importTarget: target:65000:101
+        l2proxyARPND:
+          proxyARP: false
+          proxyND: false
+          tableSize: 250
+        macAging: 300
+        macDuplicationDetection:
+          action: StopLearning
+          enabled: false
+          holdDownTime: 9
+          monitoringWindow: 3
+          numMoves: 5
+        tunnelIndexPool: tunnel-index-pool
+        type: EVPNVXLAN
+        vni: 101
+        vniPool: vni-pool
+  irbInterfaces:
+    - name: irb0
+      spec:
+        arpTimeout: 14400
+        bfd:
+          desiredMinTransmitInt: 1000000
+          detectionMultiplier: 3
+          enabled: false
+          minEchoReceiveInterval: 1000000
+          requiredMinReceive: 1000000
+        bridgeDomain: macvrf101
+        evpnRouteAdvertisementType:
+          arpDynamic: true
+          arpStatic: true
+          ndDynamic: true
+          ndStatic: true
+        hostRoutePopulate:
+          dynamic: false
+          evpn: false
+          static: false
+        ipAddresses:
+          - ipv4Address:
+              ipPrefix: 192.168.30.1/24
+              primary: false
+            ipv6Address:
+              ipPrefix: fd00:ffdd:0:30::1/64
+              primary: false
+        ipMTU: 1500
+        l3ProxyARPND:
+          proxyARP: false
+          proxyND: false
+        learnUnsolicited: GLOBAL
+        router: ipvrf201
+  routers:
+    - name: ipvrf201
+      spec:
+        bgp:
+          ebgpPreference: 170
+          enabled: false
+          ibgpPreference: 170
+          minWaitToAdvertise: 0
+          rapidWithdrawl: true
+          waitForFIBInstall: false
+        evi: 200
+        eviPool: evi-pool
+        exportTarget: target:65000:201
+        importTarget: target:65000:201
+        tunnelIndexPool: tunnel-index-pool
+        type: EVPNVXLAN
+        vni: 201
+        vniPool: vni-pool
+  vlans:
+    - name: vlan101
+      spec:
+        bridgeDomain: macvrf101
+        interfaceSelector:
+          - edge-type=compute
+        uplink:
+          uplinkVLANID: pool
+        vlanID: "101"

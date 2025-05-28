@@ -1,0 +1,540 @@
+# --- INIT ---
+---
+apiVersion: bootstrap.eda.nokia.com/v1alpha1
+kind: Init
+metadata:
+  name: init-base
+  namespace: eda
+spec:
+  commitSave: true
+  mgmt:
+    ipv4DHCP: true
+    ipv6DHCP: true
+# --- NODE-USER ---
+---
+apiVersion: core.eda.nokia.com/v1
+kind: NodeUser
+metadata:
+  name: admin
+  namespace: eda
+spec:
+  username: admin
+  password: ${EVENT_PASSWORD}
+  groupBindings:
+    - groups:
+        - sudo
+      nodeSelector:
+        - containerlab=managed
+  sshPublicKeys:
+    - ${SSH_PUBLIC_KEY}
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQComgPcG3DJaOI/Hj6SteEvwuIObe9qSLdecDHmAPLbhyvClEKN7i2AVc0UHCY10Lxxc0XsLuNPgHZYlWk1Ii9SFMHE/60MdlpP7TvcUdLBTuy0Byhx7i+0LO+vMTDJMWsil8Ivgc9xCT6iL5a/kEc3AR7FQwf3K/3jidyLpLFBy+Nliz060Y5j7X+u5sqPogdoa47qdSOJCzCD7DfThaxyPLcnNiGuco/5OoAujC/ZLCFgj2JnIrsf3ZAvl8yzrJfH3KtDK3klNlA5oc2+l92NOcTdasE7iTHZfZg3HXWvdKP5U63FsXNzisIeHkmjs4AtuTvTyCam2PEKwPuy1X+ogTBTKTSAlud5rkDeoGBIyhbO6gZTQnqb8dyLpD4mz2Fyn/6k97YcZn3KVgS6OTEzHhOOhEd1OlFlRgNdREw3YqL4B2ooq/In0GJjhPHQg6L8cyyhL+oPm2noQUp8jw9Sp42EHDgG33dYPiwbQ2eq6Ql2PLCc0M8YXJdVtFhENV6zoPTtosxx4OEWtauoART931a000/qa51cvuJX7bSEvJGhGUh3sTSYGke3X0gQKMHtVh/5iDcb0IowW0J/e/UnITwP6FgTE2AhOsEXaoJiSd4BcUUDG1mHMuLKxRSFw63V7T0XTOHSousHS8QNKMJoNe1PcaArFCJ+gOZmY68Mzw==
+
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCawBI+34vsY84oZNbyFr1hhX/7aFu1ReakjBdcfF2BAOw5ZB/UBO5AVs02KU4fug7kK6Y599dvmRXemAMH6d0hzw3Y38bn0p00B1o+5EL6fgIWOwEel/ofQXTMLLKE+EUwAg4N02PduQ8Ywwz7EnSmgOlkmmv06V1NVcjngL8rWDe3t7tu9mCEk4uUbTns+0fw0V/HPvDZNJrZ+hWhcvSRvlkKw9zKSKqepHmIbOkk9dsbImui5sX7whjbcP4Md/Of43KTqb6ifireKedKlpWFOj5k2VAQsoJIbTxBE9/JyAUHjBHw2FLYjLtW1CAB7xyFRAprwpOgn4rgDjaWX5V3xXkJU5QLXcQjo/BCbfIXWyQu7GYgjO54D/QULlIwJhws3FP5VOy6MtgKCzyqOVScV+P78RMtgYgcJPt9+x67HOyIQpOGYQnZFopEKZn4ftw4ONxYsoMSVBuz9+YqnoUbNCLDm+4Sv1aANOxW+flDmGuh+dYGC28jsQYPMbVyLnU=
+
+    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH57nIKe/MvnM+Sn8meJVeLRH1mOrHCNeofXYgX7+hah
+
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDeXBX17jTr7kDf8Fr+RL/5XaL4XZpYORSgoNQgI1BRa4QjGXx/RRlAYVXjkrp11tNhrKl5kKa50oh5IX8DvKqB7AHXh2qmSZU/pdyXeiqtk8OeAOkFgGIeQDBNGNfl+0Abc0ylhVN7Kg5JGZ66mXQ1WQ6fDIpo/Sc1YFtdBPP+QAAj8SQ44FnCosi8UqBdx9XlVilAKp4MKDfRa6Zf2+40uAxbeVQt5yZeVn/FWLbRRaFhm9cskl/TlzVFelRhy+xZf+Rcm3PMJvtqNpltOdiNgPFo4N8QrhgRUqlQ0DoN39yeRe2o02szY0aJZlPEAJU/snBc9gDyP58dz9fcEYn2Mgmuye/XMptspHzhG5NhWz9tta/nEFr0RF+dLGMEDq28Lu+aVfR8/2Nzq5YlfAnWHIstXuz0UJcwDpbP3wKPvVokLeL2GYq2tBp0k0KFetM8SLNGDcTxqQ4zXf7PWTVyU9L47PnIn7h470vxs+8HmO7BghKODLybH/ngMC5kUvU=
+
+    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILEm5Ak2KnWsWqEFTFLNWNB2KkVinQnKxW9Qs8p5nKn1
+
+    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEV4fSYr0jsVOJyFCe0jL11or6yLGymy5ple6R20oCwV
+
+    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILKdXYzPIq8kHRJtDrh21wMVI76AnuPk7HDLeDteKN74
+
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUbEtnZFHS3J/8pgpfhJTm/0JY+wWm9nShIOJ2EBCp3TxreheGSYZXBeI/RjQVqYeA096MJLXjpw+pKekMV5KsuLiQKspdMQr4Gmv5SPcbzKdUO3PIPeXlfFGs2yWThSQ1QguawwJ/MxU89AWtiDOBr4+GOu2B3koS3MYBBF/Cvq8mJTFZ2oBaI7s0QCjFUTF/vSiRwT7OW3nNi+UoEQBWQrLWNVgXgOqiQbd/cvrRlTRjL0XPj8DfGWbGPH60XhXv2g3bO2w01iQBy+QlRAGlR7ytwkCI6DINdpU3K9gSc4YN9qYklqo0O63Mii7pRdcKKGtMcqbmx0wiVXGB/tBH
+
+    - ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBAEC+jFs3ZnkjKTD3ME5fRpdLTswGnpZxQ1l/OU7ILvZCtuajh0eEDGUfyJRO+Ct/WVgHwj9OI0MqHfuNG13TGVIKwFbJb/HoRSV5G96R9tnSYO9PoTlFvZnGC3r4/zKWHZfEKFjIVRnUOppVoAUvvwomVenB9xBtu/1+e7tKtEAhHhWrA==
+
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDiMRUXcaijPkDHlgBW8oJz9QdKWjqrup1sBW81rl0X3/UnB3pI5nDmCH4TeFhA5340hoKdy4FLMFcjuWwOEGWpAd9YIrIvUtcvLK6H/JW9A9qb1BSm8DJJFjYb1JyhodFxPZamJnz3dAzwagLmR9oYmteiPPxOM7cy9xobNHg+6BTNs8TAjXlgUm4W1sL3/KK58uONopxoiHQpojk4aJY4oLIXBqsRP+Z19AwfaQ8jXXvcodJQgBOaB7V6hlRTxkyqtqCM7iY1MiAveXOBcgzMwcUE7lxEzPsoCywlFQzbZcEAowQh7l11yMN2LUHNtPcg8dKGklgH3LitQ6SQuA3L
+
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCtxsljGhy2DWg9/VwyRwsz2xEfscEuXOgd+z9aXLBXjEEPedzVAs84fAo981ap4xVmbB7gZOPwDM0jWWrGhv94WbWG5ZA7RjoAdp7EscCtv68r2gudagfxvaRHFQntgZt0c5tJztleXYLjaSvH5Nk/TDnVmOKiVKz/DZLuUx80YTb0udtz4qmFxSLswVbCr5YDtkdfaZ2fef3uEq21siVe+KNwL3gurBSUMKiWAPcQiSlBFXOjt0dLT3juy3D7ck3RaLirq07xeJvrJwDghEpvSpZnPZf7v8UmyIyv90edjC/0YogJV962IMzoT8s8+179glEKQBNHHRPm0KdX1BKjOpAFhx3zcTK6cxbG5Zbjcq0Vw86SjsiO4gz8QkBda6o/AtvqdQ8KOg+IpfVJ/j9/zyIeU1Ep9oWXzmx8i2s+rSTkNTdvi1lTKGpTCD2jFa5uxisR5dVoeKxMsJNaS7NxjIo0ZARriwGMnh+s8mA3ZZVYqnKJsGMUs02I0aSd0QU=
+
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDNEsOytypejPqd4csAycRShsJAtCKAy/PxXtTzcpoU7PTLaxTGiZUGhZ33pZ86/hzyA8/GksvHsYj3tumILe1HTdV2rKGkbRIYJ8sAEkmhKtEiC0PuXVCLS4zy7YMOIQAJ1edn0RUqvAe+rb/E50eucqzJeMriEuWUtrLZpRRaUCQOmqTkTpxHR3T+5TF+ia/ii4ZY3VwsChVrPHfoVNk3NGSb8hPsjuSE61kwYxI135hHK2ZI9iv/QKUUrR9xFaMGMCAPX+9C1EhclwkeB1t4EKwam6qQs15jnhBO7kEq9oCX7vjrmra5neQD7yxkM+I0aJTYRfmldlyf/pWpGXxPn55f1eLFH5uTKxCnEJepe5P1jm24vvTdij9DF256GVjEwBrZ0ro8Pg45PT4ZT/jkAkfC+SLpQutcDggvNbOOUOjCak/lBv5bAIQOe/sbfIW6NOdWSNm6HZShYZUAfik1oXu2VasCZHcyNpwGx3p3Cr7HSVInDpzC9WGzv+hOzJ8=
+
+    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMaVrnqPJy3+1dyr2gH4IXPslOd2WbpyWQlrsTlPBQEV
+
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDLTxDZjy70GF3lZIePu/yz0lqaglkIYm2actUb4/Fq43z1VkSsdUKknCZuMnnAuHoAI3nMs8bmm5Ba9Kc9mqfZg8A6LYUYjUbRyv1qUgfok80G4k6JqUdly9E6CiI301ysxbqzYMyX0uWz3K/mY3kClNJJVuNXw+pDu9Obm8g2BDBVH9ecQ+IVtrt8s2rwoBzb2uSCLdqpTGQvo3RF5Ds4x7uSYyMNPvyQfewUnF60PPe/BlPL1DGFXX9xYxIMnbAuQ/KnpdyB216AnOd1xakY0l7n7iw6CNbbusN0WwnuyeWtO3sD7dNBaSd6ZtwU9Vaw0tZYbrvVc2ZIG6wLX+semg//DWwvcPxAZGSUyg3KjmTS0iWLCB93bif/tzrim/cZXfe2LPYAIXtWMEELzt+iUbKOMx9zrmjZ1gcaNLOTPY4XYTSwJslER5DScz1W9VtL7cKDe+2JVsrwSIb3MMq9XwIAFptApZBlhkjLLFBu0oBJ1z8JKD9mkJb3S2uH4icsGgZU7mY8n7xl3rSurSHuM8y5gAhy7fso0U/Rk7hsUjhElwTxMRtU+zjyV8G3pUyN4yx8uYEz3KPAO/aWrZqO0uoqj+F1Mb71Bn1wNUK5QnPaDEH1ByzTGIAIyJgs++i/KxiTwIskpR02ZrN87cw8ZzDSnL/fegF12UQhzN4o5Q==
+
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDBJRPA9kC25PYrFE8+DPAvxlzj7KNAloyKPsBEHjmLFgRbkjhK3F3kNHTd/afnPx5nC5R9g7mIPXjsHnzcR9n7OxegyqEQvwGJYOC5n94UfC/Htod5FhB4FcMAR1iuJWQCmGrg+Evs4LEBdST81PKIOORsFquZ84P5i/ZifjbKE+m+3tJLu484slMZqHANNUlfmTT1MkRDeXlv6eif9YWzP3w1M4l6+WOhowfyKU5N1scEf2gPIa5uqdzL3YTWWVid/EjTx4WNLO4w8FRRxxabcqAZ6rmw5CEHfQyXfqCW+v5d3thkylYpHMGohf7BifF0oDiJkaQUgO6vQBOpSbkLZ/ZCth4RqDEmZPO8DH25Hr+rkYZleWQoNL5JpHAMlNMHAOk+b2icBT+qw0+1zpzHuQow+48BkCLwQNyZmkqJB4SABzx5JWC8nLMczvpJqkWhG/Nzp5PdoDrsqxTNt9oaTUWdBDgFCTDduisyqvtzn6UOJJn6+hKqdxMyT1bcezd9s4AiJTTBzpLy560QrANyEIX+nt2yR8fJhfg+R4RsXw0hVlYh31a9oG2+NwCwBaTrCML97m/lVFsoSb4uJ1rwqUKbdzCV3EB2xINkkKXwafYh5lHMjo7TPcgo0VQIe2lSWLiHF4h3HTD/HIP0NqxIm+Pk5pVE99gC+IUUXlmhJQ==
+
+---
+# --- TOPONODES ---
+---
+apiVersion: core.eda.nokia.com/v1
+kind: TopoNode
+metadata:
+  name: leaf11
+  labels:
+    eda.nokia.com/role: leaf
+    eda-connector.nokia.com/topology: srexperts
+    eda-connector.nokia.com/role: srexperts-leaf
+    eda.nokia.com/security-profile: managed
+    containerlab: managed
+  namespace: eda
+spec:
+  nodeProfile: srlinux-ghcr-24.10.4
+  operatingSystem: srl
+  platform: 7220 IXR-D2L
+  version: 24.10.4
+---
+apiVersion: core.eda.nokia.com/v1
+kind: TopoNode
+metadata:
+  name: leaf12
+  labels:
+    eda.nokia.com/role: leaf
+    eda-connector.nokia.com/topology: srexperts
+    eda-connector.nokia.com/role: srexperts-leaf
+    eda.nokia.com/security-profile: managed
+    containerlab: managed
+  namespace: eda
+spec:
+  nodeProfile: srlinux-ghcr-24.10.4
+  operatingSystem: srl
+  platform: 7220 IXR-D2L
+  version: 24.10.4
+---
+apiVersion: core.eda.nokia.com/v1
+kind: TopoNode
+metadata:
+  name: leaf13
+  labels:
+    eda.nokia.com/role: leaf
+    eda-connector.nokia.com/topology: srexperts
+    eda-connector.nokia.com/role: srexperts-leaf
+    eda.nokia.com/security-profile: managed
+    containerlab: managed
+  namespace: eda
+spec:
+  nodeProfile: srlinux-ghcr-24.10.4
+  operatingSystem: srl
+  platform: 7220 IXR-D2L
+  version: 24.10.4
+---
+apiVersion: core.eda.nokia.com/v1
+kind: TopoNode
+metadata:
+  name: spine11
+  labels:
+    eda.nokia.com/role: spine
+    eda-connector.nokia.com/topology: srexperts
+    eda-connector.nokia.com/role: srexperts-spine
+    eda.nokia.com/security-profile: managed
+    containerlab: managed
+  namespace: eda
+spec:
+  nodeProfile: srlinux-ghcr-24.10.4
+  operatingSystem: srl
+  platform: 7220 IXR-H2
+  version: 24.10.4
+---
+apiVersion: core.eda.nokia.com/v1
+kind: TopoNode
+metadata:
+  name: spine12
+  labels:
+    eda.nokia.com/role: spine
+    eda-connector.nokia.com/topology: srexperts
+    eda-connector.nokia.com/role: srexperts-spine
+    eda.nokia.com/security-profile: managed
+    containerlab: managed
+  namespace: eda
+spec:
+  nodeProfile: srlinux-ghcr-24.10.4
+  operatingSystem: srl
+  platform: 7220 IXR-H2
+  version: 24.10.4
+---
+# --- TOPOLINK-INTERFACES ---
+---
+apiVersion: interfaces.eda.nokia.com/v1alpha1
+kind: Interface
+metadata:
+  name: spine11-ethernet-1-1
+  namespace: eda
+  labels:
+    eda.nokia.com/role: interSwitch
+spec:
+  enabled: true
+  encapType: 'null'
+  ethernet:
+    stormControl:
+      enabled: false
+  lldp: true
+  members:
+    - enabled: true
+      interface: ethernet-1-1
+      lacpPortPriority: 32768
+      node: g${INSTANCE_ID}-spine11
+  type: interface
+  mtu: 9198
+  description: 'inter-switch link to leaf11'
+---
+apiVersion: interfaces.eda.nokia.com/v1alpha1
+kind: Interface
+metadata:
+  name: leaf11-ethernet-1-49
+  namespace: eda
+  labels:
+    eda.nokia.com/role: interSwitch
+spec:
+  enabled: true
+  encapType: 'null'
+  ethernet:
+    stormControl:
+      enabled: false
+  lldp: true
+  members:
+    - enabled: true
+      interface: ethernet-1-49
+      lacpPortPriority: 32768
+      node: g${INSTANCE_ID}-leaf11
+  type: interface
+  mtu: 9198
+  description: 'inter-switch link to spine11'
+---
+apiVersion: interfaces.eda.nokia.com/v1alpha1
+kind: Interface
+metadata:
+  name: spine11-ethernet-1-2
+  namespace: eda
+  labels:
+    eda.nokia.com/role: interSwitch
+spec:
+  enabled: true
+  encapType: 'null'
+  ethernet:
+    stormControl:
+      enabled: false
+  lldp: true
+  members:
+    - enabled: true
+      interface: ethernet-1-2
+      lacpPortPriority: 32768
+      node: g${INSTANCE_ID}-spine11
+  type: interface
+  mtu: 9198
+  description: 'inter-switch link to leaf12'
+---
+apiVersion: interfaces.eda.nokia.com/v1alpha1
+kind: Interface
+metadata:
+  name: leaf12-ethernet-1-49
+  namespace: eda
+  labels:
+    eda.nokia.com/role: interSwitch
+spec:
+  enabled: true
+  encapType: 'null'
+  ethernet:
+    stormControl:
+      enabled: false
+  lldp: true
+  members:
+    - enabled: true
+      interface: ethernet-1-49
+      lacpPortPriority: 32768
+      node: g${INSTANCE_ID}-leaf12
+  type: interface
+  mtu: 9198
+  description: 'inter-switch link to spine11'
+---
+apiVersion: interfaces.eda.nokia.com/v1alpha1
+kind: Interface
+metadata:
+  name: spine11-ethernet-1-3
+  namespace: eda
+  labels:
+    eda.nokia.com/role: interSwitch
+spec:
+  enabled: true
+  encapType: 'null'
+  ethernet:
+    stormControl:
+      enabled: false
+  lldp: true
+  members:
+    - enabled: true
+      interface: ethernet-1-3
+      lacpPortPriority: 32768
+      node: g${INSTANCE_ID}-spine11
+  type: interface
+  mtu: 9198
+  description: 'inter-switch link to leaf13'
+---
+apiVersion: interfaces.eda.nokia.com/v1alpha1
+kind: Interface
+metadata:
+  name: leaf13-ethernet-1-49
+  namespace: eda
+  labels:
+    eda.nokia.com/role: interSwitch
+spec:
+  enabled: true
+  encapType: 'null'
+  ethernet:
+    stormControl:
+      enabled: false
+  lldp: true
+  members:
+    - enabled: true
+      interface: ethernet-1-49
+      lacpPortPriority: 32768
+      node: g${INSTANCE_ID}-leaf13
+  type: interface
+  mtu: 9198
+  description: 'inter-switch link to spine11'
+---
+apiVersion: interfaces.eda.nokia.com/v1alpha1
+kind: Interface
+metadata:
+  name: spine12-ethernet-1-1
+  namespace: eda
+  labels:
+    eda.nokia.com/role: interSwitch
+spec:
+  enabled: true
+  encapType: 'null'
+  ethernet:
+    stormControl:
+      enabled: false
+  lldp: true
+  members:
+    - enabled: true
+      interface: ethernet-1-1
+      lacpPortPriority: 32768
+      node: g${INSTANCE_ID}-spine12
+  type: interface
+  mtu: 9198
+  description: 'inter-switch link to leaf11'
+---
+apiVersion: interfaces.eda.nokia.com/v1alpha1
+kind: Interface
+metadata:
+  name: leaf11-ethernet-1-50
+  namespace: eda
+  labels:
+    eda.nokia.com/role: interSwitch
+spec:
+  enabled: true
+  encapType: 'null'
+  ethernet:
+    stormControl:
+      enabled: false
+  lldp: true
+  members:
+    - enabled: true
+      interface: ethernet-1-50
+      lacpPortPriority: 32768
+      node: g${INSTANCE_ID}-leaf11
+  type: interface
+  mtu: 9198
+  description: 'inter-switch link to spine12'
+---
+apiVersion: interfaces.eda.nokia.com/v1alpha1
+kind: Interface
+metadata:
+  name: spine12-ethernet-1-2
+  namespace: eda
+  labels:
+    eda.nokia.com/role: interSwitch
+spec:
+  enabled: true
+  encapType: 'null'
+  ethernet:
+    stormControl:
+      enabled: false
+  lldp: true
+  members:
+    - enabled: true
+      interface: ethernet-1-2
+      lacpPortPriority: 32768
+      node: g${INSTANCE_ID}-spine12
+  type: interface
+  mtu: 9198
+  description: 'inter-switch link to leaf12'
+---
+apiVersion: interfaces.eda.nokia.com/v1alpha1
+kind: Interface
+metadata:
+  name: leaf12-ethernet-1-50
+  namespace: eda
+  labels:
+    eda.nokia.com/role: interSwitch
+spec:
+  enabled: true
+  encapType: 'null'
+  ethernet:
+    stormControl:
+      enabled: false
+  lldp: true
+  members:
+    - enabled: true
+      interface: ethernet-1-50
+      lacpPortPriority: 32768
+      node: g${INSTANCE_ID}-leaf12
+  type: interface
+  mtu: 9198
+  description: 'inter-switch link to spine12'
+---
+apiVersion: interfaces.eda.nokia.com/v1alpha1
+kind: Interface
+metadata:
+  name: spine12-ethernet-1-3
+  namespace: eda
+  labels:
+    eda.nokia.com/role: interSwitch
+spec:
+  enabled: true
+  encapType: 'null'
+  ethernet:
+    stormControl:
+      enabled: false
+  lldp: true
+  members:
+    - enabled: true
+      interface: ethernet-1-3
+      lacpPortPriority: 32768
+      node: g${INSTANCE_ID}-spine12
+  type: interface
+  mtu: 9198
+  description: 'inter-switch link to leaf13'
+---
+apiVersion: interfaces.eda.nokia.com/v1alpha1
+kind: Interface
+metadata:
+  name: leaf13-ethernet-1-50
+  namespace: eda
+  labels:
+    eda.nokia.com/role: interSwitch
+spec:
+  enabled: true
+  encapType: 'null'
+  ethernet:
+    stormControl:
+      enabled: false
+  lldp: true
+  members:
+    - enabled: true
+      interface: ethernet-1-50
+      lacpPortPriority: 32768
+      node: g${INSTANCE_ID}-leaf13
+  type: interface
+  mtu: 9198
+  description: 'inter-switch link to spine12'
+---
+# --- TOPOLINKS ---
+---
+apiVersion: core.eda.nokia.com/v1
+kind: TopoLink
+metadata:
+  labels:
+    eda.nokia.com/role: interSwitch
+  name: spine11-e1-1-leaf11-e1-49
+  namespace: eda
+spec:
+  links:
+    - local:
+        interface: ethernet-1-1
+        interfaceResource: spine11-ethernet-1-1
+        node: g${INSTANCE_ID}-spine11
+      remote:
+        interface: ethernet-1-49
+        interfaceResource: leaf11-ethernet-1-49
+        node: g${INSTANCE_ID}-leaf11
+      type: interSwitch
+---
+apiVersion: core.eda.nokia.com/v1
+kind: TopoLink
+metadata:
+  labels:
+    eda.nokia.com/role: interSwitch
+  name: spine11-e1-2-leaf12-e1-49
+  namespace: eda
+spec:
+  links:
+    - local:
+        interface: ethernet-1-2
+        interfaceResource: spine11-ethernet-1-2
+        node: g${INSTANCE_ID}-spine11
+      remote:
+        interface: ethernet-1-49
+        interfaceResource: leaf12-ethernet-1-49
+        node: g${INSTANCE_ID}-leaf12
+      type: interSwitch
+---
+apiVersion: core.eda.nokia.com/v1
+kind: TopoLink
+metadata:
+  labels:
+    eda.nokia.com/role: interSwitch
+  name: spine11-e1-3-leaf13-e1-49
+  namespace: eda
+spec:
+  links:
+    - local:
+        interface: ethernet-1-3
+        interfaceResource: spine11-ethernet-1-3
+        node: g${INSTANCE_ID}-spine11
+      remote:
+        interface: ethernet-1-49
+        interfaceResource: leaf13-ethernet-1-49
+        node: g${INSTANCE_ID}-leaf13
+      type: interSwitch
+---
+apiVersion: core.eda.nokia.com/v1
+kind: TopoLink
+metadata:
+  labels:
+    eda.nokia.com/role: interSwitch
+  name: spine12-e1-1-leaf11-e1-50
+  namespace: eda
+spec:
+  links:
+    - local:
+        interface: ethernet-1-1
+        interfaceResource: spine12-ethernet-1-1
+        node: g${INSTANCE_ID}-spine12
+      remote:
+        interface: ethernet-1-50
+        interfaceResource: leaf11-ethernet-1-50
+        node: g${INSTANCE_ID}-leaf11
+      type: interSwitch
+---
+apiVersion: core.eda.nokia.com/v1
+kind: TopoLink
+metadata:
+  labels:
+    eda.nokia.com/role: interSwitch
+  name: spine12-e1-2-leaf12-e1-50
+  namespace: eda
+spec:
+  links:
+    - local:
+        interface: ethernet-1-2
+        interfaceResource: spine12-ethernet-1-2
+        node: g${INSTANCE_ID}-spine12
+      remote:
+        interface: ethernet-1-50
+        interfaceResource: leaf12-ethernet-1-50
+        node: g${INSTANCE_ID}-leaf12
+      type: interSwitch
+---
+apiVersion: core.eda.nokia.com/v1
+kind: TopoLink
+metadata:
+  labels:
+    eda.nokia.com/role: interSwitch
+  name: spine12-e1-3-leaf13-e1-50
+  namespace: eda
+spec:
+  links:
+    - local:
+        interface: ethernet-1-3
+        interfaceResource: spine12-ethernet-1-3
+        node: g${INSTANCE_ID}-spine12
+      remote:
+        interface: ethernet-1-50
+        interfaceResource: leaf13-ethernet-1-50
+        node: g${INSTANCE_ID}-leaf13
+      type: interSwitch

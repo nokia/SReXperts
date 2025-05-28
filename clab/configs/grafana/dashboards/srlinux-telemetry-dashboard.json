@@ -1973,7 +1973,7 @@
           },
           {
             "aggregation": "current",
-            "alias": "leaf-2_e1/1_in",
+            "alias": "leaf-2_e1/2_in",
             "column": "Time",
             "dateColumn": "Time",
             "dateFormat": "YYYY-MM-DD HH:mm:ss",
@@ -2080,7 +2080,7 @@
             ],
             "order": 13,
             "overlayIcon": false,
-            "pattern": "clab-srexperts-leaf12:ethernet-1/2:out",
+            "pattern": "clab-srexperts-leaf12:ethernet-1/2:in",
             "rangeData": [],
             "reduce": true,
             "refId": "A",
@@ -2172,7 +2172,7 @@
                   {
                     "colorOn": "a",
                     "hidden": false,
-                    "pattern": "agJGtUolQpaysEPCJuB_-19",
+                    "pattern": "MzNvUIA4c6WraNlcx4m_-89",
                     "style": "strokeColor"
                   }
                 ],
@@ -3222,7 +3222,7 @@
                 "dataList": [
                   {
                     "hidden": false,
-                    "pattern": "agJGtUolQpaysEPCJuB_-23",
+                    "pattern": "agJGtUolQpaysEPCJuB_-20",
                     "textOn": "wmd",
                     "textPattern": "/.*/",
                     "textReplace": "content"
@@ -3356,7 +3356,7 @@
                   {
                     "colorOn": "a",
                     "hidden": false,
-                    "pattern": "11",
+                    "pattern": "MzNvUIA4c6WraNlcx4m_-107",
                     "style": "strokeColor"
                   }
                 ],

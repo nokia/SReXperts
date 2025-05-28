@@ -1,0 +1,87 @@
+apiVersion: routing.eda.nokia.com/v1alpha1
+kind: DefaultInterface
+metadata:
+  name: interface-spine11-ethernet-1-31
+  namespace: eda
+  labels:
+    role: hackathon-infra
+spec:
+  bfd:
+    desiredMinTransmitInt: 1000000
+    detectionMultiplier: 3
+    enabled: false
+    minEchoReceiveInterval: 1000000
+    requiredMinReceive: 1000000
+  defaultRouter: router-g${INSTANCE_ID}-spine11
+  interface: spine11-ethernet-1-31
+  unnumbered: IPV6
+  vlanID: null
+  ipMTU: null
+  ipv4Addresses: []
+  ipv6Addresses: []
+---
+apiVersion: routing.eda.nokia.com/v1alpha1
+kind: DefaultInterface
+metadata:
+  name: interface-spine11-ethernet-1-32
+  namespace: eda
+  labels:
+    role: hackathon-infra
+spec:
+  bfd:
+    desiredMinTransmitInt: 1000000
+    detectionMultiplier: 3
+    enabled: false
+    minEchoReceiveInterval: 1000000
+    requiredMinReceive: 1000000
+  defaultRouter: router-g${INSTANCE_ID}-spine11
+  interface: spine11-ethernet-1-32
+  unnumbered: IPV6
+  vlanID: null
+  ipMTU: null
+  ipv4Addresses: []
+  ipv6Addresses: []
+---
+apiVersion: routing.eda.nokia.com/v1alpha1
+kind: DefaultInterface
+metadata:
+  name: interface-spine12-ethernet-1-31
+  namespace: eda
+  labels:
+    role: hackathon-infra
+spec:
+  bfd:
+    desiredMinTransmitInt: 1000000
+    detectionMultiplier: 3
+    enabled: false
+    minEchoReceiveInterval: 1000000
+    requiredMinReceive: 1000000
+  defaultRouter: router-g${INSTANCE_ID}-spine12
+  interface: spine12-ethernet-1-31
+  unnumbered: IPV6
+  vlanID: null
+  ipMTU: null
+  ipv4Addresses: []
+  ipv6Addresses: []
+---
+apiVersion: routing.eda.nokia.com/v1alpha1
+kind: DefaultInterface
+metadata:
+  name: interface-spine12-ethernet-1-32
+  namespace: eda
+  labels:
+    role: hackathon-infra
+spec:
+  bfd:
+    desiredMinTransmitInt: 1000000
+    detectionMultiplier: 3
+    enabled: false
+    minEchoReceiveInterval: 1000000
+    requiredMinReceive: 1000000
+  defaultRouter: router-g${INSTANCE_ID}-spine12
+  interface: spine12-ethernet-1-32
+  unnumbered: IPV6
+  vlanID: null
+  ipMTU: null
+  ipv4Addresses: []
+  ipv6Addresses: []

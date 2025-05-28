@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <defs>
+    <clipPath id="clip-Nokia_Favicon_32x32">
+      <rect width="32" height="32"/>
+    </clipPath>
+  </defs>
+  <g id="Nokia_Favicon_32x32" data-name="Nokia Favicon 32x32" clip-path="url(#clip-Nokia_Favicon_32x32)">
+    <rect width="32" height="32" fill="#005aff"/>
+    <g id="N_Amplifier" data-name="N Amplifier" transform="translate(2.963 2.252)">
+      <path id="Path_4" data-name="Path 4" d="M0,0V26.715H4.208V9.047L25.89,27.353l.184.156V21.98Z" fill="#fff"/>
+    </g>
+    <rect id="Rectangle_1" data-name="Rectangle 1" width="32" height="32" fill="none"/>
+  </g>
+</svg>

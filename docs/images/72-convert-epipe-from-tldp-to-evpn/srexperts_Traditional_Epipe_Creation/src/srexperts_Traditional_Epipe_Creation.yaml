@@ -1,0 +1,258 @@
+# Copyright 2025 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+version: '2.0'
+
+srexperts_Traditional_Epipe_Creation:
+  workflow_meta:
+    title: Traditional Epipe Creation
+    author: Siva Sivakumar
+    email: siva.sivakumar@nokia.com
+    version: "1.1.0"
+    deprecated: false
+    
+  tags:
+    - sf-network-operation
+
+  input:
+    - templateName
+    - tunnelTemplateName
+    - targets
+
+  output:
+    result: <% $.result %>
+
+  output-on-error:
+    result: failed
+
+  vars:
+    rcFind: https://<% locate_nsp() %>:8545/restconf/operations/nsp-inventory:find
+    ibsfCreate: https://<% locate_nsp() %>:8545/restconf/data/nsp-service-intent:intent-base
+    ibsfTunnelCreate: https://<% locate_nsp() %>:8545/restconf/data/nsp-tunnel-intent:intent-base
+
+
+  tasks:
+    getIntentType:
+      action: nsp.https
+      input:
+        method: POST
+        url: <% $.rcFind %>
+        body:
+          input:
+            xpath-filter: /service-template:templates/template[name='<% $.templateName %>']
+            fields: name;description;intent-type;intent-version;state
+        resultFilter: $.content.get("nsp-inventory:output")
+      publish:
+        intentType: <% task().result.content.data.first().get("intent-type") %>
+        intentTypeVersion: <% task().result.content.data.first().get("intent-version") %>
+      on-success:
+        - getTunnelIntentType
+
+    getTunnelIntentType:
+      action: nsp.https
+      input:
+        method: POST
+        url: <% $.rcFind %>
+        body:
+          input:
+            xpath-filter: /tunnel-template:templates/template[name='<% $.tunnelTemplateName %>']
+            fields: name;description;intent-type;intent-version;state
+        resultFilter: $.content.get("nsp-inventory:output")
+      publish:
+        tunnelIntentType: <% task().result.content.data.first().get("intent-type") %>
+        tunnelIntentTypeVersion: <% task().result.content.data.first().get("intent-version") %>
+      on-success:
+        - getCustomerId
+
+    getCustomerId:
+      with-items: item in <% $.targets %>
+      action: nsp.https
+      input:
+        method: POST
+        url: <% $.rcFind %>
+        body:
+          input:
+            xpath-filter: /nsp-customer:customers/customer[name='<% $.item.custName %>']
+            fields: name;id;description
+        resultFilter: $.content.get("nsp-inventory:output")
+      publish:
+        customerIds: <% task().result.content.data.select($.id).flatten() %>
+      on-success:
+        - createSdpTunnelAtoB
+        - createSdpTunnelBtoA
+
+    createSdpTunnelAtoB:
+      with-items: 
+        - item in <% $.targets %>
+      action: nsp.https
+      input:
+        method: POST
+        url: <% $.ibsfTunnelCreate %>
+        body:
+          nsp-tunnel-intent:intent:
+          - source-ne-id: <% $.item.siteA %>
+            sdp-id: <% $.item.svcId %>
+            intent-type: <% $.tunnelIntentType %>
+            intent-type-version: <% $.tunnelIntentTypeVersion %>
+            olc-state: deployed
+            template-name: <% $.tunnelTemplateName %>
+            intent-specific-data:
+              tunnel:tunnel:
+                destination-ne-id: <% $.item.siteB %>
+                admin-state: unlocked
+                transport-type: mpls
+                signaling: tldp
+                mpls:
+                  mixed-lsp-mode: false
+                  enable-ldp: false
+                  enable-bgp-tunnel: false
+                  sr-isis: true
+                  sr-ospf: false
+                hello-parameters:
+                  keep-alive-enabled: false
+                name: serviceTunnel--<% $.item.svcId %>-from-A-to-B
+      publish:
+        taskId: <% task().id %>
+        createResponse: <% task().result.select($.content.response.data) %>
+      on-success:
+        - createElineService
+
+    createSdpTunnelBtoA:
+      with-items: 
+        - item in <% $.targets %>
+      action: nsp.https
+      input:
+        method: POST
+        url: <% $.ibsfTunnelCreate %>
+        body:
+          nsp-tunnel-intent:intent:
+          - source-ne-id: <% $.item.siteB %>
+            sdp-id: <% $.item.svcId %>
+            intent-type: <% $.tunnelIntentType %>
+            intent-type-version: <% $.tunnelIntentTypeVersion %>
+            olc-state: deployed
+            template-name: <% $.tunnelTemplateName %>
+            intent-specific-data:
+              tunnel:tunnel:
+                destination-ne-id: <% $.item.siteA %>
+                admin-state: unlocked
+                transport-type: mpls
+                signaling: tldp
+                mpls:
+                  mixed-lsp-mode: false
+                  enable-ldp: false
+                  enable-bgp-tunnel: false
+                  sr-isis: true
+                  sr-ospf: false
+                hello-parameters:
+                  keep-alive-enabled: false
+                name: serviceTunnel--<% $.item.svcId %>-from-B-to-A
+
+      publish:
+        taskId: <% task().id %>
+        createResponse: <% task().result.select($.content.response.data) %>
+      on-success:
+        - createElineService
+
+    createElineService:
+      join: all
+      with-items: 
+        - cId in <% $.customerIds %>
+        - item in <% $.targets %>
+      action: nsp.https
+      input:
+        method: POST
+        url: <% $.ibsfCreate %>
+        body:
+          nsp-service-intent:intent:
+            - template-name: <% $.templateName %>
+              intent-type: <% $.intentType %>
+              intent-type-version: <% $.intentTypeVersion %>
+              service-name: <% $.item.svcName %>
+              olc-state: deployed
+              intent-specific-data:
+                epipe:epipe:
+                  customer-id: <% $.cId %>
+                  ne-service-id: <% $.item.svcId %>
+                  description: Bulk Provisioning using WFM
+                  admin-state: unlocked
+                  mtu: 1600
+                  site-a:
+                    device-id: <% $.item.siteA %>
+                    endpoint:
+                      - port-id: <% $.item.portA %>
+                        description: Endpoint A
+                        inner-vlan-tag: -1
+                        outer-vlan-tag: <% $.item.svcId %>
+                  site-b:
+                    device-id: <% $.item.siteB %>
+                    endpoint:
+                      - port-id: <% $.item.portB %>
+                        description: Endpoint B
+                        inner-vlan-tag: -1
+                        outer-vlan-tag: <% $.item.svcId %>
+                  sdp-details:
+                    sdp:
+                      - source-device-id: <% $.item.siteA %>
+                        destination-device-id: <% $.item.siteB %>
+                        sdp-id: <% $.item.svcId %>
+                        admin-state: unlocked
+                        override-vc-id: false
+                        vc-type: ether
+                      - source-device-id: <% $.item.siteB %>
+                        destination-device-id: <% $.item.siteA %>
+                        sdp-id: <% $.item.svcId %>
+                        admin-state: unlocked
+                        override-vc-id: false
+                        vc-type: ether
+      publish:
+        taskId: <% task().id %>
+        createResponse: <% task().result.select($.content.response.data) %>
+      on-success:
+        - captureCreationTime
+
+    captureCreationTime:
+      wait-before: 5
+      action: nsp.https
+      input:
+        method: GET
+        url: <% locate_nsp("Action Executions", "v1") %>/v1/action-execution/task/<% $.taskId %>
+      publish:
+        startTime: <% task().result.content.response.data.first().created_at %>    
+        endTime: <% task().result.content.response.data.first().updated_at %>
+      on-success:
+        - extractTimeDifference
+
+    extractTimeDifference:
+      action: std.javascript
+      input: 
+        context: <% $ %>
+        script: |
+          const t1 = new Date($.endTime);
+          const t2 = new Date($.startTime);
+          diff = t1.getTime() - t2.getTime();
+          diff /= 1000;
+          return diff;
+      publish:
+        execTime: <% task().result %>
+      on-success:
+        - captureServiceState
+
+    captureServiceState:
+      with-items: item in <% $.targets %>
+      action: nsp.https
+      input:
+        method: POST
+        url: <% $.rcFind %>
+        body:
+          input:
+            xpath-filter: /nsp-service:services/service-layer/eline[service-id='<% $.item.svcName %>']
+        resultFilter: >-
+          $.content.get("nsp-inventory:output").data.select({
+          svcName => $.name, 
+          svcId => $.get("ne-service-id"), 
+          slcState => $.get("service-extension:eline-svc").get("slc-state"), 
+          misaligned => $.get("service-extension:eline-svc").misaligned})
+      publish:
+        result: <% resolve_jinja(fetch_jinja("serviceState"), {execTime => $.execTime, data => task().result.content.flatten()}) %>

@@ -40,3 +40,16 @@ iface bond0.200
     address 10.65.34.12/24
     post-up ip r a 10.65.0.0/16 via 10.65.34.1 dev bond0.200
 
+# VLAN 300 - SRL EDA
+auto bond0.300
+iface bond0.300
+    address 10.30.0.12/24
+    address fd00:fdfd:0:3000::12/64
+
+# VLAN 312 - SRL EDA
+auto bond0.312
+iface bond0.312
+    address 10.30.2.12/24
+    address fd00:fdfd:0:3002::12/64
+    post-up ip r a 10.30.0.0/16 via 10.30.2.1 dev eth1.312
+    post-up ip -6 r a fd00:fdfd::/32 via fd00:fdfd:0:3002::1 dev eth1.312

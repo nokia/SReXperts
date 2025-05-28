@@ -1,0 +1,29 @@
+apiVersion: protocols.eda.nokia.com/v1alpha1
+kind: DefaultBGPGroup
+metadata:
+  name: bgpgroup-ebgp-pe
+  namespace: eda
+  labels:
+    role: hackathon-infra
+spec:
+  bfd: false
+  client: false
+  exportPolicy:
+    - accept-all
+  importPolicy:
+    - accept-all
+  ipv4Unicast:
+    advertiseIPV6NextHops: true
+    enabled: true
+    receiveIPV6NextHops: true
+    maxReceivedRoutes: null
+  ipv6Unicast:
+    enabled: true
+    maxReceivedRoutes: null
+  l2VPNEVPN:
+    enabled: false
+    advertiseIPV6NextHops: false
+    maxReceivedRoutes: null
+  nextHopSelf: false
+  sendCommunityLarge: false
+  sendCommunityStandard: false

@@ -15,3 +15,11 @@ iface eth1.100
 #                               # translates to server.office3 in hex
 iface eth1.100 inet6 dhcp
 
+# VLAN 3000
+auto eth1.3000
+allow-hotplug eth1.3000
+iface eth1.3000 inet static
+  address 192.168.190.3
+  netmask 255.255.255.0
+  network 192.168.190.0
+  broadcast 192.168.190.255

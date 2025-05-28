@@ -1,0 +1,35 @@
+name: serviceState
+template: |-
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <style>
+        table {font-family: NokiaPure, sans-serif;border-collapse: collapse;width: 100%;}
+        td, th {border: 1px solid #dddddd;text-align: left;padding: 8px;}
+        tr:nth-child(even) {background-color: #dddddd;}
+        lime {margin-left: 19px;height: 12px;width: 12px;background-color: lime;border-radius: 50%;display: inline-block;}
+        red {margin-left: 19px;height: 12px;width: 12px;background-color: red;border-radius: 50%;display: inline-block;}
+      </style>
+    </head>
+    <body>
+      <br/><span style="font-size: 1em; font-weight: 600; margin:10px; color:#183693 ;font-family: NokiaPure, sans-serif;">Service State</span><br/><br/>
+      <div style="padding-right: 10px;">
+        <table>
+          <tr>
+            <th>Service ID</th>
+            <th>Service Name</th>
+            <th>SLC State</th>
+            <th>Misaligned</th>
+          </tr>
+          {% for item in data %}<tr>
+            <td>{{ item.svcId }}</td> 
+            <td>{{ item.svcName }}</td>
+            <td>{{ item.slcState }}</td>
+            <td>{{ item.misaligned }}</td>
+          </tr>{% endfor %}
+          <tr><td colspan="4">Overall Service Creation Time: {{ execTime }} sec(s)</td></tr>
+        </table>
+      </div>
+    </body>
+  </html>
+tags: []

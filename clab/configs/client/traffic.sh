@@ -1,8 +1,8 @@
+#!/bin/sh
 # Copyright 2024 Nokia
 # Licensed under the BSD 3-Clause License.
 # SPDX-License-Identifier: BSD-3-Clause
 
-#1/bin/sh 
 
 set -eu
 
@@ -13,8 +13,22 @@ validsuffix=".grt .vprn.dci"
 hostname=$(/bin/hostname)
 
 startTraffic() {
-    echo "starting traffic to ${dst}, binding on ${hostname}.${suffix}, saving logs to /tmp/${prefix}.${suffix}.log"
-    /usr/bin/iperf3 -6 -c ${prefix}.${suffix} -t 10000 -i 1 -p 5201 -B ${hostname}.${suffix} -P 8 -b 200K -M 1460 --logfile /tmp/${prefix}.${suffix}.log &
+    log_file=/tmp/${prefix}.${suffix}.$(date +%FT%T).log
+    pid_file=/tmp/traffic-${hostname}-${prefix}.${suffix}.pid
+    if [ -f "$pid_file" ]; then
+        pid=$(cat $pid_file)
+        ps -p $pid > /dev/null 2>&1 && {
+            echo "Already running for given host $prefix (pid $pid)" >&2 ;
+            exit 1 ;
+        } || {
+            rm -f $pid_file || {
+                echo Unable to remove orphan PID file $pid_file >&2 ;
+                exit 1 ;
+            }
+        }
+    fi
+    echo "starting traffic to ${dst}, binding on ${hostname}.${suffix}, saving logs to ${log_file}"
+    /usr/bin/iperf3 -6 -c ${prefix}.${suffix} -t 10000 -i 1 -p 5201 -B ${hostname}.${suffix} -P 8 -b 200K -M 1460 --logfile ${log_file} &
     echo $! > /tmp/traffic-$hostname-${prefix}.${suffix}.pid
 }
 stopTraffic() {
@@ -22,8 +36,18 @@ stopTraffic() {
     if [ -f "$pid_file" ]; then
         echo "stopping traffic to ${dst}"
         pid=$(cat $pid_file)
-        /bin/kill -9 $pid
-        rm -f /tmp/traffic-$hostname-${prefix}.${suffix}.pid
+        ps -p $pid > /dev/null 2>&1 && {
+            sudo /bin/kill -9 $pid || {
+                echo Unable to kill PID $pid >&2 ;
+                exit 1 ;
+            }
+        } || {
+            echo PID $pid not running >&2 ;
+        }
+        sudo rm -f $pid_file || {
+            echo Unable to remove PID file $pid_file >&2 ;
+            exit 1 ;
+        }
     fi
 }
 

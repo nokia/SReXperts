@@ -1,3 +1,4 @@
+
 # Copyright 2024 Nokia
 # Licensed under the BSD 3-Clause License.
 # SPDX-License-Identifier: BSD-3-Clause
@@ -5,8 +6,8 @@
 name: srexperts
 
 mgmt:
-  network: srexperts               # management network name
-  ipv4-subnet: 10.128.${INSTANCE_ID}.0/24       # ipv4 range
+  network: srexperts # management network name
+  ipv4-subnet: 10.128.${INSTANCE_ID}.0/24 # ipv4 range
 
 topology:
   defaults:
@@ -14,11 +15,14 @@ topology:
     image: ghcr.io/srl-labs/network-multitool
   kinds:
     nokia_sros:
-      image: vr-sros:24.7.R1
-      #image: registry.srlinux.dev/pub/vr-sros:24.3.R2-1
-      license: /opt/srexperts/license-sros24.txt
+      image: vr-sros:25.3.R1
+      license: /opt/srexperts/license-sros25.txt
     nokia_srlinux:
-      image: ghcr.io/nokia/srlinux:24.7.1
+      image: ghcr.io/nokia/srlinux:24.10.4
+      exec:
+        - bash -c "sr_cli /tools system configuration generate-checkpoint name final-config"
+      binds:
+        - configs/srl/lldp-interface-descriptions.py:/opt/srlinux/eventmgr/lldp-interface-descriptions.py:ro
       stages:
         create:
           wait-for:
@@ -37,41 +41,51 @@ topology:
     p1:
       kind: nokia_sros
       binds:
-        - configs/sros/boot-good-exec.cfg:/tftpboot/boot-good-exec.cfg
+        - configs/sros/bof-dns.py:/tftpboot/bof-dns.py
       mgmt-ipv4: 10.128.${INSTANCE_ID}.11
       startup-config: configs/sros/p1.partial.cfg
       ports:
         - 50011:22
         - 50311:57400
         - 50411:830
-      stages:
-        create:
-          wait-for:
-            - node: vRR
-              stage: healthy
+      labels:
+        graph-posX: "585"
+        graph-posY: "545"
+        graph-groupLabelPos: bottom-center
+        graph-group: P LAYER
+        graph-level: "1"
     p2:
       kind: nokia_sros
       binds:
-        - configs/sros/boot-good-exec.cfg:/tftpboot/boot-good-exec.cfg
+        - configs/sros/bof-dns.py:/tftpboot/bof-dns.py
       mgmt-ipv4: 10.128.${INSTANCE_ID}.12
       startup-config: configs/sros/p2.partial.cfg
       ports:
         - 50012:22
         - 50312:57400
         - 50412:830
-      stages:
-        create:
-          wait-for:
-            - node: vRR
-              stage: healthy
+      labels:
+        graph-posX: "585"
+        graph-posY: "715"
+        graph-groupLabelPos: bottom-center
+        graph-group: P LAYER
+        graph-level: "1"
     vRR:
-      kind: nokia_sros
+      kind: nokia_srlinux
+      license: /opt/srexperts/license-srlinux24.txt
+      type: ixrx1b
       mgmt-ipv4: 10.128.${INSTANCE_ID}.13
-      startup-config: configs/sros/vRR.partial.cfg
+      startup-config: configs/srl/vRR.cfg
       ports:
         - 50013:22
         - 50313:57400
         - 50413:830
+      labels:
+        graph-posX: "625"
+        graph-posY: "625"
+        graph-groupLabelPos: bottom-center
+        graph-group: P LAYER
+        graph-level: "1"
     radius:
       kind: linux
       group: core
@@ -79,18 +93,29 @@ topology:
       image: ghcr.io/srl-labs/network-multitool
       binds:
         - $HOME/.ssh/id_rsa.pub:/tmp/authorized_keys:ro
-        - configs/radius/interfaces:/etc/network/interfaces
-        - configs/radius/clients.conf:/etc/raddb/clients.conf
+        - configs/radius/interfaces.tmpl:/etc/network/interfaces.tmpl
+        - configs/radius/clients.tmpl.conf:/etc/raddb/clients.tmpl.conf
         - configs/radius/radiusd.conf:/etc/raddb/radiusd.conf
         - configs/radius/authorize:/etc/raddb/mods-config/files/authorize
         - configs/radius/radius.sh:/client.sh
+        - configs/radius/dictionary:/usr/share/freeradius/dictionary
+        - configs/radius/dictionary.alcatel.sr.extended:/usr/share/freeradius/dictionary.alcatel.sr.extended
       exec:
+        - bash -c "envsubst < /etc/network/interfaces.tmpl | tee /etc/network/interfaces"
+        - bash -c "envsubst < /etc/raddb/clients.tmpl.conf | tee /etc/raddb/clients.conf"
         - bash /client.sh
         - bash -c "echo 'nameserver 10.128.${INSTANCE_ID}.15' | sudo tee /etc/resolv.conf"
       ports:
         - 50014:22
       env:
         USER_PASSWORD: ${EVENT_PASSWORD}
+        INSTANCE_ID: ${INSTANCE_ID}
+      labels:
+        graph-posX: "715"
+        graph-posY: "585"
+        graph-groupLabelPos: bottom-center
+        graph-group: P LAYER
+        graph-level: "1"
     dns:
       kind: linux
       group: core
@@ -100,18 +125,28 @@ topology:
         - $HOME/.ssh/id_rsa.pub:/tmp/authorized_keys:ro
         - configs/dns/interfaces:/etc/network/interfaces
         - configs/dns/dns.sh:/client.sh
-        - configs/dns/dnsmasq.conf:/etc/dnsmasq.conf
+        - configs/dns/dnsmasq.tmpl.conf:/etc/dnsmasq.tmpl.conf
       exec:
+        - bash -c "envsubst < /etc/dnsmasq.tmpl.conf | tee /etc/dnsmasq.d/dns.conf"
         - bash /client.sh
       ports:
         - 50015:22
       env:
         USER_PASSWORD: ${EVENT_PASSWORD}
+        INSTANCE_ID: ${INSTANCE_ID}
+      labels:
+        graph-posX: "685"
+        graph-posY: "645"
+        graph-groupLabelPos: bottom-center
+        graph-group: P LAYER
+        graph-level: "1"
     # PE-layers
     pe1:
       kind: nokia_sros
+      # FP5 model for ANYsec
+      type: sr-1-24d
       binds:
-        - configs/sros/boot-good-exec.cfg:/tftpboot/boot-good-exec.cfg
+        - configs/sros/bof-dns.py:/tftpboot/bof-dns.py
       mgmt-ipv4: 10.128.${INSTANCE_ID}.21
       startup-config: configs/sros/pe1.partial.cfg
       ports:
@@ -123,8 +158,20 @@ topology:
           wait-for:
             - node: p1
               stage: healthy
+      labels:
+        graph-posX: "455"
+        graph-posY: "545"
+        graph-groupLabelPos: bottom-center
+        graph-group: PE LAYER WEST
+        graph-level: "1"
     pe2:
       kind: nokia_sros
+      # FP5 model for ANYsec
+      type: sr-1-24d
+      binds:
+        - configs/sros/bof-dns.py:/tftpboot/bof-dns.py
+        - ../activities/nos/sros/activity-09/ehs_basic.py:/tftpboot/ehs_basic.py
+        - configs/sros/script-policy-results.py:/tftpboot/script-policy-results.py
       mgmt-ipv4: 10.128.${INSTANCE_ID}.22
       startup-config: configs/sros/pe2.partial.cfg
       ports:
@@ -136,8 +183,16 @@ topology:
           wait-for:
             - node: p1
               stage: healthy
+      labels:
+        graph-posX: "855"
+        graph-posY: "545"
+        graph-groupLabelPos: bottom-center
+        graph-group: PE LAYER EAST
+        graph-level: "1"
     pe3:
       kind: nokia_sros
+      binds:
+        - configs/sros/bof-dns.py:/tftpboot/bof-dns.py
       mgmt-ipv4: 10.128.${INSTANCE_ID}.23
       startup-config: configs/sros/pe3.partial.cfg
       ports:
@@ -149,8 +204,23 @@ topology:
           wait-for:
             - node: pe2
               stage: healthy
+      labels:
+        graph-posX: "855"
+        graph-posY: "715"
+        graph-groupLabelPos: bottom-center
+        graph-group: PE LAYER EAST
+        graph-level: "1"
     pe4:
       kind: nokia_sros
+      binds:
+        - configs/sros/bof-dns.py:/tftpboot/bof-dns.py
+        - configs/sros/radius-access-accept.py:/tftpboot/radius-access-accept.py
+        - configs/sros/radius-access-request.py:/tftpboot/radius-access-request.py
+        - ../activities/nos/sros/activity-23/dhcp.py:/tftpboot/dhcp.py
+        - ../activities/nos/sros/activity-23/radius-accounting-request.py:/tftpboot/radius-accounting-request.py
+        - ../activities/nos/sros/activity-63/sub1-python-script.py:/tftpboot/sub1-python-script.py
+        - ../activities/nos/sros/activity-63/sub2-3-python-script.py:/tftpboot/sub2-3-python-script.py
+        - configs/sros/script-policy-results.py:/tftpboot/script-policy-results.py
       mgmt-ipv4: 10.128.${INSTANCE_ID}.24
       startup-config: configs/sros/pe4.partial.cfg
       type: >-
@@ -166,6 +236,12 @@ topology:
           wait-for:
             - node: pe1
               stage: healthy
+      labels:
+        graph-posX: "455"
+        graph-posY: "755"
+        graph-groupLabelPos: bottom-center
+        graph-group: PE LAYER WEST
+        graph-level: "1"
     client01:
       kind: linux
       group: peclient
@@ -183,6 +259,12 @@ topology:
         - 50025:22
       env:
         USER_PASSWORD: ${EVENT_PASSWORD}
+      labels:
+        graph-posX: "455"
+        graph-posY: "615"
+        graph-groupLabelPos: bottom-center
+        graph-group: PE LAYER WEST
+        graph-level: "1"
     client02:
       kind: linux
       group: peclient
@@ -193,6 +275,7 @@ topology:
         - configs/client/interfaces-client02:/etc/network/interfaces
         - configs/client/client.sh:/client.sh
         - configs/client/traffic.sh:/traffic.sh
+        - configs/client/probe.sh:/probe.sh
       exec:
         - bash /client.sh
         - bash -c "echo 'nameserver 10.128.${INSTANCE_ID}.15' | sudo tee /etc/resolv.conf"
@@ -200,6 +283,12 @@ topology:
         - 50026:22
       env:
         USER_PASSWORD: ${EVENT_PASSWORD}
+      labels:
+        graph-posX: "855"
+        graph-posY: "585"
+        graph-groupLabelPos: bottom-center
+        graph-group: PE LAYER EAST
+        graph-level: "1"
     client03:
       kind: linux
       group: peclient
@@ -210,6 +299,7 @@ topology:
         - configs/client/interfaces-client03:/etc/network/interfaces
         - configs/client/client.sh:/client.sh
         - configs/client/traffic.sh:/traffic.sh
+        - configs/client/probe.sh:/probe.sh
       exec:
         - bash /client.sh
         - bash -c "echo 'nameserver 10.128.${INSTANCE_ID}.15' | sudo tee /etc/resolv.conf"
@@ -217,6 +307,12 @@ topology:
         - 50027:22
       env:
         USER_PASSWORD: ${EVENT_PASSWORD}
+      labels:
+        graph-posX: "855"
+        graph-posY: "655"
+        graph-groupLabelPos: bottom-center
+        graph-group: PE LAYER EAST
+        graph-level: "1"
     client04:
       kind: linux
       group: peclient
@@ -234,52 +330,94 @@ topology:
         - 50028:22
       env:
         USER_PASSWORD: ${EVENT_PASSWORD}
+      labels:
+        graph-posX: "455"
+        graph-posY: "685"
+        graph-groupLabelPos: bottom-center
+        graph-group: PE LAYER WEST
+        graph-level: "1"
     # DC1
     spine11:
       kind: nokia_srlinux
       type: ixrh2
       group: spine
       mgmt-ipv4: 10.128.${INSTANCE_ID}.31
-      startup-config: configs/srl/spine11.cfg
+      startup-config: configs/srl/__clabNodeName__.cfg
       ports:
         - 50031:22
         - 50331:57400
+      labels:
+        graph-posX: "965"
+        graph-posY: "575"
+        graph-groupLabelPos: bottom-center
+        graph-group: Data Center East
+        graph-level: "1"
     spine12:
       kind: nokia_srlinux
       type: ixrh2
       group: spine
       mgmt-ipv4: 10.128.${INSTANCE_ID}.32
-      startup-config: configs/srl/spine12.cfg
+      startup-config: configs/srl/__clabNodeName__.cfg
       ports:
         - 50032:22
         - 50332:57400
+      labels:
+        graph-posX: "955"
+        graph-posY: "665"
+        graph-groupLabelPos: bottom-center
+        graph-group: Data Center East
+        graph-level: "1"
     leaf11:
       kind: nokia_srlinux
       type: ixrd2l
       group: leaf
       mgmt-ipv4: 10.128.${INSTANCE_ID}.33
-      startup-config: configs/srl/leaf11.cfg
+      binds:
+        ### Activity#20 - SR Linux basic agent - agent files folder bind
+        - ../activities/nos/srlinux/20-SRLinux-basic-agent/leaf11_agent:/etc/opt/srlinux/appmgr/:rw
+      startup-config: configs/srl/__clabNodeName__.cfg
       ports:
         - 50033:22
         - 50333:57400
+      labels:
+        graph-posX: "1025"
+        graph-posY: "675"
+        graph-groupLabelPos: bottom-center
+        graph-group: Data Center East
+        graph-level: "1"
     leaf12:
       kind: nokia_srlinux
       type: ixrd2l
       group: leaf
       mgmt-ipv4: 10.128.${INSTANCE_ID}.34
-      startup-config: configs/srl/leaf12.cfg
+      startup-config: configs/srl/__clabNodeName__.cfg
       ports:
         - 50034:22
         - 50334:57400
+      labels:
+        graph-posX: "1035"
+        graph-posY: "605"
+        graph-groupLabelPos: bottom-center
+        graph-group: Data Center East
+        graph-level: "1"
     leaf13:
       kind: nokia_srlinux
       type: ixrd2l
       group: leaf
       mgmt-ipv4: 10.128.${INSTANCE_ID}.35
-      startup-config: configs/srl/leaf13.cfg
+      binds:
+        ### Activity#20 - SR Linux basic agent - agent files folder bind
+        - ../activities/nos/srlinux/20-SRLinux-basic-agent/solution:/etc/opt/srlinux/appmgr/:rw
+      startup-config: configs/srl/__clabNodeName__.cfg
       ports:
         - 50035:22
         - 50335:57400
+      labels:
+        graph-posX: "1035"
+        graph-posY: "545"
+        graph-groupLabelPos: bottom-center
+        graph-group: Data Center East
+        graph-level: "1"
     client11:
       kind: linux
       group: dcclient
@@ -289,14 +427,23 @@ topology:
         - $HOME/.ssh/id_rsa.pub:/tmp/authorized_keys:ro
         - configs/client/interfaces-client11:/etc/network/interfaces
         - configs/client/client.sh:/client.sh
+        - configs/client/probe-responder.sh:/probe-responder.sh
+        - configs/client/probe.sh:/probe.sh
         - configs/client/traffic.sh:/traffic.sh
       exec:
         - bash /client.sh
         - bash -c "echo 'nameserver 10.128.${INSTANCE_ID}.15' | sudo tee /etc/resolv.conf"
+        - setsid /probe-responder.sh
       ports:
         - 50036:22
       env:
         USER_PASSWORD: ${EVENT_PASSWORD}
+      labels:
+        graph-posX: "1125"
+        graph-posY: "675"
+        graph-groupLabelPos: bottom-center
+        graph-group: Data Center East
+        graph-level: "1"
     client12:
       kind: linux
       group: dcclient
@@ -307,6 +454,7 @@ topology:
         - configs/client/interfaces-client12:/etc/network/interfaces
         - configs/client/client.sh:/client.sh
         - configs/client/traffic.sh:/traffic.sh
+        - configs/client/probe.sh:/probe.sh
       exec:
         - bash /client.sh
         - bash -c "echo 'nameserver 10.128.${INSTANCE_ID}.15' | sudo tee /etc/resolv.conf"
@@ -314,6 +462,12 @@ topology:
         - 50037:22
       env:
         USER_PASSWORD: ${EVENT_PASSWORD}
+      labels:
+        graph-posX: "1125"
+        graph-posY: "605"
+        graph-groupLabelPos: bottom-center
+        graph-group: Data Center East
+        graph-level: "1"
     client13:
       kind: linux
       group: dcclient
@@ -324,13 +478,22 @@ topology:
         - configs/client/interfaces-client13:/etc/network/interfaces
         - configs/client/client.sh:/client.sh
         - configs/client/traffic.sh:/traffic.sh
+        - configs/client/probe-responder.sh:/probe-responder.sh
+        - configs/client/probe.sh:/probe.sh
       exec:
         - bash /client.sh
         - bash -c "echo 'nameserver 10.128.${INSTANCE_ID}.15' | sudo tee /etc/resolv.conf"
+        - setsid /probe-responder.sh
       ports:
         - 50038:22
       env:
         USER_PASSWORD: ${EVENT_PASSWORD}
+      labels:
+        graph-posX: "1125"
+        graph-posY: "545"
+        graph-groupLabelPos: bottom-center
+        graph-group: Data Center East
+        graph-level: "1"
     # DC2
     leaf21:
       kind: nokia_srlinux
@@ -341,6 +504,12 @@ topology:
       ports:
         - 50041:22
         - 50341:57400
+      labels:
+        graph-posX: "385"
+        graph-posY: "625"
+        graph-groupLabelPos: bottom-center
+        graph-group: Data Center West
+        graph-level: "1"
     client21:
       kind: linux
       group: dcclient
@@ -358,6 +527,12 @@ topology:
         - 50042:22
       env:
         USER_PASSWORD: ${EVENT_PASSWORD}
+      labels:
+        graph-posX: "305"
+        graph-posY: "625"
+        graph-groupLabelPos: bottom-center
+        graph-group: Data Center West
+        graph-level: "1"
     # MISC
     ixp1:
       kind: nokia_srlinux
@@ -368,6 +543,12 @@ topology:
       ports:
         - 50051:22
         - 50351:57400
+      labels:
+        graph-posX: "275"
+        graph-posY: "475"
+        graph-groupLabelPos: bottom-center
+        graph-group: Internet Exchange
+        graph-level: "1"
     agg1:
       kind: nokia_srlinux
       type: ixrd2l
@@ -377,14 +558,25 @@ topology:
       ports:
         - 50052:22
         - 50352:57400
+      labels:
+        graph-posX: "395"
+        graph-posY: "755"
+        graph-groupLabelPos: bottom-center
     peering2:
       kind: nokia_srlinux
-      type: ixrd2l
+      license: /opt/srexperts/license-srlinux24.txt
+      type: ixrx3b
       mgmt-ipv4: 10.128.${INSTANCE_ID}.53
       startup-config: configs/srl/peering2.cfg
       ports:
         - 50053:22
         - 50353:57400
+      labels:
+        graph-posX: "325"
+        graph-posY: "425"
+        graph-groupLabelPos: bottom-center
+        graph-group: Internet Exchange
+        graph-level: "1"
     transit1:
       kind: linux
       mgmt-ipv4: 10.128.${INSTANCE_ID}.54
@@ -393,17 +585,31 @@ topology:
         - $HOME/.ssh/id_rsa.pub:/tmp/authorized_keys:ro
         - configs/transit/interfaces:/etc/network/interfaces
         - configs/transit/client.sh:/client.sh
-        - configs/transit/gobgp.yml:/gobgp/gobgp.yml
+        - configs/transit/gobgp.tmpl.yml:/gobgp/gobgp.tmpl.yml
       exec:
+        - bash -c "envsubst < /gobgp/gobgp.tmpl.yml | tee /gobgp/gobgp.yml"
         - bash /client.sh
       ports:
         - 50054:22
       env:
         USER_PASSWORD: ${EVENT_PASSWORD}
+        INSTANCE_ID: ${INSTANCE_ID}
+      labels:
+        graph-posX: "385"
+        graph-posY: "475"
+        graph-groupLabelPos: bottom-center
+        graph-group: Internet Exchange
+        graph-level: "1"
     rpki:
       mgmt-ipv4: 10.128.${INSTANCE_ID}.55
       kind: linux
       image: rpki/stayrtr # see https://github.com/bgp/stayrtr, default source is https://console.rpki-client.org/vrps.json
+      labels:
+        graph-posX: "615"
+        graph-posY: "465"
+        graph-groupLabelPos: bottom-center
+        graph-group: Network Tools
+        graph-level: "1"
     sub1:
       kind: linux
       group: subscriber
@@ -421,6 +627,12 @@ topology:
         - 50061:22
       env:
         USER_PASSWORD: ${EVENT_PASSWORD}
+      labels:
+        graph-posX: "335"
+        graph-posY: "715"
+        graph-groupLabelPos: bottom-center
+        graph-group: Broadband Network
+        graph-level: "1"
     sub2:
       kind: linux
       group: subscriber
@@ -438,6 +650,12 @@ topology:
         - 50062:22
       env:
         USER_PASSWORD: ${EVENT_PASSWORD}
+      labels:
+        graph-posX: "335"
+        graph-posY: "745"
+        graph-groupLabelPos: bottom-center
+        graph-group: Broadband Network
+        graph-level: "1"
     sub3:
       kind: linux
       group: subscriber
@@ -455,10 +673,16 @@ topology:
         - 50063:22
       env:
         USER_PASSWORD: ${EVENT_PASSWORD}
+      labels:
+        graph-posX: "335"
+        graph-posY: "775"
+        graph-groupLabelPos: bottom-center
+        graph-group: Broadband Network
+        graph-level: "1"
     ### TELEMETRY STACK ###
     gnmic:
       kind: linux
-      mgmt-ipv4:  10.128.${INSTANCE_ID}.71
+      mgmt-ipv4: 10.128.${INSTANCE_ID}.71
       image: ghcr.io/openconfig/gnmic:0.38.2
       binds:
         - configs/gnmic/config.yml:/gnmic-config.yml:ro
@@ -467,6 +691,12 @@ topology:
       group: "10" # group 10 is assigned to the nodes of a telemetry stack
       env:
         GNMIC_PASSWORD: ${EVENT_PASSWORD}
+      labels:
+        graph-posX: "615"
+        graph-posY: "385"
+        graph-groupLabelPos: bottom-center
+        graph-group: Network Tools
+        graph-level: "1"
     
     prometheus:
       kind: linux
@@ -478,7 +708,13 @@ topology:
         - 9090:9090
       cmd: --config.file=/etc/prometheus/prometheus.yml
       group: "10"
-
+      labels:
+        graph-posX: "665"
+        graph-posY: "385"
+        graph-groupLabelPos: bottom-center
+        graph-group: Network Tools
+        graph-level: "1"
+      
     grafana:
       kind: linux
       mgmt-ipv4: 10.128.${INSTANCE_ID}.73
@@ -499,6 +735,12 @@ topology:
         GF_SECURITY_ADMIN_PASSWORD: ${EVENT_PASSWORD}
       cmd: "sh -c grafana cli admin reset-admin-password ${GF_SECURITY_ADMIN_PASSWORD} && /run.sh"
       group: "10"
+      labels:
+        graph-posX: "715"
+        graph-posY: "385"
+        graph-groupLabelPos: bottom-center
+        graph-group: Network Tools
+        graph-level: "1"
 
     ### LOGGING STACK ###
     syslog:
@@ -511,7 +753,13 @@ topology:
       env:
         PUID: 1001
         PGID: 1001
-
+      labels:
+        graph-posX: "765"
+        graph-posY: "385"
+        graph-groupLabelPos: bottom-center
+        graph-group: Network Tools
+        graph-level: "1"
+      
     promtail:
       kind: linux
       mgmt-ipv4: 10.128.${INSTANCE_ID}.75
@@ -519,7 +767,13 @@ topology:
       binds:
         - configs/promtail:/etc/promtail
       cmd: --config.file=/etc/promtail/promtail-config.yml
-
+      labels:
+        graph-posX: "615"
+        graph-posY: "425"
+        graph-groupLabelPos: bottom-center
+        graph-group: Network Tools
+        graph-level: "1"
+      
     loki:
       kind: linux
       mgmt-ipv4: 10.128.${INSTANCE_ID}.76
@@ -527,7 +781,193 @@ topology:
       binds:
         - configs/loki:/etc/loki
       cmd: --config.file=/etc/loki/loki-config.yml
+      labels:
+        graph-posX: "665"
+        graph-posY: "425"
+        graph-groupLabelPos: bottom-center
+        graph-group: Network Tools
+        graph-level: "1"
+      
+    ### NETBOX STACK ###
+    netbox:
+      kind: linux
+      image: netboxcommunity/netbox:v4.2-3.2.0
+      mgmt-ipv4: 10.128.${INSTANCE_ID}.81
+      ports:
+        - "8000:8080"
+      user: unit:root
+      exec: 
+        - chown -R unit:root /opt/netbox/netbox/media/
+        - chown -R unit:root /opt/netbox/netbox/reports/
+        - chown -R unit:root /opt/netbox/netbox/scripts/
+      binds:
+        - ./configs/netbox/config/netbox-configs:/etc/netbox/config:z,ro
+        - ./configs/netbox/config/media-files:/opt/netbox/netbox/media:rw
+        - ./configs/netbox/config/reports-files:/opt/netbox/netbox/reports:rw
+        - ./configs/netbox/config/scripts-files:/opt/netbox/netbox/scripts:rw
+      env-files:
+        - configs/netbox/envs/netbox.env
+      healthcheck:
+        test: 
+          - curl -f http://localhost:8080/login/ || exit 1
+        start-period: 90
+        timeout: 3
+        interval: 15
+      labels:
+        graph-posX: "715"
+        graph-posY: "425"
+        graph-groupLabelPos: bottom-center
+        graph-group: Network Tools
+        graph-level: "1"
+      
+    netbox-worker:
+      kind: linux
+      image: netboxcommunity/netbox:v4.2-3.2.0
+      ports: # none
+      mgmt-ipv4: 10.128.${INSTANCE_ID}.82
+      user: unit:root
+      exec: 
+        - chown -R unit:root /opt/netbox/netbox/media/
+        - chown -R unit:root /opt/netbox/netbox/reports/
+        - chown -R unit:root /opt/netbox/netbox/scripts/
+      binds:
+        - ./configs/netbox/config/netbox-configs:/etc/netbox/config:z,ro
+        - ./configs/netbox/config/media-files:/opt/netbox/netbox/media:rw
+        - ./configs/netbox/config/reports-files:/opt/netbox/netbox/reports:rw
+        - ./configs/netbox/config/scripts-files:/opt/netbox/netbox/scripts:rw
+      env-files:
+        - configs/netbox/envs/netbox.env
+      cmd: /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py rqworker
+      healthcheck: 
+        test: 
+          - ps -aux | grep -v grep | grep -q rqworker || exit 1
+        start-period: 20
+        timeout: 3
+        interval: 15
+      labels:
+        graph-posX: "765"
+        graph-posY: "425"
+        graph-groupLabelPos: bottom-center
+        graph-group: Network Tools
+        graph-level: "1"
+      
+    netbox-housekeeping:
+      kind: linux
+      image: netboxcommunity/netbox:v4.2-3.2.0
+      ports: # none
+      mgmt-ipv4: 10.128.${INSTANCE_ID}.83
+      user: unit:root
+      exec: 
+        - chown -R unit:root /opt/netbox/netbox/media/
+        - chown -R unit:root /opt/netbox/netbox/reports/
+        - chown -R unit:root /opt/netbox/netbox/scripts/
+      binds:
+        - ./configs/netbox/config/netbox-configs:/etc/netbox/config:z,ro
+        - ./configs/netbox/config/media-files:/opt/netbox/netbox/media:rw
+        - ./configs/netbox/config/reports-files:/opt/netbox/netbox/reports:rw
+        - ./configs/netbox/config/scripts-files:/opt/netbox/netbox/scripts:rw
+      env-files:
+        - configs/netbox/envs/netbox.env
+      cmd: /opt/netbox/housekeeping.sh
+      healthcheck:
+        test: 
+          - ps -aux | grep -v grep | grep -q housekeeping || exit 1
+        start-period: 20
+        timeout: 3
+        interval: 15
+      labels:
+        graph-posX: "565"
+        graph-posY: "385"
+        graph-groupLabelPos: bottom-center
+        graph-group: Network Tools
+        graph-level: "1"
+      
+    postgres:
+      kind: linux
+      image: postgres:17-alpine
+      mgmt-ipv4: 10.128.${INSTANCE_ID}.84
+      healthcheck:
+        test: 
+          - pg_isready -q -t 2 -d netbox -U netbox
+        start-period: 20
+        timeout: 30
+        interval: 10
+        retries: 5
+      env-files: 
+        - configs/netbox/envs/postgres.env
+      binds:
+        - ./configs/netbox/config/postgres-init:/docker-entrypoint-initdb.d        
+      labels:
+        graph-posX: "665"
+        graph-posY: "465"
+        graph-groupLabelPos: bottom-center
+        graph-group: Network Tools
+        graph-level: "1"
+      
+    redis:
+      kind: linux
+      image: valkey/valkey:8.0-alpine
+      mgmt-ipv4: 10.128.${INSTANCE_ID}.85
+      healthcheck: &redis-healthcheck
+        test: 
+          - '[ $$(valkey-cli --pass "$${REDIS_PASSWORD}" ping) = ''PONG'' ]'
+        start-period: 5
+        timeout: 3
+        interval: 1
+        retries: 5
+      env-files: 
+        - configs/netbox/envs/redis.env
+      binds:
+        - ./configs/netbox/config/redis-data:/data
+      labels:
+        graph-posX: "715"
+        graph-posY: "465"
+        graph-groupLabelPos: bottom-center
+        graph-group: Network Tools
+        graph-level: "1"
 
+    redis-cache:
+      kind: linux
+      image: valkey/valkey:8.0-alpine
+      mgmt-ipv4: 10.128.${INSTANCE_ID}.86
+      healthcheck: *redis-healthcheck
+      env-files: 
+        - configs/netbox/envs/redis-cache.env
+      binds:
+        - ./configs/netbox/config/redis-cache-data:/data
+      labels:
+        graph-posX: "765"
+        graph-posY: "465"
+        graph-groupLabelPos: bottom-center
+        graph-group: Network Tools
+        graph-level: "1"
+      
+    ### DEV TOOLS ###
+    codeserver:
+      kind: linux
+      user: ${NOKIA_UID}:${NOKIA_GID}
+      mgmt-ipv4: 10.128.${INSTANCE_ID}.90
+      image: ghcr.io/coder/code-server:latest
+      binds:
+        - ${HOME}:/home/coder
+        - /opt/srexperts/vscode-extensions:/opt/srexperts/vscode-extensions
+        - ./configs/coder:/entrypoint.d
+        - /var/run/docker.sock:/var/run/docker.sock
+        - /var/lib/docker/containers:/var/lib/docker/containers
+        - /usr/bin/containerlab:/usr/bin/containerlab:ro
+        - /usr/bin/docker:/usr/bin/docker:ro
+      ports:
+        - 80:8080
+      env:
+        PASSWORD: ${EVENT_PASSWORD}
+        USER: ${NOKIA_UID}
+      labels:
+        graph-posX: "565"
+        graph-posY: "465"
+        graph-groupLabelPos: bottom-center
+        graph-group: Network Tools
+        graph-level: "1"
+      
   links:
     # links from P1
     - endpoints: ["p1:eth1", "pe1:eth1"]
@@ -554,14 +994,14 @@ topology:
     - endpoints: ["p2:eth12", "p1:eth12"]
       mtu: 9500
     # links from p1/p2 to vRR
-    - endpoints: ["p1:eth5", "vRR:eth1"]
+    - endpoints: ["p1:eth5", "vRR:e1-1"]
       mtu: 9500
-    - endpoints: ["p2:eth5", "vRR:eth2"]
+    - endpoints: ["p2:eth5", "vRR:e1-2"]
       mtu: 9500
     # links from vRR to dns/radius
-    - endpoints: ["vRR:eth3", "radius:eth1"]
+    - endpoints: ["vRR:e1-3", "radius:eth1"]
       mtu: 9500
-    - endpoints: ["vRR:eth4", "dns:eth1"]
+    - endpoints: ["vRR:e1-4", "dns:eth1"]
       mtu: 9500
     # links from pe2/pe3 to DC1
     - endpoints: ["pe2:eth3", "spine11:e1-32"]

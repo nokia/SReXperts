@@ -1,0 +1,14 @@
+# Copyright 2025 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+---
+# Task to send a ping from a client to a predetermined
+# IP address in the network to ascertain that service is
+# working correctly and gateway is reachable
+- name: Linux ping to test provisioned service
+  hosts: linux_hosts
+  gather_facts: False
+  roles:
+    - linux_ping
+  tags: ['linux_ping']

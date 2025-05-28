@@ -1,0 +1,120 @@
+{
+    "_occupied": true,
+    "bridge": null,
+    "cable": {
+        "description": "",
+        "display": "#18",
+        "id": 18,
+        "label": "",
+        "url": "/api/dcim/cables/18/"
+    },
+    "cable_end": "A",
+    "connected_endpoints": [
+        {
+            "_occupied": true,
+            "cable": {
+                "description": "",
+                "display": "#18",
+                "id": 18,
+                "label": "",
+                "url": "/api/dcim/cables/18/"
+            },
+            "description": "p1",
+            "device": {
+                "description": "",
+                "display": "pe1",
+                "id": 9,
+                "name": "pe1",
+                "url": "/api/dcim/devices/9/"
+            },
+            "display": "1/1/c8/1",
+            "id": 119,
+            "name": "1/1/c8/1",
+            "url": "/api/dcim/interfaces/119/"
+        }
+    ],
+    "connected_endpoints_reachable": true,
+    "connected_endpoints_type": "dcim.interface",
+    "count_fhrp_groups": 0,
+    "count_ipaddresses": 2,
+    "created": "2025-04-10T22:04:05.241912Z",
+    "custom_fields": {},
+    "description": "pe1",
+    "device": {
+        "description": "",
+        "display": "p1",
+        "id": 7,
+        "name": "p1",
+        "url": "/api/dcim/devices/7/"
+    },
+    "display": "1/1/c8/1",
+    "display_url": "/dcim/interfaces/89/",
+    "duplex": null,
+    "enabled": true,
+    "id": 89,
+    "l2vpn_termination": null,
+    "label": "",
+    "lag": null,
+    "last_updated": "2025-04-16T04:19:48.072746Z",
+    "link_peers": [
+        {
+            "_occupied": true,
+            "cable": {
+                "description": "",
+                "display": "#18",
+                "id": 18,
+                "label": "",
+                "url": "/api/dcim/cables/18/"
+            },
+            "description": "p1",
+            "device": {
+                "description": "",
+                "display": "pe1",
+                "id": 9,
+                "name": "pe1",
+                "url": "/api/dcim/devices/9/"
+            },
+            "display": "1/1/c8/1",
+            "id": 119,
+            "name": "1/1/c8/1",
+            "url": "/api/dcim/interfaces/119/"
+        }
+    ],
+    "link_peers_type": "dcim.interface",
+    "mac_address": null,
+    "mac_addresses": [],
+    "mark_connected": false,
+    "mgmt_only": false,
+    "mode": null,
+    "module": null,
+    "mtu": 9100,
+    "name": "1/1/c8/1",
+    "nsp_host": "SAMPLE_HOST",
+    "nsp_password": "SAMPLE_PASSWORD",
+    "nsp_username": "SAMPLE_USERNAME",
+    "parent": null,
+    "poe_mode": null,
+    "poe_type": null,
+    "primary_mac_address": null,
+    "qinq_svlan": null,
+    "rf_channel": null,
+    "rf_channel_frequency": null,
+    "rf_channel_width": null,
+    "rf_role": null,
+    "speed": null,
+    "tagged_vlans": [],
+    "tags": [],
+    "tx_power": null,
+    "type": {
+        "label": "QSFP28 (100GE)",
+        "value": "100gbase-x-qsfp28"
+    },
+    "untagged_vlan": null,
+    "url": "/api/dcim/interfaces/89/",
+    "vdcs": [],
+    "vlan_translation_policy": null,
+    "vrf": null,
+    "wireless_lans": [],
+    "wireless_link": null,
+    "wwn": null
+}

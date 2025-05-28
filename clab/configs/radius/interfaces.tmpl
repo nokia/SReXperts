@@ -1,6 +1,0 @@
-auto eth1
-iface eth1 
-    address 10.64.13.0/31
-    address fd00:fde8:0:1:${INSTANCE_ID}:13:14:1/127
-    up ip r a 10.0.0.0/8 via 10.64.13.1 dev eth1
-    up ip -6 r a fd00:fde8::/32 via fd00:fde8:0:1:${INSTANCE_ID}:13:14:0 dev eth1

@@ -48,32 +48,6 @@ jobs:
             #        with:
             #          config: docs/htmltest.yml
 
-  # this action deploys mkdocs-material to gh-pages. It is commented out because we moved to cloudflare pages
-  # publish-docs-gh-pages:
-  #   runs-on: ubuntu-20.04
-  #   if: startsWith(github.ref, 'refs/heads/main')
-  #   needs: docs-test
-  #   steps:
-  #     # this is to mitigate unsafe dir errors from git
-  #     # https://github.com/actions/checkout/issues/760
-  #     - name: Add workspace as safe directory
-  #       run: |
-  #         git config --global --add safe.directory /__w/learn-srlinux/learn-srlinux
-
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-  #       with:
-  #         fetch-depth: 0
-
-  #     - name: Login to GitHub Container Registry
-  #       uses: docker/login-action@v1
-  #       with:
-  #         registry: ghcr.io
-  #         username: ${{ github.actor }}
-  #         password: ${{ secrets.GITHUB_TOKEN }}
-
-  #     - run: docker run -v $(pwd):/docs --entrypoint ash ghcr.io/srl-labs/mkdocs-material-insiders:$MKDOCS_MATERIAL_VER -c 'git config --global --add safe.directory /docs; mkdocs gh-deploy --force'
-
   publish-docs:
     runs-on: ubuntu-22.04
     env:

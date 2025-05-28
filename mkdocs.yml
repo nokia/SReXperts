@@ -81,8 +81,8 @@ site_author: Nokia
 site_description: >-
   SReXperts hackathon event guidelines
 # Repository
-repo_name: srexperts/srx-hackplanning-2025
-repo_url: https://github.com/srexperts/srx-hackplanning-2025
+repo_name: nokia/SReXperts
+repo_url: https://github.com/nokia/SReXperts
 edit_uri: edit/main/docs/
 site_url: "https://hack.srexperts.net/"
 copyright: Copyright &copy; 2021-2025 Nokia
@@ -223,8 +223,8 @@ markdown_extensions:
   - pymdownx.keys
   - pymdownx.magiclink:
       repo_url_shorthand: true
-      user: srexperts
-      repo: srx-hackplanning-2025
+      user: nokia
+      repo: SReXperts
   - pymdownx.mark
   - pymdownx.smartsymbols:
       fractions: false

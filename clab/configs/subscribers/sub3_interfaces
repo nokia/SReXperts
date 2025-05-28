@@ -1,0 +1,25 @@
+auto lo
+iface lo inet loopback
+
+auto eth1
+allow-hotplug eth1
+iface eth1 inet manual
+    hwaddress 00:D0:F6:03:03:03
+
+# VLAN 100
+auto eth1.100
+allow-hotplug eth1.100
+iface eth1.100
+  use dhcp
+  udhcpc_opts -x 0x3d:0FF1CE03 -x 0x51:00037365727665722e6f666669636533
+#                               # translates to server.office3 in hex
+iface eth1.100 inet6 dhcp
+
+# VLAN 3000
+auto eth1.3000
+allow-hotplug eth1.3000
+iface eth1.3000 inet static
+  address 192.168.190.3
+  netmask 255.255.255.0
+  network 192.168.190.0
+  broadcast 192.168.190.255

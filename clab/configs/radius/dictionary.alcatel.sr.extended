@@ -1,0 +1,5 @@
+VENDOR          Alcatel-Lucent-Service-Router   6527
+BEGIN-VENDOR Alcatel-Lucent-Service-Router format=Extended-Vendor-Specific-1
+ATTRIBUTE       Alc-PySROS-Script-Params                    99     string
+ATTRIBUTE       Alc-PySROS-Script-Policy                    98     string
+END-VENDOR Alcatel-Lucent-Service-Router

@@ -1,0 +1,56 @@
+module ne-rollback-groupxx {
+  yang-version 1.1;
+  namespace "urn:nokia:nsp:model:lso:operation:ne-rollback-groupxx";
+  prefix rollback;
+
+  import nsp-lso-operation {
+    prefix nlo;
+  }
+
+  organization "Nokia";
+  contact "";
+  description "NSP Operation Manager - Rollback NE Config";
+
+  revision 2024-05-21 {
+    description "version 1";
+    reference "";
+  }
+
+  augment "/nlo:lso-operations/nlo:operation" {
+    when "operation-type='ne-rollback-groupxx'";
+    description
+      "Augmentation of ne-rollback-groupxx operation config data.";
+          
+    container ne-rollback-groupxx-operation  {
+      description
+        "Config data container for the NE restore operation.";
+      leaf backup_operation {
+        type leafref {
+          path "/nlo:lso-operations/nlo:operation/nlo:name";
+        }
+        description
+          "Indicates the backup which needs to be restored.";
+      }
+      leaf backupFilename {
+        type string;
+        description
+          "Indicates the backup filename which needs to be restored.";
+      }
+      leaf backupFilePath {
+        type string;
+        description
+          "Indicates the backup filepath from where the backup file needs to be restored.";
+      }
+    }
+  }
+
+  augment "/nlo:lso-operations/nlo:operation/nlo:executions/nlo:execution" {
+    when "../../operation-type='ne-rollback-groupxx'";
+    description
+      "Augmentation of execution state data.";
+    container ne-rollback-groupxx-execution {
+      description
+        "State data container for NE restore execution.";
+    }
+  }
+}

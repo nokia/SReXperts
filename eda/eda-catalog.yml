@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    eda.nokia.com/backup: "true"
+  name: gh-catalog
+  namespace: eda-system
+type: Opaque
+data:
+  password: Z2hwXzRxcGpPanJ1eVJXa3Zzc0NGcUdENUFlZ29VN3dXYTN4c0NKSgo=
+  username: bm9raWEtZWRhLWJvdA==
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    eda.nokia.com/backup: "true"
+  name: appstore-gh-registry
+  namespace: eda-system
+type: Opaque
+data:
+  password: Z2hwXzRxcGpPanJ1eVJXa3Zzc0NGcUdENUFlZ29VN3dXYTN4c0NKSgo=
+  username: bm9raWEtZWRhLWJvdA==
+---
+apiVersion: appstore.eda.nokia.com/v1
+kind: Catalog
+metadata:
+  finalizers:
+    - catalog.v1.appstore.eda.nokia.com/finalizer
+  name: eda-catalog-builtin-apps
+  namespace: eda-system
+spec:
+  authSecretRef: gh-catalog
+  remoteType: git
+  remoteURL: https://github.com/nokia-eda/catalog.git
+  skipTLSVerify: false
+  title: EDA built in apps catalog
+---
+apiVersion: appstore.eda.nokia.com/v1
+kind: Registry
+metadata:
+  finalizers:
+    - registry.v1.appstore.eda.nokia.com/finalizer
+  name: eda-apps-registry
+  namespace: eda-system
+spec:
+  authSecretRef: appstore-gh-registry
+  remoteURL: ghcr.io
+  skipTLSVerify: false

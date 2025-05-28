@@ -1,0 +1,15 @@
+/**
+ * Copyright 2025 Nokia
+ * Licensed under the BSD 3-Clause License.
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+/* Default (light mode) text */
+.feedback-title {
+  color: #174593;
+}
+
+/* Override for dark mode */
+body[data-md-color-scheme="slate"] .feedback-title {
+  color: #0FB3E3;
+}

@@ -1,0 +1,111 @@
+# --- Custom underlay BGP export policy ---
+# this is required to export the IRB anycast gateway
+# route to the WAN network, so connectivity is achieved
+# throughout the network
+apiVersion: routingpolicies.eda.nokia.com/v1alpha1
+kind: Policy
+metadata:
+  name: ebgp-isl-export-policy-srexperts-fabric-custom
+  namespace: eda
+  labels:
+    role: hackathon-infra
+spec:
+  defaultAction:
+    policyResult: reject
+    bgp:
+      localPreference: null
+      setOrigin: "igp"
+      asPathPrepend: null
+      asPathReplace: []
+      asPathRemove: null
+  statement:
+    - action:
+        bgp:
+          localPreference: 100
+        policyResult: accept
+      match:
+        prefixSet: prefixset-grt
+        protocol: LOCAL
+      name: "10"
+    - action:
+        bgp:
+          localPreference: 100
+        policyResult: accept
+      match:
+        protocol: BGP
+      name: "15"
+    - action:
+        bgp:
+          localPreference: 100
+        policyResult: accept
+      match:
+        protocol: AGGREGATE
+      name: "20"
+    - action:
+        bgp:
+          localPreference: 100
+        policyResult: accept
+      match:
+        bgp:
+          evpnRouteType:
+            - 1
+      name: "25"
+    - action:
+        bgp:
+          localPreference: 100
+        policyResult: accept
+      match:
+        bgp:
+          evpnRouteType:
+            - 2
+      name: "30"
+    - action:
+        bgp:
+          localPreference: 100
+        policyResult: accept
+      match:
+        bgp:
+          evpnRouteType:
+            - 3
+      name: "35"
+    - action:
+        bgp:
+          localPreference: 100
+        policyResult: accept
+      match:
+        bgp:
+          evpnRouteType:
+            - 4
+      name: "40"
+    - action:
+        bgp:
+          localPreference: 100
+        policyResult: accept
+      match:
+        bgp:
+          evpnRouteType:
+            - 5
+      name: "45"
+---
+# prefix set for the custom underlay export policy
+apiVersion: routingpolicies.eda.nokia.com/v1alpha1
+kind: PrefixSet
+metadata:
+  name: prefixset-grt
+  namespace: eda
+  labels:
+    role: hackathon-infra
+spec:
+  prefix:
+    - endRange: 128
+      exact: false
+      prefix: fd00:fde8::${INSTANCE_ID}:0/120
+      startRange: 128
+    - endRange: 32
+      exact: false
+      prefix: 10.46.${INSTANCE_ID}.0/24
+      startRange: 32
+    - exact: true
+      prefix: 10.64.30.0/24
+    - exact: true
+      prefix: fd00:fde8:0:30::/64

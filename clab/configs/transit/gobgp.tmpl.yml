@@ -1,0 +1,53 @@
+# Copyright 2023 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+global:
+  config:
+    as: 64599
+    router-id: 10.46.${INSTANCE_ID}.51
+  apply-policy:
+    config:
+      export-policy-list:
+        - next-hop-self
+      default-export-policy: accept-route
+neighbors:
+  - config:
+      neighbor-address: 10.64.54.1
+      peer-as: 65000
+    afi-safis:
+      - config:
+          afi-safi-name: ipv4-unicast
+  - config:
+      neighbor-address: fd00:fde8:0:54::1
+      peer-as: 65000
+    afi-safis:
+      - config:
+          afi-safi-name: ipv6-unicast
+  - config:
+        neighbor-address: fd00:fc00:0:51::1
+        peer-as: 65000
+    afi-safis:
+      - config:
+          afi-safi-name: ipv6-unicast
+  - config:
+      neighbor-address: 10.64.54.3
+      peer-as: 64699
+    afi-safis:
+      - config:
+          afi-safi-name: ipv4-unicast
+  - config:
+      neighbor-address: fd00:fde8:0:54::3
+      peer-as: 64699
+    afi-safis:
+      - config:
+          afi-safi-name: ipv6-unicast
+
+policy-definitions:
+  - name: "next-hop-self"
+    statements:
+      - name: "nhs"
+        actions:
+          bgp-actions:
+            set-next-hop: "self"
+          route-disposition: "accept-route"

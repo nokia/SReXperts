@@ -1,0 +1,269 @@
+# Copyright 2025 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+site_name: Hackathon 2025
+nav:
+  - Home: index.md
+  - Network Operating Systems:
+      - nos/index.md
+      - SR OS:
+        - Beginner:
+            - nos/sros/beginner/nos-sros-activity-06.md
+            - nos/sros/beginner/nos-sros-show-latest-commit-activity-14.md
+            - nos/sros/beginner/9-custom-generic-log.md
+            - nos/sros/beginner/43-Grafana-Dashboards.md
+            - nos/sros/beginner/41-ANYsec.md
+        - Intermediate:
+            - nos/sros/intermediate/nos-sros-activity-05.md
+            - nos/sros/intermediate/nos-sros-activity-21.md
+            - nos/sros/intermediate/nos-sros-activity-08.md
+            - nos/sros/intermediate/nos-sros-activity-22.md
+            - nos/sros/intermediate/nos-sros-activity-23.md
+            - nos/sros/intermediate/nos-sros-activity-56.md
+            - nos/sros/intermediate/nos-sros-activity-62.md
+            - nos/sros/intermediate/nos-sros-activity-63.md
+        # - Advanced:
+            # - nos/sros/advanced/index.md
+      - SR Linux:
+          - Beginner:
+              - nos/srlinux/beginner/nos-srlinux-activity-11.md
+              - nos/srlinux/beginner/nos-srl-gnsi-authz.md
+              - nos/sros/beginner/43-Grafana-Dashboards.md
+              - nos/srlinux/beginner/nos-srl-activity-04.md
+              - nos/srlinux/beginner/b-srl-oc.md
+          - Intermediate:
+              - nos/srlinux/intermediate/nos-srl-activity-12.md
+              - nos/srlinux/intermediate/20-SRLinux-Basic-Agent.md
+              - nos/srlinux/intermediate/19-SRLinux-Custom-CLI.md
+              - nos/srlinux/intermediate/58-programming-snmp-mibs.md
+          - Advanced:
+              - nos/srlinux/advanced/nos-srlinux-activity-18.md    
+  - Network Services Platform (NSP):
+      - nsp/index.md
+      - Beginner:
+          - Acknowledge Alarms: nsp/beginner/60-nsp-alarm-ack.md
+          - Indicator Analytics: nsp/beginner/68-indicator-analytics.md
+          - Baseline Analytics: nsp/beginner/69-nsp-baseline-analytics.md
+          - Inventory Report using WFM: nsp/beginner/70-nsp-inventory-report-using-workflow.md
+      - Intermediate:
+          - Device-specific Infra Config: nsp/intermediate/48-nsp-device-specific-infra-config.md
+          - NE Password Audit/Align: nsp/intermediate/66-nsp-ne-password-audit.md
+          - NE config snapshot/rollback: nsp/intermediate/71-nsp-ne-config-snapshot-rollback.md
+          - Port Migration: nsp/intermediate/51-nsp-access-port-migration.md
+      - Advanced:
+          - Golden Security Configuration: nsp/advanced/73-nsp-golden-cfg-security.md          
+          - Integrating NSP w/ NetBox: nsp/advanced/57-nsp-netbox.md
+          - TLDP to EVPN Migration: nsp/advanced/72-nsp-tldp-to-evpn-migration.md
+  - Event Driven Automation (EDA):
+      - eda/index.md
+      - Beginner:
+          - Declarative Intents: eda/beginner/declarative-intents.md
+          - Label-based Selection: eda/beginner/label-based-selection.md
+          - Allocations: eda/beginner/allocations.md
+          - EDA Query Language: eda/beginner/eda-query-language.md
+          - Configlets: eda/beginner/configlets.md
+          - Bridge Domains: eda/beginner/bridge-domains.md
+          - Routers: eda/beginner/routers.md
+          - Virtual Networks: eda/beginner/virtual-networks.md
+          - Notifications: eda/beginner/notifications.md
+      - Intermediate:
+          - Install Your Own EDA: eda/intermediate/install-eda.md
+          - Custom Allocations: eda/intermediate/custom-allocations.md
+          - REST API: eda/intermediate/api.md
+      - Advanced:
+          - Service Automation using Python: eda/advanced/service-automation.md
+  - Supporting tools and plugins:
+      - tools/tools-bash-basics.md
+      - tools/tools-clab-vscode-plugin.md
+
+site_author: Nokia
+site_description: >-
+  SReXperts hackathon event guidelines
+# Repository
+repo_name: srexperts/srx-hackplanning-2025
+repo_url: https://github.com/srexperts/srx-hackplanning-2025
+edit_uri: edit/main/docs/
+site_url: "https://hack.srexperts.net/"
+copyright: Copyright &copy; 2021-2025 Nokia
+theme:
+  name: material
+  custom_dir: docs/overrides
+
+  # 404 page
+  static_templates:
+    - 404.html
+
+  # Don't include MkDocs' JavaScript
+  include_search_page: false
+  search_index_only: true
+
+  features:
+    - navigation.top
+    # - navigation.instant # removed until code selection are fixed https://github.com/squidfunk/mkdocs-material/issues/5066
+    - navigation.tabs
+    - navigation.sections
+    - search.suggest
+    - content.code.annotate
+    - content.code.copy
+    - content.code.select
+    - content.action.edit
+    - toc.follow
+    - content.tooltips
+    - content.footnote.tooltips
+    - navigation.indexes
+
+  language: en
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+  font:
+    text: NokiaPureText
+    code: Fira Code
+  logo: images/srexperts.svg
+  icon:
+    logo: nokia/srexperts
+    repo: fontawesome/brands/github
+    edit: material/file-edit-outline
+  favicon: images/nokia_favicon.svg
+
+# Plugins
+plugins:
+  - meta
+  - glightbox
+  - macros:
+      j2_block_start_string: "-{{%"
+      j2_block_end_string: "%}}-"
+      j2_variable_start_string: "-{{"
+      j2_variable_end_string: "}}-"
+      include_yaml:
+        - macros/vars.yml
+      include_dir: macros
+      module_name: macros/main
+  - enumerate-headings:
+      increment_across_pages: false
+  - blog:
+      blog_dir: blog
+      post_url_date_format: yyyy
+      archive: false
+      categories: false
+      post_excerpt_max_authors: 2
+      authors_profiles: true
+  - tags
+  - typeset
+  - search
+  - minify:
+      minify_html: true
+  - rss:
+      match_path: blog/posts/.*
+      abstract_chars_count: 5000
+      date_from_meta:
+        as_creation: date
+      categories:
+        - tags
+      comments_path:
+        "#__comments"
+        #- redirects:
+        #redirect_maps:
+
+# Customization
+extra:
+  social:
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/tZvgjQ6PZf
+    - icon: fontawesome/brands/github
+      link: https://github.com/nokia/SReXperts
+  analytics:
+    provider: google
+    property: G-VNYX781Q48
+  tags:
+    # tags and their identifiers
+    media: media # media tag is used to show posts in media.md
+  annotate:
+    bash:
+      - .s1
+      - .s2
+
+# Extensions
+markdown_extensions:
+  - markdown.extensions.admonition
+  - markdown.extensions.attr_list
+  - markdown.extensions.md_in_html
+  - markdown.extensions.codehilite:
+      guess_lang: false
+  - markdown.extensions.def_list
+  - markdown.extensions.footnotes
+  - markdown.extensions.meta
+  - toc:
+      permalink: "#"
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      line_spans: __span
+      anchor_linenums: true
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: srexperts
+      repo: srx-hackplanning-2025
+  - pymdownx.mark
+  - pymdownx.smartsymbols:
+      fractions: false
+  - pymdownx.snippets:
+      check_paths: true
+      url_download: true
+      dedent_subsections: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.blocks.tab:
+      alternate_style: true
+  - pymdownx.blocks.admonition
+  - pymdownx.blocks.definition
+  - pymdownx.blocks.details
+  - pymdownx.blocks.html:
+      custom:
+        - tag: td
+          mode: block
+        - tag: th
+          mode: block
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+extra_css:
+  - stylesheets/nokia.css
+  - stylesheets/nokia-fonts.css
+  - stylesheets/diagrams.css
+  - stylesheets/animations.css
+  - stylesheets/feedback.css
+
+extra_javascript:
+  - javascripts/sh-annotation.js
+  - javascripts/visitor-id.js
+  - javascripts/scroll-tracker.js
+  - javascripts/star-rating.js
+  - javascripts/heading-buttons.js

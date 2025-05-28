@@ -1,0 +1,20 @@
+version: "2.0"
+
+nsp.portList:
+  description: List Ports
+  base: nsp.https
+  base-input:
+    method: POST
+    url: https://<% locate_nsp() %>:8545/restconf/operations/nsp-inventory:find
+    body:
+      input:
+        xpath-filter: >-
+          <% let(x => concat("site", $.formValues.get("__attribute").toCharArray().last()), 
+          y => "/nsp-equipment:network/network-element[ne-id='siteId']/hardware-component/port") -> 
+          $y.replace("siteId", $.formValues.get($x)) %>
+        fields: name
+    resultFilter: $.content.get("nsp-inventory:output")
+  input:
+    - formValues: ""
+    - token_auth
+  output: <% let(x => $.content.data.where($.containsKey("children"))) -> switch($x.len() = 0 => $.content.data, $x.len() > 0 => $x.where($.children.len() = 0)) %>

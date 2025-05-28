@@ -1,0 +1,44 @@
+module ne-snapshot-groupxx {
+  yang-version 1.1;
+  namespace "urn:nokia:nsp:model:lso:operation:ne-snapshot-groupxx";
+  prefix snapshot;
+
+  import nsp-lso-operation {
+    prefix nlo;
+  }
+
+  organization "Nokia";
+  contact "";
+  description "NSP Operation Manager - NE Config Snapshot";
+
+  revision 2024-05-01 {
+    description "initial version";
+  }
+
+  augment "/nlo:lso-operations/nlo:operation/nlo:executions/nlo:execution" {
+    when "../../operation-type='ne-snapshot-groupxx'";
+    description "Augmentation of operation execution state data";
+
+    container ne-snapshot-groupxx-execution {
+      description "State data container for backup execution.";
+
+      leaf backupFilename {
+        type string;
+        description
+          "Indicates the backup file created in the NSP.";
+      }
+
+      leaf neSoftwareVersion {
+        type string;
+        description
+          "Indicates the Network Element Version.";
+      }
+
+      leaf filePath {
+        type string;
+        description
+          "Indicates the backup file path created in the NSP.";
+      }
+    }
+  }
+}

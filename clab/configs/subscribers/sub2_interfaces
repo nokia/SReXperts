@@ -1,0 +1,24 @@
+auto lo
+iface lo inet loopback
+
+auto eth1
+allow-hotplug eth1
+iface eth1 inet manual
+    hwaddress 00:D0:F6:02:02:02
+
+# VLAN 100
+auto eth1.100
+allow-hotplug eth1.100
+iface eth1.100
+  use dhcp
+  udhcpc_opts -x 0x3d:0FF1CE02
+iface eth1.100 inet6 dhcp
+
+# VLAN 2000
+auto eth1.2000
+allow-hotplug eth1.2000
+iface eth1.2000 inet static
+  address 192.168.190.2
+  netmask 255.255.255.0
+  network 192.168.190.0
+  broadcast 192.168.190.255

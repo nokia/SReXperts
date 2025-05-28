@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kmrd-dev-eda-secret
+  namespace: eda-system
+  labels:
+    "eda.nokia.com/backup": "true"
+type: Opaque
+data:
+  username: ZWRhZ2l0
+  password: ZWRhcGFzczIwMjQ=
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kmrd-eda-registry-secret
+  namespace: eda-system
+  labels:
+    "eda.nokia.com/backup": "true"
+type: Opaque
+data:
+  username: ZWRhcmVn
+  password: ZWRhUGFzczIwMjQ=
+---
+apiVersion: appstore.eda.nokia.com/v1
+kind: Catalog
+metadata:
+  name: kmrd-eda-catalog
+  namespace: eda-system
+spec:
+  authSecretRef: kmrd-dev-eda-secret
+  remoteType: git
+  remoteURL: https://git.kmrd.dev:9443/eda/app-catalog.git
+  skipTLSVerify: true
+  title: Karim's Catalog
+---
+apiVersion: appstore.eda.nokia.com/v1
+kind: Registry
+metadata:
+  name: kmrd-eda-registry
+  namespace: eda-system
+spec:
+  authSecretRef: kmrd-eda-registry-secret
+  remoteURL: https://registry.kmrd.dev
+  skipTLSVerify: true

@@ -1,0 +1,77 @@
+module srl_basic_agent {
+  yang-version 1.1;
+  namespace "urn:srl_sdk/srl_basic_agent";
+  prefix srl_basic_agent;
+
+  import srl_nokia-common {
+      prefix srl_nokia-comm;
+  }
+  import srl_nokia-network-instance {
+        prefix srl_nokia-netinst;
+  }
+
+  revision 2024-07-31 {
+  description
+    "SRLinux 24.7.1";
+}
+
+  grouping static-routes-ndk-top {
+      container static-routes-ndk {
+          presence "configure alternative static routes";
+
+          description
+              "SReXperts - ndk static-routes agent.";
+          list route {
+              max-elements 16384;
+              key "prefix";
+              leaf prefix {
+                  must "not(../../../srl_nokia-netinst:type = 'srl_nokia-netinst:host')" {
+                      error-message "Static route configuration not valid in network instance of type host";
+                  }
+                  type srl_nokia-comm:ip-prefix;
+              }
+              leaf admin-state {
+                  type srl_nokia-comm:admin-state;
+                  default "enable";
+                  description
+                      "Administratively enable or disable the static route.";
+              }
+              leaf next-hop {
+                  type srl_nokia-comm:ip-address-with-zone;
+                  description
+                      "The next-hop IPv4 or IPv6 address
+
+                      If the IPv6 address is a link-local address then the zoned format must be used";
+              }
+              container cpe-check {
+                  leaf admin-state {
+                  type srl_nokia-comm:admin-state;
+                  default "enable";
+                  description
+                      "Probe the next-hop periodically using ICMP echo request.";
+                  }
+
+                  leaf is-alive {
+                      type boolean;
+                      config false;
+                  }
+                  container probe-statistics {
+                    config false;
+                    leaf successful {
+                        type uint64;
+                        config false;
+                    }
+                    leaf failed {
+                        type uint64;
+                        config false;
+                    }
+                  }
+              }
+          }
+      }
+  }
+
+  augment "/srl_nokia-netinst:network-instance" {
+      uses static-routes-ndk-top;
+  }
+}

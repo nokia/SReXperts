@@ -1,0 +1,128 @@
+# Copyright 2025 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+---
+version: '2.0'
+
+ne-snapshot-groupxx:
+  type: direct
+  tags:
+    - LSO
+    - SReXperts
+
+  vars:
+    lsoInfo: "Failed"
+    lsoStageError: "Failed"
+    backupFilename: "unknown"
+    filePath: "unknown"
+    neSoftwareVersion: "unknown"
+
+  input:
+    - neId
+
+  output:
+    lsoInfo: <% $.lsoInfo %>
+    backupFilename: <% $.backupFilename %>
+    filePath: <% $.filePath %>
+    neSoftwareVersion: <% $.neSoftwareVersion %>
+    
+  output-on-error:
+    lsoInfo: "Error: <% $.lsoInfo %>"
+    backupFilename: <% $.backupFilename %>
+    filePath: <% $.filePath %>
+    neSoftwareVersion: <% $.neSoftwareVersion %>
+   
+  tasks:
+    lsoStageMapping:
+      action: std.noop
+      publish:
+        timestamp: <% regex(":").replace(regex(" ").replace(get_UTC_time(),"-"),".") %>
+        lsoWorkflowStageMapping:
+          ne-snapshot-groupxx:
+          - getDeviceInfo
+          - getConfigSROS
+          - uploadConfig
+          - zipConfig  
+      on-success:
+        - getDeviceInfo
+    
+    getDeviceInfo:
+      action: nsp.https
+      input:
+        method: POST
+        url: https://restconf-gateway/restconf/operations/nsp-inventory:find
+        body: 
+          input:
+            xpath-filter: /nsp-ne-control:ne-control/discovered-ne[ne-id='<% $.neId %>']
+            fields: ne-id;ne-name;version;communication-state;ne-vendor;ne-family
+        resultFilter: $.content.get("nsp-inventory:output").data
+      publish:
+        neInfo: <% switch(task().result.content.len() > 0 => task().result.content.first(), true => {}) %>
+      publish-on-error:
+        lsoInfo: "Failed: fetching node details"
+        lsoStageError: <% task().result %>
+      on-success:
+        - processDeviceInfo
+
+    processDeviceInfo:
+      action: std.noop
+      publish:
+        dirName: /lsom/neBackup/<% $.neInfo.get("ne-vendor") %>/<% $.neInfo.get("ne-family").replace(" ","_") %>/<% $.neInfo.get("ne-name") %>/<% $.neInfo.get("version") %>
+        neName: <% $.neInfo.get("ne-name") %>
+        neSoftwareVersion: <% $.neInfo.get("version") %>
+      on-success:
+        - getConfigSROS
+
+    getConfigSROS:
+      action: nsp.https
+      input:
+        method: GET
+        url: https://restconf-gateway/restconf/data/network-device-mgr:network-devices/network-device=<% $.neId %>/root/nokia-conf:configure
+      publish:
+        jsonConfig: <% json_dump(task().result.content) %> 
+      publish-on-error:
+        lsoInfo: "Failed: getting config from MD-SROS node"
+        lsoStageError: <% task().result %>      
+      on-success:
+        - createBackupFolder
+   
+    createBackupFolder:
+      action: nsp.https
+      input:
+        method: POST
+        url: https://file-service/nsp-file-service-app/rest/api/v1/directory?dirName=<% $.dirName %>/<% $.timestamp %>
+        resultFilter : $.content.data.fileName
+      publish-on-error:
+        lsoStageError: <% task().result %>
+        lsoInfo: "Failed: creating backup directory on file-server"
+      on-success:
+        - writeConfigFile
+
+    writeConfigFile:
+      action: nsp.https
+      input:
+        method: POST
+        url: https://file-service/nsp-file-service-app/rest/api/v1/file/uploadTextToFile
+        body:
+          dirName: <% $.dirName %>/<% $.timestamp %>
+          fileName: <% $.neName %>.nokia-conf.json
+          text: <% $.jsonConfig %>
+          overwrite: true
+      on-success:
+        - zipConfig
+
+    zipConfig:
+      action: nsp.https
+      input:
+        method: POST
+        url: "https://file-service/nsp-file-service-app/rest/api/v1/directory/zip?sourceDir=<% $.dirName %>/<% $.timestamp %>&zipFilePath=<% $.dirName %>/<% $.timestamp %>.zip&deleteSourceDir=true"
+      publish:
+        backupFilename: <% $.timestamp %>.zip
+        filePath: <% $.dirName %>/
+        lsoInfo: "Successfully done backup operation"
+        backupSuccess: True
+      publish-on-error:
+        lsoInfo: "Failed: zipping of uploaded config File Server" 
+        lsoStageError: <% task().result %>
+...

@@ -1,0 +1,34 @@
+apiVersion: services.eda.nokia.com/v1alpha1
+kind: VLAN
+metadata:
+  name: vlan1
+  namespace: eda
+  labels:
+    role: hackathon-infra
+spec:
+  bridgeDomain: macvrf1
+  # TODO: uncomment on 25.4
+  #description: VLAN 1 for connectivity to the WAN GRT
+  interfaceSelector:
+    - edge-type=compute
+  uplink:
+    uplinkVLANID: pool
+    uplinkSelector: []
+    uplinkVLANPool: ""
+    ingress:
+      filters: []
+      qosPolicy: []
+    egress:
+      filters: []
+      qosPolicy: []
+  vlanID: "1"
+  vlanPool: ""
+  macDuplicationDetectionAction: "UseBridgeDomainAction"
+  l2MTU: null
+  splitHorizonGroup: ""
+  ingress:
+    filters: []
+    qosPolicy: []
+  egress:
+    filters: []
+    qosPolicy: []

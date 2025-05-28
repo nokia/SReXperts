@@ -1,0 +1,39 @@
+apiVersion: services.eda.nokia.com/v1alpha1
+kind: BridgeDomain
+metadata:
+  name: macvrf1
+  namespace: eda
+  labels:
+    role: hackathon-infra
+spec:
+  # TODO uncomment when 25.4
+  #description: MAC-VRF for connectivity via the GRT of the WAN
+  evi: 1
+  eviPool: evi-pool
+  exportTarget: target:65000:1
+  importTarget: target:65000:1
+  l2proxyARPND:
+    proxyARP: false
+    proxyND: false
+    tableSize: 250
+    dynamicLearning:
+      enabled: null
+      ageTime: null
+      sendRefresh: null
+    ipDuplication:
+      enabled: null
+      monitoringWindow: null
+      numMoves: null
+      holdDownTime: null
+  macAging: 300
+  macDuplicationDetection:
+    action: StopLearning
+    enabled: false
+    holdDownTime: 9
+    monitoringWindow: 3
+    numMoves: 5
+  tunnelIndexPool: tunnel-index-pool
+  type: EVPNVXLAN
+  vni: 1
+  vniPool: vni-pool
+  macLimit: null

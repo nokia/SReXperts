@@ -1,0 +1,18 @@
+version: "2.0"
+
+nsp.ibsfTunnelTemplates:
+  description: List IBSF Tunnel Templates
+  base: nsp.https
+  base-input:
+    method: POST
+    url: https://<% locate_nsp() %>:8545/restconf/operations/nsp-inventory:find
+    body:
+      input:
+        xpath-filter: /tunnel-template:templates/template
+        fields: name;description;intent-type;intent-version;state
+        sort-by: ["name"]
+    resultFilter: $.content.get("nsp-inventory:output")
+  input:
+    - formValues: ""
+    - token_auth
+  output: <% $.content.data %>

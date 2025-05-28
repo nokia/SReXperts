@@ -1,0 +1,14 @@
+apiVersion: core.eda.nokia.com/v1
+kind: IndexAllocationPool
+metadata:
+  labels:
+    eda.nokia.com/bootstrap: "true"
+    role: hackathon-infra
+  name: evi-pool
+  namespace: eda
+  annotations: {}
+spec:
+  publishAllocations: true
+  segments:
+    - size: 1000
+      start: 1000

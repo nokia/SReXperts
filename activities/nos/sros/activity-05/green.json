@@ -1,0 +1,57 @@
+{
+    "nokia-conf:configure": {
+        "service": {
+            "vprn": [
+                {
+                    "service-name": "activity-05-green",
+                    "admin-state": "enable",
+                    "service-id": 501,
+                    "customer": "1",
+                    "bgp-evpn": {
+                        "mpls": [
+                            {
+                                "bgp-instance": 1,
+                                "admin-state": "enable",
+                                "route-distinguisher": "10.46.15.21:501",
+                                "vrf-target": {
+                                    "community": "target:65000:501"
+                                },
+                                "auto-bind-tunnel": {
+                                    "resolution": "filter",
+                                    "resolution-filter": {
+                                        "sr-isis": true
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    "interface": [
+                        {
+                            "interface-name": "vprn-pe-ce",
+                            "admin-state": "enable",
+                            "loopback": true,
+                            "ipv4": {
+                                "primary": {
+                                    "address": "10.0.0.21",
+                                    "prefix-length": 32
+                                }
+                            }
+                        }
+                    ],
+                    "static-routes": {
+                        "route": [
+                            {
+                                "ip-prefix": "172.16.21.0\/24",
+                                "route-type": "unicast",
+                                "blackhole": {
+                                    "admin-state": "enable",
+                                    "generate-icmp": true
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+}

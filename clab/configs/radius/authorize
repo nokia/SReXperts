@@ -1,0 +1,56 @@
+00:d0:f6:01:01:01                       Cleartext-Password  := "pe4-customer"
+                                        Framed-IP-Address = 10.24.1.112,
+                                        Framed-IP-Netmask = 255.255.255.0,
+                                        Alc-Default-Router += 10.24.1.5,
+                                        Class = "0xCAFE",
+                                        Alc-Subsc-ID-Str = "%{Acct-Session-Id}",
+                                        Alc-Subsc-Prof-Str = "SUB_PROF1",
+                                        Alc-MSAP-Serv-Id = "401",
+                                        Alc-MSAP-Interface = "GrpInt1",
+                                        Alc-SLA-Prof-Str = "SLA_PROF1",
+                                        Alc-SLAAC-IPv6-Pool = "POOL_IPV6ND",
+                                        Alc-Delegated-IPv6-Pool = "REGULAR",
+                                        Alc-ToClient-Dhcp-Options = "0x7910100A400A18010520C0A8D3010A180105",
+                                        Alc-ToClient-Dhcp6-Options = "0x0017002020010db800010001000100010001000120010db8000100010001000100010002",
+                                        Alc-ANCP-Str = "00:d0:f6:01:01:01",
+                                        Alc-PySROS-Script-Policy = "sub1-script-policy",
+                                        Alc-PySROS-Script-Params = "{'PING':{'target':'10.24.1.112','source':'192.168.211.1','size':500}}"
+
+#
+#
+00:d0:f6:02:02:02                       Cleartext-Password  := "pe4-customer"
+                                        Framed-IP-Address = 10.24.1.113,
+                                        Framed-IP-Netmask = 255.255.255.0,
+                                        Alc-Default-Router += 10.24.1.5,
+                                        Class = "0xBEEF",
+                                        Alc-Subsc-ID-Str = "%{Acct-Session-Id}",
+                                        Alc-Subsc-Prof-Str = "SUB_PROF1",
+                                        Alc-MSAP-Serv-Id = "401",
+                                        Alc-MSAP-Interface = "GrpInt1",
+                                        Alc-SLA-Prof-Str = "SLA_PROF1",
+                                        Alc-SLAAC-IPv6-Pool = "POOL_IPV6ND",
+                                        Alc-Delegated-IPv6-Pool = "REGULAR",
+                                        Alc-ToClient-Dhcp-Options = "0x7910100A400A18010520C0A8D3010A180105",
+                                        Alc-ToClient-Dhcp6-Options = "0x0017002020010db800010001000100010001000120010db8000100010001000100010002",
+                                        Alc-ANCP-Str = "00:d0:f6:02:02:02",
+                                        Alc-PySROS-Script-Policy = "sub2-3-script-policy",
+                                        Alc-PySROS-Script-Params = "{'SVC':{'id':10011,'name':'dynsvc-epipe-1','SAP':{'id':'1/1/c3/1:2000','desc':'client-sub2-vlan2000'}}}"
+#
+#
+server.office3                          Cleartext-Password  := "pe4-customer"
+                                        Framed-IP-Address = 10.24.1.114,
+                                        Framed-IP-Netmask = 255.255.255.0,
+                                        Alc-Default-Router += 10.24.1.5,
+                                        Class = "0xBABE",
+                                        Alc-Subsc-ID-Str = "%{Acct-Session-Id}",
+                                        Alc-Subsc-Prof-Str = "SUB_PROF1",
+                                        Alc-MSAP-Serv-Id = "401",
+                                        Alc-MSAP-Interface = "GrpInt1",
+                                        Alc-SLA-Prof-Str = "SLA_PROF1",
+                                        Alc-SLAAC-IPv6-Pool = "POOL_IPV6ND",
+                                        Alc-Delegated-IPv6-Pool = "REGULAR",
+                                        Alc-ToClient-Dhcp-Options = "0x7910100A400A18010520C0A8D3010A180105",
+                                        Alc-ToClient-Dhcp6-Options = "0x0017002020010db800010001000100010001000120010db8000100010001000100010002",
+                                        Alc-ANCP-Str = "00:d0:f6:03:03:03",
+                                        Alc-PySROS-Script-Policy = "sub2-3-script-policy",
+                                        Alc-PySROS-Script-Params = "{'SVC':{'id':10011,'name':'dynsvc-epipe-1','SAP':{'id':'1/1/c3/1:3000','desc':'client-sub3-vlan3000'}}}"

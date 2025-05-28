@@ -1,0 +1,156 @@
+{
+    "type": "object",
+    "properties": [
+        {
+            "name": "templateName",
+            "title": "Template Name",
+            "readOnly": false,
+            "columnSpan": 2,
+            "required": true,
+            "newRow": true,
+            "type": "string",
+            "component": {
+                "input": "autoComplete"
+            },
+            "suggest": {
+                "action": "nsp.ibsfTemplates",
+                "name": [
+                    "name"
+                ]
+            }
+        },
+        {
+            "name": "tunnelTemplateName",
+            "title": "Tunnel Template Name",
+            "readOnly": false,
+            "columnSpan": 2,
+            "required": true,
+            "newRow": true,
+            "type": "string",
+            "component": {
+                "input": "autoComplete"
+            },
+            "suggest": {
+                "action": "nsp.ibsfTunnelTemplates",
+                "name": [
+                    "name"
+                ]
+            }
+        },
+        {
+            "name": "targets",
+            "type": "list",
+            "title": "Targets",
+            "newRow": true,
+            "columnSpan": 7,
+            "required": true,
+            "properties": [
+                {
+                    "name": "custName",
+                    "title": "Customer Name",
+                    "type": "string",
+                    "newRow": true,
+                    "columnSpan": 2,
+                    "required": true,
+                    "component": {
+                        "input": "autoComplete"
+                    },
+                    "suggest": {
+                        "action": "nsp.customerList",
+                        "name": [
+                            "name"
+                        ]
+                    }
+                },
+                {
+                    "name": "svcId",
+                    "title": "NE Service ID",
+                    "type": "string",
+                    "newRow": true,
+                    "columnSpan": 2,
+                    "required": true
+                },
+                {
+                    "name": "svcName",
+                    "title": "Service Name",
+                    "type": "string",
+                    "newRow": false,
+                    "columnSpan": 2,
+                    "required": true
+                },
+                {
+                    "name": "siteA",
+                    "title": "Site A",
+                    "type": "string",
+                    "newRow": true,
+                    "columnSpan": 2,
+                    "required": true,
+                    "component": {
+                        "input": "autoComplete"
+                    },
+                    "suggest": {
+                        "action": "nsp.neList",
+                        "name": [
+                            "name"
+                        ]
+                    },
+                    "default": "fd00:fde8::1:21"
+                },
+                {
+                    "name": "portA",
+                    "title": "Port A",
+                    "type": "string",
+                    "newRow": false,
+                    "columnSpan": 2,
+                    "required": true,
+                    "component": {
+                        "input": "autoComplete"
+                    },
+                    "suggest": {
+                        "action": "nsp.portList",
+                        "name": [
+                            "name"
+                        ]
+                    },
+                    "default": "1/1/c6/1"
+                },
+                {
+                    "name": "siteB",
+                    "title": "Site B",
+                    "type": "string",
+                    "newRow": true,
+                    "columnSpan": 2,
+                    "required": true,
+                    "component": {
+                        "input": "autoComplete"
+                    },
+                    "suggest": {
+                        "action": "nsp.neList",
+                        "name": [
+                            "name"
+                        ]
+                    },
+                    "default": "fd00:fde8::1:22"
+                },
+                {
+                    "name": "portB",
+                    "title": "Port B",
+                    "type": "string",
+                    "newRow": false,
+                    "columnSpan": 2,
+                    "required": true,
+                    "component": {
+                        "input": "autoComplete"
+                    },
+                    "suggest": {
+                        "action": "nsp.portList",
+                        "name": [
+                            "name"
+                        ]
+                    },
+                    "default": "1/1/c6/1"
+                }
+            ]
+        }
+    ]
+}

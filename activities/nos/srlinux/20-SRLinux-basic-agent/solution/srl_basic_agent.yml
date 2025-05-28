@@ -1,0 +1,30 @@
+# Copyright 2025 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+# Title: SRLinux Basic agent
+# Author: Nokia SReXperts
+# Date: 2025-03-03
+# location /etc/opt/srlinux/appmgr/srl_basic_agent.yml 
+srl_basic_agent:
+   path: /etc/opt/srlinux/appmgr/srl_basic_agent/
+   launch-command: /etc/opt/srlinux/appmgr/srl_basic_agent/srl_basic_agent.sh
+   search-command: /bin/bash /etc/opt/srlinux/appmgr/srl_basic_agent/srl_basic_agent.sh
+   version-command: /etc/opt/srlinux/appmgr/srl_basic_agent/srl_basic_agent_version.sh
+   wait-for-config: No
+   failure-action: wait=10
+   restricted-operations: ['quit']
+   author: 'Nokia SReXperts'
+   run-as-user: root
+
+   # YANG module references
+   yang-modules:
+       names:
+           - "srl_basic_agent"
+
+       source-directories:
+           - "/etc/opt/srlinux/appmgr/srl_basic_agent/yang"
+           - "/opt/srlinux/models/iana"
+           - "/opt/srlinux/models/ietf"
+           - "/opt/srlinux/models/srl_nokia/models"
+

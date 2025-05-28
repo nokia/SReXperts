@@ -1,0 +1,10 @@
+# Copyright 2025 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+
+## This file is intentionally left empty for Activity#20 to troubleshoot
+## If you find this, then you're on the right path to fixing the issue
+## Use VSCode to update the file directly on the VM. You may also update leaf11 directly with vi
+## Note:You can copy/paste code directly to `vi`, howhever, to keep your indentation you need to enable paste mode (Esc + `:set paste`) then move to insertion mode and paste your code. 
+

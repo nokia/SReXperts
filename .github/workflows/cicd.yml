@@ -1,0 +1,97 @@
+# Copyright 2025 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+---
+name: CICD
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  pull_request:
+
+env:
+  MKDOCS_MATERIAL_VER: 9.6.9-insiders-4.53.16-hellt
+
+jobs:
+  docs-test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: docker run -v $(pwd):/docs --entrypoint mkdocs ghcr.io/srexperts/mkdocs-material-insiders:$MKDOCS_MATERIAL_VER build --clean --strict
+
+      - name: Cache htmltest external links
+        id: cache-htmltest
+        uses: actions/cache@v4
+        with:
+          path: tmp/.htmltest
+          # key will contain hash of all md files to check if files have changed
+          # when files are changed, a new key name is formed, and thus a new cache will be saved
+          key: htmltest-${{ hashFiles('docs/**/*.md') }}
+          # the restore key will fetch any previously saved cache even if there is no match on key
+          # this allows to use cache from prev runs and update it
+          restore-keys: |
+            htmltest-
+
+            #      - name: htmltest
+            #        uses: wjdp/htmltest-action@master
+            #        with:
+            #          config: docs/htmltest.yml
+
+  publish-docs:
+    runs-on: ubuntu-22.04
+    env:
+      BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # needed for commit authors plugin
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build docs
+        run: |
+          docker run --env CI=true --env MKDOCS_GIT_COMMITTERS_APIKEY=${{ secrets.GITHUB_TOKEN }} -v $(pwd):/docs --user $(id -u):$(id -g) --entrypoint mkdocs ghcr.io/srexperts/mkdocs-material-insiders:$MKDOCS_MATERIAL_VER build
+
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        id: wrangler-deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: d8095c1586d36812e902e7acbf42300a
+          command: pages deploy site --project-name=srexperts --branch=${{ env.BRANCH_NAME }}
+
+      - name: Add deploy comment to PR
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const branchName = process.env.BRANCH_NAME.replace(/\./g, '-');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🏗 Preview site has been deployed to:
+
+              * https://${branchName}.srexperts.pages.dev
+              * ${{ steps.wrangler-deploy.outputs.deployment-url }}
+              `
+              })

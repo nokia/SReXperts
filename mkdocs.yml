@@ -185,7 +185,7 @@ extra:
       link: https://github.com/nokia/SReXperts
   analytics:
     provider: google
-    property: G-VNYX781Q48
+    property: G-7C3C7M5XJP
   tags:
     # tags and their identifiers
     media: media # media tag is used to show posts in media.md

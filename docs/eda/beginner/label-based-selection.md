@@ -114,10 +114,6 @@ Go on and **edit** the Banner resource you created in the first task and add the
 
 > Don't know how to use the Dry Run feature? Check out the [Declarative Intents](declarative-intents.md#dry-run) exercise first.
 
-### Create/Modify NTP Client on all nodes
-
-Fancy some more tasks? Can you modify the NTP client that you [configured in the Declarative Intents exercise](declarative-intents.md#configuring-ntp) to target all the nodes with a **single** label?
-
 <script type="text/javascript" src="https://viewer.diagrams.net/js/viewer-static.min.js" async></script>
 
 [^1]: EQL stands for EDA Query Language that is resembles other query languages like PromQL, Jira QL and so on.

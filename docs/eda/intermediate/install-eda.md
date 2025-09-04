@@ -33,7 +33,7 @@ EDA is a cloud-native platform for infrastructure automation. It is deployed on 
 - and so on...
 
 If microservices and Kubernetes concepts are new to you, fear not, you don't have to be a PhD in cloud-native to install EDA in the lab environment, let alone to use it.
-We call the process of installing a lab instance of EDA - **Try EDA** - and it is [documented on docs.eda.dev](https://docs.eda.dev/getting-started/try-eda/).
+We call the process of installing a lab instance of EDA - **Try EDA** - and it is [documented on docs.eda.dev](https://docs.eda.dev/25.8/getting-started/try-eda/).
 
 The Try EDA installation installs the **EDA Playground** - a lab environment that consists of a [KinD](https://kind.sigs.k8s.io/) k8s cluster with EDA platform and a small virtual network topology with SR Linux nodes running on top of it.
 
@@ -47,9 +47,9 @@ By leveraging EDA's deployment model that uses Kubernetes, we can install EDA Pl
 
     ---
 
-    Of course, you can install EDA on any compute powered by Linux. Just use the [Try EDA](https://docs.eda.dev/getting-started/try-eda/) installation guide to get started.
+    Of course, you can install EDA on any compute powered by Linux. Just use the [Try EDA](https://docs.eda.dev/25.8/getting-started/try-eda/) installation guide to get started.
 
-    [:octicons-arrow-right-24: Try EDA on Linux](https://docs.eda.dev/getting-started/try-eda/)
+    [:octicons-arrow-right-24: Try EDA on Linux](https://docs.eda.dev/25.8/getting-started/try-eda/)
 
 - :fontawesome-brands-windows:{ .middle } **Windows**
 
@@ -57,7 +57,7 @@ By leveraging EDA's deployment model that uses Kubernetes, we can install EDA Pl
 
     You can install EDA on Windows as well! Leveraging the Windows Subsystem for Linux (WSL) you can install EDA on top of it. Check out our guide.
 
-    [:octicons-arrow-right-24: Try EDA on Windows](https://docs.eda.dev/software-install/non-production/wsl/)
+    [:octicons-arrow-right-24: Try EDA on Windows](https://docs.eda.dev/25.8/software-install/non-production/wsl/)
 
 - :simple-apple:{ .middle } **MacOS**
 
@@ -67,7 +67,7 @@ By leveraging EDA's deployment model that uses Kubernetes, we can install EDA Pl
 
     By setting up Docker on your Mac you can install EDA on top of it. Check out our guide.
 
-    [:octicons-arrow-right-24: Try EDA on macOS](https://docs.eda.dev/software-install/non-production/macos/)
+    [:octicons-arrow-right-24: Try EDA on macOS](https://docs.eda.dev/25.8/software-install/non-production/macos/)
 
 - :simple-kubernetes:{ .middle } **Existing Kubernetes cluster**
 
@@ -77,7 +77,7 @@ By leveraging EDA's deployment model that uses Kubernetes, we can install EDA Pl
 
     This is a more advanced path, as you will need to understand basic Kubernetes concepts and EDA installation process to get it running.
 
-    [:octicons-arrow-right-24: Playground on an existing Kubernetes cluster](https://docs.eda.dev/software-install/non-production/on-prem-cluster/)
+    [:octicons-arrow-right-24: Playground on an existing Kubernetes cluster](https://docs.eda.dev/25.8/software-install/non-production/on-prem-cluster/)
 
 </div>
 
@@ -103,10 +103,10 @@ This is the amount of resources that your kubernetes cluster implemented by the 
 
 Choose your deployment option and equip yourself with the following documentation articles to help you get going:
 
-- [Try EDA process explained](https://docs.eda.dev/getting-started/try-eda/) - to install EDA on a Linux server.
-- [macOS install instructions](https://docs.eda.dev/software-install/non-production/macos/) - to install EDA Playground on a macOS.
-- [Windows install instructions](https://docs.eda.dev/software-install/non-production/wsl/) - to install EDA Playground on a Windows machine.
+- [Try EDA process explained](https://docs.eda.dev/25.8/getting-started/try-eda/) - to install EDA on a Linux server.
+- [macOS install instructions](https://docs.eda.dev/25.8/software-install/non-production/macos/) - to install EDA Playground on a macOS.
+- [Windows install instructions](https://docs.eda.dev/25.8/software-install/non-production/wsl/) - to install EDA Playground on a Windows machine.
 - [`Makefile`](https://github.com/nokia-eda/playground/blob/main/Makefile) from the EDA Playground repository - to see what actually being installed and how when you run `make try-eda` command.
-- [Installation process explained](https://docs.eda.dev/getting-started/installation-process/) - to have a deeper dive on how EDA is installed on a Linux server.
+- [Installation process explained](https://docs.eda.dev/25.8/getting-started/installation-process/) - to have a deeper dive on how EDA is installed on a Linux server.
 
 <script type="text/javascript" src="https://viewer.diagrams.net/js/viewer-static.min.js" async></script>

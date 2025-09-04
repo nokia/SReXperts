@@ -7,12 +7,12 @@
 |                       |                                                                                              |
 | --------------------- | -------------------------------------------------------------------------------------------- |
 | **Short Description** | Define an EDA virtual network integrating Layer 2/3 services using Python              |
-| **Difficulty**        | Intermediate                                                                                     |
+| **Difficulty**        | Advanced                                                                                     |
 | **Tools used**        | Python, Pydantic                                                                                           |
 | **Topology Nodes**    | :material-server: client11, :material-server: client12, :material-server: client13, :material-router: leaf11, :material-router: leaf12, :material-router: leaf13           |
 | **References**        |[EDA API Guide][api-guide], [OpenAPI Swagger spec][swagger-spec], [Pydantic EDA][pydantic-eda]                                                                                             |
 
-[api-guide]: https://docs.eda.dev/development/api/
+[api-guide]: https://docs.eda.dev/25.8/development/api/
 [swagger-spec]: https://github.com/eda-labs/openapi
 [pydantic-eda]: https://github.com/eda-labs/pydantic-eda
 [pydantic]: https://docs.pydantic.dev/latest/
@@ -61,10 +61,10 @@ Pydantic models are commonly derived from an OpenAPI specification, which outlin
 
 This allows developers to work with EDA resources programmatically, avoiding the need to manually craft JSON or YAML definitions.
 
-/// note | The community project [Pydantic EDA][pydantic-eda] provides the Pydantic models for EDA generated from the EDA OpenAPI specification published in the [EDA OpenAPI spec][swagger-spec] repo.
+/// note | The [Pydantic EDA][pydantic-eda] community project provides the Pydantic models for EDA API. It generates them from the EDA OpenAPI specifications published in the [EDA OpenAPI spec][swagger-spec] repo.
 ///
 
-Before diving into the task of creating a **Virtual Network** with Python, let's first review the basics concepts behind a Pydantic model, and for that we will use one of the most basic Units of automation: the **Interface**.
+Before diving into the task of creating a **Virtual Network** with Python, let's first review the basics concepts behind a Pydantic model, and for that we will use one of the most basic units of automation - the Interface.
 
 ### Interface Pydantic Model
 
@@ -95,7 +95,7 @@ Let's see side by side an Interface CR and it's Pydantic definition:
 /// tab | Interface yaml definition
 
 ```yaml
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
   name: leaf11-ethernet-1-49
@@ -119,7 +119,7 @@ import pydantic_eda.com.nokia.eda.interfaces.v1alpha1 as iface # (1)!
 
 def interface(ns: str, name: str) -> iface.Interface: # (2)!
     iface_ = iface.Interface(
-        apiVersion="interfaces.eda.nokia.com/v1alpha1",
+        apiVersion="interfaces.eda.nokia.com/v1",
         kind="Interface",
         metadata=iface.InterfaceMetadata( # (3)!
             name=name,
@@ -171,13 +171,18 @@ Remove any Bridge Domains, Bridge Interfaces or VLANs created in the [Bridge Dom
 It’s highly recommended to use a code editor with Python auto-completion and suggestions enabled, as it will significantly improve your productivity and help avoid syntax errors when working with Pydantic models.
 ///
 
-Clone a Github repository that provides the basic components. You can clone it in your own personal device or your dedicated cloud instance (VM) running a copy of the lab topology.
+Clone the [openapi-example-python](https://github.com/eda-labs/openapi-example-python) that provides the EDA API client implemented in Python. You can clone it to your own personal device or your dedicated hackathon instance VM running the lab topology.
 
 If you're working on your local device, make sure the [uv python package manager and installer](https://github.com/astral-sh/uv) is installed beforehand.
 
 ```bash
 git clone  -b srx-2025 https://github.com/eda-labs/openapi-example-python.git
 cd openapi-example-python
+```
+
+After you cloned the repository, initialize the virtual environment:
+
+```bash
 uv sync
 ```
 
@@ -200,7 +205,7 @@ openapi-example-python/
 
 The `client.py` and `logging.py` files are prebuilt and ready to use.
 
-Your task is to implement the Virtual Network definition inside the `virtualnetwork.py` file that is then referenced in the `main.py`. The `virtualnetwork.py` file has an import block that pulls in the generated Pydantic classes for the services application that contains the VirtualNetwork resource. By importing this module, you get access to the generated classes from the [OpenAPI spec for this application](https://rest.wiki/?https://raw.githubusercontent.com/eda-labs/openapi/refs/heads/main/apps/services.eda.nokia.com/v1alpha1/services.json).
+Your task is to implement the Virtual Network definition inside the `virtualnetwork.py` file that is then referenced in the `main.py`. The `virtualnetwork.py` file has an import block that pulls in the generated Pydantic classes for the services application that contains the VirtualNetwork resource. By importing this module, you get access to the generated classes from the [OpenAPI spec for this application](https://rest.wiki/?https://raw.githubusercontent.com/eda-labs/openapi/refs/tags/v25.8.1/apps/services.eda.nokia.com/v1alpha1/services.json).
 
 Since you already have an idea what the virtual network resource consists of after completing the Part 3 of this challenge, you may start by typing starting to define your virtual network:
 
@@ -220,7 +225,7 @@ If everything works correctly, you should see output similar to the following:
 [*]─[~/openapi-example-python]
 └──> python main.py
 [05/10/25 14:34:41] INFO     Authenticating with EDA API server                                                                                                                         client.py:54
-                    INFO     Adding 'VirtualNetwork' resource from 'services.eda.nokia.com/v1alpha1' to the 'create' transaction list                                                  client.py:101
+                    INFO     Adding 'VirtualNetwork' resource from 'services.eda.nokia.com/v1' to the 'create' transaction list                                                        client.py:101
                     INFO     Transaction 183 committed                                                                                                                                 client.py:160
 [05/10/25 14:34:43] INFO     Transaction 183 state: complete                                                                                                                           client.py:166
 
@@ -236,7 +241,7 @@ Your function should list the specification of the bridge domains, a router, the
 ```python
 def virtualnetwork(ns: str, name: str) -> service.VirtualNetwork:
     vnet = service.VirtualNetwork(
-        apiVersion="services.eda.nokia.com/v1alpha1",
+        apiVersion="services.eda.nokia.com/v1",
         kind="VirtualNetwork",
         metadata=service.VirtualNetworkMetadata(name=name, namespace=ns, labels={"role": "exercise"}),
         spec=service.SpecModel17(

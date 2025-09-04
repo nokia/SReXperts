@@ -6,9 +6,7 @@
 | --------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | **Short Description** | Creating bridge domains with EDA to achieve layer 2 connectivity                                                     |
 | **Difficulty**        | Beginner                                                                                                             |
-| **Tools used**        | /                                                                                                                    |
 | **Topology Nodes**    | :material-server: client11, :material-server: client13, :material-router: leaf11, :material-router: leaf13           |
-| **References**        | /                                                                                                                    |
 
 This is the first exercise in a 4-part series around using EDA to achieve connectivity to, from, and within your datacenter. In this exercise, we will achieve layer-2 connectivity between two hosts in the same broadcast domain.
 
@@ -52,7 +50,7 @@ Before we start, we need to verify the IP configuration on both clients. We're i
 To connect to the shell of the client nodes, you should connect to the server running your lab and then ssh to each node, for example, for `client11`:
 
 ```bash title="execute from the lab server"
-ssh user@clab-srexperts-client11
+ssh admin@clab-srexperts-client11
 ```
 
 <div class="embed-result">
@@ -160,9 +158,9 @@ You will likely won't see any subinterface with VLAN 300, and that's expected, w
 
 ### Create a bridge domain
 
-Using the "Create" button in the top-right, you can create a new bridge domain. In the center of the screen you can see all configuration options for the new bridge domain, and on the right is a YAML representation of the same. You can either fill the form fields, or edit the YAML, whatever you prefer.
+In the **Virtual Networks** → **Bridge Domains** app page click the "Create" button in the top-right to create a new bridge domain. In the center of the screen you can see all configuration options for the new bridge domain, and on the right is a YAML representation of the same. You can either fill the form fields, or edit the YAML, whatever you prefer.
 
-![Creating a bridge domain](../../images/eda/eda_bridge_domain_creation.png)
+![Creating a bridge domain](https://gitlab.com/rdodin/pics/-/wikis/uploads/bf50bf63da050fbed1422e00cd2a35f6/CleanShot_2025-08-14_at_15.49.03.webp)
 
 Create a new bridge domain, so you can attach some interfaces to it in the next step. If you're not sure which value you need to pick for a particular property, you can leave the field default or empty. The most important properties are:
 
@@ -186,7 +184,7 @@ The solution can be found below in YAML format, if you want to refer to it. You 
 It is enough to define the Bridge Domain like this:
 
 ```yaml
-apiVersion: services.eda.nokia.com/v1alpha1
+apiVersion: services.eda.nokia.com/v1
 kind: BridgeDomain
 metadata:
   name: bridge-domain-vlan300
@@ -226,7 +224,7 @@ Once you figured out what to enter in the Bridge Interface form, don't hit the *
     type: success
 
 ```yaml
-apiVersion: services.eda.nokia.com/v1alpha1
+apiVersion: services.eda.nokia.com/v1
 kind: BridgeInterface
 metadata:
   name: client11-bridge-domain-300
@@ -251,7 +249,7 @@ Use the Dry Run functionality in EDA to check what would change if we were to co
 
 As shown in the video snippet above, you can check the diffs that the particular transaction would emit, and there you have a chance to see what node-specific configs would be pushed to which nodes if we were to commit our transaction.
 
-/// note | The Dry Run functionality does not touch the network elements in any way. All the potential change sets are computed by EDA. Safe and Fast.
+/// note | The Dry Run functionality does not touch the network elements in any way. All the potential change sets are computed by EDA. Safe and fast.
 ///
 
 The change set in the diff view should indicate that a subinterface with vlan-id is created on the `leaf11` switch as well as the network instance of type `mac-vrf` that this subinterface is connected to.
@@ -267,7 +265,7 @@ You should be able to see the Bridge Interface status reflected in the GUI. To s
 
  You can also navigate to your bridge domain, and find out which leaf nodes are now participating in the service.
 
-![Status of the bridge domain](../../images/eda/eda_bridge_domain_status.png)
+![Status of the bridge domain](https://gitlab.com/rdodin/pics/-/wikis/uploads/7a76509bbb07f715c43a243da68490f6/CleanShot_2025-08-14_at_15.56.27.webp)
 
 ### Testing the connectivity
 
@@ -278,7 +276,7 @@ With Bridge Domain and two Bridge Interfaces committed to the fabric, you should
 Connect to the server and then SSH into the client
 
 ```bash
-ssh user@clab-srexperts-client11
+ssh admin@clab-srexperts-client11
 ```
 
 Once in the shell, ping client13:
@@ -313,7 +311,7 @@ rtt min/avg/max/mdev = 1.915/1.915/1.915/0.000 ms
 Connect to the server and then SSH into the client
 
 ```bash
-ssh user@clab-srexperts-client13
+ssh admin@clab-srexperts-client13
 ```
 
 Once in the shell, ping client11:
@@ -389,7 +387,7 @@ If everything was configured correctly and committed, you should now be able to 
     type: success
 
 ```yaml
-apiVersion: services.eda.nokia.com/v1alpha1
+apiVersion: services.eda.nokia.com/v1
 kind: VLAN
 metadata:
   name: bridge-domain-vlan300
@@ -418,7 +416,7 @@ To ensure that everything was configured correctly, re-check the connectivity be
 Connect to the server and then SSH into the client
 
 ```bash
-ssh user@clab-srexperts-client11
+ssh admin@clab-srexperts-client11
 ```
 
 Once in the shell, ping client13:
@@ -453,7 +451,7 @@ rtt min/avg/max/mdev = 1.915/1.915/1.915/0.000 ms
 Connect to the server and then SSH into the client
 
 ```bash
-ssh user@clab-srexperts-client13
+ssh admin@clab-srexperts-client13
 ```
 
 Once in the shell, ping client11:

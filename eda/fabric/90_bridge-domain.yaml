@@ -1,4 +1,4 @@
-apiVersion: services.eda.nokia.com/v1alpha1
+apiVersion: services.eda.nokia.com/v1
 kind: BridgeDomain
 metadata:
   name: macvrf1
@@ -6,7 +6,7 @@ metadata:
   labels:
     role: hackathon-infra
 spec:
-  # TODO uncomment when 25.4
+  # TODO revisit this bd config before 25.12
   #description: MAC-VRF for connectivity via the GRT of the WAN
   evi: 1
   eviPool: evi-pool

@@ -132,7 +132,11 @@ Before you proceed with creating the `ethernet-1/5` interface, let's query the i
 
 Typically you would connect to the leaf switches and run `show` commands, or use a custom script that does the same in a more automated way. But there is a better way to interrogate the network devices...
 
-EDA comes with a built-in network-wide query engine that allows you to query the network devices in a performant and scalable way. Using the sidebar navigation, go to the **Queries** resource and paste the following in the EQL[^1] Query input field:
+EDA comes with a built-in network-wide query engine that allows you to query the network devices in a performant and scalable way. Using the sidebar navigation, go to the **Queries** page:
+
+![queries](https://gitlab.com/rdodin/pics/-/wikis/uploads/9ba292956fa8d11b00ad27c54331f0f3/CleanShot_2025-08-14_at_12.36.21.webp)
+
+And paste the following in the EQL[^1] Query input field:
 
 /// warning
 In the query below, replace `g1` in the node name list with the group ID you have been assigned to.
@@ -149,7 +153,7 @@ For example, if your group ID is 32, then the list should look like:
 .namespace.node.srl.interface fields [admin-state] where (.namespace.node.name in [ "g1-leaf11","g1-leaf12","g1-leaf13" ] and .namespace.node.srl.interface.name = "ethernet-1/5")
 ```
 
-![eql](https://gitlab.com/rdodin/pics/-/wikis/uploads/d6739ceef3d3e91b5f69a35d1b2d68af/CleanShot_2025-04-08_at_15.56.48_2x.png)
+![eql](https://gitlab.com/rdodin/pics/-/wikis/uploads/16fb7232bd94e945142d95c58bf84a86/CleanShot_2025-08-14_at_12.48.20.webp)
 
 > While this exercise is not about EQL specifically, it is a good opportunity to leverage the power of the query engine to understand the state of the network.
 
@@ -173,18 +177,20 @@ The form has three distinct sections, as per the screenshot above, and as a user
 
 The form has quite some number of fields, but not all of them are relevant to our task or required to be filled in. You must provide the following fields:
 
-* Metadata -> Name: the name of the interface
-* Specification -> Members: a list of the port name + node name combinations that identify what ports to configure on which nodes
+1. **Metadata** → **Name**: the name of the interface resource.  
+    This is not the name of the interface that you will see in the node's configuration, but a name of the Interface resource that will be created in EDA.  
+    For example, since we are tasked to create an interface ethernet-1/5 on all leaf switches, for leaf11 we might want to name the interface resource as `leaf11-ethernet-1-5`.
+2. **Specification** → **Members**: a list of the port name + node name combinations that identify what ports to configure on which nodes
 
 #### Interface Members
 
 If you chose to configure the interface via the form view, you have to click **+ Add** button to invoke another modal window where interface members are configured.
 
-You will have to provide the Interface name in the sanitized format, where spaces and `/` are replaced with `-`. For instance, `ethernet-1/5` should become `ethernet-1-5`.
+You will have to provide the Interface name in the normalized format, where spaces and `/` are replaced with `-`. For instance, `ethernet-1/5` should become `ethernet-1-5`.
 
 And after the interface name is sorted, you should provide the node name using the drop down menu.
 
-![members](https://gitlab.com/rdodin/pics/-/wikis/uploads/8030869abec5a3c6464a166e8e268a96/CleanShot_2025-04-08_at_16.24.55_2x.png)
+![members](https://gitlab.com/rdodin/pics/-/wikis/uploads/a29dfc7f5ab685ce55cffc35020c0a66/CleanShot_2025-08-14_at_13.16.29.webp)
 
 /// warning | When to use multiple members?
 You might have an urge to configure ethernet-1/5 port on multiple nodes by adding them as members, but this would be a mistake.

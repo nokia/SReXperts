@@ -6,45 +6,57 @@ tags:
   - Visual Studio Code
 ---
 
-# NSP Device Configuration
-
+# Infrastructure Configuration
 
 |     |     |
 | --- | --- |
-| **Activity name**           | NSP Device Configuration                                      |
-| **Activity ID**             | 48                                                            |
-| **Short Description**       | Use generator tool to build new intent-types for SR OS        |
-| **Difficulty**              | Intermediate                                                  |
-| **Tools used**              | IM VS Code Extension, ICM                                     |
-| **Topology Nodes**          | :material-router: PE1 |
-| **References**              | [VSCode IM Extension](https://github.com/nokia/vscode-intent-manager) |
+| **Activity name** | Infrastructure Configuration |
+| **Activity ID** | 48 |
+| **Short Description** | Auto-generate new device-specific infrastructure intent-types for SR OS and use them with Device Configuration |
+| **Difficulty** | Intermediate |
+| **Tools used** | NSP, Visual Studio Code |
+| **Topology Nodes** | :material-router: PE1 |
+| **References** | [Visual Studio Code IM Extension](https://github.com/nokia/vscode-intent-manager) |
 
 ## Objective
 
-Use Visual Studio Code (or code-server) with the NSP Intent Manager extension to create
-device-specific intent-types that can be used in the context of *Device Configuration*.
+As a network operator, you probably deal with these common challenges:
+
+* Device configurations are stored in different places (CLI history, text files, templates), so it’s never clear what the configuration baseline is.
+* Manual CLI changes creep in over time, introducing drift and making it harder to align devices back to a known state.
+* Onboarding new devices or enabling new features often means starting from scratch, repeating the same manual work again.
+
+In this activity, you will:
+
+* Learn how to auto-generate a brand-new intent-type from the device model so you can manage all configuration attributes consistently from day one.
+* See how intents, once generated, become the central source of truth — enabling audits, drift detection, and realignment with far less manual effort.
+* Understand how this tool-based approach shortens onboarding and provides more flexible options than relying only on pre-defined templates.
+
+In this activity we are use Visual Studio Code (or code-server) with the NSP Intent Manager extension to create device-specific intent-types that can be used in the context of *Device Configuration*.
 
 ## Technology explanation
 
+This section describes the concepts used in this activity.
+
 ### Visual Studio Code
 
-**[Visual Studio Code (VS Code)](https://code.visualstudio.com/)** is a free, lightweight, and cross-platform source-code
+**[Visual Studio Code (Visual Studio Code)](https://code.visualstudio.com/)** is a free, lightweight, and cross-platform source-code
 editor developed by Microsoft, with its core available under [MIT License](https://github.com/microsoft/vscode/blob/main/LICENSE.txt).
 While the official Microsoft distribution includes telemetry and branding, the underlying [open-source project](https://github.com/microsoft/vscode)
 is actively developed by thousands of contributors worldwide. Backed by Microsoft and deeply integrated with [GitHub](https://github.com/),
-VS Code offers rich extensibility through the [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/vscode), enabling
+Visual Studio Code offers rich extensibility through the [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/vscode), enabling
 developers to tailor their development environments with themes, debuggers, linters, and language support.
 
-VS Code runs seamlessly on **Windows, MacOS X, and Linux**, and also powers browser-based development via [code-server](https://github.com/coder/code-server)
+Visual Studio Code runs seamlessly on **Windows, MacOS X, and Linux**, and powers browser-based development via [code-server](https://github.com/coder/code-server)
 and [GitHub Codespaces](https://github.com/features/codespaces). Features like built-in Git support, [Remote SSH](https://code.visualstudio.com/docs/remote/ssh),
 IntelliSense, and live share collaboration making it a top choice for developers. The well-documented [extension API](https://code.visualstudio.com/api),
 comprehensive [examples](https://github.com/microsoft/vscode-extension-samples), and clean [UX Guidelines](https://code.visualstudio.com/api/ux-guidelines)
 encourage a thriving eco-system and consistent user experience.
 
-You can download VS Code [here](https://code.visualstudio.com/Download) and start exploring the modern, extensible, and developer-friendly environment
+You can download Visual Studio Code [here](https://code.visualstudio.com/Download) and start exploring the modern, extensible, and developer-friendly environment
 shaping how code is written today.
 
-NOKIA is actively contributing VS Code extensions to improve Developer eXperience around our networking products and technologies being used.
+Nokia is actively contributing Visual Studio Code extensions to improve Developer eXperience around our networking products and technologies being used.
 In this hackathon, you have the opportunity to use the following extensions contributed by Nokia in action:
 
 * [NSP Intent Manager extension](https://github.com/nokia/vscode-intent-manager)
@@ -55,48 +67,28 @@ In this hackathon, you have the opportunity to use the following extensions cont
 * [Containerlab extension](https://github.com/srl-labs/vscode-containerlab)
 * [NETCONF extension](https://github.com/nokia/vscode-netconf)
 
+
+/// warning | Disclaimer
+The NSP Intent Manager Extension for Visual Studio Code including the intent-type generator tool is a community-driven open-source initiative. Support status of intent-types generated using Visual Studio Code is experimental! Before using those in production environments, extended testing must be applied to ensure functionality, robustness, usability, performance, and scale.
+  
+If you encounter issues with the generator tool or the intent-types being created, please submit a support request and share your feedback with the community by raising an issue on GitHub. If you’ve discovered a solution that works for you, we would greatly appreciate it if you contributed your code changes back to the project. In doing so, you become an active part of our community and help it grow.
+///
+
+
 ### Intent Manager
 
-Intent Manager is a module within the Nokia Network Services Platform (NSP) that enables intent-based networking (IBN) by translating
-higher-level objectives into automated network actions. It has the ability to abstract the complexity of network configuration by
-allowing operators to express what they want, rather than how to do it.
+Intent Manager is a module within the Nokia Network Services Platform (NSP) that enables intent-based networking (IBN) by translating higher-level objectives into automated network actions. It has the ability to abstract the complexity of network configuration by allowing operators to express what they want, rather than how to do it.
 
-By separating declarative intent configuration (w/ validation) from intent operations like audits and synchronization, Intent Manager
-enables CRUD operations with operational lifecycle and control. The sync operation is used for deploying changes into the network but
-also to reconcile network object configuration in cases of misalignment, while audits are used to identify misalignments including
-network configuration drift.
+By separating declarative intent configuration (including validation) from intent operations like audits and synchronization, Intent Manager enables CRUD operations with operational lifecycle and control. The sync operation is used for deploying changes into the network but also to reconcile network object configuration in cases of misalignment, while audits are used to identify misalignments including network configuration drift.
 
-The library of intent-types can be updated at runtime, while intent-types are developed in JavaScript using YANG-defined intent
-models. Using JavaScript enables full flexibility beyond pure configuration management. Intent Manager supports natively
-heterogeneous networks (multi-vendor, multi-domain).
+The library of intent-types can be updated at runtime, while intent-types are developed in JavaScript using YANG-defined intent models. Using JavaScript enables full flexibility beyond pure configuration management. Intent Manager natively supports heterogeneous networks (multi-vendor, multi-domain).
 
 ### NSP Device Configuration
 
-Device Management Configuration is an intent-based app for infrastructure configuration management (ICM). It uses Intent Manager
-as engine underneath, but comes with an optimized user-interface tailored for the needs of device-centric configuration. ICM adds
-advanced operational procedures for brownfield configuration discovery and cloning of intent instances.
+Device Management Configuration is an intent-based app for infrastructure configuration management (ICM). It uses Intent Manager as the engine underneath and comes with an optimized user-interface tailored for the needs of device-centric configuration. ICM adds advanced operational procedures for brownfield configuration discovery and cloning of intent instances.
 
-There is the concept of *device-specific intent-types* in ICM, where a defined subtree of the device is exposed as intent-model.
-The main rational to use device models is to provide control over 100% of the device-level attributes, while device experts are
-not confused by any sort of normalization as the intent model is identical to what operators already know. Another advantage of
-this is, that intent-types can be widely auto-generated. Remind, going device-specific is a compromise, as intent-types
-become specific to given device vendors, families and releases, adding operational and integration complexity. While there is
-no abstraction using this approach, all configuration details are accessible via rich configuration forms, however, it is
-possible to adjust configuration forms to show the relevant configuration attributes only.
+There is the concept of *device-specific intent-types* in ICM, where a defined subtree of the device is exposed as intent-model. The main rational to use device models is to provide control over 100% of the device-level attributes, while device experts are not confused by any sort of normalization as the intent model is identical to what operators already know. Another advantage of this is that intent-types can be auto-generated. Keep in mind that going device-specific is a compromise, as intent-types become specific to given device vendors, families and releases, adding operational and integration complexity. While there is no abstraction using this approach, all configuration details are accessible via rich configuration forms, and it is possible to adjust those forms to show the relevant configuration attributes only.
 
-## Before you start
-
-/// warning | Disclaimer
-The NSP Intent Manager Extension for VS Code including the intent-type generator tool is a community-driven
-open-source initiative. Support status of intent-types generated using Visual Studio Code is experimental!
-Before using those in production environments, extended testing must be applied to ensure functionality,
-robustness, usability, performance, and scale.
-  
-If you find issues around the generator tool or the intent-types being created, please issue your support
-requests and provide feedback to the community directly, by raising issues on GitHub! If you've found a
-solution that works for you, we if you contribute code changes back to the project.
-By this you become part of our community helping it to grow.
-///
 
 ## Tasks
 
@@ -104,101 +96,92 @@ By this you become part of our community helping it to grow.
 
 It is tempting to skip ahead but tasks may require you to have completed previous tasks before tackling them.  
 
-### Install / Setup VS Code and the required extensions
+### Install / Setup Visual Studio Code and the required extensions
+
+Prepare your environment for creating ICM intents by installing and setting up Visual Studio Code on your computer.
 
 /// tip | Using code-server
-If you don't have the necessary privileges to install Visual Studio Code on your computer, the
-hackathon lab has code-server deployed, so you can run the editor and the extensions from your
-web-browser.
+If you don't have the necessary privileges to install Visual Studio Code on your computer, the hackathon lab has code-server deployed, so you can run the editor and the extensions from your web-browser.
 ///
 
+These are the steps you must perform. Below you can also find a short video demonstrating the process.
+
 * Install Visual Studio Code
-* Open VS Code and go to the Extensions side-bar
-* Search for "NOKIA Intent Manager" and click "Install" to add the extension to your workspace.
-* Open the Settings for the Intent Manager Extension
-* Adjust the connection details for your NSP system: `nsp.srexperts.net`with the username/password provided
-* Change will take effect immediately; Reload is not required
-* If you use the *NSP connect* extension (preferred), you can configure/connect to your NSP straight from the sidebar
-* Once done, a new folder named *Intent Manager* appears in your VS Code workspace.
-* This folder contains subfolders for intent-types (definitions) and intents (instances).
+* Open Visual Studio Code and go to the Extensions sidebar
+* Search for "NOKIA Intent Manager" and click "Install" to add the extension to your workspace
+* Setup your NSP Connection (Option A, preferred)
+    - If you use the *NSP connect* extension, you can configure/connect to your NSP straight from the sidebar
+    - Add a new connection targeting your NSP system: `nsp.srexperts.net` with the username/password provided and connect
+* Traditional Setup of your NSP Connection (Option B)
+    - Open the Settings for the Intent Manager Extension
+    - Adjust the connection details for your NSP system: `nsp.srexperts.net` with the username/password provided
+    - Change should take effect immediately. In case it does not, please reload Visual Studio Code
+* Once done, a new folder named *Intent Manager* appears in your Visual Studio Code workspace
+* This folder contains subfolders for intent-types (definitions) and intents (instances). The content you see is polled from the live system.
 
 /// tip | Video: Installing and setting up the extension
 -{{video(url="https://gitlab.com/-/project/69754954/uploads/b96983518f12ecd4f7ca064fc71d6745/setup-extension.mp4")}}-
 ///
   
-###  Create a new Intent-Type and Intent Instance
+### Create a new Intent-type and a new Intent Instance
 
 **Create and import intent-types:**
 
-* In your workspace, create an *.igen file with the desired NE configuration context (see [below](#intent-type-generator-files)).
-* As your NSP instance is shared between all participating groups, use unique filenames.
-* The filename will become the name of the new intent-type, so it must be in kebap-case.
-* Remind, the device must point to the `ne-id` (device-id) of a device with matching vendor,
-  family, and release. In case of **SR** OS routers this is the IP-address of the system interface.
-  For this hackathon, you may just select the system ip-address of PE1.
-* You find an example below the instructions;
-* Right-click on the *.igen file and select `Generate intent-type` from the context menu.
-* The generation might take some time. You can monitor the progress in the `OUTPUT` panel.
-* Check the intent-type contents.
-* Right-click on the intent-type folder and select `Upload intent-type` from the context menu.
-* The intent-type should appear on the NSP GUI https://nsp.srexperts.net/web/intent-manager/intent-types
-	
-/// note | Example: `demo-icm-sros-ip-filter-group50.igen`
+In a directory inside your workspace, create a file named `demo-icm-sros-ip-filter-group01.igen` with the desired NE configuration context, like this:
+
+/// note | Example: `demo-icm-sros-ip-filter-group01.igen`
 ```json
 {
     "description": "L3 ACL for Nokia SR OS devices (MD MODE)",
     "category": "policies",
     "role": "logical",
-    "device": "XXXXXXXX",
+    "device": "fd00:fde8::1:21",
     "context": "/nokia-conf:configure/filter/ip-filter"
 }
 ```
 ///
 
+* The filename will become the name of the new intent-type, so it must be in kebap-case.
+* The `device` value in your *.igen file must point to the `ne-id` of device with the correct vendor, family, and software release. In case of SR OS routers this is the IPv6 address of the system interface. For this hackathon, you may just select the system IP-address of PE1. The example above is for group 1. Adjust the filename and `device` to match your group!
+* Right-click on the *.igen file and select `Generate intent-type` from the context menu.
+* The generation might take some time. You can monitor the progress in the Visual Studio Code `OUTPUT` panel.
+* Once creation finished, verify the contents of the generated intent-type.
+* Right-click on the intent-type folder and select `Upload intent-type` from the context menu.
+* The intent-type should appear on the [NSP WebUI](https://nsp.srexperts.net/web/intent-manager/intent-types) in `Released` state
+
+To get a more detailed understanding about *.igen files, please check in the [reference section](#reference-intent-type-generator-files) below.
+
 /// tip
-Spend some time to go through the generated code. The intent-type uses a visionary decomposed design. Resources
-in the `common` folder are the same for all intent-types generated. A default view-config is created to improve
-WebUI usability. The main files that contain custom code are the YANG module and the `script-content.mjs`. If
-you've designed intent-types for NSP before, you may recognize the object-oriented design. Be aware, this takes
-advantage of the new JavaScript engine (GraalJS), that is available since 24.11.
+Spend some time to go through the generated code. The intent-type uses a visionary modular design. Resources in the `common` folder are the same for all intent-types generated. A default view-config is created to improve WebUI usability. The main files that contain custom code are the YANG module and the `script-content.mjs`. If you've designed intent-types for NSP before, you may recognize the object-oriented design. Be aware, this takes advantage of the new JavaScript engine (GraalJS), that is available since NSP 24.11.
 ///
 
 **Import intent-types and creating templates in ICM**:
 
-* Navigate to `Device Management > Configuration intent-types`.
+* Navigate to `Device Management > Configuration Intent Types`.
 * Import the newly created intent-type.
 * Navigate to `Configuration Templates`.
 * Create a new template using your intent-type.
 
 **Create an intent**:
 
-* Now you can move to Configuration Deployments.
+Now you can move further to `Configuration Deployments`.
+
 * Create a new deployment using the previous template.
 
-/// tip | Video: Creating a new Intent-Type and Intent Instance to enable a port
+/// tip | Example solution: Creating a new intent-type and intent instance to enable a port
 -{{video(url="https://gitlab.com/-/project/69754954/uploads/c6334e7d83192a2d5e6aa5522825cb2c/enable-port.mp4")}}-
 ///
 
-### Create intent-types to configure ports, interfaces and ISIS bindings
+We've just learned step-by-step on how to quickly create brand new intent-types from small *.igen files. Now, turn is on you to create all required intent-types required for base router connectivity: Port Configuration, Interface Configuration and IS-IS Interface Configuration.
 
-We've just learned step-by-step on how to quickly create brand new intent-types from small *.igen
-files. Now, turn is on you to create all required intent-types required for base router connectivity:
-Port Configuration, Interface Configuration and IS-IS Interface Configuration.
-
-#### Port Config
+### Port Config
 
 Let's start with port configuration.
 
 /// tip
-The most important part when creating *.igen files is device-model path. This is where
-the subtree starts, that is owned by the corresponding intents. In SR OS MD-CLI one can
-use the command `pwc model-path` to retrieve the corresponding string. You should consider
-removing the list-key identifiers along the path, to make those identifiers part of the
-intent target.
+The most important part when creating *.igen files is device-model path. This is where the subtree starts, that is "owned" by the corresponding intents. In SR OS MD-CLI one can use the command `pwc model-path` to retrieve the corresponding string. You should consider removing the list-key identifiers along the path, to make those identifiers part of the intent target.
 
-You may decide to exclude certain children subtrees from the intent-type to reduce the
-intent complexity and to speed up rendering time using the `exclude` and/or `max-depth`
-statements.
+You may decide to exclude certain children's subtrees from the intent-type to reduce the intent complexity and to speed up rendering time using the `exclude` and/or `max-depth` statements.
 
 Port configuration is a special case, using `role: physical` and `category: port`.
 ///
@@ -211,13 +194,15 @@ Port configuration is a special case, using `role: physical` and `category: port
     "description": "Port configuration on Nokia SR OS devices (MD MODE)",
     "category": "port",
     "role": "physical",
-    "device": "XXXXXXXX",
+    "device": "fd00:fde8::1:21",
     "context": "nokia-conf:/configure/port",
     "icmstyle": true,
     "maxdepth": 2,
     "exclude": ["sonet-sdh","tdm","otu","network","gnss","dwdm","access","scheduler","transceiver","dist-cpu-protection","ethernet","hybrid-buffer-allocation","modify-buffer-allocation"]
 }
-``` 
+```
+
+Once again, be sure to update the `device` attribute so it matches the `PE1` node for your group. The example shown above corresponds to `group 1`.
 ///
 
 /// note | Device Configuration: Port on PE1
@@ -246,18 +231,14 @@ A:admin@g1-pe1# info configure port 1/1/c1/1
 
 Now, import the intent-type into ICM, create a template and deployments. 
 
-#### Interface Config
+### Interface Config
 
-We continue with the IP interface configuration associated with the Base router instance.
+We continue with the IP interface configuration associated with the `Base` router instance.
 
 /// tip
-In this case we may keep the router instance reference `router=Base` as part of the
-model-path. In this case, the operator cannot select the  routing instance anymore and
-it would be hardcoded using the `Base` instance.
+Since the interfaces we configure in this section always reside in the `Base` routing instance, there is no need to remove that element from the model path. This avoids requiring an unnecessary selection. When creating your *.igen file, ensure that this selection filter is included in the model path.
 
-As role *physical* is used exclusively for hardware configuration like ports and cards,
-in all other cases we use role *logical*. The *category* has no functional meaning
-and is rather used as a way to categorize intent-types similar to labels.
+The role *physical* is reserved for hardware configuration such as ports and cards. In all other cases, we use the role *logical*. The category field has no functional impact; it simply serves to group intent-types in a label-like manner.
 ///
 
 /// details | Solution
@@ -268,12 +249,14 @@ and is rather used as a way to categorize intent-types similar to labels.
     "description": "Interfaces creation on Nokia SR OS devices (MD MODE)",
     "category": "interface",
     "role": "logical",
-    "device": "XXXXXXXX",
+    "device": "fd00:fde8::1:21",
     "context": "nokia-conf:/configure/router=Base/interface",
     "icmstyle": true,
     "exclude": ["egress","ingress","ldp-sync-timer","load-balancing","lag","ptp-hw-assist","autoconfigure","ipsec","cflowd-parameters","hold-time","eth-cfm","ipv6","qos","if-attribute","untrusted","network-domains","external-reference","ipv4/icmp","ipv4/unnumbered","ipv4/urpf-check","ipv4/dhcp","ipv4/bfd","ipv4/secondary","ipv4/neighbor-discovery","ipv4/vrrp"]
 }
 ```
+
+Quick reminder: have you updated the `device` attribute to match your group?
 ///
 
 /// note | Device Configuration: Interface on PE1
@@ -296,13 +279,13 @@ A:admin@g1-pe1# info configure router interface p1
 ```
 ///
 
-Again, import the intent-type into ICM, create a template and deployments. 
+As already done previously, import the intent-type into ICM, create a template and deployments. 
 
-#### IS-IS Interface Config
+### IS-IS Interface Config
 
-This is now out last step intent-type to bind the new IP interface to the IS-IS protocol.
+As a final step, create an intent-type that will allow operators to associate router network interface with the IS-IS protocol in model-driven SR OS using the NSP WebUI.
 
-/// details | Solution
+/// details | Example solution
     type: success
 
 ``` json
@@ -310,11 +293,14 @@ This is now out last step intent-type to bind the new IP interface to the IS-IS 
     "description": "ISIS Interfaces on Nokia SR OS devices (MD MODE)",
     "category": "interface",
     "role": "logical",
-    "device": "XXXXXXXX",
+    "device": "fd00:fde8::1:21",
     "context": "nokia-conf:/configure/router=Base/isis=0/interface",
     "icmstyle": true
 }
 ``` 
+
+Hackathon activities are not meant to be simple copy-and-paste exercises. Even if you rely on the provided example solution, be sure to update the `device` attribute before generating the intent-type.
+
 ///
 
 /// note | Device Configuration: ISIS Interface on PE1
@@ -365,52 +351,36 @@ Adjacencies : 2
 ```
 ///
 
-## What else could you do???
+## Summary
 
-Brilliant, you've mastered this exercise. Using the community approach with *.igen files
-really makes the job of intent-type development easy. Even if you are expert on the node
-or management systems - but not soo much a JavaScript/YANG developer.
+Well done — you’ve successfully completed this activity! By working with community-driven *.igen files, you’ve seen how intent-type development can be greatly simplified. This approach lets you focus on the network and management aspects without needing to be an expert in JavaScript or YANG.
 
-But you don't need to stop here. Have you already tried the discover a brownfield
-configuration from PE1, or did you create a new one? Have you tried to change the
-device configuration directly using CLI and then run audits and reconcile? There
-are many things to try out. Maybe you just want to get more knowledgeable on
-schema-form customization using our new graphical view-config editor. Remind,
-the limit is your own creativity.
+But this is just the beginning. You might explore discovering a brownfield configuration from PE1, experiment by changing device settings directly through the CLI and then running audits and alignment, or dive deeper into schema-form customization with the graphical view-config editor.
 
-Here some more asks, if you are overwhelmed by the simplicity of this approach and your
-creativity got blocked:
+The possibilities are wide open — how far you go is up to your curiosity and creativity.
 
-* create an intent-type for customers
-* create an intent-type for lag
-* create an intent-type for ISIS instance but exclude interfaces.
+## Reference: Intent-type Generator Files
 
-## Reference
-
-### Intent Type Generator Files
-
-Remember, the starting point for device-specific auto-generation is always an *.igen file, which are in JSON format.
-As Visual Studio Code is a text editor, nothing is as easy to create those files.
-Here is the list of supported attributes of *.igen files:
+The starting point for device-specific auto-generation is always an *.igen file, provided in JSON format. Since Visual Studio Code is a text editor, creating these files is straightforward. Below is the list of supported *.igen file attributes:
 
 | Attribute | Type | Default | Usage |
 |---|---|---|---|
 | **category** | string | -- | icm_descriptor: helps to categorize the intent (shortcut) |
 | **role** | string | -- | icm_descriptor: physical or logical (shortcut) |
 | **description** | string | -- | icm_descriptor: description (shortcut) |
-| icmDescriptor | dict | {} | icm_descriptor: transparent access to all descriptor fields |
+| **icmDescriptor** | dict | {} | icm_descriptor: transparent access to all descriptor fields |
 | **context** | string | -- | device-model subtree to cover, example: nokia-conf:/configure/qos/sap-egress |
 | **device** | string | -- | ne-id of the device used for auto-generation |
-| intent_type | string | *filename of the igen-file* | intent-type name |
-| author | string | NOKIA | intent-type author |
-| exclude | string[] | [] | list of children subtrees to be excluded |
-| maxdepth | number | -1 | maximum depth to cover (deeper hierarchies are excluded) |
-| labels | string[] | [] | additional labels, `InfrastructureConfiguration` is always added |
-| date | string | today | date used for YANG model revision |
-| withdefaults | boolean | false | enable/disable default values in YANG |
-| applygroups | boolean | false | enable/disable apply-group statements |
-| constraints | boolean | false | enable/disable WHEN statements |
-| icmstyle | boolean | false | enable/disable top-level container to match ICM needs |
+| **intent_type** | string | *filename of the *.igen file* | intent-type name |
+| **author** | string | NOKIA | intent-type author |
+| **exclude** | string[] | [] | list of children subtrees to be excluded |
+| **maxdepth** | number | -1 | maximum depth to cover (deeper hierarchies are excluded) |
+| **labels** | string[] | [] | additional labels, `InfrastructureConfiguration` is always added |
+| **date** | string | today | date used for YANG model revision |
+| **withdefaults** | boolean | false | enable/disable default values in YANG |
+| **applygroups** | boolean | false | enable/disable apply-group statements |
+| **constraints** | boolean | false | enable/disable WHEN statements |
+| **icmstyle** | boolean | false | enable/disable top-level container to match ICM needs |
 
 /// note | Example: demo-icm-sros-sap-ingress-policy.json
 ``` json
@@ -420,7 +390,7 @@ Here is the list of supported attributes of *.igen files:
     "description": "SAP ingress QoS policy on Nokia SR OS devices (MD MODE)",
 
     "context": "nokia-conf:/configure/qos/sap-ingress",
-    "device": "XXXXXXXX",
+    "device": "fd00:fde8::1:21",
 
     "intent_type": "icm-sros-sap-ingress-policy",
     "author": "hackthon25",

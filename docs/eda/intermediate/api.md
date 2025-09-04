@@ -8,7 +8,7 @@
 | **Topology Nodes**    | leaf11, leaf12, leaf13, spine11, spine12                                 |
 | **References**        | [EDA API Guide][api-guide], [EDA OpenAPI Swagger spec][swagger-spec][^1] |{: .foo}
 
-[api-guide]: https://docs.eda.dev/development/api/
+[api-guide]: https://docs.eda.dev/25.8/development/api/
 [swagger-spec]: https://github.com/eda-labs/openapi
 
 EDA is an API-first platform where every client, be it the EDA UI, a CLI tool or a higher-level orchestrator talks to EDA via one of its APIs.
@@ -28,13 +28,13 @@ The objectives of this challenge are:
 
 ## Technology Explanation
 <!-- --8<-- [start:api-intro] -->
-EDA API follows a very similar model as the Kubernetes Resource Model. Every custom resource that gets added through the installation of an App, becomes available through the EDA API in a similar way as custom resources in Kubernetes become available through the Kubernetes API. This model provides that powerful extensibility where a system can be extended on-the-fly, by simply installing the EDA App via the EDA Store, and the app will plug its API to the common API layer of the system.
+EDA API is extensible. Every EDA resource that gets added when a user installs the application, becomes extends the EDA API surface in a similar way as custom resources in Kubernetes become available through the Kubernetes API. This model provides that powerful extensibility where a system can be customized on-the-fly, by simply installing the EDA App via the EDA Store, and the app will plug its API to the common API layer of the system.
 
-Based on this, the EDA API may be seen as comprised of the two APIs sets:
+EDA's API have two API sets that users typically interact with:
 
 1. **Core API**  
     This is the EDA Core system API. Things like Transactions, Alarms, and User management are all part of the this API set.  
-    It can not be extended without installing a new version of the EDA Core.
+    It extends with installing a new version of the EDA platform.
 2. **Apps API**  
     Every applications onboarded to the EDA platform (both provided by Nokia or anyone else) will extend the Apps API by adding the applications API to the common API layer.  
     This is how extensibility of the API is achieved in EDA.
@@ -42,9 +42,7 @@ Based on this, the EDA API may be seen as comprised of the two APIs sets:
 
 ### API Server
 
-Both Core and Apps API are served by the EDA's API Server implemented as a horizontally scalable `eda-api` deployment running in the EDA's Kubernetes cluster. The API server deployment is exposed via `eda-api` service.
-
-You access the API server using the EDA's external address.
+Both Core and Apps API are served by the EDA's API Server implemented as a horizontally scalable `eda-api` deployment running in the EDA's Kubernetes cluster. The API server deployment is exposed via `eda-api` Kubernetes service.
 
 ### API Documentation
 
@@ -64,7 +62,7 @@ As you would expect, only authorized and authenticated users can make use of the
 
 The API client directly authenticates with Keycloak, and uses the token received for further API calls to the EDA API. The API client is also responsible for refreshing or renewing their token.
 
-Open a tab with the [authentication docs](https://docs.eda.dev/development/api/#authentication) as you will need it later when we get to running our first API call.
+Open a tab with the [authentication docs](https://docs.eda.dev/25.8/development/api/#authentication) as you will need it later when we get to running our first API call.
 
 ### Sync, Async and Transaction APIs
 
@@ -99,7 +97,7 @@ We will use Postman as the API client to fire off the requests. If you don't hav
 
 When installing Postman you will be asked to login to the Postman.com, you can use any of the existing OpenID providers (google, github). The registration is free and you won't be asked to provide any payment details.
 
-When Postman is installed, grab the Postman Collection that we prepared for this exercise by clicking on this button
+When Postman is installed, grab the Postman Collection that we prepared for this exercise by clicking on the button below:
 
 [<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://app.getpostman.com/run-collection/4909600-0b22527f-4f68-464b-9c74-70c0bb658292?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D4909600-0b22527f-4f68-464b-9c74-70c0bb658292%26entityType%3Dcollection%26workspaceId%3D6bee419c-5db7-440e-a509-f9bb4d460e34#?env%5BHackathon%20instance%5D=W3sia2V5IjoiQVBJX1NFUlZFUiIsInZhbHVlIjoiaHR0cHM6Ly8xMC4xODEuMTMxLjQxOjk0NDMiLCJlbmFibGVkIjp0cnVlLCJ0eXBlIjoiZGVmYXVsdCIsInNlc3Npb25WYWx1ZSI6Imh0dHBzOi8vMTAuMTgxLjEzMS40MTo5NDQzIiwiY29tcGxldGVTZXNzaW9uVmFsdWUiOiJodHRwczovLzEwLjE4MS4xMzEuNDE6OTQ0MyIsInNlc3Npb25JbmRleCI6MH0seyJrZXkiOiJFREFfQ0xJRU5UX1NFQ1JFVCIsInZhbHVlIjoieGoxbkFZWTRMWE9KOUlWMEtWWnppRnY1NE53YWlzNlAiLCJlbmFibGVkIjp0cnVlLCJ0eXBlIjoic2VjcmV0Iiwic2Vzc2lvblZhbHVlIjoieGoxbkFZWTRMWE9KOUlWMEtWWnppRnY1NE53YWlzNlAiLCJjb21wbGV0ZVNlc3Npb25WYWx1ZSI6InhqMW5BWVk0TFhPSjlJVjBLVlp6aUZ2NTROd2FpczZQIiwic2Vzc2lvbkluZGV4IjoxfSx7ImtleSI6IkVEQV9VU0VSIiwidmFsdWUiOiJhZG1pbiIsImVuYWJsZWQiOnRydWUsInR5cGUiOiJkZWZhdWx0Iiwic2Vzc2lvblZhbHVlIjoiYWRtaW4iLCJjb21wbGV0ZVNlc3Npb25WYWx1ZSI6ImFkbWluIiwic2Vzc2lvbkluZGV4IjoyfSx7ImtleSI6IkVEQV9VU0VSX1BXIiwidmFsdWUiOiJhZG1pbiIsImVuYWJsZWQiOnRydWUsInR5cGUiOiJkZWZhdWx0Iiwic2Vzc2lvblZhbHVlIjoiYWRtaW4iLCJjb21wbGV0ZVNlc3Npb25WYWx1ZSI6ImFkbWluIiwic2Vzc2lvbkluZGV4IjozfSx7ImtleSI6IlRPS0VOIiwidmFsdWUiOiIiLCJlbmFibGVkIjp0cnVlLCJ0eXBlIjoiZGVmYXVsdCIsInNlc3Npb25WYWx1ZSI6IiIsImNvbXBsZXRlU2Vzc2lvblZhbHVlIjoiIiwic2Vzc2lvbkluZGV4Ijo0fSx7ImtleSI6IktDX0FETUlOX1BXIiwidmFsdWUiOiJhZG1pbiIsImVuYWJsZWQiOnRydWUsInR5cGUiOiJkZWZhdWx0Iiwic2Vzc2lvblZhbHVlIjoiYWRtaW4iLCJjb21wbGV0ZVNlc3Npb25WYWx1ZSI6ImFkbWluIiwic2Vzc2lvbkluZGV4Ijo1fSx7ImtleSI6IktDX0FETUlOX1RPS0VOIiwidmFsdWUiOiIiLCJlbmFibGVkIjp0cnVlLCJ0eXBlIjoiYW55Iiwic2Vzc2lvblZhbHVlIjoiIiwiY29tcGxldGVTZXNzaW9uVmFsdWUiOiIiLCJzZXNzaW9uSW5kZXgiOjZ9XQ==)
 
@@ -113,7 +111,7 @@ Select your Workspace where you want the collection to be imported in. The prepa
 
 In addition to the collection, the environment named "Hackathon instance" that contains the `API_SERVER` variable should appear in the top right corner of the Postman app:
 
-![envpic](https://gitlab.com/rdodin/pics/-/wikis/uploads/05503a8ac4221aab026181e2af4db8c5/CleanShot_2025-05-07_at_14.28.08_2x.png){.img-shadow width=50%}
+![envpic](https://gitlab.com/rdodin/pics/-/wikis/uploads/b33da623c4d7e20c321fa10bf75afeee/CleanShot_2025-08-19_at_11.34.05.webp)
 
 Make sure to select it.
 
@@ -127,7 +125,7 @@ This video shows the full process:
 
 Now that you have the collection and the environment dialed in, you need to sort the authentication out. Remember, only the authenticated users can leverage the API.
 
-The authentication process boils down to acquiring the API token from the Keycloak service that runs as part of the EDA deployment, but to get the authentication token you first need to get the `client_secret` from Keycloak. Sounds a bit cryptic? Check out the [authentication docs](https://docs.eda.dev/development/api/#authentication) to understand the flow better; there we also explain how to get the `client_secret` using the Keycloak UI.
+The authentication process boils down to acquiring the API token from the Keycloak service that runs as part of the EDA deployment, but to get the access token you first need to get the `client_secret` from Keycloak. Sounds a bit cryptic? Check out the [authentication docs](https://docs.eda.dev/25.8/development/api/#authentication) to understand the flow better; there we also explain how to get the `client_secret` using the Keycloak UI.
 
 Once you get the `client_secret` string from Keycloak, set its value in the [Postman Environment](#environment) as the **Current value** of the `EDA_CLIENT_SECRET` variable. Done?
 
@@ -190,7 +188,7 @@ Congratulations, you have completed the first task!
 
 In the previous task you listed all objects of the same kind, to be precise - all users. Now the task is to retrieve the details of a particular Interface object from EDA, namely, `leaf11-ethernet-1-49`.
 
-To complete this task you will use the **Interface** application API, as interfaces are not part of the EDA core, but an extension brought in by the [Interface application](https://docs.eda.dev/apps/interfaces/).
+To complete this task you will use the **Interface** application API, as interfaces are not part of the EDA core, but an extension brought in by the [Interface application](https://docs.eda.dev/25.8/apps/interfaces/).
 
 Using the knowledge on how to navigate the API documentation, try to complete the :material-folder-outline: **Interface** → **Interface** request so that the EDA returns everything it knows about the `leaf11-ethernet-1-49`.
 

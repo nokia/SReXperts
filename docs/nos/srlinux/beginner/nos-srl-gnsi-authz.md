@@ -107,16 +107,16 @@ Create 2 users described below on `leaf11`. These users will be used by gRPC cli
 | Username | Password | Role |
 |----------|----------|------|
 | client1 | client1 | gNOI service |
-| grclient1 | grclient1 | gNMI service |
+| client2 | client2 | gNMI service |
 
 /// tab | cmd
 
 ``` bash
-set / system aaa authorization role ext-clients services [ gnoi ]
+set / system aaa authorization role gnoi-clients services [ gnoi ]
 set / system aaa authentication user client1 password client1
-set / system aaa authentication user client1 role [ ext-clients ]
+set / system aaa authentication user client1 role [ gnoi-clients ]
 set / system aaa authorization role gnmi-clients services [ gnmi ]
-set / system aaa authentication user grclient1 password grclient1 role [ gnmi-clients ]
+set / system aaa authentication user client2 password client2 role [ gnmi-clients ]
 set / system configuration role gnmi-clients rule / action write
 ```
 
@@ -132,10 +132,10 @@ info flat from running system aaa | grep client
 
 ``` bash
 set / system aaa authentication user client1 password $y$j9T$c0b094a538ddae13$GtCdwrCxDIrMhva6AtwPrXBR9YKFj4Gkr3RhaqRBstB
-set / system aaa authentication user client1 role [ ext-clients ]
-set / system aaa authentication user grclient1 password $y$j9T$720580ea832aa30d$AP.4Qi6e1kFXyU6TG82/v1xs99r4tCk/H8kBmvPenpB
-set / system aaa authentication user grclient1 role [ gnmi-clients ]
-set / system aaa authorization role ext-clients services [ gnoi ]
+set / system aaa authentication user client1 role [ gnoi-clients ]
+set / system aaa authentication user client2 password $y$j9T$720580ea832aa30d$AP.4Qi6e1kFXyU6TG82/v1xs99r4tCk/H8kBmvPenpB
+set / system aaa authentication user client2 role [ gnmi-clients ]
+set / system aaa authorization role gnoi-clients services [ gnoi ]
 set / system aaa authorization role gnmi-clients services [ gnmi ]
 ```
 ///
@@ -416,8 +416,8 @@ Refer to [SR Linux Documentation](https://documentation.nokia.com/srlinux/25-3/b
 
 Your task is to overwrite this default Authz policy with another policy that will have the following rules:
 
-1. Allow gNOI File Stat and gNOI File Get for `client1` and role `ext-clients`
-2. Deny gNOI File Put RPC for `client1` and role `ext-clients`
+1. Allow gNOI File Stat and gNOI File Get for `client1` and role `gnoi-clients`
+2. Deny gNOI File Put RPC for `client1` and role `gnoi-clients`
 
 Once your Authz policy is ready to be configured, use Authz Rotate RPC in the gNSIc command to push the policy to `leaf11`. Here's an example. Replace the `json payload` part with your Authz policy in JSON format (remember to use the escape character `\` for the `"` character).
 
@@ -479,13 +479,13 @@ If you need help, refer to the Authz policy below.
     type: code
 ```json
 {
-  "name": "Ext-clients",
+  "name": "gnoi-clients",
   "allow_rules": [
     {
       "name": "backup-access",
       "source": {
         "principals": [
-          "client1","ext-clients"
+          "client1","gnoi-clients"
         ]
       },
       "request": {
@@ -501,7 +501,7 @@ If you need help, refer to the Authz policy below.
       "name": "backup-access",
       "source": {
         "principals": [
-          "client1","ext-clients"
+          "client1","gnoi-clients"
         ]
       },
       "request": {
@@ -519,7 +519,7 @@ Here's the command to push this policy to `leaf11` using `Authz Rotate` RPC.
 
 /// tab | cmd
 ``` bash
-gnsic -a clab-srexperts-leaf11:57401 -u admin -p $EVENT_PASSWORD --skip-verify authz rotate --policy "{\"name\":\"Ext-clients\",\"allow_rules\":[{\"name\":\"backup-access\",\"source\":{\"principals\":[\"client1\",\"ext-clients\"]},\"request\":{\"paths\":[\"/gnoi.file.File/Get\",\"/gnoi.file.File/Stat\"]}}],\"deny_rules\":[{\"name\":\"backup-access\",\"source\":{\"principals\":[\"client1\",\"ext-clients\"]},\"request\":{\"paths\":[\"/gnoi.file.File/Put\"]}}]}"
+gnsic -a clab-srexperts-leaf11:57401 -u admin -p $EVENT_PASSWORD --skip-verify authz rotate --policy "{\"name\":\"gnoi-clients\",\"allow_rules\":[{\"name\":\"backup-access\",\"source\":{\"principals\":[\"client1\",\"gnoi-clients\"]},\"request\":{\"paths\":[\"/gnoi.file.File/Get\",\"/gnoi.file.File/Stat\"]}}],\"deny_rules\":[{\"name\":\"backup-access\",\"source\":{\"principals\":[\"client1\",\"gnoi-clients\"]},\"request\":{\"paths\":[\"/gnoi.file.File/Put\"]}}]}"
 ```
 ///
 /// tab | expected output
@@ -550,7 +550,7 @@ info flat from state /system aaa authorization authz-policy
 ``` bash
 / system aaa authorization authz-policy version ""
 / system aaa authorization authz-policy created-on "2417-02-18T14:54:24.465Z (392 years from now)"
-/ system aaa authorization authz-policy policy "{\"name\":\"Ext-clients\",\"allow_rules\":[{\"name\":\"backup-access\",\"source\":{\"principals\":[\"client1\",\"ext-clients\"]},\"request\":{\"paths\":[\"/gnoi.file.File/Get\",\"/gnoi.file.File/Stat\"]}}],\"deny_rules\":[{\"name\":\"backup-access\",\"source\":{\"principals\":[\"client1\",\"ext-clients\"]},\"request\":{\"paths\":[\"/gnoi.file.File/Put\"]}}]}"
+/ system aaa authorization authz-policy policy "{\"name\":\"gnoi-clients\",\"allow_rules\":[{\"name\":\"backup-access\",\"source\":{\"principals\":[\"client1\",\"gnoi-clients\"]},\"request\":{\"paths\":[\"/gnoi.file.File/Get\",\"/gnoi.file.File/Stat\"]}}],\"deny_rules\":[{\"name\":\"backup-access\",\"source\":{\"principals\":[\"client1\",\"gnoi-clients\"]},\"request\":{\"paths\":[\"/gnoi.file.File/Put\"]}}]}"
 / system aaa authorization authz-policy counters rpc /gnoi.file.File/Get access-rejects 0
 / system aaa authorization authz-policy counters rpc /gnoi.file.File/Get access-accepts 1
 / system aaa authorization authz-policy counters rpc /gnoi.file.File/Get last-access-accept "2025-04-29T01:56:45.028Z (6 minutes ago)"
@@ -587,7 +587,7 @@ tools system aaa authorization authz-policy remove
 
 ## Additional Task
 
-Streaming Telemetry is being sent from `leaf11` with `grclient1` username to an open source stats collector. An unauthorized 3rd party gets access to the CLI of this stats collector and uses gNMI Set RPC to disable BGP on `leaf11`. Your task is to secure `leaf11` from such an attack using gNSI Authz policies.
+Streaming Telemetry is being sent from `leaf11` with `client2` username to an open source stats collector. An unauthorized 3rd party gets access to the CLI of this stats collector and uses gNMI Set RPC to disable BGP on `leaf11`. Your task is to secure `leaf11` from such an attack using gNSI Authz policies.
 
 ### gNMI commands
 
@@ -614,23 +614,23 @@ Here are the commands to test Get, Set and Subscribe.
 
 /// tab | gNMI Get
 ``` bash
-gnmic -a clab-srexperts-leaf11:57401 -u grclient1 -p grclient1 --skip-verify get --type state --path "/interface[name=ethernet-1/1]/statistics/in-octets/" -e json_ietf
+gnmic -a clab-srexperts-leaf11:57401 -u client2 -p client2 --skip-verify get --type state --path "/interface[name=ethernet-1/1]/statistics/in-octets/" -e json_ietf
 ```
 ///
 /// tab | gNMI Set
 ``` bash
-gnmic -a clab-srexperts-leaf11:57401 -u grclient1 -p grclient1 --skip-verify set --update-path "/interface[name=ethernet-1/1]/description" --update-value "gnmi-test"
+gnmic -a clab-srexperts-leaf11:57401 -u client2 -p client2 --skip-verify set --update-path "/interface[name=ethernet-1/1]/description" --update-value "gnmi-test"
 ```
 ///
 /// tab | gNMI Subscribe
 ``` bash
-gnmic -a clab-srexperts-leaf11:57401 -u grclient1 -p grclient1 --skip-verify sub --path "/interface[name=ethernet-1/1]/statistics/in-octets/" --mode once
+gnmic -a clab-srexperts-leaf11:57401 -u client2 -p client2 --skip-verify sub --path "/interface[name=ethernet-1/1]/statistics/in-octets/" --mode once
 ```
 ///
 
 Test the above commands and verify the outputs.
 
-Then apply an Authz policy to allow `Get` and `Subscribe` RPCs while denying `Set` RPC for user `grclient1` and role `gnmi-clients`.
+Then apply an Authz policy to allow `Get` and `Subscribe` RPCs while denying `Set` RPC for user `client2` and role `gnmi-clients`.
 
 Both the username and the role name should be added to the principals section.
 
@@ -649,7 +649,7 @@ If you need help, refer to the solution below.
       "name": "gnmi-access",
       "source": {
         "principals": [
-          "grclient1","gnmi-clients"
+          "client2","gnmi-clients"
         ]
       },
       "request": {
@@ -665,7 +665,7 @@ If you need help, refer to the solution below.
       "name": "gnmi-access",
       "source": {
         "principals": [
-          "grclient1","gnmi-clients"
+          "client2","gnmi-clients"
         ]
       },
       "request": {
@@ -681,7 +681,7 @@ If you need help, refer to the solution below.
 
 /// details | gNSI request for gNMI Authz policy
 ```bash
-gnsic -a clab-srexperts-leaf11:57401 -u admin -p $EVENT_PASSWORD --skip-verify authz rotate --policy "{\"name\":\"gnmi-access\",\"allow_rules\":[{\"name\":\"gnmi-access\",\"source\":{\"principals\":[\"grclient1\",\"gnmi-clients\"]},\"request\":{\"paths\":[\"/gnmi.gNMI/Get\",\"/gnmi.gNMI/Subscribe\"]}}],\"deny_rules\":[{\"name\":\"gnmi-access\",\"source\":{\"principals\":[\"grclient1\",\"gnmi-clients\"]},\"request\":{\"paths\":[\"/gnmi.gNMI/Set\"]}}]}"
+gnsic -a clab-srexperts-leaf11:57401 -u admin -p $EVENT_PASSWORD --skip-verify authz rotate --policy "{\"name\":\"gnmi-access\",\"allow_rules\":[{\"name\":\"gnmi-access\",\"source\":{\"principals\":[\"client2\",\"gnmi-clients\"]},\"request\":{\"paths\":[\"/gnmi.gNMI/Get\",\"/gnmi.gNMI/Subscribe\"]}}],\"deny_rules\":[{\"name\":\"gnmi-access\",\"source\":{\"principals\":[\"client2\",\"gnmi-clients\"]},\"request\":{\"paths\":[\"/gnmi.gNMI/Set\"]}}]}"
 ```
 ///
 

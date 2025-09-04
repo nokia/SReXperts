@@ -5,14 +5,14 @@
 
 ifup -a
 
-mkdir -p /home/user/.ssh
-touch /home/user/.ssh/authorized_keys
-chmod 600 /home/user/.ssh/authorized_keys
-cat /tmp/authorized_keys > /home/user/.ssh/authorized_keys
-chown -R user:user /home/user/.ssh
+mkdir -p /home/admin/.ssh
+touch /home/admin/.ssh/authorized_keys
+chmod 600 /home/admin/.ssh/authorized_keys
+cat /tmp/authorized_keys > /home/admin/.ssh/authorized_keys
+chown -R admin:admin /home/admin/.ssh
 
-echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-echo "user:$USER_PASSWORD" | chpasswd
+echo "admin ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+echo "admin:$USER_PASSWORD" | chpasswd
 
 # Start iperf3 server
 iperf3 -s -p 5201 -D 

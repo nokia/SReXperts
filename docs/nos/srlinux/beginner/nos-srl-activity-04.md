@@ -232,7 +232,7 @@ There are 4 gRPC services enabled in this config including gRIBI.
 
 ### Configure user for gRIBI client
 
-Create a user `grclient1` that will be used by gRIBIc client to inject routes.
+Create a user `client3` that will be used by gRIBIc client to inject routes.
 
 Remember to run `enter candidate private` to change to the candidate mode and `commit now` to save your changes.
 
@@ -240,7 +240,7 @@ Remember to run `enter candidate private` to change to the candidate mode and `c
 
 ``` bash
 set / system aaa authorization role gribi-clients services [ gribi ]
-set / system aaa authentication user grclient1 password grclient1 role [ gribi-clients ]
+set / system aaa authentication user client3 password client3 role [ gribi-clients ]
 ```
 
 ///
@@ -255,8 +255,8 @@ info flat from running system aaa | grep client
 
 ``` bash
 A:g15-leaf11# info flat from running system aaa | grep client
-set / system aaa authentication user grclient1 password $y$j9T$bcd1d72367d5f71e$FgwfvyKXBZwkPv7hrI45hqgQF3i20buJoaTmBjLLK9.
-set / system aaa authentication user grclient1 role [ gribi-clients ]
+set / system aaa authentication user client3 password $y$j9T$bcd1d72367d5f71e$FgwfvyKXBZwkPv7hrI45hqgQF3i20buJoaTmBjLLK9.
+set / system aaa authentication user client3 role [ gribi-clients ]
 set / system aaa authorization role gribi-clients services [ gribi ]
 ```
 ///
@@ -295,14 +295,14 @@ We will use the `gRIBI Get` RPC to get the current installed gRIBI routes.
 /// tab | cmd
 
 ``` bash
-gribic -a clab-srexperts-peering2:57400 --insecure -u grclient1 -p grclient1 get --ns default --aft ipv4
+gribic -a clab-srexperts-peering2:57400 --insecure -u client3 -p client3 get --ns default --aft ipv4
 ```
 
 ///
 /// tab | expected output
 
 ``` bash
-❯ gribic -a clab-srexperts-peering2:57400 --insecure -u grclient1 -p grclient1 get --ns default --aft ipv4
+❯ gribic -a clab-srexperts-peering2:57400 --insecure -u client3 -p client3 get --ns default --aft ipv4
 INFO[0000] target clab-srexperts-peering2:57400: final get response:  
 INFO[0000] got 1 results                                
 INFO[0000] "clab-srexperts-peering2:57400":  
@@ -345,7 +345,7 @@ Use `gRIBI Modify` RPC to inject this route to `peering2`. Replace `file.yml` wi
 
 /// tab | cmd
 ``` bash
-gribic -a clab-srexperts-peering2:57400 --insecure -u grclient1 -p grclient1 modify --input-file file.yml
+gribic -a clab-srexperts-peering2:57400 --insecure -u client3 -p client3 modify --input-file file.yml
 ```
 ///
 /// tab | expected output
@@ -436,13 +436,13 @@ When the firewall application use is complete, the gRIBI routes can be moved usi
 /// tab | cmd
 
 ``` bash
-gribic -a clab-srexperts-peering2:57400 --insecure -u grclient1 -p grclient1 flush --ns default --override
+gribic -a clab-srexperts-peering2:57400 --insecure -u client3 -p client3 flush --ns default --override
 ```
 ///
 /// tab | expected output
 
 ``` bash
-❯ gribic -a clab-srexperts-peering2:57400 --insecure -u grclient1 -p grclient1 flush --ns default --override
+❯ gribic -a clab-srexperts-peering2:57400 --insecure -u client3 -p client3 flush --ns default --override
 INFO[0000] got 1 results                                
 INFO[0000] "clab-srexperts-peering2:57400": timestamp: 1745865482482562426
 result: OK 
@@ -492,13 +492,13 @@ operations:
 /// details | Injecting the route
 /// tab | cmd
 ``` bash
-gribic -a clab-srexperts-peering2:57400 --insecure -u grclient1 -p grclient1 modify --input-file gribi-input.yml
+gribic -a clab-srexperts-peering2:57400 --insecure -u client3 -p client3 modify --input-file gribi-input.yml
 ```
 ///
 /// tab | expected output
 
 ``` bash
-❯ gribic -a clab-srexperts-peering2:57400 --insecure -u grclient1 -p grclient1 modify --input-file gribi-input.yml
+❯ gribic -a clab-srexperts-peering2:57400 --insecure -u client3 -p client3 modify --input-file gribi-input.yml
 INFO[0000] trying to find variable file "gribi-input_vars.yml" 
 INFO[0000] sending request=params:{redundancy:SINGLE_PRIMARY persistence:PRESERVE ack_type:RIB_AND_FIB_ACK} to "clab-srexperts-peering2:57400" 
 INFO[0000] sending request=election_id:{high:1} to "clab-srexperts-peering2:57400" 
@@ -592,13 +592,13 @@ To see the next-hop definition:
 /// tab | cmd
 
 ``` bash
-gribic -a clab-srexperts-peering2:57400 --insecure -u grclient1 -p grclient1 get --ns default --aft nh
+gribic -a clab-srexperts-peering2:57400 --insecure -u client3 -p client3 get --ns default --aft nh
 ```
 ///
 /// tab | expected output
 
 ``` bash
-❯ gribic -a clab-srexperts-peering2:57400 --insecure -u grclient1 -p grclient1 get --ns default --aft nh
+❯ gribic -a clab-srexperts-peering2:57400 --insecure -u client3 -p client3 get --ns default --aft nh
 INFO[0000] target clab-srexperts-peering2:57400: final get response: entry:{network_instance:"default" next_hop:{index:1 next_hop:{ip_address:{value:"10.64.51.1"}}} rib_status:PROGRAMMED fib_status:PROGRAMMED} 
 INFO[0000] got 1 results                                
 INFO[0000] "clab-srexperts-peering2:57400":
@@ -624,13 +624,13 @@ To see the next-hop group definition:
 /// tab | cmd
 
 ``` bash
-gribic -a clab-srexperts-peering2:57400 --insecure -u grclient1 -p grclient1 get --ns default --aft nhg
+gribic -a clab-srexperts-peering2:57400 --insecure -u client3 -p client3 get --ns default --aft nhg
 ```
 ///
 /// tab | expected output
 
 ``` bash
-❯ gribic -a clab-srexperts-peering2:57400 --insecure -u grclient1 -p grclient1 get --ns default --aft nhg
+❯ gribic -a clab-srexperts-peering2:57400 --insecure -u client3 -p client3 get --ns default --aft nhg
 INFO[0000] target clab-srexperts-peering2:57400: final get response: entry:{network_instance:"default" next_hop_group:{id:1 next_hop_group:{next_hop:{index:1}}} rib_status:PROGRAMMED fib_status:PROGRAMMED} 
 INFO[0000] got 1 results                                
 INFO[0000] "clab-srexperts-peering2:57400":
@@ -655,13 +655,13 @@ To see the destination prefix definition:
 /// tab | cmd
 
 ``` bash
-gribic -a clab-srexperts-peering2:57400 --insecure -u grclient1 -p grclient1 get --ns default --aft ipv4
+gribic -a clab-srexperts-peering2:57400 --insecure -u client3 -p client3 get --ns default --aft ipv4
 ```
 ///
 /// tab | expected output
 
 ``` bash
-❯ gribic -a clab-srexperts-peering2:57400 --insecure -u grclient1 -p grclient1 get --ns default --aft ipv4
+❯ gribic -a clab-srexperts-peering2:57400 --insecure -u client3 -p client3 get --ns default --aft ipv4
 INFO[0000] target clab-srexperts-peering2:57400: final get response: entry:{network_instance:"default" ipv4:{prefix:"31.10.31.11/32" ipv4_entry:{next_hop_group:{value:1}}} rib_status:PROGRAMMED fib_status:PROGRAMMED} 
 INFO[0000] got 1 results                                
 INFO[0000] "clab-srexperts-peering2:57400":

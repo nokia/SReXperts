@@ -6,11 +6,11 @@ tags:
   - EPIPE
 ---
 
-# T-LDP to EVPN Migration
+# Service Migration from TLDP to EVPN
 
 |     |     |
 | --- | --- |
-| **Activity name** | T-LDP to EVPN Migration |
+| **Activity name** |Service Migration from TLDP to EVPN |
 | **Activity ID** | 72 |
 | **Short Description** | Converting EPIPE services from Targeted LDP (T-LDP) to Ethernet VPN (EVPN) |
 | **Difficulty** | Advanced |
@@ -18,13 +18,13 @@ tags:
 | **Topology Nodes** | :material-router: PE1, :material-router: PE2 |
 | **References** | [NSP Documentation](https://documentation.nokia.com/nsp/24-11/libfiles/landing.html)<br/> [NSP Developer Portal](https://network.developer.nokia.com/learn/24_11/)<br/> [NSP Service Management](https://documentation.nokia.com/nsp/24-11/NSP_Service_Management_Guide/iptitle.html)<br/> [SROS Documentation](https://documentation.nokia.com/sr/24-10/index.html)<br/> [SROS L2 Service and EVPN Advance Configuration Guide](https://documentation.nokia.com/sr/24-10/7750-sr/titles/layer-2-services-evpn.html) |
 
-In this activity, we explore the evolution of L2VPN services—from traditional EPIPE over TLDP to a more scalable, modern alternative: EPIPE over EVPN.
+## Objective
 
-We'll begin by revisiting how EPIPE services over TLDP work within the Nokia IP/MPLS ecosystem, then introduce EVPN (Ethernet VPN)—a standards-based
-solution gaining widespread adoption for its superior scalability, operational simplification, and flexibility.
+Migrating EPIPE services from TLDP to EVPN is not a question of “if” but “how” — especially when you are dealing with thousands of services. Doing this manually is slow, error-prone, and simply not scalable.
 
-But we won’t stop at theory. You'll get your hands dirty in a guided migration exercise, where we use Nokia NSP (Network Services Platform) to
-automate the transition of a traditional TLDP-based EPIPE to an EVPN-based EPIPE service.
+In this activity, you will explore how NSP can be used to automate the migration of TLDP-based EPIPEs to EVPN-based EPIPEs. Rather than handling every service by hand, you will implement a workflow in NSP that takes care of the complexity and can be extended to meet your operational needs.
+
+The purpose is not only to complete a migration, but to gain hands-on experience with network automation — experience you can build on to design variations, extend the workflow, and apply the same principles to other large-scale transitions in your network.
 
 ## Tasks
 
@@ -1073,9 +1073,7 @@ Let’s dive deeper and **customize the workflow**.
 
 #### Challenge: Change the Transport Tunnel from `sr-isis` to `segment routing traffic engineering`
 
-By default, the migration preserves the transport tunnel type defined in the legacy service. In our case, that's **`sr-isis`**—a topology-based label distribution model.
-However, **SR-ISIS does not support Traffic Engineering (TE)**, which limits your ability to influence path selection beyond the IGP's shortest path.
-To enable **TE capabilities**, we want to update the EVPN service to use **Segment Routing Traffic Engineering (SR-TE)** instead—giving us fine-grained control over how traffic flows across the MPLS core.
+By default, the migration preserves the transport tunnel type defined in the legacy service. In our case, that's **`sr-isis`**—a topology-based label distribution model. However, **SR-ISIS does not support Traffic Engineering (TE)**, which limits your ability to influence path selection beyond the IGP's shortest path. To enable **TE capabilities**, we want to update the EVPN service to use **Segment Routing Traffic Engineering (SR-TE)** instead—giving us fine-grained control over how traffic flows across the MPLS core.
 
 > **Goal**: Modify the workflow to replace `sr-isis` with `sr-te` in the EVPN transport tunnel selection.
 
@@ -1158,8 +1156,7 @@ This activity gave you a template that applies across many domains. You can take
 
 Looking ahead, the same foundational principles can even be extended to **AI-assisted automation**. Imagine using **Model Context Protocol (MCP)**—an emerging framework where **AI models interface directly with network controllers** to interpret high-level service intent, recommend optimizations, or even auto-resolve failures in real time. In such architectures, **AI doesn’t replace the network engineer—it acts as a co-pilot**, helping translate dynamic business needs into actionable, verifiable network changes.
 
-What you’ve built here prepares you not just for today’s migrations—but for tomorrow’s autonomous networks.
-What you’ve done here—modeling a service, abstracting its lifecycle, transforming it, and validating the outcome—is repeatable, scalable, and increasingly indispensable.
+What you’ve built here prepares you not just for today’s migrations—but for tomorrow’s autonomous networks. What you’ve done here—modeling a service, abstracting its lifecycle, transforming it, and validating the outcome—is repeatable, scalable, and increasingly indispensable.
 
 You're no longer simply configuring networks. You're now designing their evolution, shaping their logic, and writing the rules that govern their automation.
 

@@ -67,15 +67,15 @@ The [SR OS system management guide](https://documentation.nokia.com/sr/25-3/7x50
 
 ### MD-CLI alias command
 
-SR OS MD-CLI command aliases provide a way for an operator to customize the user-experience of an SR OS node by renaming commands, creating shortcut aliases to existing commands or integrating custom developed commands directly into the MD-CLI with context sensitive help, auto-completion and the other user interface features operators love about SR OS.  
+SR OS MD-CLI command aliases provide a way for an operator to customize the user-experience of an SR OS node by renaming commands, creating shortcut aliases to existing commands or integrating custom developed commands directly into the MD-CLI with context sensitive help, auto-completion and the other user interface features operators love about SR OS.
 
 The [MD-CLI command reference guide](https://documentation.nokia.com/sr/25-3/7750-sr/books/md-cli-command-reference/environment_0.html#d67300) and the [SR OS system management guide](https://documentation.nokia.com/sr/25-3/7x50-shared/system-management/python.html#ai9exj5x8z) provide more information.
 
 ## Tasks
 
-**You should read these tasks from top-to-bottom before beginning the activity**.  
+**You should read these tasks from top-to-bottom before beginning the activity**.
 
-It is tempting to skip ahead but tasks may require you to have completed previous tasks before tackling them.  
+It is tempting to skip ahead but tasks may require you to have completed previous tasks before tackling them.
 
 All supporting files can be found in the `activities/nos/sros/activity-05` directory of the repository.
 
@@ -94,7 +94,7 @@ Create the virtual environment using the `uv` command.
 /// tab | cmd
 ``` bash
 uv venv
-``` 
+```
 
 ///
 /// tab | expected output
@@ -122,7 +122,7 @@ A virtual environment can be created using the builtin `venv` Python module.  Cr
 /// tab | cmd
 ``` bash
 python -m venv .venv
-``` 
+```
 ///
 
 It is important to make sure that you are using this newly created virtual environment.  To do this use the Linux `source` command.
@@ -158,7 +158,7 @@ Next install the pySROS package from PyPI into your virtual environment.
 /// tab | cmd
 ``` bash
 uv pip install --upgrade pysros
-``` 
+```
 
 ///
 /// tab | expected output
@@ -197,7 +197,7 @@ Now ensure that you have the `pip` package manager installed by running the comm
 /// tab | cmd
 ``` bash
 python -m ensurepip
-``` 
+```
 ///
 /// tab | possible outcome on Debian/Ubuntu
 ``` bash
@@ -225,7 +225,7 @@ Next install the pySROS package from PyPI into your virtual environment.
 /// tab | cmd
 ``` bash
 pip install --upgrade pysros
-``` 
+```
 ///
 /// tab | expected output
 ``` bash
@@ -266,7 +266,7 @@ Use `git` to clone the source code repository from GitHub (where the pySROS sour
 /// tab | cmd
 ``` bash
 git clone https://github.com/nokia/pysros
-``` 
+```
 ///
 /// tab | expected output
 ``` bash
@@ -285,7 +285,7 @@ Now ensure that you have the `pip` package manager installed by running the comm
 /// tab | cmd
 ``` bash
 python -m ensurepip
-``` 
+```
 ///
 /// tab | possible outcome on Debian/Ubuntu
 ``` bash
@@ -314,7 +314,7 @@ Next install the pySROS package from the source code you downloaded.
 ``` bash
 cd pysros
 pip install .
-``` 
+```
 ///
 /// tab | expected output
 ``` bash
@@ -323,21 +323,21 @@ Collecting ncclient~=0.6.12
   Using cached ncclient-0.6.19.tar.gz (112 kB)
 Collecting lxml~=5.3.0
   Downloading lxml-5.3.1-cp310-cp310-manylinux_2_28_x86_64.whl (5.2 MB)
-     |████████████████████████████████| 5.2 MB 19.2 MB/s 
+     |████████████████████████████████| 5.2 MB 19.2 MB/s
 Collecting paramiko>=1.15.0
   Downloading paramiko-3.5.1-py3-none-any.whl (227 kB)
-     |████████████████████████████████| 227 kB 89.9 MB/s 
+     |████████████████████████████████| 227 kB 89.9 MB/s
 Collecting pynacl>=1.5
   Using cached PyNaCl-1.5.0-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl (856 kB)
 Collecting cryptography>=3.3
   Downloading cryptography-44.0.2-cp39-abi3-manylinux_2_28_x86_64.whl (4.2 MB)
-     |████████████████████████████████| 4.2 MB 60.4 MB/s 
+     |████████████████████████████████| 4.2 MB 60.4 MB/s
 Collecting bcrypt>=3.2
   Downloading bcrypt-4.3.0-cp39-abi3-manylinux_2_28_x86_64.whl (284 kB)
-     |████████████████████████████████| 284 kB 61.7 MB/s 
+     |████████████████████████████████| 284 kB 61.7 MB/s
 Collecting cffi>=1.12
   Downloading cffi-1.17.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (446 kB)
-     |████████████████████████████████| 446 kB 86.2 MB/s 
+     |████████████████████████████████| 446 kB 86.2 MB/s
 Collecting pycparser
   Using cached pycparser-2.22-py3-none-any.whl (117 kB)
 Using legacy 'setup.py install' for pysros, since package 'wheel' is not installed.
@@ -363,7 +363,7 @@ Run the following command to verify the end-to-end traffic integrity of the `RED
 /// tab | cmd
 ``` bash
 python verify.py
-``` 
+```
 ///
 /// tab | expected output
 ``` bash
@@ -371,10 +371,10 @@ Enter router password:
 =====================================================================================
 Verification table
 =====================================================================================
-Host                      GREEN config    RED config      GREEN traffic   RED traffic    
+Host                      GREEN config    RED config      GREEN traffic   RED traffic
 -------------------------------------------------------------------------------------
-clab-srexperts-pe1        False           False           False           False          
-clab-srexperts-pe2        True            True            False           False          
+clab-srexperts-pe1        False           False           False           False
+clab-srexperts-pe2        True            True            False           False
 =====================================================================================
 ```
 ///
@@ -404,10 +404,10 @@ Having obtained a pySROS formatted data structure containing the configuration, 
 /// details | Hint
     type: tip
 
-pySROS utilizes NETCONF as the underlying protocol. 
+pySROS utilizes NETCONF as the underlying protocol.
 
-NETCONF requires the operator to supply a top level path and (currently) pySROS requires the same. 
- 
+NETCONF requires the operator to supply a top level path and (currently) pySROS requires the same.
+
 You have been provided with the full JSON IETF formatted configuration back to the YANG modeled root.  This includes the top level path, therefore, you will need to strip this off and supply it as the `path` parameter of the pySROS `set` method.
 ///
 
@@ -420,7 +420,7 @@ Run the following command to verify the end-to-end traffic integrity of the `RED
 /// tab | cmd
 ``` bash
 python verify.py
-``` 
+```
 ///
 /// tab | expected output
 ``` bash
@@ -428,15 +428,15 @@ Enter router password:
 =====================================================================================
 Verification table
 =====================================================================================
-Host                      GREEN config    RED config      GREEN traffic   RED traffic    
+Host                      GREEN config    RED config      GREEN traffic   RED traffic
 -------------------------------------------------------------------------------------
-clab-srexperts-pe1        True            False           True            False           
-clab-srexperts-pe2        True            True            True            False           
+clab-srexperts-pe1        True            False           True            False
+clab-srexperts-pe2        True            True            True            False
 =====================================================================================
 ```
 ///
 
-If your application works correctly, you will have been able to configure :material-router: PE1 on the command line, using your program, and the configuration for the `GREEN` VPRN should be shown present on :material-router: PE1.  
+If your application works correctly, you will have been able to configure :material-router: PE1 on the command line, using your program, and the configuration for the `GREEN` VPRN should be shown present on :material-router: PE1.
 
 Both :material-router: PE1 and :material-router: PE2 should be able to ping each other over the `GREEN` VPRN showing that traffic is flowing correctly.
 
@@ -525,7 +525,7 @@ You may wish to consider the `input()` Python method to solve this part of the a
 
 ### Configure SR OS to reference your application
 
-Configure this Python application info the SR OS configuration using the `/configure python python-script`.  Make sure you identify it as a `python3` script.
+Configure this Python application into the SR OS configuration using the `/configure python python-script`.  Make sure you identify it as a `python3` script.
 
 ### Create a SR OS command-alias pointing to your configured Python application
 
@@ -542,7 +542,7 @@ If you get stuck and need to return the lab to it's original starting position, 
 ``` bash
 python setup-activity.py teardown --configure-all
 python setup-activity.py setup
-``` 
+```
 ///
 /// tab | expected output 1
 ``` bash

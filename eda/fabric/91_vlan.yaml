@@ -1,4 +1,4 @@
-apiVersion: services.eda.nokia.com/v1alpha1
+apiVersion: services.eda.nokia.com/v1
 kind: VLAN
 metadata:
   name: vlan1

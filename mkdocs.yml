@@ -34,27 +34,27 @@ nav:
               - nos/srlinux/beginner/b-srl-oc.md
           - Intermediate:
               - nos/srlinux/intermediate/nos-srl-activity-12.md
-              - nos/srlinux/intermediate/20-SRLinux-Basic-Agent.md
               - nos/srlinux/intermediate/19-SRLinux-Custom-CLI.md
               - nos/srlinux/intermediate/58-programming-snmp-mibs.md
           - Advanced:
-              - nos/srlinux/advanced/nos-srlinux-activity-18.md    
+              - nos/srlinux/advanced/nos-srlinux-activity-18.md
+              - nos/srlinux/advanced/20-SRLinux-Basic-Agent.md  
   - Network Services Platform (NSP):
       - nsp/index.md
       - Beginner:
           - Acknowledge Alarms: nsp/beginner/60-nsp-alarm-ack.md
           - Indicator Analytics: nsp/beginner/68-indicator-analytics.md
           - Baseline Analytics: nsp/beginner/69-nsp-baseline-analytics.md
-          - Inventory Report using WFM: nsp/beginner/70-nsp-inventory-report-using-workflow.md
+          - Inventory Reports: nsp/beginner/70-nsp-inventory-report-using-workflow.md
       - Intermediate:
-          - Device-specific Infra Config: nsp/intermediate/48-nsp-device-specific-infra-config.md
+          - Infrastructure Configuration: nsp/intermediate/48-nsp-device-specific-infra-config.md
           - NE Password Audit/Align: nsp/intermediate/66-nsp-ne-password-audit.md
-          - NE config snapshot/rollback: nsp/intermediate/71-nsp-ne-config-snapshot-rollback.md
-          - Port Migration: nsp/intermediate/51-nsp-access-port-migration.md
+          - NE Config Snapshot/Rollback: nsp/intermediate/71-nsp-ne-config-snapshot-rollback.md
+          - Access Port Migration: nsp/intermediate/51-nsp-access-port-migration.md
       - Advanced:
-          - Golden Security Configuration: nsp/advanced/73-nsp-golden-cfg-security.md          
+          - Security Baseline Configuration: nsp/advanced/73-nsp-golden-cfg-security.md          
           - Integrating NSP w/ NetBox: nsp/advanced/57-nsp-netbox.md
-          - TLDP to EVPN Migration: nsp/advanced/72-nsp-tldp-to-evpn-migration.md
+          - Service Migration from TLDP to EVPN: nsp/advanced/72-nsp-tldp-to-evpn-migration.md
   - Event Driven Automation (EDA):
       - eda/index.md
       - Beginner:
@@ -84,7 +84,7 @@ site_description: >-
 repo_name: nokia/SReXperts
 repo_url: https://github.com/nokia/SReXperts
 edit_uri: edit/main/docs/
-site_url: "https://hack.srexperts.net/"
+site_url: "https://hackathon.srexperts.net/"
 copyright: Copyright &copy; 2021-2025 Nokia
 theme:
   name: material

@@ -108,14 +108,14 @@ In this task we will ensure the event handling system is ready to respond to an 
 This same `ehs_basic.py` file has been made available within :material-router:PE2 via container binds.
 
 ??? note
-    In the Hackathon environment the `/home/nokia/clab-srexperts/pe2/tftpboot/` directory on your groups Hackathon VM is made available using TFTP to the node `PE2`.  Any file you put in that folder will be accessible from within SR OS using TFTP. This could be used as an alternative to `scp` or manually copying over file contents for containerlab environnments.
+    In the Hackathon environment the `/home/nokia/clab-srexperts/pe2/tftpboot/` directory on your groups Hackathon VM is made available using TFTP to the node `PE2`.  Any file you put in that folder will be accessible from within SR OS using TFTP. This could be used as an alternative to `scp` or manually copying over file contents for containerlab environments.
 
 
 Any modifications you make to that file in your group's hackathon VM will be visible to the router, this is the preferred method of development as it allows you to modify the file under the Linux filesystem while being able to test on the containerlab node.
 
 
 !!! info "Connect to :material-router:PE2 from your group's hackathon VM"
-    ssh admin@clab-srexperts-pe2
+    ```ssh admin@clab-srexperts-pe2```
 
 In the box below you see that the full configuration for setting up the EHS on the node has already been prepared for you. However, the second step (creating a directory to store the `python-script` execution results) must be performed manually by you before continuing with the tasks.
 
@@ -178,7 +178,6 @@ In the box below you see that the full configuration for setting up the EHS on t
                     entry 10 {
                         script-policy {
                             name "ehs_basic"
-                            owner "admin"
                         }
                     }
                 }
@@ -203,7 +202,7 @@ In the box below you see that the full configuration for setting up the EHS on t
         }
 
     ```
-Before proceeding, execute the command to create a results directory on :material-router: PE2 before you continue:
+Before proceeding, execute the command to create a results directory on :material-router: PE2:
 
  ```bash
  /file make-directory cf3:/results_ehs_basic/

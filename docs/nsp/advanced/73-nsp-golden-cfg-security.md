@@ -5,11 +5,11 @@ tags:
   - Device Configuration
 ---
 
-# Golden Security Configuration
+# Security Baseline Configuration
 
 |     |     |
 | --- | --- |
-| **Activity name** | Golden Security Configuration |
+| **Activity name** | Security Baseline Configuration |
 | **Activity ID** | 73 |
 | **Short Description** | Use intent-based networking principles to implement and assure device-level security configuration for SR OS and SRLinux. |
 | **Difficulty** | Advanced |
@@ -18,14 +18,12 @@ tags:
 | **References** | [Security Configuration](https://documentation.nokia.com/sr/25-3/7x50-shared/system-management/security-system-management.html#d197e3)<br/>[Developer Portal](https://network.developer.nokia.com) |
 
 ## Objective
-In this activity, you'll design an abstract intent-type for NSP used to apply node-level security configuration to all your networking devices.
-The general approach taken is different from NSP's product intent-types. The intent-type defined uses minimal input to apply security configuration
-to a device. The mapping logic is adjustable, so the same intent-type can be used across different router families and even different network
-operating systems.
 
-The intent-type boilerplate is provided. You will be expected to make modifications by adding attributes or support for another NOS.
-To do this, the idea will be to first become acquainted with the base version of the intent-type, to then modify it for SR OS, make
-sure everything behaves as expected and finally to make it work in a similar way for SRLinux.
+Security baselines are only effective if they are applied consistently across all devices — and kept that way over time. In practice, differences between platforms and configuration drift often result in small gaps that can quickly become security holes. Manually tracking these differences is error-prone, and updating each device configuration one by one is not sustainable.
+
+In this activity, you will tackle this challenge using intent-based networking (IBN). By defining an abstract intent-type for node-level security, you can express what should be enforced while NSP ensures how this is realized across different router families and network operating systems. The result is a scalable way to maintain conformance and avoid drift, with one high-level intent applied network wide.
+
+To get started, a boilerplate custom intent-type for SR OS is provided. You will first install and validate this baseline, then make targeted modifications to extend its functionality. As a final step, you will adapt the same intent-type to support SR Linux, demonstrating how one abstraction can be applied across multiple platforms.
 
 ## Tasks
 
@@ -33,10 +31,9 @@ sure everything behaves as expected and finally to make it work in a similar way
 
 It is tempting to skip ahead but tasks may require you to have completed previous tasks before tackling them.  
 
-### Task 0: Install VS Code and NSP Intent Manager extension
+###  Install VS Code and NSP Intent Manager extension
 
-For this activity, having VS Code with the NSP Intent Manager extension installed is essential.
-If you cannot install 3rd party software on your laptop, don't worry you can just use your web-browser and connect to code-server.
+For this activity, having VS Code with the NSP Intent Manager extension installed is essential. If you cannot install 3rd party software on your laptop, don't worry you can just use your web-browser and connect to code-server.
 
 Installation Steps:
 
@@ -44,27 +41,19 @@ Installation Steps:
 2. Install the [vsCode extension for Intent Manager](https://marketplace.visualstudio.com/items?itemName=Nokia.nokia-intent-manager).
 3. Configure the vsCode extension to authenticate against the SReXperts NSP at `nsp.srexperts.net` using the credentials (username/password) provided to you.
 
-### Task 1: Create your own Golden Security Config intent-type
+### Create your own Golden Security Config intent-type
 
-Add a folder to your VS Code workspace to store intent-types. Open the context-menu for this folder, and select
-`Create intent-type`. Provide a unique name like `security-config-group02`, provide the author name and choose
-the device security template. Please adjust the name with the group, that has been assigned to you during the
-hackathon. A new folder called `security-config-group02_v1` will be created. The folder contains the complete
-intent-type, while the context menu has the option to `Upload intent-type` to the connected NSP system.
+Add a folder to your VS Code workspace to store intent-types. Open the context-menu for this folder and select `Create intent-type`. Provide a unique name like `security-config-group02`, provide the author's name and choose the device security template. Please adjust the name with the group, that has been assigned to you during the hackathon. A new folder called `security-config-group02_v1` will be created. The folder contains the complete intent-type, while the context menu has the option to `Upload intent-type` to the connected NSP system.
 
-Take yourself some time to study the intent-type folder and file structure and content. The intent-type follows
-a decomposed design, minimizing the touch-points to adjust the behavior. In consequence, most of the JavaScript
-code-base is static, and must not be changed by the intent developer.
+Take yourself some time to study the intent-type folder and file structure and content. The intent-type follows a decomposed design, minimizing the touchpoints to adjust the behavior. In consequence, most of the JavaScript codebase is static and must not be changed by the intent developer.
 
-The most important concept here are mappers, that can be found in `intent-type-resources/mappers`. Those are
-templates (using Apache FreeMarker) to translate the intent-model into the device model.
+The most important concept here are mappers, that can be found in `intent-type-resources/mappers`. Those are templates (using Apache FreeMarker) to translate the intent-model into the device model.
 
 Explore what is contained in the mapper!
 
 /// details | Solution
     type: success
-The created intent-type only contains a SR OS mapper, while the mappings are provided using an opinionated
-JSON format. Following security rules are applied:
+The created intent-type only contains a SR OS mapper, while the mappings are provided using an opinionated JSON format. Following security rules are applied:
 
 * Disable telnet and telnet6 server functionality
 * Disable the on-board FTP server
@@ -78,27 +67,21 @@ JSON format. Following security rules are applied:
 * Create a log 90 that stores logs generated by the MAF (and security in general)
 
 /// note
-Telnet and FTP configurations we can all agree with, the MAF, clearly, is not very secure.
-As this is a containerlab topology, we use these settings to ensure persistent access and
-in the hopes of avoiding restarting the topology due to an unfortunate configuration change
-that blocks access to the system.
+Telnet and FTP configurations we can all agree with, the MAF, clearly, is not very secure. As this is a containerlab topology, we use these settings to ensure persistent access and in the hopes of avoiding restarting the topology due to an unfortunate configuration change that blocks access to the system.
 ///
 ///
 
-### Task 2: Create/Deploy intents from WebUI
+### Create/Deploy intents from WebUI
 
 * Create an intent for PE1, but don't deploy it yet to the network
 * Run an audit to understand, which configuration would be rolled out
 * Synchronize the intent to the network and check if the device config was updated
 * Feel free to modify the device configuration via CLI and run audit/sync operations again
 
-### Task 3: Extend the intent-type with something small
-In this task, we explore how to add additional configuration to your intent-type to extend the coverage.
-The idea with this type of intent is that model-driven node configuration can be easily reused to populate the intent-type.
-This is exactly what we will try to do for model-driven SR OS nodes in this task.
+### Extend the intent-type with something small
+In this task, we explore how to add additional configuration to your intent-type to extend the coverage. The idea with this type of intent is that model-driven node configuration can be easily reused to populate the intent-type. This is exactly what we will try to do for model-driven SR OS nodes in this task.
 
-Change your intent-type in such a way that it creates an additional entry `50` in the management-access-filter that
-explicitly accepts SNMP Traps (UDP 162 as both destination and source port). The resulting configuration in SR OS should be
+Change your intent-type in such a way that it creates an additional entry `50` in the management-access-filter that explicitly accepts SNMP Traps (UDP 162 as both destination and source port).
 
 /// note | SR OS CLI config
 ```
@@ -165,14 +148,14 @@ Use CLI commands `pwc model-path` and `info json` to get the snippets to be adde
 ///
 
 After making your changes in the intent-type, trigger an `Audit` of the intent from the WebUI.
+
 What result do you expect?
 
 Synchronize either `PE1`, make sure that your changes in the intent-type are propagated correctly and verify the result on the node CLI.
 
-### Task 4: Extend the intent-type with something big
+### Extend the intent-type with something big
 
-For the previous task, a simple copy-and-paste of what was already in the intent with minor modifications was all that was needed to get the desired result.
-Kudos to you if you used a different approach already. In either case, a different approach will be required for this task.
+For the previous task, a simple copy-and-paste of what was already in the intent with minor modifications was all that was needed to get the desired result. Kudos to you if you used a different approach already. In either case, a different approach will be required for this task.
 
 The modification required in this task isn't based on existing content of the intent-type, rather requiring entirely new sections to be added to the `SR OS.ftl` file.
 
@@ -218,7 +201,7 @@ Using what you've seen so far, audit and synchronize the intents with your chang
 
 Enable the `update-fault-tolerance` configuration in the global BGP context to bring the configuration in line with Nokia's recommendation and once again align the router configuration.
 
-### Task 5: Extend the intent-type for SR Linux
+### Extend the intent-type for SR Linux
 
 Completing this lab requires a magnum opus of sorts. If you've made it this far that means you are well-versed in SR OS as well as the intent principles we are using here. This intent-type is designed to allow simple onboarding of different NOSes. Having SR Linux available in the topology we would be amiss if we do not add coverage for it to our intent-type. As before, open your intent-type. In line with `SR OS.ftl`, it stands to reason that we will need a similar file for SR Linux. That might be `SRL.ftl` or `SRLinux.ftl` or `SR Linux.ftl`.
 
@@ -275,6 +258,16 @@ system {
 ```
 ///
 
-Use what you've learned and populate `SRLinux.ftl` so this configuration will be applied. The first pointer to take into account here is that the equivalent of `info json` for SR Linux is `info | as json`, and this output modifier can be used in general. The second pointer is that the Model Driven Configurator knows which namespaces (or prefixes) to use, and this information is also freely available [online](https://yang.srlinux.dev/).
+Use what you've learned and populate `SRLinux.ftl` so this configuration will be applied. The first pointer is that the equivalent of `info json` for SR Linux is `info | as json`, and this output modifier can be used in general. The second pointer is that the Model Driven Configurator knows which namespaces (or prefixes) to use, and this information is also freely available [online](https://yang.srlinux.dev/).
 
 Once complete, deploy the intent and confirm the changes are applied successfully.
+
+## Summary
+
+Congratulations! You have completed this activity. Take a moment to review what you have achieved:
+
+* Installed and validated a provided boilerplate intent-type for SR OS.
+* Modified the intent-type to enforce node-level security attributes.
+* Extended the same construct to also support SR Linux.
+
+The result: a reusable, intent-driven approach that enforces consistent configuration across your network, prevents drift, and keeps your security posture aligned with evolving standards. Beyond security, the same concepts and patterns are universally applicable to other configuration areas, helping you simplify operations, maintain conformance, and scale day-to-day network management with confidence.

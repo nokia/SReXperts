@@ -106,7 +106,9 @@ And your task is to create a service that has the following connectivity matrix:
 -{{ diagram(url='srexperts/hackathon-diagrams/main/eda.drawio', title='Target connectivity', page=9, zoom=1.5) }}-
 
 /// warning | IMPORTANT
-Remove any Bridge Domains, Bridge Interfaces or VLANs created in the [Bridge Domains/Part 1](bridge-domains.md) and the [Routers/Part 2](routers.md) as our Virtual Network will create them or [simply reset EDA using the git time machine](../index.md#reset-eda).
+Remove any Bridge Domains, Bridge Interfaces, VLANs and Routed Interfaces that you may have created in the [Bridge Domains/Part 1](bridge-domains.md) and the [Routers/Part 2](routers.md) as our Virtual Network will create them or [simply reset EDA using the git time machine](../index.md#reset-eda).
+
+Be careful when removing these resources and do not remove resources that have `role=hackathon-infra` tag as they are infrastructure related. But if you messed it up, don't worry, you can always [reset EDA](../index.md#reset-eda).
 ///
 
 You should expect that clients can't reach each other in any direction, due to no overlay services being configured.
@@ -132,7 +134,7 @@ Time to create your first Virtual Network and make your clients talk to each oth
 Use the knowledge of the previous two exercises ([Bridge Domains](bridge-domains.md) and [Routers](routers.md)) to achieve the connectivity as shown on the diagram above. A single virtual network resource would be able to define the following:
 
 - a **Router** to create the IP-VRF of the EVPNVXLAN type
-- two **Routed Interfaces** to connect the Router to the `client11` and `client12` over the respective VLANs 311 and 313
+- two **Routed Interfaces** to connect the Router to the `client11` and `client13` over the respective VLANs 311 and 313
 - two **Bridge Domains** to create subnets for VLAN 300 and 312 respectively
 - two **VLAN** resources to create Bridge Interfaces for the respective VLANs 300 and 312
 - two **IRB Interfaces** to connect the Bridge Domains to the Router
@@ -155,7 +157,7 @@ When creating an IRB for example, you must specify references to both a Router a
 It might be tricky to solve this challenge if you see EDA for the first time, so here is a solution:
 
 ```yaml
-apiVersion: services.eda.nokia.com/v1alpha1
+apiVersion: services.eda.nokia.com/v1
 kind: VirtualNetwork
 metadata:
   name: virtual-network

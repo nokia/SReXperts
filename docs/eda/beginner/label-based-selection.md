@@ -51,23 +51,21 @@ Have one more look at the diagram above that depicts a leaf-spine topology manag
 
 When logged into the EDA UI you can find the list of nodes managed by EDA using the left side bar navigation and selecting **Targets** → **Nodes** menu.
 
-![nodes](https://gitlab.com/rdodin/pics/-/wikis/uploads/1ff53dfbf11061f7ecf42f00d901a96b/CleanShot_2025-04-09_at_20.49.31_2x.png)
+![nodes](https://gitlab.com/rdodin/pics/-/wikis/uploads/0767987fda89074031f79ed1fadff7c0/CleanShot_2025-08-18_at_21.11.53.png)
 
 You should see the familiar node names (we call these resources **TopoNodes**) as depicted in the diagram above and the associated metadata, specification and status. In the same table view you can find the **Labels** column that shows the labels attached to each node; they are collapsed under the `+5` icon, which means there are 5 labels attached to each node and there is no space to display them all in line.
 
 If you hover over this icon you should see the list of labels, but you can also select the **Configuration View** menu element at the end of each row to see the expanded view of the TopoNode resource:
 
-![conf view](https://gitlab.com/rdodin/pics/-/wikis/uploads/a0e58751d2a06913a79967add24a9b49/CleanShot_2025-04-09_at_20.56.20_2x.png)
+![conf view](https://gitlab.com/rdodin/pics/-/wikis/uploads/91a774298684ea02949664c24321f9a3/CleanShot_2025-08-18_at_21.14.56.png)
 
 In the configuration view labels are shown expanded, and we can see all five of them listed there, each carrying our some meaning:
 
-![labels](https://gitlab.com/rdodin/pics/-/wikis/uploads/07e690121aa6e93b13edb459ce52bd7a/CleanShot_2025-04-09_at_20.57.30_2x.png)
+![labels](https://gitlab.com/rdodin/pics/-/wikis/uploads/3cce7b1dc950b392c044894f448fef40/CleanShot_2025-08-18_at_21.30.19.png)
 
-As I selected the `leaf13` node, the important label it has attached to it is:
+For the selected `leaf13` node, the important label it has attached to it is:
 
-- `eda.nokia.com/role = leaf` - this label carries out the role of the node in the topology
-
-> This label has a key - `eda.nokia.com/role` and a value - `leaf`.
+- `eda.nokia.com/role = leaf` - this label carries out the role of the node in the topology and has a key - `eda.nokia.com/role` and a value - `leaf`.
 
 When onboarding the nodes of the topology to EDA we manually assigned labels to each nodes to identify their role and make it possible for EDA to select the nodes for the intents based on these labels.
 
@@ -113,10 +111,6 @@ You will use the loose coupling enabled by the labels to achieve that. Recall th
 Go on and **edit** the Banner resource you created in the first task and add the **Node Selector** field with the label all leaf nodes have in common. After you added the Node Selector, add the change to the transaction and run the Dry Run to ensure that all three leaf nodes will be targeted with the same banner.
 
 > Don't know how to use the Dry Run feature? Check out the [Declarative Intents](declarative-intents.md#dry-run) exercise first.
-
-### Create/Modify NTP Client on all nodes
-
-Fancy some more tasks? Can you modify the NTP client that you [configured in the Declarative Intents exercise](declarative-intents.md#configuring-ntp) to target all the nodes with a **single** label?
 
 <script type="text/javascript" src="https://viewer.diagrams.net/js/viewer-static.min.js" async></script>
 

@@ -59,7 +59,7 @@ Please refer to the paper provided by the hackathon session leader. If nothing h
 
 ### SSH
 
-The simplest way to get going is to use your SSH client to connect to your group's hackathon VM instance and work from there.  All tools and applications are pre-installed and you will have direct access to your entire network. 
+The simplest way to get going is to use your SSH client to connect to your group's hackathon VM instance and work from there.  All tools and applications are pre-installed and you will have direct access to your entire network.
 
 SSH is also important if you want to driectly access your network from your laptop but more on that later.
 
@@ -79,15 +79,15 @@ WiFi is important here.  Without it your hackathon experience is going to be rat
 
 ### Topology
 
-When accessing your hackathon VM instance you'll the [SReXperts GitHub repository](https://github.com/nokia/srexperts) that contains all of the documentation, examples, solutions and loads of other great stuff, has already been cloned for you.
+When accessing your hackathon VM instance you'll find that the [SReXperts GitHub repository](https://github.com/nokia/srexperts) contains all of the documentation, examples, solutions and loads of other great stuff, has already been cloned for you.
 
-In this hackathon, every group has their own complete service-provider network at their disposal.  Your network comprises an IP backbone with Provider (P) and Provider Edge (PE) router, a broadband dial-in network, a peering edge network, an internet exchange point, multiple data-centers and a number of client and subscriber devices.  This network is already deployed and provisioned and is ready to go!
+In this hackathon, every group has their own complete service-provider network at their disposal.  Your network comprises an IP backbone with Provider (P) and Provider Edge (PE) routers, a broadband dial-in network, a peering edge network, an internet exchange point, multiple data-centers and a number of client and subscriber devices.  This network is already deployed and provisioned and is ready to go!
 
 *Don't worry: This is your personal group network, you cannot impact any other groups.*
 
 -{{ diagram(url='srexperts/hackathon-diagrams/main/SReXperts2025.drawio', title='Topology', page=0) }}-
 
-The above topology contains a number of functional blocks to help you in area's you might want to focus on, it contains:
+The above topology contains a number of functional blocks to help you in areas you might want to focus on, it contains:
 
 - Routing:
     - SR-MPLS (Dual-Stack ISIS)
@@ -132,7 +132,7 @@ sudo containerlab inspect -a
 │           Topology          │  Lab Name │                Name                │                  Kind/Image                 │   State   │ IPv4/6 Address │
 ├─────────────────────────────┼───────────┼────────────────────────────────────┼─────────────────────────────────────────────┼───────────┼────────────────┤
 │ SReXperts/clab/srx.clab.yml │ srexperts │ clab-srexperts-agg1                │ nokia_srlinux                               │ running   │ 10.128.1.52    │
-│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.4               │           │ N/A            │
+│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.3               │           │ N/A            │
 │                             │           ├────────────────────────────────────┼─────────────────────────────────────────────┼───────────┼────────────────┤
 │                             │           │ clab-srexperts-client01            │ linux                                       │ running   │ 10.128.1.25    │
 │                             │           │                                    │ ghcr.io/srl-labs/network-multitool          │           │ N/A            │
@@ -171,19 +171,19 @@ sudo containerlab inspect -a
 │                             │           │                                    │ grafana/grafana:10.3.5                      │           │ N/A            │
 │                             │           ├────────────────────────────────────┼─────────────────────────────────────────────┼───────────┼────────────────┤
 │                             │           │ clab-srexperts-ixp1                │ nokia_srlinux                               │ running   │ 10.128.1.51    │
-│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.4               │           │ N/A            │
+│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.3               │           │ N/A            │
 │                             │           ├────────────────────────────────────┼─────────────────────────────────────────────┼───────────┼────────────────┤
 │                             │           │ clab-srexperts-leaf11              │ nokia_srlinux                               │ running   │ 10.128.1.33    │
-│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.4               │           │ N/A            │
+│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.3               │           │ N/A            │
 │                             │           ├────────────────────────────────────┼─────────────────────────────────────────────┼───────────┼────────────────┤
 │                             │           │ clab-srexperts-leaf12              │ nokia_srlinux                               │ running   │ 10.128.1.34    │
-│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.4               │           │ N/A            │
+│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.3               │           │ N/A            │
 │                             │           ├────────────────────────────────────┼─────────────────────────────────────────────┼───────────┼────────────────┤
 │                             │           │ clab-srexperts-leaf13              │ nokia_srlinux                               │ running   │ 10.128.1.35    │
-│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.4               │           │ N/A            │
+│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.3               │           │ N/A            │
 │                             │           ├────────────────────────────────────┼─────────────────────────────────────────────┼───────────┼────────────────┤
 │                             │           │ clab-srexperts-leaf21              │ nokia_srlinux                               │ running   │ 10.128.1.41    │
-│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.4               │           │ N/A            │
+│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.3               │           │ N/A            │
 │                             │           ├────────────────────────────────────┼─────────────────────────────────────────────┼───────────┼────────────────┤
 │                             │           │ clab-srexperts-loki                │ linux                                       │ running   │ 10.128.1.76    │
 │                             │           │                                    │ grafana/loki:2.9.7                          │           │ N/A            │
@@ -216,7 +216,7 @@ sudo containerlab inspect -a
 │                             │           │                                    │ vr-sros:25.3.R1                             │ (healthy) │ N/A            │
 │                             │           ├────────────────────────────────────┼─────────────────────────────────────────────┼───────────┼────────────────┤
 │                             │           │ clab-srexperts-peering2            │ nokia_srlinux                               │ running   │ 10.128.1.53    │
-│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.4               │           │ N/A            │
+│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.3               │           │ N/A            │
 │                             │           ├────────────────────────────────────┼─────────────────────────────────────────────┼───────────┼────────────────┤
 │                             │           │ clab-srexperts-postgres            │ linux                                       │ running   │ 10.128.1.84    │
 │                             │           │                                    │ docker.io/postgres:17-alpine                │           │ N/A            │
@@ -240,10 +240,10 @@ sudo containerlab inspect -a
 │                             │           │                                    │ rpki/stayrtr                                │           │ N/A            │
 │                             │           ├────────────────────────────────────┼─────────────────────────────────────────────┼───────────┼────────────────┤
 │                             │           │ clab-srexperts-spine11             │ nokia_srlinux                               │ running   │ 10.128.1.31    │
-│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.4               │           │ N/A            │
+│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.3               │           │ N/A            │
 │                             │           ├────────────────────────────────────┼─────────────────────────────────────────────┼───────────┼────────────────┤
 │                             │           │ clab-srexperts-spine12             │ nokia_srlinux                               │ running   │ 10.128.1.32    │
-│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.4               │           │ N/A            │
+│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.3               │           │ N/A            │
 │                             │           ├────────────────────────────────────┼─────────────────────────────────────────────┼───────────┼────────────────┤
 │                             │           │ clab-srexperts-sub1                │ linux                                       │ running   │ 10.128.1.61    │
 │                             │           │                                    │ ghcr.io/srl-labs/network-multitool          │           │ N/A            │
@@ -261,13 +261,13 @@ sudo containerlab inspect -a
 │                             │           │                                    │ ghcr.io/srl-labs/network-multitool          │           │ N/A            │
 │                             │           ├────────────────────────────────────┼─────────────────────────────────────────────┼───────────┼────────────────┤
 │                             │           │ clab-srexperts-vRR                 │ nokia_srlinux                               │ running   │ 10.128.1.13    │
-│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.4               │           │ N/A            │
+│                             │           │                                    │ ghcr.io/nokia/srlinux:24.10.3               │           │ N/A            │
 ╰─────────────────────────────┴───────────┴────────────────────────────────────┴─────────────────────────────────────────────┴───────────┴────────────────╯
 ```
 
 ///
 
-Using the names from the above output, we can login to the a node using the following command:
+Using the names from the above output, we can login to a node using the following command:
 
 For example, to access the `clab-srexperts-pe1` node via ssh simply type:
 
@@ -375,7 +375,7 @@ In the generic topology, linux clients are attached to a number of routers:
 One can start and/or stop traffic by connecting to the relevant client using SSH, and running `/traffic.sh`, for example:
 
 ```
-ssh user@clab-srexperts-client11
+ssh admin@clab-srexperts-client11
 
 client11:~$ /traffic.sh [-a <start|stop>] [-d <dns hostname>]
 ```
@@ -433,7 +433,7 @@ stopping traffic to client21.grt
 
 ### My employer/security department locked down my laptop
 
-No worries, we have got you covered! Each instance is running a web-based VSCode code server, when accessing it at `http://<my group id>.srexperts.net` should prompt you for a password (which is documented on the physical paper provided), and you should be able to access the topology through the terminal there.
+No worries, we have got you covered! Each instance is running a web-based VSCode code server, when accessing it at `https://<my group id>.srexperts.net` should prompt you for a password (which is documented on the physical paper provided), and you should be able to access the topology through the terminal there.
 
 ### Help! I've bricked my lab, how do I redeploy?
 
@@ -999,7 +999,7 @@ Run 'sudo clab version upgrade' or see https://containerlab.dev/install/ for ins
 │                Name                │                  Kind/Image                 │  State  │ IPv4/6 Address │
 ├────────────────────────────────────┼─────────────────────────────────────────────┼─────────┼────────────────┤
 │ clab-srexperts-agg1                │ nokia_srlinux                               │ running │ 10.128.15.52   │
-│                                    │ ghcr.io/nokia/srlinux:24.10.4               │         │ N/A            │
+│                                    │ ghcr.io/nokia/srlinux:24.10.3               │         │ N/A            │
 ├────────────────────────────────────┼─────────────────────────────────────────────┼─────────┼────────────────┤
 │ clab-srexperts-client01            │ linux                                       │ running │ 10.128.15.25   │
 │                                    │ ghcr.io/srl-labs/network-multitool          │         │ N/A            │
@@ -1038,19 +1038,19 @@ Run 'sudo clab version upgrade' or see https://containerlab.dev/install/ for ins
 │                                    │ grafana/grafana:10.3.5                      │         │ N/A            │
 ├────────────────────────────────────┼─────────────────────────────────────────────┼─────────┼────────────────┤
 │ clab-srexperts-ixp1                │ nokia_srlinux                               │ running │ 10.128.15.51   │
-│                                    │ ghcr.io/nokia/srlinux:24.10.4               │         │ N/A            │
+│                                    │ ghcr.io/nokia/srlinux:24.10.3               │         │ N/A            │
 ├────────────────────────────────────┼─────────────────────────────────────────────┼─────────┼────────────────┤
 │ clab-srexperts-leaf11              │ nokia_srlinux                               │ running │ 10.128.15.33   │
-│                                    │ ghcr.io/nokia/srlinux:24.10.4               │         │ N/A            │
+│                                    │ ghcr.io/nokia/srlinux:24.10.3               │         │ N/A            │
 ├────────────────────────────────────┼─────────────────────────────────────────────┼─────────┼────────────────┤
 │ clab-srexperts-leaf12              │ nokia_srlinux                               │ running │ 10.128.15.34   │
-│                                    │ ghcr.io/nokia/srlinux:24.10.4               │         │ N/A            │
+│                                    │ ghcr.io/nokia/srlinux:24.10.3               │         │ N/A            │
 ├────────────────────────────────────┼─────────────────────────────────────────────┼─────────┼────────────────┤
 │ clab-srexperts-leaf13              │ nokia_srlinux                               │ running │ 10.128.15.35   │
-│                                    │ ghcr.io/nokia/srlinux:24.10.4               │         │ N/A            │
+│                                    │ ghcr.io/nokia/srlinux:24.10.3               │         │ N/A            │
 ├────────────────────────────────────┼─────────────────────────────────────────────┼─────────┼────────────────┤
 │ clab-srexperts-leaf21              │ nokia_srlinux                               │ running │ 10.128.15.41   │
-│                                    │ ghcr.io/nokia/srlinux:24.10.4               │         │ N/A            │
+│                                    │ ghcr.io/nokia/srlinux:24.10.3               │         │ N/A            │
 ├────────────────────────────────────┼─────────────────────────────────────────────┼─────────┼────────────────┤
 │ clab-srexperts-loki                │ linux                                       │ running │ 10.128.15.76   │
 │                                    │ grafana/loki:2.9.7                          │         │ N/A            │
@@ -1083,7 +1083,7 @@ Run 'sudo clab version upgrade' or see https://containerlab.dev/install/ for ins
 │                                    │ vr-sros:25.3.R1                             │         │ N/A            │
 ├────────────────────────────────────┼─────────────────────────────────────────────┼─────────┼────────────────┤
 │ clab-srexperts-peering2            │ nokia_srlinux                               │ running │ 10.128.15.53   │
-│                                    │ ghcr.io/nokia/srlinux:24.10.4               │         │ N/A            │
+│                                    │ ghcr.io/nokia/srlinux:24.10.3               │         │ N/A            │
 ├────────────────────────────────────┼─────────────────────────────────────────────┼─────────┼────────────────┤
 │ clab-srexperts-postgres            │ linux                                       │ running │ 10.128.15.84   │
 │                                    │ docker.io/postgres:17-alpine                │         │ N/A            │
@@ -1107,10 +1107,10 @@ Run 'sudo clab version upgrade' or see https://containerlab.dev/install/ for ins
 │                                    │ rpki/stayrtr                                │         │ N/A            │
 ├────────────────────────────────────┼─────────────────────────────────────────────┼─────────┼────────────────┤
 │ clab-srexperts-spine11             │ nokia_srlinux                               │ running │ 10.128.15.31   │
-│                                    │ ghcr.io/nokia/srlinux:24.10.4               │         │ N/A            │
+│                                    │ ghcr.io/nokia/srlinux:24.10.3               │         │ N/A            │
 ├────────────────────────────────────┼─────────────────────────────────────────────┼─────────┼────────────────┤
 │ clab-srexperts-spine12             │ nokia_srlinux                               │ running │ 10.128.15.32   │
-│                                    │ ghcr.io/nokia/srlinux:24.10.4               │         │ N/A            │
+│                                    │ ghcr.io/nokia/srlinux:24.10.3               │         │ N/A            │
 ├────────────────────────────────────┼─────────────────────────────────────────────┼─────────┼────────────────┤
 │ clab-srexperts-sub1                │ linux                                       │ running │ 10.128.15.61   │
 │                                    │ ghcr.io/srl-labs/network-multitool          │         │ N/A            │
@@ -1128,7 +1128,7 @@ Run 'sudo clab version upgrade' or see https://containerlab.dev/install/ for ins
 │                                    │ ghcr.io/srl-labs/network-multitool          │         │ N/A            │
 ├────────────────────────────────────┼─────────────────────────────────────────────┼─────────┼────────────────┤
 │ clab-srexperts-vRR                 │ nokia_srlinux                               │ running │ 10.128.15.13   │
-│                                    │ ghcr.io/nokia/srlinux:24.10.4               │         │ N/A            │
+│                                    │ ghcr.io/nokia/srlinux:24.10.3               │         │ N/A            │
 ╰────────────────────────────────────┴─────────────────────────────────────────────┴─────────┴────────────────╯
 ```
 
@@ -1212,4 +1212,4 @@ gh repo clone nokia/SReXperts
 
 ## Thanks and contributions
 
-As you can imagine, creating the activities that make up this hackathon is a lot of work.  The hackathon team would like to thanks the following team members (in alphabetical order) for their contributions: Asad Arafat, Diogo Pinheiro, Guilherme Cale, Hans Thienpondt, James Cumming, Joao Machado, Kaelem Chandra, Laleh Kiani, Louis Van Eeckhoudt, Maged Makramalla, Miguel Redondo Ferrero, Roman Dodin, Saju Salahudeen, Samier Barguil, Shafkat Waheed, Shashi Sharma, Simon Tibbitts, Siva Sivakumar, Subba Konda, Sven Wisotzky, Thomas Hendriks, Tiago Amado. Zeno Dhaene, Tim Raphael and Vasileios Tekidis
+As you can imagine, creating the activities that make up this hackathon is a lot of work.  The hackathon team would like to thank the following team members (in alphabetical order) for their contributions: Asad Arafat, Bhavish Khatri, Diogo Pinheiro, Guilherme Cale, Hans Thienpondt, James Cumming, Joao Machado, Kaelem Chandra, Laleh Kiani, Louis Van Eeckhoudt, Maged Makramalla, Miguel Redondo Ferrero, Roman Dodin, Saju Salahudeen, Samier Barguil, Shafkat Waheed, Shashi Sharma, Simon Tibbitts, Siva Sivakumar, Subba Konda, Sven Wisotzky, Thomas Hendriks, Tiago Amado. Zeno Dhaene, Tim Raphael and Vasileios Tekidis

@@ -396,7 +396,7 @@ connection = connect(host = "clab-srexperts-pe1", username = "admin", hostkey_ve
 !!! note
     Executing `connect()` might take some time when it connects for the first time, as it needs to transfer information from the node to establish the connection.
     On posterior connections, this function will execute much faster, as the information will be kept cached.
-    
+
 !!! warning
     The option `hostkey_verify = False` disables verification of the host key when establishing the SSH connection. This option should be enabled if used in a production environment.
 ///
@@ -682,7 +682,7 @@ scp show-commits.py admin@clab-srexperts-pe1:cf3:/
 ❯ scp show-commits.py admin@clab-srexperts-pe1:cf3:/
 Warning: Permanently added 'clab-srexperts-pe1' (ECDSA) to the list of known hosts.
 
-show-commits.py                                                                            100% 2411   784.5KB/s   00:00
+show-commits.py                                                               100% 2411   784.5KB/s   00:00
 ```
 ///
 ///
@@ -1312,7 +1312,7 @@ With the work you have put in, you should now have a basic understanding of the 
 
 - Creating a Python script and setting it up as a custom `show` command in SR OS.
 
-If you also ventured into the optional, more advanced tasks, you should also have become familiar with: 
+If you also ventured into the optional, more advanced tasks, you should also have become familiar with:
 
 - Using the data obtained through pySROS to extend your custom command with additional information.
 

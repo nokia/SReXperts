@@ -30,10 +30,10 @@ This activity demonstrates how the open-source tool Scapy (pre-installed on SR L
 
 Consider the following scenario:<p>
 Unidirectional packet loss was reported for client traffic sourced from `client11` destined for `client13`.
-After some trial and error actions, customer found the issue was resolved after disabling the underlay BGP session between :material-router: spine11 and :material-router: leaf11, diverting the traffic away from that link.<p>  
+After some trial and error actions, customer found the issue was resolved after disabling the underlay BGP session between :material-router: spine11 and :material-router: leaf11, diverting the traffic away from that link.<p>
 
 The workaround applied on :material-router: leaf11 is:
-``` 
+```
 delete / network-instance default protocols bgp dynamic-neighbors interface ethernet-1/49.0
 ```
 ![DC1](../../../images/18-custom-traffic-scapy.svg)
@@ -44,11 +44,11 @@ Your goal is to:<p>
 3.  Verify the issue is resolved, before reactivating BGP session.
 
 ## Technology explanation
-To tackle this activity you will need to combine different tools present in SR Linux that will allow to manipulate and observe network traffic.<p>  
+To tackle this activity you will need to combine different tools present in SR Linux that will allow to manipulate and observe network traffic.<p>
 
 A basic level of Python, Linux OS, and SR Linux CLI navigation proficiency is assumed for this activity.<p>
 
-The key technologies used in this activity are described here:  
+The key technologies used in this activity are described here:
 
 ### SR Linux routed interfaces
 In SR Linux, any of the following objects is considered a routed interface:
@@ -83,8 +83,8 @@ A:n1# bash network-instance default ip address show e1-1.0
 ///
 
 ### Scapy
-[Scapy](https://scapy.net/){:target="_blank"} is a powerful open-source interactive packet manipulation program. It is able to craft or decode packets of a wide number of protocols, send them on the wire, capture them, match requests and replies, and much more. 
-It comes already pre-installed and is available from the SR Linux python virtual-environment. We can use it to send custom packets out of SR Linux routed interfaces. 
+[Scapy](https://scapy.net/){:target="_blank"} is a powerful open-source interactive packet manipulation program. It is able to craft or decode packets of a wide number of protocols, send them on the wire, capture them, match requests and replies, and much more.
+It comes already pre-installed and is available from the SR Linux python virtual-environment. We can use it to send custom packets out of SR Linux routed interfaces.
 
 /// note
 Make sure to launch scapy in the same network-instance as the target interface and from a user with **super-user** privilege.
@@ -95,8 +95,8 @@ You can use scapy through an interactive shell or by running python scripts.
 
 ```bash title="opening interactive shell from SR Linux CLI"
 A:n1# bash network-instance default /opt/srlinux/python/virtual-env/bin/scapy
-                                      
-                     aSPY//YASa       
+
+                     aSPY//YASa
              apyyyyCY//////////YCa       |
             sY//////YSpcs  scpCY//Pp     | Welcome to Scapy
  ayp ayyyyyyySCP//Pp           syY//C    | Version 2.5.0
@@ -109,17 +109,17 @@ A:n1# bash network-instance default /opt/srlinux/python/virtual-env/bin/scapy
        scccccp///pSP///p          p//Y   | day on earth.
       sY/////////y  caa           S//P   |                      -- Lao-Tze
        cayCyayP//Ya              pY/Ya   |
-        sY/PsY////YCc          aC//Yp 
-         sc  sccaCY//PCypaapyCP//YSs  
-                  spCPY//////YPSps    
-                       ccaacs         
-                                      
->>> 
+        sY/PsY////YCc          aC//Yp
+         sc  sccaCY//PCypaapyCP//YSs
+                  spCPY//////YPSps
+                       ccaacs
+
+>>>
 ```
-///   
+///
 /// tab | script
 
-``` title="/etc/opt/srlinux/scapytest.py" 
+``` title="/etc/opt/srlinux/scapytest.py"
 from scapy.all import *
 p=Ether(src='1A:CF:01:FF:00:00',dst='1A:CF:01:FF:00:01')/IP(src='192.168.1.2',dst='192.168.1.1')/ICMP(type=8)/Raw(load='hackaton2025')
 sendp(p,iface='e1-50.0')
@@ -135,7 +135,7 @@ Sent 1 packets.
 This allows you to edit scripts directly from the host using Visual Studio Code or any other editor.
 ///
 /// tip | CLI alias
-Create an environment [alias](https://learn.srlinux.dev/cli/#aliases){:target="_blank"} to easily run scapy scripts located in `/etc/opt/srlinux/` from your SR Linux CLI.  
+Create an environment [alias](https://learn.srlinux.dev/cli/#aliases){:target="_blank"} to easily run scapy scripts located in `/etc/opt/srlinux/` from your SR Linux CLI.
 ``` title="run-scapy alias"
 environment alias "run-scapy {name}" "bash network-instance default /opt/srlinux/python/virtual-env/bin/python /etc/opt/srlinux/{name}"
 ```
@@ -175,17 +175,17 @@ p
 p.show()
 ```
 ```python
-###[ Ethernet ]### 
+###[ Ethernet ]###
   dst       = 1A:CF:01:FF:00:01
   src       = 1A:CF:01:FF:00:00
   type      = IPv4
-###[ IP ]### 
+###[ IP ]###
      version   = 4
      ihl       = None
      tos       = 0x0
      len       = None
      id        = 1
-     flags     = 
+     flags     =
      frag      = 0
      ttl       = 64
      proto     = icmp
@@ -193,14 +193,14 @@ p.show()
      src       = 192.168.1.2
      dst       = 192.168.1.1
      \options   \
-###[ ICMP ]### 
+###[ ICMP ]###
         type      = echo-request
         code      = 0
         chksum    = None
         id        = 0x0
         seq       = 0x0
         unused    = ''
-###[ Raw ]### 
+###[ Raw ]###
            load      = 'hackaton2025'
 ```
 ///
@@ -212,17 +212,17 @@ p.show()
 p.show2()
 ```
 ```python
-###[ Ethernet ]### 
+###[ Ethernet ]###
   dst       = 1a:cf:01:ff:00:01
   src       = 1a:cf:01:ff:00:00
   type      = IPv4
-###[ IP ]### 
+###[ IP ]###
      version   = 4
      ihl       = 5
      tos       = 0x0
      len       = 40
      id        = 1
-     flags     = 
+     flags     =
      frag      = 0
      ttl       = 64
      proto     = icmp
@@ -230,14 +230,14 @@ p.show2()
      src       = 192.168.1.2
      dst       = 192.168.1.1
      \options   \
-###[ ICMP ]### 
+###[ ICMP ]###
         type      = echo-request
         code      = 0
         chksum    = 0xf6ea
         id        = 0x0
         seq       = 0x0
         unused    = ''
-###[ Raw ]### 
+###[ Raw ]###
            load      = 'hackaton2025'
 ```
 ///
@@ -276,7 +276,7 @@ sendp(p,iface='e1-1.0')
 .
 Sent 1 packets.
 ```
-/// note 
+/// note
 checksum fields are calculated automatically if not defined
 ///
 ///
@@ -298,7 +298,7 @@ pkts[0]
 /// details | finding class arguments
     type: tip
 Use help function, or check [Scapy API reference](https://scapy.readthedocs.io/en/latest/api/scapy.html){:target="_blank"}
-```python 
+```python
 help(ICMPv6EchoRequest)
 ```
 ```python
@@ -333,17 +333,17 @@ It's possible to sniff any containerlab node link by [manually executing a shell
 ///
 ## Tasks
 
-**You should read these tasks from top-to-bottom before beginning the activity**.  
+**You should read these tasks from top-to-bottom before beginning the activity**.
 
-It is tempting to skip ahead but tasks may require you to have completed previous tasks before tackling them.  
+It is tempting to skip ahead but tasks may require you to have completed previous tasks before tackling them.
 
 /// warning
-MAC and IP addresses displayed in the outputs will differ from your Hackacton VM instance.
+MAC and IP addresses displayed in the outputs will differ from your Hackathon VM instance.
 ///
 
 ### Practice scapy
 This is an optional introductory exercise to get familiar with scapy.<p>
-Goal: generate an IPv6 `echo request` with payload "hackaton2025" from leaf11 to leaf13 (using system IPv6 addresses), via spine11.  
+Goal: generate an IPv6 `echo request` with payload "hackaton2025" from leaf11 to leaf13 (using system IPv6 addresses), via spine11.
 Verify that leaf13 successfully responds with an `echo reply`.<p>
 
 Start by opening 3 separate CLI sessions, one to each node: leaf11, spine11, leaf13. You can connect from your Hackaton VM instance using the following commands:
@@ -358,10 +358,10 @@ ssh admin@clab-srexperts-leaf13
 ```
 
 #### Test ping from CLI
-Let's start by testing a regular ping using CLI.<p> 
+Let's start by testing a regular ping using CLI.<p>
 
 Consult the `leaf11` and `leaf13` IPv6 addresses of the system interface:
-```title="example - consulting leaf11 system address" hl_lines="11" 
+```title="example - consulting leaf11 system address" hl_lines="11"
 --{ + running }--[  ]--
 A:g15-leaf11# /show interface system0
 =======================================================================
@@ -399,7 +399,7 @@ with `verbose` option, more details of the packet can be seen
 ```title="traffic-monitor using verbose option"
 /tools system traffic-monitor protocol icmp6 destination-address fd00:fde8::15:35 source-address fd00:fde8::15:33 verbose
 ```
-/// 
+///
 /// tab | expected output
 ```title="traffic-monitor"
 A:g15-leaf13# /tools system traffic-monitor protocol icmp6 destination-address fd00:fde8::15:35 source-address fd00:fde8::15:33
@@ -518,9 +518,9 @@ ethernet-1/49 is up, speed 100G, type None
 ======================================================================
 ```
 The subinterface is `ethernet-1/49.0` SR Linux CLI, which is attached to the network-instance `default` (the instance associated with the global routing-table). <br>
-///admonition 
+///admonition
     type: question
-What is correspondent name of this subinterface on Linux?
+What is corresponding name of this subinterface on Linux?
 ///
 ///
 
@@ -537,7 +537,7 @@ Alternatively, you can login to the next-hop and directly inspect it from the in
 ///
 /// tab | expected output
 ```bash hl_lines="5"
-A:g15-leaf11# /show arpnd neighbors 
+A:g15-leaf11# /show arpnd neighbors
 +----------------+----------------+------------------------+---------+--------------------+---------------+-------------------+-----------+
 |    Interface   |  Subinterface  |        Neighbor        | Origin  | Link layer address | Current state | Next state change | Is Router |
 +================+================+========================+=========+====================+===============+===================+===========+
@@ -588,8 +588,8 @@ bash network-instance default
 A:g15-leaf11# bash network-instance default
 admin@g15-leaf11:~$ /opt/srlinux/python/virtual-env/bin/scapy
 AutoCompletion, History are disabled.
-                                      
-                     aSPY//YASa       
+
+                     aSPY//YASa
              apyyyyCY//////////YCa       |
             sY//////YSpcs  scpCY//Pp     | Welcome to Scapy
  ayp ayyyyyyySCP//Pp           syY//C    | Version 2.5.0
@@ -603,22 +603,22 @@ AutoCompletion, History are disabled.
       sY/////////y  caa           S//P   | the wires and in the waves.
        cayCyayP//Ya              pY/Ya   |        -- Jean-Claude Van Damme
         sY/PsY////YCc          aC//Yp    |
-         sc  sccaCY//PCypaapyCP//YSs  
-                  spCPY//////YPSps    
-                       ccaacs         
-                                      
->>> 
+         sc  sccaCY//PCypaapyCP//YSs
+                  spCPY//////YPSps
+                       ccaacs
+
+>>>
 ```
 ///
 
-Use scapy's [layer stacking](https://scapy.readthedocs.io/en/latest/usage.html#stacking-layers){:target="_blank"} to build the packet and store it in a python variable. All Scapy functions and classes should be already loaded by default in this interactive python shell.  
+Use scapy's [layer stacking](https://scapy.readthedocs.io/en/latest/usage.html#stacking-layers){:target="_blank"} to build the packet and store it in a python variable. All Scapy functions and classes should be already loaded by default in this interactive python shell.
 
 ///Tip
 Use the following Scapy classes to build the packet<p>
-- [Ether()](https://scapy.readthedocs.io/en/latest/api/scapy.layers.l2.html#scapy.layers.l2.Ether){:target="_blank"}  
-- [IPv6()](https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.IPv6){:target="_blank"}  
-- [ICMPv6EchoRequest()](https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.ICMPv6EchoRequest){:target="_blank"}  
-- [Raw()](https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Raw){:target="_blank"}  
+- [Ether()](https://scapy.readthedocs.io/en/latest/api/scapy.layers.l2.html#scapy.layers.l2.Ether){:target="_blank"}
+- [IPv6()](https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.IPv6){:target="_blank"}
+- [ICMPv6EchoRequest()](https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.ICMPv6EchoRequest){:target="_blank"}
+- [Raw()](https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Raw){:target="_blank"}
 
 Check out [scapy recipes](#scapy-recipes) for an example of a packet built using layer stacking.
 ///
@@ -626,11 +626,11 @@ Check out [scapy recipes](#scapy-recipes) for an example of a packet built using
 After you build the packet, use the `show()` method to display it. Should look like this:
 ```python title="displaying packet object stored in the variable pkt"
 >>> p.show()
-###[ Ethernet ]### 
+###[ Ethernet ]###
   dst       = 1A:EF:1D:FF:00:01
   src       = 1A:41:AA:AA:00:32
   type      = IPv6
-###[ IPv6 ]### 
+###[ IPv6 ]###
      version   = 6
      tc        = 0
      fl        = 0
@@ -639,14 +639,14 @@ After you build the packet, use the `show()` method to display it. Should look l
      hlim      = 64
      src       = fd00:fde8::15:33
      dst       = fd00:fde8::15:35
-###[ ICMPv6 Echo Request ]### 
+###[ ICMPv6 Echo Request ]###
         type      = Echo Request
         code      = 0
         cksum     = None
         id        = 0x0
         seq       = 0x0
         data      = ''
-###[ Raw ]### 
+###[ Raw ]###
            load      = 'hackaton2025'
 ```
 
@@ -656,13 +656,13 @@ Continuing from the previous Scapy interactive session, use the [`sendp` functio
 Check out [scapy recipes](#scapy-recipes) for an example.
 ///
 
-You will know to have succeeded if the custom generated ICMPv6 `echo request` hits the leaf13 ethernet-1/49.0 and an ICMPv6 `echo response` is generated back towards leaf11.  
+You will know to have succeeded if the custom generated ICMPv6 `echo request` hits the leaf13 ethernet-1/49.0 and an ICMPv6 `echo response` is generated back towards leaf11.
 The ICMP payload should read "**hackaton2025**"<p>
-  
+
 /// tip
 To monitor the ICMP probes you can use `tools system traffic-monitor` from the SR Linux CLI (note that `traffic-monitor` is only able to capture on ingress direction).
-On the leaf nodes you can also use `tcpdump` from the bash shell, which will display both `egress` and `ingress` direction since the probes terminate in the leafs control-plane.  
-On the spine, `tcpdump` from bash will not capture the ICMP packet because this is treated as transit traffic.  
+On the leaf nodes you can also use `tcpdump` from the bash shell, which will display both `egress` and `ingress` direction since the probes terminate in the leafs control-plane.
+On the spine, `tcpdump` from bash will not capture the ICMP packet because this is treated as transit traffic.
 /// details | Monitoring ICMP on leaf11 with `tcpdump`
     type: tip
 /// tab | cmd
@@ -765,7 +765,7 @@ Internet Control Message Protocol v6
 ///
 
 #### Build & Send the packet in one-shot by executing a python script
-Here you will repeat the same task but using a script instead of the Scapy interactive shell.  
+Here you will repeat the same task but using a script instead of the Scapy interactive shell.
 ///tip
 Check out [Scapy technology explanation - Script ](#__tabbed_2_2) for an example
 ///
@@ -816,19 +816,19 @@ listening on any, link-type LINUX_SLL2 (Linux cooked v2), snapshot length 262144
 
 For the rest of activity, we will simulate a network issue which we will diagnose.
 
-Activate traffic between `client11` and `client13`.  
+Activate traffic between `client11` and `client13`.
 /// details | How to open a shell prompt to access client nodes
     type: tip
 
 From your Hackton VM, you can use either of this options:
 
-- `ssh user@<client-hostname>`
+- `ssh admin@<client-hostname>`
 - `sudo docker exec -it clab-srexperts-<client-hostname> bash`
 
 Example - accessing client11:
 /// tab | ssh
 ```
-❯ ssh user@clab-srexperts-client11
+❯ ssh admin@clab-srexperts-client11
 
 [*]─[client11]─[~]
 ```
@@ -838,7 +838,7 @@ Example - accessing client11:
 ❯ sudo docker exec -it clab-srexperts-client11 bash
 
 [*]─[client11]─[/]
-└──> 
+└──>
 ```
 ///
 ///
@@ -846,7 +846,7 @@ Example - accessing client11:
 /// details | Start traffic flow between client11 and client13
 /// tab | cmd
 ```bash title="from client11"
-/traffic.sh -a start -d client13.vprn.dci  
+/traffic.sh -a start -d client13.vprn.dci
 ```
 ///
 /// tab | expected output
@@ -863,7 +863,7 @@ This creates 8 TCP flows pushing 2Mbps from client11 to client13
 Verify that the traffic is being load-balanced between the two spines. You use `traffic-monitor` on leaf13 or visualize it in Grafana.
 You should see that leaf13 receives traffic destined for client13 from both spines.
 
-/// details | `traffic-monitor` on leaf13 
+/// details | `traffic-monitor` on leaf13
 /// tab | cmd
 ```
 tools system traffic-monitor destination-address fd00:ffdd:0:30::13
@@ -897,7 +897,7 @@ Notice that traffic destined to client13 (fd00:ffdd:0:30::13) is being received 
 ///
 
 /// details | visualizing traffic in Grafana
-    type: note 
+    type: note
 Connect to Grafana to have a real-time view of link utilization across fabric.
 ``` title="Grafana URL"
 http://<group-id>.srexperts.net:3000/
@@ -1039,7 +1039,7 @@ scp admin@clab-srexperts-spine12:/etc/opt/srlinux/sample_clean.pcap admin@clab-s
 ///
 
 /// details | selecting a packet to replicate
-Inspect the pcap in scapy interactive shell or wireshark/tcpdump to find an interesting packet. 
+Inspect the pcap in scapy interactive shell or wireshark/tcpdump to find an interesting packet.
 /// tab | cmd
 ```bash title="using tcpdump to inspect first 5 packets of a pcap file"
 tcpdump -n --number -c 5 -r /etc/opt/srlinux/sample_clean.pcap
@@ -1085,8 +1085,8 @@ p['TCP'].sport = 22050
 p['Ether'].dst = '1A:40:1E:FF:00:01' #mac-address of spine12 interface ethernet-1/1
 sendp(p,iface='e1-50.0',count=1)
 ```
-On leaf11, we load the .pcap, pick one of the packets, modify it and finally send it via the "bad" and the "good" paths.  
-Ethernet destination address is modified to match the respective next-hop interfaces of spine11 and spine12. 
+On leaf11, we load the .pcap, pick one of the packets, modify it and finally send it via the "bad" and the "good" paths.
+Ethernet destination address is modified to match the respective next-hop interfaces of spine11 and spine12.
 Packet is marked with different port numbers, so we can easy correlate which one failed.
 
 ```python title="alternative way to build packet instead of loading from pcap"
@@ -1205,7 +1205,7 @@ commit stay
 ///
 
 ### Verify the issue is resolved
-Using the same scapy scripts as in previous tasks, re-test the path before enabling BGP. 
+Using the same scapy scripts as in previous tasks, re-test the path before enabling BGP.
 
 /// details | Solution
     type: success
@@ -1242,7 +1242,7 @@ commit stay
 ```
 ### Revert network condition
 Run this on your group's VM instance to rollback changes introduced by task 3 (Introduce the network condition).
-``` 
+```
 eval "$(base64 -d <<< "Z25taWMgLWEgY2xhYi1zcmV4cGVydHMtbGVhZjExIC11IGFkbWluIC1wICRFVkVOVF9QQVNTV09SRCAtLWluc2VjdXJlIHNldCAtLXVwZGF0ZSAvOjo6anNvbl9pZXRmOjo6IntcIm5ldHdvcmstaW5zdGFuY2VcIjpbe1wibmFtZVwiOlwiZGVmYXVsdFwiLFwicHJvdG9jb2xzXCI6e1wiYmdwXCI6e1wiZHluYW1pYy1uZWlnaGJvcnNcIjp7XCJpbnRlcmZhY2VcIjpbe1wiaW50ZXJmYWNlLW5hbWVcIjpcImV0aGVybmV0LTEvNDkuMFwiLFwicGVlci1ncm91cFwiOlwiYmdwZ3JvdXAtZWJncC1zcmV4cGVydHMtZmFicmljXCIsXCJhbGxvd2VkLXBlZXItYXNcIjpbXCI0MjAwMDAxMDAwXCJdfV19fX19XX0iO2dubWljIC1hIGNsYWItc3JleHBlcnRzLXNwaW5lMTEgLXUgYWRtaW4gLXAgJEVWRU5UX1BBU1NXT1JEIC0taW5zZWN1cmUgc2V0IC0tZGVsZXRlICcvYWNsL2FjbC1maWx0ZXJbbmFtZT12eGxhbl1bdHlwZT1pcHY0XScgLS1kZWxldGUgJy9hY2wvaW50ZXJmYWNlW2ludGVyZmFjZS1pZD1ldGhlcm5ldC0xLzEuMF0n")"
 ```
 ### Stop traffic

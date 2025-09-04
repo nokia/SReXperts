@@ -10,7 +10,7 @@
 | **Tools used**        | EDA UI                                                                                                      |
 | **References**        | [Allocation Pools documentation][allocation-docs]                                                                                                      |
 
-[allocation-docs]: https://docs.eda.dev/user-guide/allocation-pools/
+[allocation-docs]: https://docs.eda.dev/25.8/user-guide/allocation-pools/
 
 One of infamous challenges of network automation lies in the domain of Network Source of Trust, often abbreviated as NSoT. Managing IP addresses, ASN numbers, VLAN IDs and tunnel indexes without a system that allows you to both manage and enforce allocations to the network elements is a recipe for network configuration drift and sleepless nights.
 
@@ -118,7 +118,7 @@ Many resources you find in EDA will allow you to specify either a pool to select
 For example, when creating a VLAN resource, you can either set the VLAN ID manually, or let EDA allocate a VLAN ID from a pool of VLANs.
 
 ```yaml linenums="1" hl_lines="12-13"
-apiVersion: services.eda.nokia.com/v1alpha1
+apiVersion: services.eda.nokia.com/v1
 kind: VLAN
 metadata:
   name: macvrf-100-vlan1
@@ -210,7 +210,7 @@ You may also use Kubernetes API and `kubectl` tool available on the server insta
     type: example
 To find the resource kind for the specific allocation, find the allocation resource in the EDA UI, and switch to the YAML view of the resource to see its kind:
 
--{{video(url='https://gitlab.com/rdodin/pics/-/wikis/uploads/9516ffe210e798b8312013c3c29b1125/CleanShot_2025-04-15_at_13.58.35.mp4')}}-
+-{{video(url='https://gitlab.com/rdodin/pics/-/wikis/uploads/79d2d2257bef8afd26e7adb39366c210/CleanShot_2025-08-14_at_13.38.08.mp4')}}-
 
 Knowing the resource kind, you can use `kubectl` and list resources by its kind:
 
@@ -220,15 +220,15 @@ kubectl -n eda get indexallocationpools
 
 ///
 
-### Changing AS Numbering scheme
+### Find Allocated ASN Numbers
 
 Now that you know what allocation pools exist in your EDA instance, it is time to find out how these pools are used.
 
-The SReXperts 2025 topology that is deployed in the lab environment you work on uses EDA to deploy the fabric configuration over the three leafs and two spines that make up the DC1 topology.
+The SReXperts 2025 topology that is deployed in the lab environment you work on used EDA to deploy the fabric configuration over the three leafs and two spines that make up the datacenter topology.
 
 -{{ diagram(url='srexperts/hackathon-diagrams/main/eda.drawio', title='EDA Managed nodes', page=0, zoom=1.5) }}-
 
-By creating the **Fabric** resource in EDA, we configure the full underlay/overlay topology that makes it possible to create virtual networks on top of it. The Fabric configuration translates to several configuration blocks on the managed nodes:
+The pre-created **Fabric** resource configured the data center underlay to make it possible to create virtual networks on top of it. In particular, the Fabric resource is responsible for the following configuration on the managed nodes:
 
 * export/import policies
 * network instances
@@ -238,7 +238,7 @@ By creating the **Fabric** resource in EDA, we configure the full underlay/overl
 
 And all that, by submitting a single Fabric resource, that looks like in its entirety like this:
 
-```yaml linenums="1" hl_lines="13 26 29-30 33"
+```yaml linenums="1" hl_lines="14 26 29-30 33"
 --8<-- "eda/fabric/40_fabric.yaml"
 ```
 
@@ -246,7 +246,27 @@ Checkout the highlighted lines in the Fabric resource YAML. This is where we ref
 
 The Fabric application that processes the Fabric resource sees the referenced allocation pools and uses EDA SDK to request a next allocation for a particular resource.
 
-In this task you are asked to change the AS Numbers used for the leaf switches in our fabric from the the 4-byte AS Number scheme to the 2-byte AS Number scheme, while keeping spines
+You can check what values have been allocated from the relevant allocation pools using EQL. We are interested in the **AS Numbers** allocated for the data center switches, and as shown in the Fabric resource definition, the `srexperts-asnpool` is the allocation pool that is used to allocate AS Numbers.
+
+Open the Queries page and list allocated values by submitting the following EQL query:
+
+```
+.namespace.allocations.v1.template.instance.allocation where ( .namespace.allocations.v1.template.name = "srexperts-asnpool" )
+```
+
+This query lists the allocation key that an application used to request an AS number and the associated value.
+
+![allocations](https://gitlab.com/rdodin/pics/-/wikis/uploads/f5dc68342bfb509e2b21866102798a3d/CleanShot_2025-08-14_at_14.45.11.webp)
+
+The result of this query shows that our leafs have been allocated AS numbers from the `srexperts-asnpool`, namely:
+
+* leaf11 - 4200001000
+* leaf12 - 4200001001
+* leaf13 - 4200001002
+
+### Changing AS Numbering scheme
+
+In this task you are asked to change the AS Numbers used for the data center switches in our fabric from the default starting range of 4200001000 to some other 4-byte ASN range.
 
 /// details | Hints
     type: example
@@ -259,4 +279,4 @@ If you want a more challenging task, create a new pool and reference it from the
 
 By completing these tasks you should have a basic understanding of Allocation Pools used in EDA. What are they used for, what types of pools we have in the product and how they serve different purposes.
 
-You also learned how to change existing and create new allocation pools, and how resources reference the pools to request identifiers from them.
+You also learned how to find what allocation values have been used, change existing and create new allocation pools, and how resources reference the pools to request identifiers from them.

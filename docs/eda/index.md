@@ -4,7 +4,7 @@
 
 Event Driven Automation (EDA) is the state of the art automation platform that completes Nokia's Data Center portfolio:
 
-![portfolio](https://gitlab.com/rdodin/pics/-/wikis/uploads/8a5373e38de7ea4be5af8128ffab9d3c/CleanShot_2025-04-18_at_23.53.33_2x.png)
+![portfolio](https://gitlab.com/rdodin/pics/-/wikis/uploads/cad161eb76137f1034e7fbc8c196fdc8/CleanShot_2025-04-18_at_23.53.33_2x.webp)
 
 The design goals behind EDA were lofty and our ambitions were to create an infrastructure automation platform that addresses many challenges seen in the data center networking.
 
@@ -77,7 +77,7 @@ Clients are the Linux containers connected to the switches that you would need t
 To access the clients you first need to login to the lab server, and then from the server's shell you SSH further to the desired client.
 
 ```bash title="run from the lab server"
-ssh user@{client-hostname}
+ssh admin@{client-hostname}
 ```
 
 The switch hostnames are:
@@ -86,7 +86,7 @@ The switch hostnames are:
 * `clab-srexperts-client12`
 * `clab-srexperts-client13`
 
-The client's credentials are `user:multit00l`
+The client's credentials are `admin:multit00l`
 
 ///
 
@@ -102,7 +102,7 @@ Still, for the most part we expect you to follow the lead and use the UI to comp
 
 When you log in to the EDA UI you land on the **Main** page, here are the main areas of interest:
 
-![ui-1](https://gitlab.com/rdodin/pics/-/wikis/uploads/a33d12f0cb46c95563021ceba7992d96/CleanShot_2025-05-02_at_18.54.01_2x.png)
+![ui-1](https://gitlab.com/rdodin/pics/-/wikis/uploads/756d9cb79ed9deb1e450eccc6e9a1a0e/CleanShot_2025-08-14_at_11.51.59.webp)
 
 :material-numeric-1-circle: The home page features a dashboard that provides some key information about the managed nodes and their interfaces.
 
@@ -112,15 +112,17 @@ When you log in to the EDA UI you land on the **Main** page, here are the main a
 
 :material-numeric-4-circle: Transaction basket. This is where your uncommitted transactions will be stored. Clicking on the basket icon also lets you do operations on the transactions.
 
-:material-numeric-5-circle: User menu. This is where you can change your password, log out, and access the help and about pages.
+:material-numeric-5-circle: Workflows. This menu icon lists the recently run workflows.
 
-:material-numeric-6-circle: Side menu toggle. Expands/collapses the left side menu where all EDA apps and menu items are.
+:material-numeric-6-circle: User menu. This is where you can change your password, log out, and access the help and about pages.
 
-:material-numeric-7-circle: Application icon. Clicking on the icon in the collapsed view opens up the application page.
+:material-numeric-7-circle: Side menu toggle. Expands/collapses the left side menu where all EDA apps and menu items are.
 
-:material-numeric-8-circle: Application category toggle. Can be used to hide/show the application category.
+:material-numeric-8-circle: Panel selector. EDA provides two default panels - Main and System Administration. The panels control what apps are visible in the side menu. Users can create their own panels and switch between them based on the use case.
 
-:material-numeric-9-circle: Application search. Type in the search term and the apps list will be filtered.
+:material-numeric-9-circle: Application icon. Clicking on the icon in the collapsed view opens up the application page.
+
+:material-numeric-10-circle: Application category toggle. Can be used to hide/show the application category.
 
 ### App page
 
@@ -187,5 +189,9 @@ bash /opt/srexperts/restore-eda.sh
 ```
 
 This script will immediately revert all changes happened in EDA since you first logged in so you can start fresh.
+
+## Where to next?
+
+After this brief introduction to the EDA UI you are ready to start exploring the next generation of network automation by either starting ["The tour of EDA"](./beginner/declarative-intents.md) that we have prepared for you, or venturing into self-paced exploration.
 
 [^1]: Pending vendors' support for YANG and modern management interfaces.

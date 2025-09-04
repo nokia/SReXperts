@@ -138,7 +138,7 @@ show service active-subscribers
 /// tab | Expected output
 ```
 [/]
-A:admin@g##-pe4# show service active-subscribers
+A:admin@g23-pe4# show service active-subscribers
 
 ===============================================================================
 Active Subscribers
@@ -216,25 +216,34 @@ To do this, log in to any of the emulated client devices using SSH. They are ava
 /// details | Logging in to a virtual subscriber
 /// tab | From inside the Hackathon VM
 ```bash
-$ ssh -l user clab-srexperts-sub3
+ssh -l admin clab-srexperts-sub3
+```
+<div class="embed-result">
+```{.text .no-select .no-copy}
 Warning: Permanently added 'clab-srexperts-sub3' (ED25519) to the list of known hosts.
 
 [*]─[sub3]─[~]
 └──>
 ```
+</div>
 ///
 /// tab | From outside the Hackathon VM
 ```bash
-$ ssh -l user 23.srexperts.net -p 50063
+ssh -l admin 23.srexperts.net -p 50063
+```
+<div class="embed-result">
+```{.text .no-select .no-copy}
 The authenticity of host '[23.srexperts.net]:50063 ([23.srexperts.net]:50063)' can't be established.
 ED25519 key fingerprint is SHA256:OkKDNbCUoVhEP3Up6TSjpsB9skvBrpsvMobr025B4i8.
 This key is not known by any other names
 Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
 Warning: Permanently added '[23.srexperts.net]:50063' (ED25519) to the list of known hosts.
-user@23.srexperts.net's password: #PROVIDED#
+admin@23.srexperts.net's password: #PROVIDED#
 
-bash#
+[*]─[sub3]─[~]
+└──>
 ```
+</div>
 ///
 ///
 
@@ -329,7 +338,7 @@ If additional information from the Radius server is required, the server's logs 
 
 `docker exec -it  clab-srexperts-radius tail -f /var/log/radius/radius.log`
 
-As an example, consider that this file may include additional information from the Radius server about why it is declining certain requests.
+from your group's hackathon VM instance. As an example, consider that this file may include additional information from the Radius server about why it is declining certain requests.
 
 ### Add an attribute into Radius Accounting Requests using configuration
 
@@ -470,8 +479,7 @@ A:admin@g23-pe4# /clear service id 401 ipoe session all
 All three subscribers should reappear in the system after this operation.
 
 /// details | Modify DHCP script to cache options for Radius accounting
-/// tab | Modified version of script found under `/home/nokia/SReXperts/activities/nos/sros/activity-23/dhcp.py`
-```python
+```python title="Modified version of script found under /home/nokia/SReXperts/activities/nos/sros/activity-23/dhcp.py"
 from alc import dhcpv4
 from alc import cache
 from binascii import unhexlify
@@ -533,7 +541,6 @@ if __name__ == "__main__":
     # REQUEST is attr 53 value 1
     dhcp4_request()
 ```
-///
 /// tab | Cache for UE MAC 00:d0:f6:01:01:01 - before
 ```
 [/]
@@ -580,6 +587,21 @@ The file `/home/nokia/SReXperts/activities/nos/sros/activity-23/radius-accountin
 For this step, you will have to modify the `python-policy` that is currently in use for your subscribers to apply the pre-provisioned Python script `radius-accounting-request` to Radius Accounting-Request packages headed towards the Radius server. The script doesn't do anything yet, that will be addressed later.
 
 /// details | Add the radius-accounting-request `python-script` to the `python-policy`
+/// tab | Commands
+```
+configure global
+python {
+    python-policy "python-policy" {
+        radius accounting-request direction egress {
+            script "radius-accounting-request"
+        }
+    }
+}
+compare /
+commit
+```
+///
+/// tab | Compare output
 ```
 *[gl:/configure]
 A:admin@g23-pe4# compare /
@@ -593,6 +615,7 @@ A:admin@g23-pe4# compare /
         }
     }
 ```
+///
 ///
 
 Next up, you will modify the `radius-accounting-request.py` file so that it copies cached DHCP options into Radius Accounting Requests. Add your DHCP options to Radius Vendor-Specific Attribute (VSA) 26.6527.102, `Alc-ToServer-Dhcp-Options`. Check the [Radius reference guide](https://documentation.nokia.com/sr/25-3/7750-sr/titles/radius.html) for formatting details. Use the debugging and test methods shown above to verify your changes behave as expected.

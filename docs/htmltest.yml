@@ -16,7 +16,9 @@ IgnoreURLs:
   - https://github.com/orgs/nokia/packages/container/srlinux/versions
   - on.srlinux.dev
   - localhost
-  - https://github.com/srl-labs/learn-srlinux/edit/
+  - https://github.com/srexperts/srx-hackplanning-2025 # repo is not public
+  - https://github.com/srexperts/srx-hackplanning-2025/edit/
+  - https://github.com/nokia/SReXperts/edit/
   - twitter.com
   - https://linkedin.com/in
   - https://linkedin.com/feed

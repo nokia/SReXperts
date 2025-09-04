@@ -2,14 +2,14 @@
 apiVersion: artifacts.eda.nokia.com/v1
 kind: Artifact
 metadata:
-  name: srlinux-ghcr-24.10.4
+  name: srlinux-ghcr-24.10.3
   namespace: eda-system
   labels:
     role: hackathon-infra
 spec:
-  filePath: srlinux-24.10.4.zip
+  filePath: srlinux-24.10.3.zip
   remoteFileUrl:
-    fileUrl: https://github.com/nokia/srlinux-yang-models/releases/download/v24.10.4/srlinux-24.10.4-244.zip
+    fileUrl: https://github.com/nokia/srlinux-yang-models/releases/download/v24.10.3/srlinux-24.10.3-201.zip
   repo: schemaprofiles
 # --- INIT ---
 ---
@@ -60,6 +60,9 @@ spec:
     - GNMI
     - CLI
     - NETCONF
+    - GNOI
+    - GNSI
+    - JSON-RPC
   superuser: true
 ---
 # --- NODE-USER ---
@@ -117,7 +120,7 @@ spec:
 apiVersion: core.eda.nokia.com/v1
 kind: NodeProfile
 metadata:
-  name: srexperts-srlinux-24.10.4
+  name: srexperts-srlinux-24.10.3
   namespace: eda
   labels:
     role: hackathon-infra
@@ -125,10 +128,10 @@ spec:
   port: 57410
   annotate: true
   operatingSystem: srl
-  version: 24.10.4
+  version: 24.10.3
   versionPath: .system.information.version
-  versionMatch: v24\.10\.4.*
-  yang: https://eda-asvr.eda-system/eda-system/schemaprofiles/srlinux-ghcr-24.10.4/srlinux-24.10.4.zip
+  versionMatch: v24\.10\.3.*
+  yang: https://eda-asvr.eda-system/eda-system/schemaprofiles/srlinux-ghcr-24.10.3/srlinux-24.10.3.zip
   nodeUser: admin
   onboardingPassword: NokiaSrl1!
   onboardingUsername: admin
@@ -151,10 +154,10 @@ metadata:
     role: hackathon-infra
   namespace: eda
 spec:
-  nodeProfile: srexperts-srlinux-24.10.4
+  nodeProfile: srexperts-srlinux-24.10.3
   operatingSystem: srl
   platform: 7220 IXR-D2L
-  version: 24.10.4
+  version: 24.10.3
   productionAddress:
     ipv4: 10.128.${INSTANCE_ID}.33
     ipv6: ""
@@ -172,10 +175,10 @@ metadata:
     role: hackathon-infra
   namespace: eda
 spec:
-  nodeProfile: srexperts-srlinux-24.10.4
+  nodeProfile: srexperts-srlinux-24.10.3
   operatingSystem: srl
   platform: 7220 IXR-D2L
-  version: 24.10.4
+  version: 24.10.3
   productionAddress:
     ipv4: 10.128.${INSTANCE_ID}.34
     ipv6: ""
@@ -193,10 +196,10 @@ metadata:
     role: hackathon-infra
   namespace: eda
 spec:
-  nodeProfile: srexperts-srlinux-24.10.4
+  nodeProfile: srexperts-srlinux-24.10.3
   operatingSystem: srl
   platform: 7220 IXR-D2L
-  version: 24.10.4
+  version: 24.10.3
   productionAddress:
     ipv4: 10.128.${INSTANCE_ID}.35
     ipv6: ""
@@ -214,10 +217,10 @@ metadata:
     role: hackathon-infra
   namespace: eda
 spec:
-  nodeProfile: srexperts-srlinux-24.10.4
+  nodeProfile: srexperts-srlinux-24.10.3
   operatingSystem: srl
   platform: 7220 IXR-H2
-  version: 24.10.4
+  version: 24.10.3
   productionAddress:
     ipv4: 10.128.${INSTANCE_ID}.31
     ipv6: ""
@@ -235,10 +238,10 @@ metadata:
     role: hackathon-infra
   namespace: eda
 spec:
-  nodeProfile: srexperts-srlinux-24.10.4
+  nodeProfile: srexperts-srlinux-24.10.3
   operatingSystem: srl
   platform: 7220 IXR-H2
-  version: 24.10.4
+  version: 24.10.3
   productionAddress:
     ipv4: 10.128.${INSTANCE_ID}.32
     ipv6: ""
@@ -741,6 +744,7 @@ spec:
           ]
         }
 
+
 # --- EDA COMMON SECURE GRPC SERVER ---
 # since EDA removes any prior existing config from the node
 # we need to bring back the explicit server running on port 57401
@@ -776,6 +780,7 @@ spec:
             "gnsi"
           ]
         }
+
 
 # --- EDA COMMON SYSLOG SERVER ---
 # considering we don't have a way (yet) to configure a
@@ -815,6 +820,8 @@ spec:
             }
           ]
         }
+
+
 # --- EDA SYSTEM DEFAULT IP MTU ---
 # considering we don't have a way (yet) to configure a
 # common default ip mtu, this makes sure the SReXperts

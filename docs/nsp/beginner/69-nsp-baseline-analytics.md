@@ -1,8 +1,9 @@
 ---
 tags:
   - NSP
-  - Baseline
+  - MD-CLI
   - Analytics
+  - Telemetry
 ---
 
 # Baseline Analytics
@@ -11,78 +12,64 @@ tags:
 | --- | --- |
 | **Activity name** | Baseline Analytics |
 | **Activity ID** | 69 |
-| **Short Description** | Detect anomalies through training and providing a baseline |
+| **Short Description** | Anomaly detection using historical telemetry data and Z-Score analysis |
 | **Difficulty** | Beginner |
-| **Tools used** |     |
-| **Topology Nodes** | :material-router: PE3 |
-| **References** | [NSP baseline](https://documentation.nokia.com/nsp/24-11/NSP_Data_Collection_and_Analysis_Guide/dca_baselines.html) |
+| **Tools used** | NSP |
+| **Topology Nodes** | :material-router: pe1, :material-router: agg1 |
+| **References** | [NSP Baseline Analytics](https://documentation.nokia.com/nsp/24-8/NSP_Data_Collection_and_Analysis_Guide/dca_baselines.html) |
 
-This guided activity walks you through detecting port flaps using telemetry data and statistical anomaly detection techniques.
-The workflow collects port telemetry from routers, applies Z-score-based anomaly detection after training a baseline.
+## Objective
 
-## Prerequisites
+In large networks, operators must keep critical device and service metrics under control — such as link utilization, memory usage, or temperature. The challenge is that these metrics rarely stay constant:
 
-- Basic understanding of NSP
-- Understanding on time-series data and statistical algorithm
-- Knowing the common models in NSP and filter can be used on these model to query the appropriate router resource.
+* Traffic naturally peaks during business hours and drops at night.
+* CPU or memory load may vary with planned maintenance windows.
+* Temperature follows device, environmental and seasonal patterns.
 
-## Key Learnings
+Traditionally, operators define static thresholds (e.g., CPU > 80%, link utilization > 70%). But static thresholds don’t reflect real behavior. They are often too strict (raising false alarms every Monday morning when traffic ramps up) or too loose (missing actual anomalies).
 
-By the end of this activity, you'll be able to create and train a baseline for anamoly detection.
+The alternative — manually adjusting thresholds for every device, per metric, per time-of-day or day-of-week — is not scalable. It requires constant human monitoring, is prone to error, and becomes unmanageable at scale when networks contain thousands of nodes.
 
-## Terminology
+Baseline Analytics solves this problem. By automatically learning normal patterns from historical telemetry, NSP builds dynamic, seasonal baselines. These baselines adapt to daily or weekly variations and automatically adjust thresholds without manual intervention. Operators are then alerted only when behavior truly deviates from the norm — e.g., if traffic stays unusually high late at night, or if a router’s temperature spikes outside its usual profile.
 
-**Baseline Training and Z-score Detection**
+In this activity you will take some initial steps into the world of Baseline Analytics with NSP.
 
-Train on historical port status data to establish a statistical norm.
-Use Z-score to flag deviations beyond a defined threshold, indicating a flap event.
+## Technology Explanation
 
-**Statistical Terminology**
+### Baseline Training with Dynamic Updates
+NSP looks at historical telemetry to learn what normal looks like for each metric. For example, it can learn that interface utilization is always high on Monday mornings but drops on weekends. This means thresholds do not need to be manually adjusted.
 
-Understand how statistical algorithm are used for anomaly detection
+Baselines are not static. As new telemetry is collected, NSP updates the baseline so that it stays aligned with current trends. This prevents outdated thresholds from generating false alarms.
 
-## High-level Data Flow
+### Windowing
+Once you create a baseline, statistics for a selected resource (or group of resources) are collected over a defined time window. Data is typically gathered at shorter collection intervals, but all values collected within the window are aggregated into a single data point for the baseline. Each window then has its own expected value based on historical data, making it easier to compare measurements against what is typical for that time period.
 
-1. Define the Collection Interval
+### Metric Aggregation
 
-        This is how often you collect data.
+Different metric types are aggregated differently when building baselines:
 
-        Example:
-        Every 15 minutes, collect metrics like received-octets.
+* **Counters** — cumulative values measured over a window (example: octets transmitted)
+* **Gauges** — snapshot values that can go up or down (example: CPU load in percent)
+* **Samples** — discrete points measured (example: latency measured periodically)
 
-2. Filter the NSP resource using a path-filter
+### Seasonality
+Metrics often follow recurring time-based patterns. For example:
 
-        Select which resources to monitor using a filter path.
+* **Daily season** — traffic rises every weekday around 9am and drops overnight
+* **Weekly season** — weekends often show lower traffic compared to weekdays
 
-        Example:
-        Filter for ports with traffic, specific interfaces, or NE-IDs.
+A season defines the length of the repeating cycle used for training the baseline (e.g., 24 hours). The baseline learns expected values within that cycle, so it can account for recurring variations.
 
-3. Aggregate the data based on counter, gauge or sample
+Typically, you configure the longest relevant season (e.g., 1 week if weekday vs. weekend differences matter). Keep in mind that longer seasons require more time to collect enough data before the baseline becomes reliable.
 
-        You collect metrics like:
+### Z-Score
+A Z-Score is a statistical way to measure how far a value is from the expected average, expressed in units of standard deviation. Using Z-Score allows NSP to detect unusual events automatically, without operators having to guess or configure thresholds manually.
 
-        * counters (e.g., received-octets),
-        * gauges (e.g., CPU usage),
-        * samples (e.g., latency).
+* A Z-Score of **0** means the value is exactly as expected.
+* A Z-Score of **+3** means the value is three standard deviations above normal (a rare event, often flagged as an anomaly).
 
-4. Seasonality and window allows us to calculate the mean and variance
-
-        You define a season (e.g., 1 week) and split it into windows (e.g., 15-min intervals).
-        For a 1-week season with 15m windows, there are:
-        7 days x 24 hours x 4 windows/hour = 672 windows
-        Each window has its own baseline value — the expected metric for that time slot based on past values.
-
-5. Update the Baseline
-
-        After each new measurement, the system updates the expected value for that window using a baseline algorithm .
-        So, the value you see for Tuesday 08:00–08:15 is based on past Tuesdays at the same time.
-
-6. Apply one of the anamoly algorithm to detect anamoly based on the mean and variance
-
-        Once we have a baseline (expected mean and variance), we apply an anomaly detection algorithm.
-        If a new value deviates too far from the expected value (e.g., outside 3×standard deviation), it's flagged as an anomaly.
-
----
+### Anomaly Detection
+By comparing the current metric value to the expected baseline using the Z-Score, NSP can highlight anomalies. These are shown visually in the WebUI (red dots vs dotted baseline) and can trigger alerts for operator action.
 
 ## Tasks
 
@@ -90,217 +77,350 @@ Understand how statistical algorithm are used for anomaly detection
 
 It is tempting to skip ahead but tasks may require you to have completed previous tasks before tackling them.  
 
-### Configure a Baseline Analytics
+### Create a new Baseline for PE1 (SR OS)
 
-/// note | Click on Menu to access the hamburger menu
-![Step 1 screenshot](images/69-baseline/step1.png)
+Login to NSP WebUI and navigate to `Data Collection and Analysis Management` and then `Baselines`.
+
+/// details | Step-by-Step (if getting stuck)
+     type: success
+/// tab | 01 NSP Home Nav
+![home-nav](../beginner/images/69-baseline/step1.png)
 ///
-
-/// note | Click on Data Collection and Analysis
-![Step 2 screenshot](images/69-baseline/step2.png)
+/// tab | 02 Data Collection Nav
+![data-collection-nav](../beginner/images/69-baseline/step2.png)
 ///
-
-/// note | Click on Management
-![Step 3 screenshot](images/69-baseline/step3.png)
+/// tab | 03 Management tab
+![management-nav](../beginner/images/69-baseline/step3.png)
 ///
-
-/// note | Click on Dropdown
-![Step 4 screenshot](images/69-baseline/step4.png)
-///
-
-/// note | Click on Baseline subsection
-![Step 5 screenshot](images/69-baseline/step5.png)
-///
-
-/// note | Click on BASELINE to create the baseline
-![Step 6 screenshot](images/69-baseline/step6.png)
-///
-
-/// note | Give a Name For the Use Case
-![Step 7 screenshot](images/69-baseline/step7.png)
-///
-
-/// note | Define the collectionInterval
-![Step 8 screenshot](images/69-baseline/step8.png)
-///
-
-/// note | Choose a seasonlity
-![Step 9 screenshot](images/69-baseline/step9.png)
-///
-
-/// note | Click on 5 minutes
-![Step 10 screenshot](images/69-baseline/step10.png)
-///
-
-/// note | Click on Window Duration
-![Step 11 screenshot](images/69-baseline/step11.png)
-///
-
-/// note | Click on 1 minute for the window
-![Step 12 screenshot](images/69-baseline/step12.png)
-///
-
-/// note | Click on ​Object Filter to select your resource
-![Step 13 screenshot](images/69-baseline/step13.png)
-///
-
-/// note | Type "/" to select available filters
-![Step 14 screenshot](images/69-baseline/step14.png)
-
-Choose `nsp-equipment:network/network-element`
-///
-
-/// note | Type "/interface" to find the telemetry type
-![Step 15 screenshot](images/69-baseline/step15.png)
-///
-
-/// note | Click on interfaces/interface to monitor ports
-![Step 16 screenshot](images/69-baseline/step16.png)
-///
-
-/// note | Click on COUNTERS for data aggregation
-![Step 17 screenshot](images/69-baseline/step17.png)
-///
-
-/// note | Click on / Press Space to toggle row selection (checked)
-![Step 18 screenshot](images/69-baseline/step18.png)
-
-Check `transmitted-octets-periodic`
-///
-
-/// note | Click on / Press Space to toggle row selection (checked)
-![Step 19 screenshot](images/69-baseline/step19.png)
-
-Check `received-octets-periodic`
-///
-
-/// note | Click on ADD
-![Step 20 screenshot](images/69-baseline/step20.png)
-///
-
-/// note | Click on / Press SPACE to select this row
-![Step 21 screenshot](images/69-baseline/step21.png)
-///
-
-/// note | Click on Counter
-![Step 22 screenshot](images/69-baseline/step22.png)
-///
-
-/// note | Click on / Press SPACE to select this row
-![Step 23 screenshot](images/69-baseline/step23.png)
-///
-
-/// note | Click on Counter
-![Step 24 screenshot](images/69-baseline/step24.png)
-///
-
-/// note | Click on VERIFY RESOURCES
-![Step 25 screenshot](images/69-baseline/step25.png)
-///
-
-/// note | Select the router or resource where you want to apply this baseline
-![Step 26 screenshot](images/69-baseline/step26.png)
-///
-
-/// note | You can select multiple resources
-![Step 27 screenshot](images/69-baseline/step27.png)
-
-/// warning
-Make sure to select resources from routers that belong to your group.
-Access control is not enforced.
+/// tab | 04 Baseline Tab
+![plotter-view](../beginner/images/69-baseline/step5.png)
 ///
 ///
 
-/// note | Click on CREATE
-![Step 28 screenshot](images/69-baseline/step28.png)
+Now, click on `+ BASELINE` on the top right of your screen to create a baseline on your `pe1` node. Use the following information to fill in the required form:
+
+```yaml
+General:
+  Collection Interval: 30 secs
+  Season: 5 mins
+  Window Duration: 1 min
+Filter And Counters:
+  Object Filter: /nsp-equipment:network/network-element[ne-name='g1-pe1']       (update to match your group)
+  Telemetry Type: telemetry:/base/system-info/system
+  Selected Counters: cpu-usage (Gauge)
+Detector:
+  Algorithm: Z-Score Absolute
+  Comparison: Less than
+  Threshold: 2
+```
+
+/// details | Help (if getting stuck)
+     type: success
+* Replace `g1-pe1` to match the system-name of the `pe1` node in your system. Like if you are in group 17, it becomes `g17-pe1`.
+* The baseline name is auto generated and cannot be set during creation.
+* After you filled in the form click on `VERIFY RESOURCES`. It may take a bit of time to list the desired counter. Once you see your resource, click on `STOP VERIFICATION`, select the resource to be monitored, and confirm by clicking on `CREATE`.
+* Edit the baseline created: Add a detector with the information provided above.
+
+/// tab | 01 Baseline Definition
+![baseline-definition](../beginner/images/69-baseline/step7.png)
 ///
-
-/// note | Click on CLOSE
-![Step 29 screenshot](images/69-baseline/step29.png)
-///
-
-/// note | Click on the create baseline
-![Step 30 screenshot](images/69-baseline/step30.png)
-///
-
-/// note | Click on 3 dots to edit option
-![Step 31 screenshot](images/69-baseline/step31.png)
-///
-
-/// note | Click on Edit
-![Step 32 screenshot](images/69-baseline/step32.png)
-///
-
-/// note | Click rule to create a rule for detecting anamoly
-![Step 33 screenshot](images/69-baseline/step33.png)
-///
-
-/// note | Set up the comparator
-![Step 34 screenshot](images/69-baseline/step34.png)
-///
-
-/// note | And set the threshold value
-![Step 35 screenshot](images/69-baseline/step35.png)
-///
-
-/// note | Click on UPDATE to add the changes
-![Step 36 screenshot](images/69-baseline/step36.png)
-///
-
-/// note | Click on CANCEL to rerturn to baseline
-![Step 37 screenshot](images/69-baseline/step37.png)
-///
-
-/// note | Click on 3 dots to access visualization
-![Step 38 screenshot](images/69-baseline/step38.png)
-///
-
-/// note | Click on Open in Data Collection and Analysis Visualizations
-![Step 39 screenshot](images/69-baseline/step39.png)
-///
-
-/// note | Click on PLOT
-![Step 40 screenshot](images/69-baseline/step40.png)
-
-/// warning
-With the settings provided (collection: 30s, window: 1min, season: 5min) you should wait around 10min to see results!
+/// tab | 02 Algorithm Definition
+![alogrithm-definition](../beginner/images/69-baseline/step34.png)
 ///
 ///
 
-### Generate some traffic
+### Create a new Baseline for AGG1 (SRLinux)
 
-Use high frequency ping (rapid, large mtu) to generate some traffic to ensure hitting the baseline.
-Continue monitoring the plotter.
+In the previous task, you created a baseline for SR OS. Now, to gain more hands-on experience, create another subscription using an SRLinux node. This time, let’s focus on interface statistics. Port `ethernet-1/1` on node `agg1` is operational and carries some control-plane traffic, making it a good candidate for monitoring. If you choose raw counters such as received or transmitted octets, make sure to set the `Type` to `Counter`.
+
+/// details | Solution (if getting stuck)
+     type: success
+```yaml
+General:
+  Collection Interval: 30 secs
+  Season: 5 mins
+  Window Duration: 1 min
+Filter And Counters:
+  Object Filter: /nsp-equipment:network/network-element[ne-name='g1-agg1']       (update to match your group)
+  Telemetry Type: telemetry:/base/interfaces/interface
+  Selected Counters: received-octets (Counter)
+Detector:
+  Algorithm: Z-Score Absolute
+  Comparison: Less than
+  Threshold: 3
+```
+
+As in the previous task, after clicking `VERIFY RESOURCES` it takes about 30 seconds to populate the list of available interface resources. Once the list appears, stop verification, select interface `ethernet-1/1`, and proceed to create the baseline.
+///
+
+With these two baselines — CPU for SR OS and interface statistics for SR Linux — you now have vendor-agnostic metrics that provide a consistent, normalized view across device families and vendors. This makes it easy to work seamlessly across different platforms.
+
+### Check the Telemetry subscription
+
+Login into the SR OS node you are monitoring and check the active telemetry subscriptions from CLI.
+
+/// admonition | Do you spot the corresponding gRPC subscription?
+    type: question
+The corresponding subscription is retrieving CPU usage stats at a 30sec interval.
+///
+
+/// details | gRPC Subscription Checking Hint
+    type: success
+/// tab | List Active Subscriptions Command
+```
+[/]
+A:admin@g1-pe1# show system telemetry grpc subscription
+```
+///
+/// tab | Example Output of Subscriptions
+```
+===============================================================================
+Telemetry gRPC subscriptions
+===============================================================================
+Id            User                             Mode                       Port
+  Destination                                                                 
+-------------------------------------------------------------------------------
+1             admin                            stream                    58876
+     172.31.255.29
+2             admin                            stream                    58876
+     172.31.255.29
+3             admin                            stream                    58876
+     172.31.255.29
+4             admin                            stream                    58876
+     172.31.255.29
+5             admin                            stream                    58876
+     172.31.255.29
+6             admin                            stream                    58876
+     172.31.255.29
+7             admin                            stream                    58876
+     172.31.255.29
+13            admin                            stream                    43182
+     172.31.255.29
+14            admin                            stream                    43182
+     172.31.255.29
+15            admin                            stream                    43182
+     172.31.255.29
+16            admin                            stream                    43182
+     172.31.255.29
+17            admin                            stream                    43182
+     172.31.255.29
+19            admin                            stream                    45599
+     172.31.255.29
+23            admin                            stream                    45599
+     172.31.255.29
+-------------------------------------------------------------------------------
+No. of gRPC Telemetry subscriptions: 14
+===============================================================================
+```
+///
+/// tab | Get Subscribed Paths Command
+The corresponding SR OS CLI command requires the subscription-id to be provided. You may need to check the corresponding subscriptions one after another to identify the correct one. As you've just added the new subscription, most likely it is the last one in the list. However, it is a good learning to check some of the listed subscriptions to better understand the structure.
+
+```
+[/]
+A:admin@g1-pe1# show system telemetry grpc subscription 23 paths
+```
+///
+/// tab | Example Output of Subscribed Paths
+```
+===============================================================================
+Telemetry gRPC subscription
+===============================================================================
+Subscription id       : 23
+User                  : admin
+Destination           : 172.31.255.29
+Port                  : 45599
+Subscription mode     : stream
+Encoding              : json
+Notification count    : 2428
+Context count         : 2428
+Notification bundling : Disabled
+
+Extensions
+-------------------------------------------------------------------------------
+Config-Subscription   : Disabled
+
+-------------------------------------------------------------------------------
+Paths
+-------------------------------------------------------------------------------
+Path                  : /state/system/cpu[sample-period=1]/summary/usage/cpu-
+                        usage
+Path mode             : sample
+Sample interval       : 30000 ms
+Finished samples      : 2428
+Deferred samples      : 0
+Total collection time : 2428 ms
+Min collection time   : 1 ms
+Avg collection time   : 1 ms
+Max collection time   : 1 ms
+-------------------------------------------------------------------------------
+No. of paths          : 1
+===============================================================================
+```
+///
+///
+
+/// details | Pro Tip
+    type: tip
+To check your SR Linux node for active subscriptions, you first need to enter `state` mode.
+
+```
+--{ + running }--[  ]--
+A:g1-agg1# enter state
+
+--{ + state }--[  ]--
+A:g1-agg1# system grpc-server insecure-mgmt
+
+--{ + state }--[ system grpc-server insecure-mgmt ]--
+A:g1-agg1# info
+    admin-state enable
+    timeout 7200
+    rate-limit 65000
+    session-limit 100
+    max-concurrent-streams 65535
+    metadata-authentication true
+    yang-models native
+    default-tls-profile false
+    network-instance mgmt
+    port 57400
+    oper-state up
+    trace-options [
+        request
+        response
+        common
+    ]
+    services [
+        gnmi
+        gnoi
+        gnsi
+        gribi
+        p4rt
+    ]
+    source-address [
+        ::
+    ]
+    gnmi {
+        commit-confirmed-timeout 0
+        commit-save false
+        include-defaults-in-config-only-responses false
+    }
+    statistics {
+        access-rejects 1
+        last-access-reject "2025-08-18T20:44:20.284Z (2 days ago)"
+        access-accepts 887
+        last-access-accept "2025-08-21T16:25:53.883Z (10 minutes ago)"
+        rpc /gnmi.gNMI/Capabilities {
+            access-rejects 1
+            last-access-reject "2025-08-18T20:44:20.284Z (2 days ago)"
+            access-accepts 1
+            last-access-accept "2025-08-18T20:46:51.041Z (2 days ago)"
+        }
+        rpc /gnmi.gNMI/Get {
+            access-rejects 0
+            access-accepts 441
+            last-access-accept "2025-08-18T21:02:05.427Z (2 days ago)"
+        }
+        rpc /gnmi.gNMI/Set {
+            access-rejects 0
+            access-accepts 1
+            last-access-accept "2025-08-18T20:46:55.276Z (2 days ago)"
+        }
+        rpc /gnmi.gNMI/Subscribe {
+            access-rejects 0
+            access-accepts 444
+            last-access-accept "2025-08-21T16:25:53.883Z (10 minutes ago)"
+        }
+    }
+    unix-socket {
+        admin-state enable
+        socket-path /opt/srlinux/var/run/sr_grpc_server_insecure-mgmt
+    }
+    client 1 {
+        type gnmi
+        user admin
+        user-agent "gNMIc/0.38.2 grpc-go/1.63.2"
+        remote-host 10.128.1.71
+        remote-port 39726
+        start-time "2025-08-15T04:07:45.467Z (6 days ago)"
+        gnmi {
+            paths 1 {
+                path "/system/app-management/application[name=*]/..."
+                mode SAMPLE
+                sample-interval 5
+            }
+        }
+    }
+    client 2 {
+      ...
+    }
+    ...
+```
+///
+
+### Trigger a Baseline Event
+
+By creating another subscription on `agg1` and reviewing the active subscriptions should have given NSP enough time to learn what is considered a normal CPU usage for `pe1`. This initial training phase takes about 3 seasons (≈15 minutes). Now, let’s generate some load to trigger a baseline event.
+
+One way to increase CPU usage is to run **rapid pings** between two nodes. Both the node sending pings and the node responding will experience higher CPU load. You may also use any other method that reliably increases CPU usage.
+
+/// details | Rapid Ping Hint
+    type: success
+You can generate CPU load directly from the SR OS CLI using the command below to run rapid pings. Make sure to adjust the target IP address as needed. The actual CPU impact depends on the test parameters provided (count, interval, size).
+
+The example below runs a ping test from pe1 to p1, lasting about 60 seconds and using an interface IP address as the destination. Since interface addresses are identical across all groups, you can simply copy and paste the command on your system to quickly generate additional CPU load through rapid pings.
+
+```
+[/]
+A:admin@g1-pe1# ping 10.64.11.0 router-instance Base count 6000 interval 0.01 size 1400 output-format summary 
+PING 10.64.11.0 1400 data bytes
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+---- 10.64.11.0 PING Statistics ----
+6000 packets transmitted, 6000 packets received, 0.00% packet loss
+round-trip min = 1.56ms, avg = 4.64ms, max = 60.7ms, stddev = 4.10ms
+```
+///
+
+### Visualize your Baseline
+
+* Open `Data Collection and Analysis Visualizations`
+* `PLOT` the selected baseline resource
 
 /// note
-Based on the seasonality and window length, the detector rule will begin to apply.
-You need to configure the comparator to detect values less than a threshold close to 0.
-This helps identify anomalies such as port flapping, where there is a sudden drop in the metric value toward zero.
+The Baseline Visualization can directly be opened from Baseline Management. Check the context menu (3 dots) of the Baseline entry you've created.
 
-Anamolies are pushed into a kafka topic which can be used to trigger email notification or closed of automation.
+The anomalies are displayed as red dots on the plotter. The expected values are generated using the collected statistics, visualized using dotted lines.
 ///
 
-/// note | **SUMMARY**
-Name: Detect Port Flaps
-
-        Collection Interval: 30 secs
-        Sesonality: 5 mins
-        Window Duration: 1 mins
-        Telemetry Type: /interfaces/interface
-        Object Filter: /nsp-equipment:network/network-element[ne-id={{router-id}}]
-
-Detector:
-
-        Threshold: 0.0001
-        Comparison: Less than
-        Algorithm: Z-score Absolute
-        Evaluate What: Value
-        Evaluate When: End of Window
+/// details | Step-by-Step (if getting stuck)
+     type: success
+/// tab | 01 Telemetry Viewer Navigation
+![visualisation-nav](../beginner/images/69-baseline/step39.png)
+///
+/// tab | 02 Resource Selection to Plot
+![resource-selection](../beginner/images/69-baseline/step40.png)
+///
+/// tab | 03 Result
+![results](../beginner/images/69-baseline/Result-baseline.JPG)
+///
 ///
 
-### Next steps
+## Summary
 
-Here are some ideas on how to continue:
+ Congratulations! You have completed this activity. Take this opportunity to look back on some of the things you have achieved:
 
-* What's the difference between indicators and baseline?
-* Add baselines for other KPIs like CPU and memory.
+* Learn how to configure Baseline Analytics in the NSP WebUI.
+* Understand how to train and apply statistical models on telemetry data.
+* Detect anomalies using Z-Score based detection.
+* Use object filters and telemetry paths to scope your analysis.
+* Visualize baseline behavior and anomaly events.
+* Understand the relationship between collection interval, seasonality, and window size.
+
+---
+
+## Next Steps
+
+Here are some suggestions on how to continue:
+
+* Run the [Indicator Analytics](../beginner/68-indicator-analytics.md) activity and understand the differences between Indicators and Baselines.
+* Add baselines for other KPIs like interface or ports.
+* Run Baseline Analytics at scale targeting many objects.

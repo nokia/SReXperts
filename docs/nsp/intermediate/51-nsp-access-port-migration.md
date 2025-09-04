@@ -1,68 +1,229 @@
 ---
 tags:
-  - NSP
-  - Workflow Manager
-  - Service Management
+
+- NSP
+- Workflow Manager
+- Service Management
+- Service Fulfillment Operations
 ---
 
-# Access Port Migration Automation
+# Access Port Migration
 
 |     |     |
 | --- | --- |
-| **Activity name** | Access Port Migration Automation |
+| **Activity name** | Access Port Migration |
 | **Activity ID** | 51 |
-| **Short Description** | Migration of EPIPE SAPs from one port to another |
+| **Short Description** | Migration automation of `epipe` SAPs from one port to another |
 | **Difficulty** | Intermediate |
-| **Tools used** | Visual Studio Code (or code-server) |
+| **Tools used** | NSP, Visual Studio Code |
 | **Topology Nodes** | :material-router: PE1, :material-router: PE3 |
-| **References** |     |
+| **References** | [NSP Docs](https://infocenter.nokia.com), [OpenStack Mistral](https://docs.openstack.org/mistral/latest/) |
 
-In this activity we use NSP Workflow Manager to move SAPs from one port to a backup port. This can be useful
-for activities like planned maintenance (card swap) or as temporary solution to quick fix a port that went
-down. The workflow is expected to be triggered manually from the NSP WebUI. This exercise will focus on
-**`redundant-eline`** and  **`epipe`** services, but the implementation could be extended in context of
-this hackathon to support other services like VPLS and VPRN.
+## Objective
+
+In this activity you will address a common operational challenge: migrating customer services from one access port to another. Whether you are preparing for a planned card replacement or reacting to a sudden failure, moving SAPs and services manually is both slow and prone to error.
+Using NSP Workflow Manager, you will automate this migration. You will prepare the target port, deploy a workflow that moves SAPs and associated services, and validate the outcome. By the end, you will have applied NSP automation to a real-world problem, reducing manual steps, minimizing risk, and accelerating recovery — all while keeping control of the process.
+
+## Technology Explanation
+
+Automation of access port migration relies on two main capabilities in NSP: **Workflows** and **Intents** Together, Workflows and Intents allow you to move beyond manual CLI operations, enabling structured, repeatable, and reliable service migrations while maintaining control and oversight.
+
+### Workflow Manager
+
+Workflow Manager (WFM) enables operators to automate repetitive or error-prone tasks. Instead of performing manual actions individually, WFM lets you chain API calls into a single, reusable process. This allows you to define end-to-end procedures, including validation, execution, and post-operation checks, all in a structured and repeatable way.
+
+Besides name and description, workflows may have optional tags. While these tags are mainly informational and allow for quicker filtering, in NSP some values, like `KafkaTrigger`, enable usage in specific contexts. In this exercise, we encourage triggering workflows in-context from the Service Activation WebUI, which requires adding the tag `sf-network-operation`. For more details, check the [Developer Portal](https://network.developer.nokia.com/learn/25_4/programming/workflows/workflow-manager-apis).
+
+### Intent Manager
+
+Intent Manager is a module within the Nokia Network Services Platform (NSP) that enables intent-based networking (IBN) by translating higher-level objectives into automated network actions. It has the ability to abstract the complexity of network configuration by allowing operators to express what they want, rather than how to do it.
+
+By separating declarative intent configuration (including validation) from intent operations like audits and synchronization, Intent Manager enables CRUD operations with operational lifecycle and control. The sync operation is used for deploying changes into the network but also to reconcile network object configuration in cases of misalignment, while audits are used to identify misalignments including network configuration drift.
+
+The library of intent-types can be updated at runtime, while intent-types are developed in JavaScript using YANG-defined intent models. Using JavaScript enables full flexibility beyond pure configuration management. Intent Manager natively supports heterogeneous networks (multi-vendor, multi-domain).
+
+### Tools
+
+These capabilities are complemented by operator-facing tools that make automation accessible and integrated into daily workflows:
+
+* **NSP WebUI**: Manage workflows, intents, and services end-to-end in a graphical interface.
+* **Visual Studio Code Plugin**: Author and validate workflows and forms locally, then publish directly to NSP, providing a smooth development experience.
+
+---
 
 ## Tasks
 
-**You should read these tasks from top-to-bottom before beginning the activity.**
+### Validate Port Configuration
 
-It is tempting to skip ahead but tasks may require you to have completed previous tasks before tackling them.  
+Ensure the following on PE1 and PE3:
 
-### Ensure Port Configuration and Usage
+- The breakout ports `1/1/c6` and `1/1/c8` exist
+- Ports `1/1/c6/1` and `1/1/c8/1` are configured as access ports with dot1q encapsulation
+- No critical conflicting services exist
 
-In this activity we are planning to use ports `1/1/c6/1` and `1/1/c8/1` on **PE1** and **PE3**.
-Port `1/1/c6/1` should be used for initial service configuration.
-Port `1/1/c8/1` is about to become our backup port to move the configuration to.
+Use NSP MDC or CLI to check and modify configurations. If conflicting services exist, either:
 
-Execute the following steps on PE1 and PE3:
+- Use a different port pair, or
+- Remove the existing service if it's not required for this activity
 
-* Check if the corresponding break-out ports `1/1/c6` and `1/1/c8` are setup. Configure if needed!
-* Check if the ports `1/1/c6` and `1/1/c8` are setup as access port, with dot1q encap. Configure if needed!
-* Check for pre-existing services, to avoid conflicts running this activity
- 
-### Create an ELINE service
+---
 
-Configure at least one service of type `redundant-eline` or `epipe` between PE1 to PE3 using port `1/1/c6/1`.
-Ideally, you want multiple services to be created while even a mix of epipes and redundant elines is possible.
+### Create a Sample Service
+
+Provision a service using NSP IBSF (Intent-Based Service Fulfillment):
+
+- Service type: `epipe` or `redundant-eline`
+- Endpoint A: PE1, port `1/1/c6/1`
+- Endpoint B: PE3, port `1/1/c6/1`
+
+Options:
+
+- Use NSP WebUI IBSF wizard
+- Use Visual Studio Code Plugin (recommended for versioning and local validation)
+- Use RESTCONF APIs directly (advanced)
+
+This service will later be migrated using the workflow.
+
+---
 
 ### Create Workflows in NSP
 
-Create the following two workflows in NSP. As NSP is shared across all hackathon labs, make sure using unique
-names. Because the first workflow is calling the second as sub-workflow, make sure to apply the renaming
-consistently.
+Create two workflows using the YAML content provided below:
 
-At this stage, we are providing you with full working examples of those workflows.
+- Main Workflow: `PortMigration_<GroupID>`
+- Sub-Workflow: `PortMigrationSubworkflow_<GroupID>`
 
-/// tab | Main Workflow `PortMigration`
+Ensure:
+
+- Workflow tags include `sf-network-operation`
+- Status is set to `PUBLISHED`
+- Group ID is inserted in workflow names for uniqueness
+
+/// admonition | What are the workflows doing?
+     type: question
+/// details | Answer
+    type: success
+The main workflow queries intents on a specific port and calls the sub workflow to patch them with a backup port. The sub workflow builds the PATCH payload and executes RESTCONF operations.
+///
+///
+
+/// admonition | What changes are needed for other service types?
+     type: question
+/// details | Answer
+    type: success
+Add parsing and payload logic for other intent types (e.g., `vpls`, `vprn`) in the Python block of `generatePatchPayload`.
+///
+///
+
+---
+
+### Create Input Forms
+
+Use `AUTO GENERATE UI` in NSP to auto-fill basic input fields. Then manually enhance forms with the following example for `backupPort`:
+
+```yaml
+- name: backupPort
+  title: BACKUP PORT
+  description: move all SAPs here
+  columnSpan: 4
+  newRow: true
+  readOnly: false
+  required: true
+  type: string
+  component:
+    input: autoComplete
+  suggest:
+    action: nspWebUI.portList
+    name:
+      - name
+```
+
+This enables dynamic suggestions in the UI based on available NSP ports.
+
+---
+
+### Pre-Migration Check
+
+Scenario: Migrate a service on PE1 from `1/1/c6/1` to `1/1/c8/1`.
+
+Using NSP WebUI, CLI, or MDC:
+
+- Confirm that the source port `1/1/c6/1` is in use by the service
+- Ensure `1/1/c8/1` is configured and not already in use
+
+Only proceed once pre-checks validate the environment.
+
+---
+
+### Run the Workflow via NSP
+
+1. Navigate to **NSP > Service Management**
+2. Select an active service with SAPs on `1/1/c6/1`
+3. Click the 3-dot menu and choose **Execute Workflow**
+4. Select your custom `PortMigration_<GroupID>` workflow
+5. Enter inputs based on your validation:
+```yaml
+neId: PE1
+port: 1/1/c6/1
+backupPort: 1/1/c8/1
+intentType: redundant-eline
+intentTypeVersion: 2
+```
+6. Click **Run**
+
+---
+
+### Validate Migration
+
+After execution, verify:
+
+- Service intent now references `1/1/c8/1`
+- Old SAP on `1/1/c6/1` has been removed
+
+Use NSP Service Management view, RESTCONF API, or CLI output to confirm.
+
+---
+
+## Summary
+
+Congratulations — you’ve completed this activity! Take a moment to look back at what you achieved:
+
+* Prepared port configurations
+* Deployed a test `epipe` or `redundant-eline` service
+* Built and published NSP workflows
+* Customized workflow UI forms
+* Executed a migration through Service Management
+* Verified SAP movement to the backup port
+
+You’ve now seen how NSP simplifies port migration through reusable automation.
+
+## Next Steps
+
+If you’d like to explore further, you could:
+
+* Extend the logic to support `vpls` or `vprn` services
+* Add rollback handling in case of a PATCH failure
+* Consolidate the subworkflow into the main workflow
+
+This gives you the chance to deepen your understanding and push NSP workflows even further.
+
+---
+
+## Full YAML Workflows
+
+/// note
+Remember, your NSP system is shared! Don't just copy paste the workflows below! Ensure to replace `<GroupID>` with the id of your group to avoid conflicts with other groups executing the same activity.
+///
+
+### Main Workflow: PortMigration
+
 ```yaml
 version: '2.0'
-
-PortMigration:
+PortMigration_<GroupID>:
   type: direct
-  
-  description: to be added by you
-  
+  description: Migrate SAPs from source port to backup port
+  tags:
+    - sf-network-operation
   input:
     - neId
     - port
@@ -113,7 +274,7 @@ PortMigration:
     patchIntentServices:
       with-items: intent_data in <% $.service_data %>
       concurrency: 5
-      workflow: PortMigrationSubworkflow
+      workflow: PortMigrationSubworkflow_<GroupID>
       input:
         neId: <% $.neId %>
         port: <% $.port %>
@@ -135,13 +296,13 @@ PortMigration:
         status: "success"
         message: <% str($.patchIntentStatus) %>
 ```
-///
 
-/// tab | Sub Workflow `PortMigrationSubworkflow`
+### Sub-Workflow: PortMigrationSubworkflow
+
 ```yaml
 version: '2.0'
 
-PortMigrationSubworkflow:
+PortMigrationSubworkflow_<GroupID>:
   type: direct
 
   description: to be added by you
@@ -270,123 +431,3 @@ PortMigrationSubworkflow:
           backupPort: <% $.backupPort %>
           service-name: <% $.svcInfo.target %>
 ```
-///
-
-Study both workflows carefully!
-
-/// admonition | Questions
-     type: question
-What are the workflows doing and how do they interact?
-Update the workflow descriptions accordingly!
-
-/// details | Solution
-    type: success
-The first workflow is the main workflow to be called by the operator. It consumes the
-node, the port and the backup port. It calls the Intent Manager RESTCONF API to get
-the list of all SAPs terminating on the node/port provided. It calls the 2nd workflow
-as sub-workflow with a concurrency of 5 executions.
-
-The 2nd workflow is doing the actual SAP migration, one intent-instance at a time.
-
-As the first workflow requires intent-type and version as input, if there is a mix
-of service intent-types being used, the script may need to be called multiple times.
-///
-
-Would those workflows support other service-types but `redundant-eline` or `epipe`?
-What would need to be changed to make it work for other service-types?
-
-/// details | Solution
-    type: success
-Dependencies exist mainly in the 2nd workflow, as the API calls to
-migrate services require adjustments based on the service-type.
-///
-///
-
-/// tip
-We  want to execute the `PortMigration` workflow from the **Service Management**
-application in NSP. That's why the workflow must be labeled correctly using the
-**`sf-network-operation`** tag.
-///
-
-Edit the `PortMigration` workflow and ensure the following tag is present:
-
-```yaml
-  tags:
-    - sf-network-operation
-```
-
-Feel free to add other tags!
-
-**Don't forget to update the status from `DRAFT` to `PUBLISHED`!**
-
-### Generate input forms
-
-To improve usability, generate input-forms. Give it a start using the `AUTO GENERATE UI` button.
-There are some rules in place, that auto-render the form based on attribute-names and default-values.
-
-In the given examples, the auto-generator does not work for `BACKUP PORT`and `INTENT TYPE VERSION`.
-Consider using `PORT` as template to come up with your own definition of `BACKUP PORT`.
-
-/// details | Possible solution (only look here as a last resort!)
-    type: success
-
-```yaml
-  - name: backupPort
-    title: BACKUP PORT
-    description: move all SAPs here
-    columnSpan: 4
-    newRow: true
-    readOnly: false
-    required: false
-    type: string
-    component:
-      input: autoComplete
-    suggest:
-      action: nspWebUI.portList
-      name:
-        - name
-```
-///
-
-### Simulate a Port Down Scenario
-
-* Ensure a service (`redundant-eline` or `epipe`) is provisioned with SAP on a port like `1/1/c6/1`
-* The corresponding node (e.g., `PE1`) must have a backup port available (e.g., `1/1/c8/1`)
-
-### Run the Workflow via Service Management
-
-1. Go to **NSP > Service Management**
-2. Find and select an existing service instance
-3. Click `⋮` (3-dot menu) > **Execute Workflow**
-4. Choose `PortMigration` from the list (use your custom name!)
-5. Fill in the inputs:
-
-| Field                 | Description                                             |
-| --------------------- | ------------------------------------------------------- |
-| `NE ID`               | Source port to be retired (`1/1/c6/1`)                  |
-| `PORT`                | Node where port exists (`PE1`)                          |
-| `BACKUP PORT`         | New port to migrate SAPs to (e.g., `1/1/c8/1`)          |
-| `INTENT TYPE`         | Set to `redundant-eline`                                |
-| `INTENT TYPE VERSION` | Typically `2` or `3`, depending on the deployed service |
-
-6. Click **Run**
-
-### Validate the Outcome
-
-* Check using `Service Management`
-* Ensure all SAPs have been moved to the backup port (`1/1/c6/1` ==>  `1/1/c8/1`)
-
-### Bonus
-
-Here some additional ideas on how to continue:
-
-* Try to run the sub-workflow directly
-* Run the python-code outside WFM to test changes in isolation
-* Further optimize the input (auto-pick intent-type-version)
-* Generate a HTML/PDF report, which SAPs have been migrated
-* Implement a dry-run option, to validate which services/saps would be affected
-* Extend the workflows to support other service-types like ELAN or L3VPN
-* Combine both workflows into a single one
-* Maximize experience: Ask for NE, port and backup-port only! Migrate all services found!
-* Trigger the workflow automatically, based on kafka events (port-down alarm raised on topic `nsp-fm-alerts`)
-* Rollback configuration changes, if PATCH failed

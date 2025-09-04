@@ -32,10 +32,11 @@ It allows seamless integration with your CI/CD pipelines, north-bound 3rd-party 
 
 While NSP WebUI is the quick choice for developing automation use-cases, we are promoting the use of Visual Studio Code as Integrated
 Development Environment by choice. If you have the ability to install VS Code on your computer, just do it. It's powerful! It's free!
-And it's fun! If you are into programming, you may already have it... If you cannot install it for administrative reasons: Don't Worry!
-There is `code-server` which is basically a server-hosted version of VS Code that can be accessed using your web-browser, coming with
-the same great experience. The good news: We've got code-server deployed in the hackathon labs, so it is just waiting for
-you to connect.
+And it's fun! If you are into programming, you may already have it.
+
+/// note
+If you cannot install VS Code for administrative reasons, don’t worry! You can use `code-server`, a server-hosted version of VS Code that runs in your web browser while offering the same familiar experience. Even better: code-server is already deployed in the hackathon labs with all required extensions pre-installed, ready for you to connect. This means you can run Visual Studio Code during this hackathon directly from your browser without any setup.
+///
 
 NOKIA is actively contributing VS Code extensions to improve Developer eXperience around our networking products and technologies being used.
 In this hackathon, you have the opportunity to use the following extensions contributed by Nokia in action:

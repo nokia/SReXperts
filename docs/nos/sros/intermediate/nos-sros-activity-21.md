@@ -183,7 +183,20 @@ If you are using your own platform outside the hackathon environment you can mak
 Once the connection object has been created, try to `get` the system's `oper-name` attribute from the running datastore to confirm we reached the correct node.
 
 /// details | Connecting and executing a basic get
-```bash
+/// tab | Start the Python interpreter shell
+```bash title="In your development environment of choice or your group's Hackathon VM."
+python
+```
+///
+/// tab | Connect and get something using pySROS
+```python
+from pysros.management import connect
+connection = connect(host="clab-srexperts-pe1", hostkey_verify=False, username="admin")
+connection.running.get('/configure/system/name')
+```
+///
+/// tab | Expected outcome
+```bash {.no-copy}
 (env) wsl-ubuntu: python
 Python 3.10.12 (main, Jan 17 2025, 14:35:34) [GCC 11.4.0] on linux
 Type "help", "copyright", "credits" or "license" for more information.
@@ -192,6 +205,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>> connection.running.get('/state/system/oper-name')
 Leaf('g21-pe1')
 ```
+///
 ///
 
 /// admonition | Host key verification
@@ -220,12 +234,21 @@ You may find the use of
     For VPRN services the same is not true, as the service name could be anything and a regular [`get`](https://network.developer.nokia.com/static/sr/learn/pysros/latest/pysros.html#pysros.management.Datastore.get) call is required. This can be optimized using [selection node filters](https://network.developer.nokia.com/static/sr/learn/pysros/latest/pysros.html#pysros-management-datastore-get-example-selection-node-filters) to retrieve less data in total.
 
 /// details | Finding the bgp neighbor configuration with pySROS
+Using your existing Python shell, run the code below:
+/// tab | Code
+```python
+connection.running.get_list_keys('/nokia-conf:configure/router[router-name="Base"]/bgp/neighbor')
+connection.running.get('/nokia-conf:configure/service/vprn', filter= {"bgp": { "neighbor": { "ip-address": {}} } })
 ```
+///
+/// tab | Expected result
+```python {.no-copy}
 >>> connection.running.get_list_keys('/nokia-conf:configure/router[router-name="Base"]/bgp/neighbor')
 ['10.64.51.2', '10.64.54.0', 'fd00:fc00:0:51::2', 'fd00:fde8::23:11', 'fd00:fde8::23:12', 'fd00:fde8::23:13', 'fd00:fde8:0:54::']
 >>> connection.running.get('/nokia-conf:configure/service/vprn', filter= {"bgp": { "neighbor": { "ip-address": {}} } })
 {'dci': Container({'service-name': Leaf('dci'), 'bgp': Container({'neighbor': {'12.3.3.3': Container({'ip-address': Leaf('12.3.3.3')})}})})}
 ```
+///
 ///
 
 ### Create prefix-list configuration
@@ -234,7 +257,35 @@ Prefix lists to be used in SR OS are configured in the `configure filter match-l
 One possible method for determining the expected structure and hierarchy of data that needs to be put in a [`set`](https://network.developer.nokia.com/static/sr/learn/pysros/latest/pysros.html#pysros.management.Datastore.set) call is by configuring the desired state on SR OS and using `get`. The output retrieved from the system will contain the configuration converted into the correct Python object, allowing you to go from there by building on top of known good information.
 
 /// details | Create match lists
+Using your existing Python shell, run the code below:
+/// tab | Code
 ```python
+import ipaddress
+ipv4_peers, ipv6_peers = set(), set()
+peers = connection.running.get_list_keys('/nokia-conf:configure/router[router-name="Base"]/bgp/neighbor')
+svc_peers = connection.running.get('/nokia-conf:configure/service/vprn', filter= {"bgp": { "neighbor": { "ip-address": {}} } })
+for k,v in svc_peers.items():
+ if "neighbor" not in v["bgp"].keys():
+   continue
+ for address in v["bgp"]["neighbor"].keys():
+   peers.append(address)
+
+for peer in peers:
+ if ipaddress.ip_address(peer).version == 4:
+   ipv4_peers.add(peer)
+ else:
+   ipv6_peers.add(peer)
+
+path = '/nokia-conf:configure/filter/match-list/ip-prefix-list[prefix-list-name="pysros-match-list"]'
+payload = { "prefix": { "%s/32"%peer: {"ip-prefix": f"%s/32"%peer} for peer in ipv4_peers } }
+connection.candidate.set(path, payload, commit=False)
+path = '/nokia-conf:configure/filter/match-list/ipv6-prefix-list[prefix-list-name="pysros-match-list"]'
+payload = { "prefix": { "%s/128"%peer: {"ipv6-prefix": "%s/128"%peer} for peer in ipv6_peers } }
+connection.candidate.set(path, payload, commit=True)
+```
+///
+/// tab | Expected execution result
+```python {.no-copy}
 >>> import ipaddress
 >>> ipv4_peers, ipv6_peers = set(), set()
 >>> peers = connection.running.get_list_keys('/nokia-conf:configure/router[router-name="Base"]/bgp/neighbor')
@@ -263,7 +314,7 @@ One possible method for determining the expected structure and hierarchy of data
 >>> connection.candidate.set(path, payload, commit=True)
 ```
 ///
-
+///
 To complete this step, exit your interactive Python shell once you confirm that the configuration exists in the target SR OS node, `PE1`. You can do this using your pySROS connection or simply by logging in to the node.
 
 !!! tip "Private candidate"
@@ -275,6 +326,37 @@ To complete this step, exit your interactive Python shell once you confirm that 
 
 By default, the creation you have now created is not used anywhere. In this optional subtask we will use the created match-list to populate an entry in the `cpm-filter` on `PE1`. We will use entries that are set to `accept` with a `default-action accept` so as not to impact the topology routing or lock ourselves out of the system.
 
+/// tab | Commands
+```
+edit-config private
+configure {
+    system {
+        security {
+            cpm-filter {
+                default-action accept
+                ipv6-filter {
+                    admin-state enable
+                    entry 10 {
+                        match {
+                            router-instance "Base"
+                            src-ip {
+                                ipv6-prefix-list "pysros_match_list"
+                            }
+                        }
+                        action {
+                            accept
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+commit
+quit-config
+```
+///
+/// tab | Compared result with existing configuration
 ```
 *(pr)[/]
 A:admin@pe1# compare /
@@ -302,6 +384,7 @@ A:admin@pe1# compare /
         }
     }
 ```
+///
 
 If you're using this approach you can check the effect and correctness of your prefix list using the following commands:
 
@@ -394,7 +477,7 @@ Having built up the code, we can now copy it onto our model-driven SR OS `PE1` n
 Once your file is prepared and reachable, run it with `pyexec` on `PE1` to make sure it still works as expected.
 
 /// details | Running your script with `pyexec`
-```
+```hl_lines="7"
 [/]
 A:admin@g21-pe1# edit-config private
 INFO: CLI #2070: Entering private configuration mode
@@ -432,6 +515,40 @@ A next step, now that we are able to use our code from within SR OS, is to make 
 Use the [documentation](https://documentation.nokia.com/sr/25-3/7x50-shared/md-cli-user/navigate.html#concept_hkg_hb3_bqb) for command aliases to create an alias called `align-prefix-lists` that is mounted under the `tools` context and calls a `python-script` object that calls your script file. You'll also have to create this `python-script` object. Test and make sure that the alias works the same as the `pyexec` approach by removing some prefixes from the previously created prefix-lists or by creating new BGP peer entries.
 
 /// details | Solution - creating an alias
+/// tab | Commands
+```
+edit-config private
+configure {
+    python {
+        python-script "align-prefix-lists" {
+            admin-state enable
+            urls ["cf3:/match_lists.py"]
+            version python3
+        }
+    }
+    system {
+        management-interface {
+            cli {
+                md-cli {
+                    environment {
+                        command-alias {
+                            alias "align-prefix-lists" {
+                                admin-state enable
+                                python-script "align-prefix-lists"
+                                mount-point "/tools" { }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+commit
+quit-config
+```
+///
+/// tab | Example changes and usage
 ```
 *[pr:/configure]
 A:admin@g21-pe1# compare /
@@ -476,6 +593,7 @@ A:admin@g21-pe1# /tools
  align-prefix-lists  dump  perform
 ```
 ///
+///
 
 ### Make it automated
 
@@ -515,63 +633,119 @@ Create the `script-policy` and review your changes, make sure anything that need
     - the `event-handler`, as it doesn't boast much in the way of configuration but all information is linked to it. Use `/show log event-handling information` to see if you can find an issue.
     - the `script-policy`, as we had already verified in the previous task that the `python-script` works by way of the alias. Use `/show system script-control script-policy "match_lists"` to identify issues.
 
-??? note "Solution - required configuration changes"
-    ```
-    *[pr:/configure]
-    A:admin@g21-pe1# compare /
-        configure {
-            log {
-                event-handling {
-                    handler "match_lists" {
-                        admin-state enable
-                        entry 10 {
-                            script-policy {
-                                name "match_lists"
-                            }
+/// details | Solution - required configuration changes
+/// tab | Commands
+```
+edit-config private
+configure {
+        log {
+            event-handling {
+                handler "match_lists" {
+                    admin-state enable
+                    entry 10 {
+                        script-policy {
+                            name "match_lists"
                         }
                     }
-                }
-                event-trigger {
-                    system event mdCommitSucceeded {
-                        admin-state enable
-                        description "event-trigger for activity #21"
-                        entry 10 {
-                            filter "10"
-                            handler "match_lists"
-                        }
-                    }
-                }
-                filter "10" {
-                    default-action forward
                 }
             }
-            system {
-                script-control {
-                    script-policy "match_lists" owner "TiMOS CLI" {
-                        admin-state enable
-                        results "/null"
-                        python-script {
-                            name "align-prefix-lists"
-                        }
+            event-trigger {
+                system event mdCommitSucceeded {
+                    admin-state enable
+                    description "event-trigger for activity #21"
+                    entry 10 {
+                        filter "10"
+                        handler "match_lists"
+                    }
+                }
+            }
+            filter "10" {
+                default-action forward
+            }
+        }
+        system {
+            script-control {
+                script-policy "match_lists" owner "TiMOS CLI" {
+                    admin-state enable
+                    results "/null"
+                    python-script {
+                        name "align-prefix-lists"
                     }
                 }
             }
         }
-    ```
-
+    }
+commit
+quit-config
+```
+///
+/// tab | Compare output
+```
+*(pr)[/]
+A:admin@g21-pe1# compare /
+    configure {
+        log {
+            event-handling {
++               handler "match_lists" {
++                   admin-state enable
++                   entry 10 {
++                       script-policy {
++                           name "match_lists"
++                       }
++                   }
++               }
+            }
+            event-trigger {
++               system event mdCommitSucceeded {
++                   admin-state enable
++                   description "event-trigger for activity #21"
++                   entry 10 {
++                       filter "10"
++                       handler "match_lists"
++                   }
++               }
+            }
++           filter "10" {
++               default-action forward
++           }
+        }
+        system {
++           script-control {
++               script-policy "match_lists" owner "TiMOS CLI" {
++                   admin-state enable
++                   results "/null"
++                   python-script {
++                       name "align-prefix-lists"
++                   }
++               }
++           }
+        }
+    }
+```
+///
+///
 #### Test the functionality
 
 Commit your changes and make sure the different elements are operationally up. Add BGP peer `192.168.0.1` to the service `dci` configuration. Was your match-list configuration updated?
 
 /// details | Testing your implementation
+/// tab | Add a BGP peer to the configuration
 ```
+edit-config private
+/configure service vprn dci bgp group neighbor
+/configure service vprn dci bgp neighbor 192.168.0.1 group "neighbor"
+commit
+```
+///
+/// tab | Expected result
+``` hl_lines="16"
 [/]
 A:admin@g21-pe1# edit-config private
 INFO: CLI #2070: Entering private configuration mode
 INFO: CLI #2061: Uncommitted changes are discarded on configuration mode exit
 
 (pr)[/]
-A:admin@g21-pe1# configure service vprn dci bgp group neighbor
+A:admin@g21-pe1# /configure service vprn dci bgp group neighbor
 
 *(pr)[/configure service vprn "dci" bgp group "neighbor"]
 A:admin@g21-pe1# /configure service vprn dci bgp neighbor 192.168.0.1 group "neighbor"
@@ -591,6 +765,7 @@ A:admin@g21-pe1# compare baseline running /
         }
     }
 ```
+///
 ///
 
 Remove the previously added BGP peer from your configuration and commit the changes. Does your configuration look as you had expected?

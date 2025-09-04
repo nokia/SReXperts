@@ -9,14 +9,14 @@
 | **Topology Nodes**    | :material-router: leaf1                                                       |
 | **References**        | [Notifier App documentation][notifier-docs]                                   |
 
-[notifier-docs]: https://docs.eda.dev/apps/notifier/
+[notifier-docs]: https://docs.eda.dev/25.8/apps/notifier/
 
 Modern day data center management is far from only dealing with configuration provisioning.
 More so, the day2+ operations are what teams are dealing with most of the time. Things like monitoring, alarm management and notifications come to mind.
 
 EDA is not only the powerful configuration management platform, but is also no stranger to operations. It packs a powerful set of applications and integrations to simplify operations and extend the core set of capabilities.
 
-This exercise introduces you to the EDA [**Notifier**](https://docs.eda.dev/apps/notifier/) application that allows an operator to create custom notifications based on the events registered by EDA and deliver them to popular notification and chat systems.
+This exercise introduces you to the EDA [**Notifier**][notifier-docs] application that allows an operator to create custom notifications based on the events registered by EDA and deliver them to popular notification and chat systems.
 
 ## Objective
 
@@ -35,7 +35,7 @@ Before jumping into the exercise, let's clarify what we consider an event in EDA
 As the name suggests, EDA - Event Driven Automation - is all about events, but what does it really mean? In a nutshell it means that all internal EDA processes are triggered by different kinds of events happening in and outside of the EDA system.  
 EDA is a system of event producers and consumers, where everything is based on event streaming and asynchronous communication.
 
-For example, if a transceiver dies and triggers the port to go down, this event will be immediately available in EDA thanks to streaming telemetry. Once the event of a port changing its state from UP to DOWN is available in the EDA system, all the applications that registered themselves as a consumer for such events will start and work on the basis of this event.  
+For example, if a transceiver dies and triggers a port to go down, this event will be immediately available in EDA thanks to streaming telemetry. Once the event of a port changing its state from UP to DOWN is available in the EDA system, all the applications that registered themselves as a consumer for such events will start and work on the basis of this event.  
 For example:
 
 - an Interface application that is in charge of the interfaces will raise an appropriate alarm
@@ -52,7 +52,7 @@ One such application - [Notifier][notifier-docs] - was written by Nokia to unloc
 When the Notifier app is installed, it extends the EDA API with the new Resources (aka Intents)[^1]:
 
 1. **Notifier**  
-    Allows an operator to configure which events/sources to use to create notification messages. Can be either a list of alarms, or a list of EQL queries. Notifier resource can act on sources from the namespace it is created in.
+    Allows an operator to configure which events/sources to use to create notification messages. Can be either a list of alarms, or a list of [EQL queries](eda-query-language.md). Notifier resource can act on sources from the namespace it is created in.
 
     <small>The `ClusterNotifier` resource is a cluster-scoped version of the Notifier resource that can act on sources from all namespaces.</small>
 
@@ -141,7 +141,7 @@ You are tasked with configuring the Notifier app to send Interface Up/Down alarm
 #### Configuring the Discord Provider
 
 Start with configuring the Discord Provider. In the context of the Notifier app, a Provider resource configures the destination where alarms can be sent.  
-You can configure many [different providers](https://docs.eda.dev/apps/notifier/#providers) in the Notifier app, but for this task we will use Discord, as it is easy to set up in a short amount of time we have.
+You can configure many [different providers](https://docs.eda.dev/25.8/apps/notifier/#notification-destination) in the Notifier app such as Discord, Teams, Telegram, etc., but for this task we will use Discord, as it is easy and quick to set it up.
 
 ##### Logging in to Discord
 
@@ -149,14 +149,14 @@ Naturally, you will need to log in to Discord to see the notifications popping u
 
 To join the EDA Discord server follow this link - **https://eda.dev/discord**
 
-After choosing the username, you should see a list of channels, where one of them is named `srx-hackathon-notifier`. There we will send our notifications.
+After choosing the username, you should see a list of channels with one of them being named **# srx-hackathon-notifier**. This is where we will send our notifications.
 
 ##### Create Provider resource
 
 As part of this exercise, no matter what group you're assigned to, you get a Discord webhook link from us that is associated with the channel `srx-hackathon-notifier`.
 
 ```
-https://discord.com/api/webhooks/1356633431169302688/1eigFh5nBoSRYkIU93OmkVll8xo8uEoCYvOQrEiRwjCTPvDt0E5Ntpg4D5MlU3k9q3dV
+https://discord.com/api/webhooks/1405656591650394193/qfNUUL1rN39szP608GDPMUPqBmhmwWTMRasWY36mS9QmWY24j118CFuyWA7xfArAmKfF
 ```
 
 In the EDA UI sidebar find the **Notifier** group and choose the **Provider** menu item. Next open the Provider resource form by clicking on the Create button:
@@ -184,7 +184,7 @@ metadata:
 spec:
   enabled: true
   uri: >-
-    discord://discord.com/api/webhooks/1356633431169302688/1eigFh5nBoSRYkIU93OmkVll8xo8uEoCYvOQrEiRwjCTPvDt0E5Ntpg4D5MlU3k9q3dV
+    discord://discord.com/api/webhooks/1405656591650394193/qfNUUL1rN39szP608GDPMUPqBmhmwWTMRasWY36mS9QmWY24j118CFuyWA7xfArAmKfF
 ```
 
 ///
@@ -210,11 +210,11 @@ spec:
 
 As the field's name suggest, we might want to include some alarms in the `include` list, but what exactly we need to type there?
 
-To answer this question, have a look at the Alarms page in the EDA UI:
+To answer this question, we have to look at the Alarms page in the EDA UI. In the side menu select **Alarms** from the SYSTEM category and in the Alarms dashboard click on the **View** link in the **Active Application Alarms** panel.
 
-![pic2](https://gitlab.com/rdodin/pics/-/wikis/uploads/db3b7fdf33e594f295b2cdac586d6e32/CleanShot_2025-04-01_at_15.22.51_2x.png)
+![pic2](https://gitlab.com/rdodin/pics/-/wikis/uploads/102151a88c925ca06acfbf6fb4088260/CleanShot_2025-08-20_at_13.34.13.webp)
 
-What you see in the Type column is the Alarm Type, and the Notifier app expects you to provide this value in the `.spec.alarms.include` field. Great, one piece of a puzzle solved. But there may be many alarm types in your list, and none of them may be relevant to the interface state we are after.
+What you see in the **Type** column is the Alarm Type, and the Notifier app expects you to provide this value in the `.spec.alarms.include` field. Great, one piece of a puzzle solved. But there may be many alarm types in your list, and none of them may be relevant to the interface state we are after.
 
 We need to find the relevant Alarm Type that is raised when an interface goes Up->Down or Down->Up. In future, EDA docs will have a list of alarms published, but until then, let's shut one interface down and monitor the list of alarms.
 
@@ -244,7 +244,7 @@ All changes have been committed. Leaving candidate mode.
 
 Now have a look at the alarm list again and filter on the Last Changed column to have most recent events appear on top. You will
 
-![pic3](https://gitlab.com/rdodin/pics/-/wikis/uploads/93c13dc4a9be61ad71be0c918ebbd612/CleanShot_2025-04-01_at_15.54.51_2x.png)
+![pic3](https://gitlab.com/rdodin/pics/-/wikis/uploads/d06e3d2c3f515e19318cd2c5b2f59a39/CleanShot_2025-08-20_at_13.39.45.webp)
 
 Write down the Alarm Type that was raised when we shut down the interface.
 
@@ -255,12 +255,14 @@ Alarm Type: `InterfaceDown`
 
 /// admonition | Restore Interface State
     type: warning
-Bring back the interface state by running the following command in the bash shell of the server:
+Bring back up the interface by running the following command in the bash shell of the server:
 
 ```shell
 docker exec clab-srexperts-leaf11 \
 sr_cli -ec "/interface ethernet-1/1 admin-state enable"
 ```
+
+By bringing the interface up, the alarms will be automatically change their state to Cleared = True.
 
 ///
 

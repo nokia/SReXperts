@@ -18,12 +18,12 @@ tags:
 | **Difficulty**              | Intermediate                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | **Tools used**              | [SNMP](https://documentation.nokia.com/srlinux/24-10/books/system-mgmt/snmp.html){:target='_blank'}, [MicroPython](https://micropython.org/){:target='_blank'}                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | **Topology Nodes**          | :material-router: spine11, :material-router: leaf11                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| **References**              | [SR Linux's built-in MIBs and traps](https://documentation.nokia.com/srlinux/24-10/books/system-mgmt/snmp.html){:target='_blank'}<br/>[SNMP Framework blogpost](https://learn.srlinux.dev/snmp/snmp_framework/){:target='_blank'}<br/>[MicroPython](https://docs.micropython.org/en/latest/){:target='_blank'}<br/>[YANG Browser](https://yang.srlinux.dev/v24.10.4){:target="_blank"}<br/> |
+| **References**              | [SR Linux's built-in MIBs and traps](https://documentation.nokia.com/srlinux/24-10/books/system-mgmt/snmp.html){:target='_blank'}<br/>[SNMP Framework blogpost](https://learn.srlinux.dev/snmp/snmp_framework/){:target='_blank'}<br/>[MicroPython](https://docs.micropython.org/en/latest/){:target='_blank'}<br/>[YANG Browser](https://yang.srlinux.dev/v24.10.3){:target="_blank"}<br/> |
 
 
-Many of the activities in this hackathon focus on programmability and automation in a model-driven network.  There are still some systems that require the use of more traditional (dare we say, legacy?) protocols such as SNMP.  Thankfully, SR Linux combines the best of both worlds with a highly configurable and flexible SNMP framework that lets you define your own MIBs and traps, using the same mechanisms that power its built-in SNMP capabilities. 
+Many of the activities in this hackathon focus on programmability and automation in a model-driven network.  There are still some systems that require the use of more traditional (dare we say, legacy?) protocols such as SNMP.  Thankfully, SR Linux combines the best of both worlds with a highly configurable and flexible SNMP framework that lets you define your own MIBs and traps, using the same mechanisms that power its built-in SNMP capabilities.
 
-This SNMP framework is explained in detail in the following article on [customizing SNMP MIBs for Gets and Traps in SR Linux](https://learn.srlinux.dev/snmp/snmp_framework/){:target='_blank'}. 
+This SNMP framework is explained in detail in the following article on [customizing SNMP MIBs for Gets and Traps in SR Linux](https://learn.srlinux.dev/snmp/snmp_framework/){:target='_blank'}.
 
 In this activity, we will briefly review the most important aspects and then move straight into an example, followed by a task where you will implement an SNMP Trap yourself.
 
@@ -76,7 +76,7 @@ flowchart LR
 ```
 
 ### Management information base (MIB)
-A management information base (MIB) is a formal specifications document with definitions of management information used to remotely monitor, configure, and control a managed device or network system. The agent’s management information consists of a set of network objects that can be managed with SNMP. 
+A management information base (MIB) is a formal specifications document with definitions of management information used to remotely monitor, configure, and control a managed device or network system. The agent’s management information consists of a set of network objects that can be managed with SNMP.
 
 Object identifiers are unique object names that are organized in a hierarchical tree structure. The main branches are defined by the Internet Engineering Task Force (IETF). When requested, the Internet Assigned Numbers Authority (IANA) assigns a unique branch for use by a private organization or company. The branch assigned to Nokia (TiMetra) is 1.3.6.1.4.1.6527.
 
@@ -115,7 +115,7 @@ You can create custom MIB definitions following these steps:
 The user-defined MIB definitions and files with the associated scripts are stored in `/etc/opt/srlinux/snmp` directory, while the built-in MIB definitions are stored in `/opt/srlinux/snmp` directory.
 ///
 
-Built-in MIB examples (like `if_mib.yaml`) show how interface data maps to SNMP tables using standard OIDs and types such as counters, strings, and timeticks. Your custom MIBs follow this same structure. 
+Built-in MIB examples (like `if_mib.yaml`) show how interface data maps to SNMP tables using standard OIDs and types such as counters, strings, and timeticks. Your custom MIBs follow this same structure.
 
 ##### Python Script
 
@@ -195,7 +195,7 @@ A:srl# /tree xpath from state / system grpc-server
 /system/grpc-server[name=*]/rate-limit:
 <snip>
 ```
-Or by using the [YANG Browser](https://yang.srlinux.dev/v24.10.4){:target="_blank"}.
+Or by using the [YANG Browser](https://yang.srlinux.dev/v24.10.3){:target="_blank"}.
 ///
 
 ```{.yaml .code-scroll-lg}
@@ -240,7 +240,7 @@ tables:
         syntax: timeticks
 ```
 /// details | OID definition
-OIDs are typically hierarchically structured. Since this is an example, we are using an arbitrary OID within Nokia assigned enterprise branch `1.3.6.1.4.1.6527`. The suffix `115.114.108.105.110.117.120` actually decodes to `srlinux` in ASCII. 
+OIDs are typically hierarchically structured. Since this is an example, we are using an arbitrary OID within Nokia assigned enterprise branch `1.3.6.1.4.1.6527`. The suffix `115.114.108.105.110.117.120` actually decodes to `srlinux` in ASCII.
 ///
 
 The table definition file has the following important top level fields:
@@ -482,7 +482,7 @@ traps:
             oid: 1.3.6.1.4.1.6527.115.114.108.105.110.117.120.1.1
             syntax: octet string
 ```
-The trap definition YAML file has exactly the same top level elements as the table definition file but instead of `tables` the file contains `traps` top-level list. 
+The trap definition YAML file has exactly the same top level elements as the table definition file but instead of `tables` the file contains `traps` top-level list.
 
 Besides the common `name`, `enabled` and `oid` fields, the `traps` object has the following fields:
 
@@ -798,9 +798,9 @@ There you have it: user-defined SNMP traps added to SR Linux at **runtime**, no 
 
 ## Tasks
 
-**You should read these tasks from top-to-bottom before beginning the activity**.  
+**You should read these tasks from top-to-bottom before beginning the activity**.
 
-It is tempting to skip ahead but tasks may require you to have completed previous tasks before tackling them. 
+It is tempting to skip ahead but tasks may require you to have completed previous tasks before tackling them.
 
 You are now equipped with all the knowledge to create your own custom SNMP MIBs or Traps in SR Linux. To test your newly acquired knowledge, you will create a new custom SNMP Trap. In this task you will enhance your network's observability by creating an SNMP Trap for the ACL `matched-packets` statistic.
 
@@ -823,6 +823,38 @@ Check out the [documentation page](https://documentation.nokia.com/srlinux/24-10
 ///
 /// details | Solution
     type: success
+/// tab | Commands
+```srl
+enter candidate
+system {
+    snmp {
+        access-group SNMPv2-RO-Community {
+            security-level no-auth-no-priv
+            community-entry RO-Community {
+                community $aes1$AWCRb2THTuMd5G8=$i60dOVPIHcmUuTNwePE+JQ==
+            }
+        }
+        trap-group demo {
+            admin-state enable
+            network-instance mgmt
+            destination collector {
+                admin-state enable
+                address 10.128.15.1
+                security-level no-auth-no-priv
+                community-entry demo {
+                    community $aes1$AWAp8kl/wnx0RG8=$0tiHTb7b/9pRdrUHb7b1MA==
+                }
+            }
+        }
+        network-instance mgmt {
+            admin-state enable
+        }
+    }
+}
+commit stay
+```
+///
+/// tab | Expected configuration
 ```srl
 --{ + running }--[  ]--
 A:g15-spine11# info system snmp
@@ -853,54 +885,96 @@ A:g15-spine11# info system snmp
     }
 ```
 ///
+///
 
 ### Configure an ACL on Spine11
 
-Configure an Access Control List (ACL) on :material-router: spine11 to capture (match and accept) ICMP packets originating from  :material-router: leaf11. If you're unsure how to do this, the procedure is explained here. 
+Configure an Access Control List (ACL) on :material-router: spine11 to capture (match and accept) ICMP packets originating from  :material-router: leaf11. If you're unsure how to do this, the procedure is explained here.
 
 
 1. Create the ACL and enable statistics tracking (set statistics-per-entry to true to monitor matched packets).
-2. Add an entry with matching criteria for ICMP traffic, define the match conditions (e.g. protocol type = ICMP) and specify the desired action. 
+2. Add an entry with matching criteria for ICMP traffic, define the match conditions (e.g. protocol type = ICMP) and specify the desired action.
 3. Apply the ACL to the appropriate interface (this should be the same interface that the ICMP packets were observed on during the packet capture in the previous task).
 
 /// details | Solution
     type: success
+/// tab | Commands
+```srl
+enter candidate
+acl {
+    acl-filter ping_leaf type ipv4 {
+        description "ACL to capture ICMP request from leaf"
+        statistics-per-entry true
+        entry 10 {
+            match {
+                ipv4 {
+                    protocol icmp
+                    destination-ip {
+                        prefix 10.46.15.31/32
+                    }
+                    icmp {
+                        type echo
+                    }
+                    source-ip {
+                        prefix 10.46.15.33/32
+                    }
+                }
+            }
+            action {
+                accept {
+                }
+            }
+        }
+    }
+    interface ethernet-1/1.0 {
+        input {
+            acl-filter ping_leaf type ipv4 {
+            }
+        }
+    }
+}
+diff
+commit stay
 ```
-A:g15-spine11# enter candidate
+///
+/// tab | Expected `diff` output
+```srl
+--{ +* candidate shared default }--[  ]--
 A:g15-spine11# diff
-     acl {
-         acl-filter ping_leaf type ipv4 {
-             description "ACL to capture ICMP request from leaf"
-             statistics-per-entry true
-             entry 10 {
-                 match {
-                     ipv4 {
-                         protocol icmp
-                         destination-ip {
-                             prefix 10.46.15.31/32
-                         }
-                         icmp {
-                             type echo
-                         }
-                         source-ip {
-                             prefix 10.46.15.33/32
-                         }
-                     }
-                 }
-                 action {
-                     accept {
-                     }
-                 }
-             }
-         }
-         interface ethernet-1/1.0 {
-             input {
-                 acl-filter ping_leaf type ipv4 {
-                 }
-             }
-         }
-     }
+      acl {
++         acl-filter ping_leaf type ipv4 {
++             description "ACL to capture ICMP request from leaf"
++             statistics-per-entry true
++             entry 10 {
++                 match {
++                     ipv4 {
++                         protocol icmp
++                         destination-ip {
++                             prefix 10.46.15.31/32
++                         }
++                         icmp {
++                             type echo
++                         }
++                         source-ip {
++                             prefix 10.46.15.33/32
++                         }
++                     }
++                 }
++                 action {
++                     accept {
++                     }
++                 }
++             }
++         }
+          interface ethernet-1/1.0 {
+              input {
++                 acl-filter ping_leaf type ipv4 {
++                 }
+              }
+          }
+      }
 ```
+///
 ///
 ### Check ACL statistics
 Perform a ping command on :material-router: leaf11.
@@ -941,7 +1015,7 @@ Entry-stats   : yes
 Entries       : 1
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  Subinterface    Input   Output
-ethernet-1/1.0   yes     no    
+ethernet-1/1.0   yes     no
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Entry 10
   Match               : protocol=icmp, 10.46.15.33/32(*)->10.46.15.31/32(*)
@@ -986,7 +1060,7 @@ In this activity we want to expose the `matched-packets` and `last-match` statis
 Create the file `acl_traps.yaml` in the `etc/opt/srlinux/snmp/scripts` directory on :material-router: spine11. Take a look at the `grpc_traps.yaml` file from the example earlier and use this as a reference to see what is needed in your `.yaml` file.
 
 /// Note
-Use the [YANG Browser](https://yang.srlinux.dev/v24.10.4){:target="_blank"} to easily figure out the YANG-paths you need.
+Use the [YANG Browser](https://yang.srlinux.dev/v24.10.3){:target="_blank"} to easily figure out the YANG-paths you need.
 ///
 
 /// details | Hint 1
@@ -1135,7 +1209,7 @@ def parseACLFilterKeys(xpath: str):
     Extracts values from [key=value] sections in the XPath string.
     Should return a list of values like ['ping_leaf', 'ipv4', '10']
     """
-    name_pattern = re.compile(r"\[([^\[\]=]+)=([^\]]+)\]") # This regex will match "key" and "value" 
+    name_pattern = re.compile(r"\[([^\[\]=]+)=([^\]]+)\]") # This regex will match "key" and "value"
     results = []
 
     ### Your logic here to extract the values
@@ -1317,33 +1391,33 @@ snmptrapd -f -Lo
 NET-SNMP version 5.9.1 AgentX subagent connected
 NET-SNMP version 5.9.1
 2025-05-15 15:35:50 clab-srexperts-spine11 [UDP: [10.128.15.31]:59592->[10.128.15.1]:162]:
-iso.3.6.1.2.1.1.3.0 = Timeticks: (7604300) 21:07:23.00  
-iso.3.6.1.6.3.1.1.4.1.0 = OID: iso.3.6.1.4.1.6527.99.117.115.116.111.109        
-iso.3.6.1.6.3.1.1.4.3.0 = OID: iso.3.6.1.4.1.6527.1.20      
-iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.1.0 = STRING: "cpm" 
-iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.2.0 = STRING: "ipv4"        
-iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.3.0 = STRING: "10"      
-iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.4.0 = INTEGER: 1716 
+iso.3.6.1.2.1.1.3.0 = Timeticks: (7604300) 21:07:23.00
+iso.3.6.1.6.3.1.1.4.1.0 = OID: iso.3.6.1.4.1.6527.99.117.115.116.111.109
+iso.3.6.1.6.3.1.1.4.3.0 = OID: iso.3.6.1.4.1.6527.1.20
+iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.1.0 = STRING: "cpm"
+iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.2.0 = STRING: "ipv4"
+iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.3.0 = STRING: "10"
+iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.4.0 = INTEGER: 1716
 iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.5.0 = Timeticks: (7604300) 21:07:23.00
 
 2025-05-15 15:35:50 clab-srexperts-spine11 [UDP: [10.128.15.31]:59592->[10.128.15.1]:162]:
-iso.3.6.1.2.1.1.3.0 = Timeticks: (7604300) 21:07:23.00  
-iso.3.6.1.6.3.1.1.4.1.0 = OID: iso.3.6.1.4.1.6527.99.117.115.116.111.109        
-iso.3.6.1.6.3.1.1.4.3.0 = OID: iso.3.6.1.4.1.6527.1.20      
-iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.1.0 = STRING: "cpm" 
-iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.2.0 = STRING: "ipv4"        
-iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.3.0 = STRING: "260"     
-iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.4.0 = INTEGER: 1082346      
+iso.3.6.1.2.1.1.3.0 = Timeticks: (7604300) 21:07:23.00
+iso.3.6.1.6.3.1.1.4.1.0 = OID: iso.3.6.1.4.1.6527.99.117.115.116.111.109
+iso.3.6.1.6.3.1.1.4.3.0 = OID: iso.3.6.1.4.1.6527.1.20
+iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.1.0 = STRING: "cpm"
+iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.2.0 = STRING: "ipv4"
+iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.3.0 = STRING: "260"
+iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.4.0 = INTEGER: 1082346
 iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.5.0 = Timeticks: (7604300) 21:07:23.00
 
 2025-05-15 15:35:50 clab-srexperts-spine11 [UDP: [10.128.15.31]:59592->[10.128.15.1]:162]:
-iso.3.6.1.2.1.1.3.0 = Timeticks: (7604300) 21:07:23.00  
-iso.3.6.1.6.3.1.1.4.1.0 = OID: iso.3.6.1.4.1.6527.99.117.115.116.111.109        
-iso.3.6.1.6.3.1.1.4.3.0 = OID: iso.3.6.1.4.1.6527.1.20      
-iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.1.0 = STRING: "ping_leaf"   
-iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.2.0 = STRING: "ipv4"        
-iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.3.0 = STRING: "10"      
-iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.4.0 = INTEGER: 16        
+iso.3.6.1.2.1.1.3.0 = Timeticks: (7604300) 21:07:23.00
+iso.3.6.1.6.3.1.1.4.1.0 = OID: iso.3.6.1.4.1.6527.99.117.115.116.111.109
+iso.3.6.1.6.3.1.1.4.3.0 = OID: iso.3.6.1.4.1.6527.1.20
+iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.1.0 = STRING: "ping_leaf"
+iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.2.0 = STRING: "ipv4"
+iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.3.0 = STRING: "10"
+iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.4.0 = INTEGER: 16
 iso.3.6.1.4.1.6527.99.117.115.116.111.109.1.5.0 = Timeticks: (7604300) 21:07:23.00
 
 ```

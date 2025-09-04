@@ -2,104 +2,105 @@
 tags:
   - NSP
   - Workflow Manager
-  - Device Operations
+  - Device Operation
+  - LSO (Large Scale Operation)
   - Artifact Manager
---- 
+---
 
 # Network Element Password Audit and Alignment
 
 |     |     |
 | --- | --- |
-| **Activity name** | Network Element (NE) Password Audit and Alignment |
+| **Activity name** | Network Element Password Audit and Alignment |
 | **Activity ID** | 66 |
 | **Short Description** | Audit the NE user password and align to the target password if misaligned  |
 | **Difficulty** | Intermediate |
-| **Tools used** |  |
-| **Topology Nodes** | :material-router: PE1 |
-| **References** |  |
+| **Topology Nodes** | any SR OS node |
+| **References** | [LSO Framework](https://network.developer.nokia.com/learn/24_11/network-functions/device-management/lsom-framework-apis/#Guidelines), [Workflow Development](https://network.developer.nokia.com/learn/25_4/programming/workflows/wfm-workflow-development/), [RFC8072 (YANG PATCH)](https://www.rfc-editor.org/rfc/rfc8072.html) |
 
-## Objectives
+## Objective
 
-Design, implement and test a custom two-phase **Device Operations** using the NSP Large-Scale Operations Manager (LSOM) framework to manage and synchronize NE user passwords.
+You need a reliable way to enforce your organization’s passwords on many devices—without manual spot checks, risky ad-hoc fixes, or “hope it’s compliant” assumptions. In this activity, you’ll use a custom, two-phase **Device Operation** built on NSP’s **Large-Scale Operation Manager (LSOM)** to:
 
-## Technology Overview
+* **Detect** non-compliant device user passwords at scale (validation phase).
+* **Reconcile** only where needed, safely and predictably (fix phase).
 
-**Device Operations** are part of the NSP *Device Management*, designed to support a wide range of operations including Audits, Backups/Restores and Software Upgrades.
-To enable customizability, those operations are running programmable **workflows**, while LSOM orchstrates the execution of those workflows while improving the operational
-experience by adding progress monitoring and execution control.
+The outcome is a repeatable, operator-friendly control you can run on any set of targets nodes to continuously check and enforce device-level passwords to be set correctly and update if needed.
 
-The target of any operation are devices, which depending on the use-case can be either a single network element or multiple.
-Consequently, every workflow associated with an operation includes the `ne-id` (device identifier) as required input.
-In our scenario, since we're managing nodal users, `username` and `password` become additional input parameters.
+## Technology explanation
 
-Our automation activity will require 3 artifacts to be created…
-First, there is a workflow to audit the current password of the NE user to check for misaligments.
-Second, there is another workflow to realign the user password in case there was a mismatch.
-Third, there is the operation, bringing everything together.
+**Device Operation** in NSP are tools that help manage network devices. They can do many things, like checking device settings, making backups, restoring data, or upgrading software.
 
-Finally, to simplify the transfer and installation of these 3 artifacts that belong together,
-you will package everything together becoming an `artifact bundle`.
+These operations run through workflows — think of them like step‑by‑step instructions. Another part of NSP, called LSOM, oversees running those workflows, keeping track of their progress, and giving you control over when and how they run.
 
-## Artifact Bundle
+An operation always targets one or more devices. To run it, the workflow needs to know the device’s ID (called `ne-id`). In our case, since we’re managing device user accounts, we also need a `username` and `password`.
 
-To implement the device operation that orchestrates multiple workflows, the operation must adhere to a prescribed directory structure.
-Each file and component within this structure fulfills a specific function ensuring clean modularity between the execution logic and the user interface definition.
+For our automation, we need to create three things:
 
-| Path                                                                               | Description                                                       |
-|------------------------------------------------------------------------------------|-------------------------------------------------------------------|
-| `metadata.json`                                                                    | **Artifact Bundle meta-data**                                     |
-| `workflows/`                                                                       | **Directory for workflows**                                       |
-| \|__`audit-misaligned-pass/`                                                       |                                                                   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|__`audit-misaligned-pass-<< groupId >>.yaml` | Workflow #1 to audit the NE password                              |
-| \|__`force-update-pass/`                                                           |                                                                   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|__`force-update-pass-<< groupId >>.yaml`     | Workflow #2 to realign the password if misalignment exists        |
-| `operation-types/`                                                                 | **Directory for operation-types**                                 |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|__`operation_types.json`                     | Operation-type meta information                                   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|__`misaligned-pass-<< groupId >>.yang`       | Operational model (in YANG) defining operation input and output   |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|__`misaligned-pass-<< groupId >>.yaml`       | Mapping profile: Defines phases with workflow references          |
+1. A workflow to check if a device user’s password is correct.
+2. A workflow to fix the password if it’s wrong.
+3. An operation that ties these workflows together so they can be run easily.
+
+To make sharing and installing these three parts simple, we’ll put them all together into one package called an **Artifact Bundle**.
+
+The YAML syntax for writing workflows is very intuitive, as it uses simple English expressions to describe the execution and data flow including conditional statements. Please study the workflow code carefully to get used to the syntax and principles, soon you will write your first own workflow.
+
+### Artifact Bundle
+
+To build a device operation that runs multiple workflows, you need to follow a specific directory structure. Each file and folder in this structure has its own purpose, keeping the execution logic separate from the user interface so everything stays clean and well‑organized.
+
+| Path                                                | Description                                                       |
+|-----------------------------------------------------|-------------------------------------------------------------------|
+| `metadata.json`                                     | **Artifact Bundle meta-data**                                     |
+| `workflows/`                                        | **Directory for workflows**                                       |
+| `|__audit-misaligned-pass/`                         |                                                                   |
+| `      |__audit-misaligned-pass-<< GroupId >>.yaml` | Workflow-1 to audit the NE password                               |
+| `|__force-update-pass/`                             |                                                                   |
+| `      |__force-update-pass-<< GroupId >>.yaml`     | Workflow-2 to realign the password if misalignment exists         |
+| `operation-types/`                                  | **Directory for operation-types**                                 |
+| `      |__operation_types.json`                     | Operation-type meta information                                   |
+| `      |__misaligned-pass-<< GroupId >>.yang`       | Operational model (in YANG) defining operation input and output   |
+| `      |__misaligned-pass-<< GroupId >>.yaml`       | Mapping profile: Defines phases with workflow references          |
 
 /// warning
-
 The YANG-defined operation input (and output) is provided and persisted in clear-text.
 As this applies to every field regardless of confidentiality, having user passwords unencrypted impacts applicability for production environments.
 ///
 
 ## Tasks
 
+**You should read these tasks from top-to-bottom before beginning the activity.**
+
+It is tempting to skip ahead but tasks may require you to have completed previous tasks before tackling them.
+
 /// warning
-Remind, that you are using a single NSP system (shared), that is used for all groups. Therefore, ensure
+Remember that you are using a single shared NSP system that is used for all groups. Ensure
 your group-number is part of the operation and workflow names you are creating to ensure uniqueness.
 ///
 
-**You should read these tasks from top-to-bottom before beginning the activity.**
+### Getting started
 
-It is tempting to skip ahead but tasks may require you to have completed previous tasks before tackling them.  
+Creating things from scratch can feel daunting and even overwhelming. To save you from piecing together all the required components that define the structure and format of an operation, we provide you with a [LSO Skeleton Bundle Generator](./resources/bundle-generate-66.html). This tool creates an artifact bundle in the exact structure expected by the system, giving you a ready-made starting point. From there, you can easily build upon it and move on to more advanced use cases.
 
-### Workflow 1 - Password Audit
+### Password Audit Workflow
 
-First, lets create the workflow to audit the NE user password.
+Part of monitoring local user configuration in a network element is being able to audit what is there. Let's create the workflow to audit the NE user password.
+
 The general flow is the following:
 
 1. Retrieve the current password from the NE
 2. Compare it to the configured target password
 3. Generate an audit result indicating compliance or deviation
 
-NSP Workflow Manager user OpenStack Mistral, while we've added a lot of actions and expressions to tailor it for network automation.
-[Click here](https://network.developer.nokia.com/learn/24_11/programming/workflows) for a quick starter guide on writing workflows.
+To keep things efficient, we are providing you with the complete workflow code in the box below.
 
-To keep things efficient, we are providing you with the complete workflow code.
-
-/// details | Possible solution (only look here as a last resort!)
-    type: success
-
-/// note
-Keep in mind that this workflow execution is intended to fail if the password is a match (or aligned) while it is expected to succeed if there is a misalignment. The reason behind this change is to faciliate the LSO flow to transition from Audit to Align phase.
-///
+/// details | Workflow code
+    type: note
 
 ```yaml
 version: '2.0'
 
-audit-misaligned-pass-<<groupId>>:
+audit-misaligned-pass-<<GroupId>>:
   tags:
     - LSO
 
@@ -110,15 +111,16 @@ audit-misaligned-pass-<<groupId>>:
 
   output:
     lsoInfo: <% $.lsoInfo %> ## mandatory output for LSO operations
-    misaligned: <% $.misaligned %> ## mandatory output leaf parameter defined in misaligned-pass.yang 
+    misaligned: <% $.misaligned %> ## mandatory output leaf parameter defined in misaligned-pass.yang
 
   output-on-error:
     lsoInfo: <% $.lsoInfo %> ## mandatory output for LSO operations for errors
-    misaligned: <% $.misaligned %> ## mandatory output leaf parameter defined in misaligned-pass.yang 
+    misaligned: <% $.misaligned %> ## mandatory output leaf parameter defined in misaligned-pass.yang
 
   vars:
     lsoInfo: Failed
     lsoStageError: Unknown ## mandatory for LSO operations stage level errors
+    misaligned: "no"
 
   tasks:
     checkUsernameIsAdmin:
@@ -135,7 +137,7 @@ audit-misaligned-pass-<<groupId>>:
 
     getAdminPass: ## access the configured hashed password via MDC API
       action: nsp.https
-      input: 
+      input:
         url: https://restconf-gateway/restconf/data/network-device-mgr:network-devices/network-device=<% $.neId %>/root/nokia-conf:/configure/system/security/user-params/local-user/user=<% $.username %>
         resultFilter: $.content.get("nokia-conf:user").first().password
       publish:
@@ -172,37 +174,26 @@ audit-misaligned-pass-<<groupId>>:
         lsoInfo: "Info: Password of <% $.username %> user is aligned"
         lsoStageError: Password of <% $.username %> user is aligned
 ```
+
+/// note
+Keep in mind that this workflow is intended to fail if the password matches and succeed if it does not. This ensures the Operation Manager multi-phase transition from Audit to Align: a mismatch triggers progression to the align phase, while a match halts it since no action is needed. Though logical, this may feel counterintuitive—success on mismatch and failure on match.
 ///
 
-The YAML syntax for writing workflows is very intuitive, as it uses simple English expressions to describe the
-execution and data flow including conditional statements. Please study the workflow code carefully, to get used
-to the syntax and principles, as soon you will write your first own workflow.
+///
 
-Observations:
+A few observations worth noting:
 
-* Some specific rules apply to make the workflow fit the needs of LSO. Have a look, how the environment/output variables
-  `lsoInfo` and `lsoStageError` are used. Those variables provide a feedback loop to *Device Operations* to understand
-  execution progress and reasoning of the result.
-* NSP uses the `admin` user for mediation (CLI, xFTP, NETCONF and gRPC). As we don't want to break your lab, an initial
-  check is done to avoid updating the admin users password by accident.
-* The workflow input needs to fit the needs of the operation, so it needs to match the operation model (while values
-  could also be statically set in the mapping profile).
-* The general logic in LSOM is, that only target that have successfully passed one phase are considered for the execution
-  of the next phase(s). That's why, we need to be careful about the execution state we are returning. If and only if the
-  check was executed successfully, but we found a misalignment, the workflow will return `success`. Aka, the target device
-  would be selected for the next phase, to realign the password. In all other cases, like if the password was aligned, we
-  mark the target as `failed` and the target would not be considered for realignment of the password.
+* Some specific rules need to be adhered to for the workflow to be valid LSO. Have a look at how the variables `lsoInfo` and `lsoStageError` are used. Those variables provide a feedback loop to *Device Operations* to understand execution progress and reasoning of the result.
+* NSP uses the `admin` user for mediation (CLI, xFTP, NETCONF and gRPC). As we don't want to break your lab, an initial check is done to avoid updating the admin user's password by accident.
+* The workflow input must fit the needs of the operation, so it needs to match the operation model. Alternatively, values could be set statically in the mapping profile.
+* The general logic in LSO is that only targets that have successfully passed one phase are considered for the execution of the next phase(s). That's why we need to think carefully about the returned execution state. If and only if the check was executed successfully and we found a misalignment will the workflow return `success`. In other words, only then would the target device be selected for the next phase to realign the password. In all other cases (password was aligned already, workflow failed) the target is marked as `failed` and it would not be considered for realignment of the password.
 
 /// note | Give it a try!
 
-You don't need to wait until everything comes together as operation, you can try out the workflow right now.
-You may user either NSP WebUI or Visual Studio Code (or code-server) with the NOKIA WFM extension to create
-and run the workflow. For now, you can use the `admin` user, but ideally you can already create another NE
-user like `nsptest`.
-///
+You don't need to wait until everything comes together as an operation. You can try out the workflow right now. You may use either the NSP WebUI or Visual Studio Code (or code-server) with the NOKIA WFM extension to create and run the workflow. For now, you can use the `admin` user, but ideally you can already create another NE user like `nsptest` on your targeted SR OS node.
 
-/// details | Want to create a NE user using MD-CLI?
-    type: tip
+/// details | Creating a local user using MD-CLI in SR OS
+    type: hint
 
 ```bash
 edit-config private
@@ -210,39 +201,31 @@ configure system security user-params local-user user nsptest password t0ps3creT
 commit
 ```
 
-Same could be used to update the user password at any time.
+You can use the same approach to update the user password to test your implementation.
+///
 ///
 
-### Workflow 2 - Update/Align User Password
+### Password Update Workflow
 
-Now that you are familiar with the mechanics and structure of workflows, turn is on you to create the second workflow all
-by yourself. While the first workflow was about identifying misalignments, the second workflow is update the NE user
-password to match the provided password.
+Now that we know when users are in violation of our organization's password policy, we need to automate remedying that situation.
 
-Create a workflow called force-update-pass-`<<groupId>>`. You may user either NSP WebUI or Visual Studio Code (or code-server)
-with the NOKIA WFM extension to create and run the workflow. Test your workflow properly before you continue!
+Having familiarity with the mechanics and structure of workflows, it is your turn to create the second workflow. While the first workflow identifies password rule violations, the second workflow can update configured NE user passwords with a password that is specified as input.
+
+Create a workflow called `force-update-pass-<<GroupId>>`. You may user either NSP WebUI or Visual Studio Code (or code-server) with the NOKIA WFM extension to create and run the workflow. Test your workflow properly before you continue!
 
 /// details | Hint
     type: tip
 
-1. In the first workflow we've used the NSP RESTCONF API to access the device using the device model.
-   In MD-CLI you may use `info json` and `pwc model-path` to help constructing the resource URI and
-   the body payload. But it might be even simpler: The URI from reading the user password contains
-   all details to construct the corresponding write request.
-2. In RESTCONF there are multiple ways to update the password. You may decide to use HTTP PUT, to
-   **replace** the current password value. You may use HTTP PATCH, to **merge** it. The most
-   flexible way is using **YANG PATCH** (RFC8072).
-3. To execute a RESTCONF call, ultimately you can use WFM action `nsp.https`.
-4. If you feel more comfortable usign CLI you may consider using `nsp.mdm_cli`.
+1. While you can use MD‑CLI commands like `info json` and `pwc model-path` to help build the resource URI and payload, it’s often easier to check the workflow you already have — the URI it uses contains everything needed for your write request.
+2. In RESTCONF there are multiple ways to update the password. You may decide to use HTTP PUT, to **replace** the current password value. You may use HTTP PATCH, to **merge** it. The most flexible way is using **YANG PATCH**.
+3. Use the WFM action `nsp.https` to execute a RESTCONF call from the workflow.
 
-We provide you with a working, but only look there if you totally get stuck as last resort!
-Try to figure it out yourself, and if you hit a roadblock ask the hackathon support team.
-Remind, the provided working example is not the only solution possible. You are free to use the
-[nsp.mdm_cli](https://network.developer.nokia.com/learn/24_11/programming/workflows/wfm-workflow-development/wfm-workflow-actions)
-action which would perform the same usign CLI commands. Or why not getting used to the NETCONF protocol
-using action [netconf.configure](https://network.developer.nokia.com/learn/24_11/programming/workflows/wfm-workflow-development/wfm-workflow-actions)?
+If you feel that you are hitting a roadblock in your development of this second workflow you can ask the hackathon support team for some advice. There are many possible solutions using various approaches for contacting the node, what matters in the end is the functionality of your code.
 
-Whatever path you go, if **your code** works, that's great while you've achieved something!
+Remember, the provided working example is not the only possible solution. You are free to use the [nsp.mdm_cli](https://network.developer.nokia.com/learn/24_11/programming/workflows/wfm-workflow-development/wfm-workflow-actions) action which would perform the same using CLI commands. Or look at the NETCONF protocol with action [netconf.configure](https://network.developer.nokia.com/learn/24_11/programming/workflows/wfm-workflow-development/wfm-workflow-actions).
+
+Whatever path you end up taking, once your code works the foundation has been laid, you'll have learned some new skills and will be able to build from there.
+
 ///
 
 /// details | Possible solution (only look here as a last resort!)
@@ -251,7 +234,7 @@ Whatever path you go, if **your code** works, that's great while you've achieved
 ```yaml
 version: '2.0'
 
-force-update-pass-<<groupId>>:
+force-update-pass-<<GroupId>>:
   tags:
     - LSO
 
@@ -289,7 +272,7 @@ force-update-pass-<<groupId>>:
     updateAdminPass: ## update the NE User password using MDC API
       action: nsp.https
       input:
-        method: PATCH 
+        method: PATCH
         url: https://restconf-gateway/restconf/data/network-device-mgr:network-devices/network-device=<% $.neId %>/root/
         accept: application/yang-data+json
         contentType: application/yang-patch+json
@@ -313,28 +296,37 @@ force-update-pass-<<groupId>>:
 ```
 ///
 
-Now that we have learnt and tried how to audit and force update NE password misalignments individually, lets see how to combine them into a single operation.
+Now that we have automated auditing and updating NE password configuration individually, let's see how to combine that into a single operation.
 
 ### Operation Type
 
-First part of creating an LSO operation is defining the operation type. This is done as part of the operation_types.json
+The first part of creating an operation in the LSOM framework is defining the operation type.
 
-/// details |  operation_types.json
+| **Key**              | **Description**                                                  |
+|----------------------|------------------------------------------------------------------|
+| `name`               | Same as the bundle name                                          |
+| `description`        | Short description                                                |
+| `category`           | Operation type category (`other`, `backup`, `restore`, `upgrade`)     |
+| `created-by`         | Created by (e.g., `nsp_internal_system_user`)                    |
+| `operation-model`    | `<bundle-name>.yang`                                             |
+| `profile`            | `<bundle-name>.yaml`                                             |
+| `life-cycle-state`   | Release status (`draft`, `released`, `withdrawn`)                                |
+| `additional-tag`     | Customs tags, e.g., `["LSO", "SR OS"]`                           |
+| `version`            | Version number in `x.y.z` format (e.g., `1.0.0`)                 |
+
+
+/// details |  `operation_types.json`
     type: success
-
-/// warning
-Code comments are defined purely for readability. Make sure the comments are removed when saving the file.
-///
 
 ```json
 {
   "operation-type": {
-    "name": "misaligned-pass-<< groupId >>", // same as the bundle name
-    "description": "Operation for Misaligned Pass << groupId >>", // short description
-    "category": "other", // default (do not change)
-    "created-by": "nsp_internal_system_user", // default (do not change)
-    "operation-model": "misaligned-pass-<< groupId >>.yang", // <bundle-name>.yang
-    "profile": "misaligned-pass-<< groupId >>.yaml", // <bundle-name>.yaml
+    "name": "misaligned-pass-<< GroupId >>",
+    "description": "Operation for Misaligned Pass << GroupId >>",
+    "category": "other",
+    "created-by": "nsp_internal_system_user",
+    "operation-model": "misaligned-pass-<< GroupId >>.yang",
+    "profile": "misaligned-pass-<< GroupId >>.yaml",
     "life-cycle-state": "released",
     "additional-tag": ["LSO", "SR OS"],
     "version": "1.0.0"
@@ -346,44 +338,38 @@ Code comments are defined purely for readability. Make sure the comments are rem
 
 ### Operation Input-Output
 
-Regardless of whether the operation is single-phase or multi-phase, all phases share the same input and output parameters.
-If you believe a particular phase does not require certain inputs, default values can also be defined within the phase
-definition itself (which we’ll cover in the next section).
+Regardless of whether the operation is single-phase or multi-phase, all phases share the same input and output parameters. If you believe a particular phase does not require certain inputs, default values can also be defined within the phase definition. We will cover this in the next section.
 
 /// note
-The input and output for any LSO operation are defined using YANG format.
+The input and output of any LSO operation are defined in YANG.
 ///
 
 /// details | Hint
     type: tip
 
-When creating the operation's YANG file, keep the following points in mind:
+When updating the operation's YANG file which was already generated using the [LSO Skeleton Bundle Generator](#getting-started), keep the following points in mind:
 
 1. The module name, prefix, and the final segment of the namespace (after the colon) must all match.
-2. The when clause of the augment statement, the value being compared should always be the module name.
+2. In the `when` clause of the augment statements, the value being compared should always be the module name.
 3. Only the container elements within the two augment sections should be modified based on the specific requirements.
 
 ///
-/// details |  misaligned-pass`-<< groupId >>`.yang
+/// details |  `misaligned-pass-<< GroupId >>.yang`
     type: success
 
-/// warning
-Code comments are defined purely for readability. Make sure the comments are removed when saving the file.
-///
-
 ```yang
-module misaligned-pass-<< groupId >> {
+module misaligned-pass-<< GroupId >> {
   yang-version 1.1;
-  namespace "urn:nokia:nsp:model:lso:operation:misaligned-pass-<< groupId >>";
-  prefix misaligned-pass-<< groupId >>;
+  namespace "urn:nokia:nsp:model:lso:operation:misaligned-pass-<< GroupId >>";
+  prefix misaligned-pass-<< GroupId >>;
 
-  import nsp-lso-operation { // dont not change
+  import nsp-lso-operation {
     prefix nlo;
   }
 
-  organization "Nokia"; // dont not change
+  organization "Nokia";
   contact "";
-  description "Operation for Misaligned Pass"; // same short description as provided in operation_types.json
+  description "Operation for Misaligned Pass";
 
   revision 2024-10-08 {
     description "version 1";
@@ -391,9 +377,9 @@ module misaligned-pass-<< groupId >> {
   }
 
   augment "/nlo:lso-operations/nlo:operation" {
-    when "operation-type='misaligned-pass-<< groupId >>'"; // compare parameter has to be the module name always
+    when "operation-type='misaligned-pass-<< GroupId >>'";
     description "Augmentation of operation input";
-    container misaligned-pass-<< groupId >>-operation { // syntax: <module-name>-operation
+    container misaligned-pass-<< GroupId >>-operation {
       leaf username {
         type string;
         mandatory true;
@@ -408,9 +394,9 @@ module misaligned-pass-<< groupId >> {
   }
 
   augment "/nlo:lso-operations/nlo:operation/nlo:executions/nlo:execution" {
-    when "../../operation-type='misaligned-pass-<< groupId >>'"; // compare parameter has to be the module name always
+    when "../../operation-type='misaligned-pass-<< GroupId >>'";
     description "Augmentation of operation execution state data";
-    container misaligned-pass-<< groupId >>-execution { // syntax: <module-name>-execution
+    container misaligned-pass-<< GroupId >>-execution {
       leaf misaligned {
         type string;
         description "Indicates misalignment of password";
@@ -422,38 +408,52 @@ module misaligned-pass-<< groupId >> {
 
 ///
 
-With the operation's input & output defined lets see how we define the phase.
+With the operation's input and output defined let's see how we specify the operation's phases.
 
 ### Operation Phases
 
-/// details | misaligned-pass`-<< groupId >>`.yaml
+This section defines the phases used in the Operation Type execution. It includes the phase name, description, concurrency limits, supported NE families and versions as well as the workflow triggered during each phase.
+
+| **Key**               | **Description**                                                                 |
+|-----------------------|---------------------------------------------------------------------------------------------|
+| `phase`               | Phase name (e.g., `Audit`) — also indicates phase order                                     |
+| `description`         | Description of what the phase does                                                          |
+| `concurrency_count`   | Number of NEs on which the phase can run concurrently                                       |
+| `phase_timeout`       | Timeout for the phase (in minutes)                                                          |
+| `ne_families`         | NE families on which this workflow phase can be executed (list)                             |
+| `|__family_type`      | Specific NE family types (e.g., `7750 SR, 7950 XRS, 7450 ESS, 7250 IXR`)                    |
+| `|__ne_versions`      | Version information for the NE family (list)                                                |
+| `    |__version`      | Specific NE version supported (e.g., `all`)                                                 |
+| `    |__workflow_name` | Workflow to be called when executing this phase                                            |
+| `    |__workflow_inputs` | Workflow inputs (leave empty if not required)                                            |
+
+
+/// details | `misaligned-pass-<< GroupId >>.yaml`
     type: success
 
 ```yaml
 phases:
-  - phase: Audit ## Phase 1
+  - phase: Audit
     description: Audit for misaligned Admin user password
-    concurrency_count: 20 ## No. of NE on which the phase can run concurrently
+    concurrency_count: 20
     phase_timeout: 15
     ne_families:
-      - family_type: 7750 SR, 7950 XRS, 7450 ESS, 7250 IXR ## NE family on which this WF phase can be executed on
+      - family_type: 7750 SR, 7950 XRS, 7450 ESS, 7250 IXR
         ne_versions:
           - version: all
-            workflow_name: audit-misaligned-pass-<< groupId >> ## workflow to be called on the execution of this phase
-            workflow_inputs: ## not default inputs (leave it empty)
+            workflow_name: audit-misaligned-pass-<< GroupId >>
+            workflow_inputs:
 ```
 
 ///
 
-Now that we're familiar with writing the Audit phase, I'll let you work out how to construct the Update/Align phase.
+Now that we're familiar with writing the Audit phase, it is left up to you as an exercise to construct the Update phase. This phase is like the Audit phase shown above.
 
 /// details | Possible solution (only look here as a last resort!)
     type: success
 
-/// details | Update/Align Phase
-
 ```yaml
-  - phase: Update ## Phase 2
+  - phase: Update
     description: Force update Admin user password
     concurrency_count: 20
     phase_timeout: 15
@@ -461,23 +461,40 @@ Now that we're familiar with writing the Audit phase, I'll let you work out how 
       - family_type: 7750 SR, 7950 XRS, 7450 ESS, 7250 IXR
         ne_versions:
           - version: all
-            workflow_name: force-update-pass-<< groupId >>
+            workflow_name: force-update-pass-<< GroupId >>
             workflow_inputs:
 ```
-
-///
 ///
 
-Now that we've created all the files related to the LSO operation, let's consolidate this information into an operation metadata file. This file enables NSP to verify the integrity of the operation file and determine the target application onto which the files should be deployed.
+Now that we've created all the files related to the LSO operation, let's consolidate this information into an operation metadata file. This file enables NSP to verify the integrity of the operation package and determine the target application onto which the files should be deployed.
 
 ### Operation Metadata
 
-/// details | metadata.json
-    type: success
+This section defines the **metadata and artifact details** required for the Device Operation. It describes the versioning scheme, creation details, and the list of files included in the artifact, along with their format and purpose.
 
-/// warning
-Code comments are defined purely for readability. Make sure the comments are removed when saving the file.
-///
+| **Key**                        | **Description**                                                   |
+|--------------------------------|-------------------------------------------------------------------|
+| `meta-data-header`             | Metadata container for information describing the operation type  |
+| `|__version`                   | Version of the operation type in `x.y.z` format (e.g., `1.0.0`)   |
+| `|__buildNumber`               | First number from the `version` (e.g., `1` from `1.0.0`)          |
+| `|__formatVersion`             | First two parts of the `version` (e.g., `1.0` from `1.0.0`)       |
+| `|__createdBy`                 | Created by                                                        |
+| `|__creationDate`              | Date and time of creation (UTC)                                   |
+| `|__title`                     | Operation Type title                                              |
+| `|__description`               | Short description of the Operation Type                           |
+| `artifact-meta-data`           | List of artifacts used by this operation                          |
+| `|__name`                      | Name of the operation type or workflow artifact                   |
+| `|__version`                   | Version of the artifact in `x.y.z` format (e.g., `1.0.0`)         |
+| `|__targetApplication`         | Target application (e.g., `lsom-server-app`, `workflow-manager`)  |
+| `|__applicationCompatibility`  | NSP release version from which the operation can be executed      |
+| `|__artifact-content`          | List of files included in the artifact                            |
+| `    |__fileName`              | File name of the artifact                                         |
+| `    |__path`                  | Path inside the package where the file is stored                  |
+| `    |__type`                  | MIME type of the file (e.g., `application/octet-stream`)          |
+
+
+/// details | `metadata.json`
+    type: success
 
 ```json
 {
@@ -487,23 +504,23 @@ Code comments are defined purely for readability. Make sure the comments are rem
     "formatVersion": "1.0",
     "createdBy": "SRX Hackathon 2025",
     "creationDate": "Tue, 06 May 2024 00:00:00 UTC",
-    "title": "Operation for Misaligned Pass << groupId >>", // Operation Type title
-    "description": "Operation for Misaligned Pass" // short description of Operation Type
+    "title": "Operation for Misaligned Pass << GroupId >>",
+    "description": "Operation for Misaligned Pass"
   },
   "artifact-meta-data": [
     {
-      "name": "misaligned-pass-<< groupId >>",
-      "version": "1.0.0", // same as the version in meta-data-header
-      "targetApplication": "lsom-server-app", // mandatory do not change
-      "applicationCompatibility": "23.3+", // NSP release from which the operation can be executed on
+      "name": "misaligned-pass-<< GroupId >>",
+      "version": "1.0.0",
+      "targetApplication": "lsom-server-app",
+      "applicationCompatibility": "23.3+",
       "artifact-content": [
         {
-          "fileName": "misaligned-pass-<< groupId >>.yaml",
+          "fileName": "misaligned-pass-<< GroupId >>.yaml",
           "path": "operation-types",
           "type": "application/octet-stream"
         },
         {
-          "fileName": "misaligned-pass-<< groupId >>.yang",
+          "fileName": "misaligned-pass-<< GroupId >>.yang",
           "path": "operation-types",
           "type": "application/octet-stream"
         },
@@ -515,26 +532,26 @@ Code comments are defined purely for readability. Make sure the comments are rem
       ]
     },
     {
-      "name": "audit-misaligned-pass-<< groupId >>",
+      "name": "audit-misaligned-pass-<< GroupId >>",
       "version": "1.0.0",
-      "targetApplication": "workflow-manager", // mandatory do not change
+      "targetApplication": "workflow-manager",
       "applicationCompatibility": "23.3+",
       "artifact-content": [
         {
-          "fileName": "audit-misaligned-pass-<< groupId >>.yaml",
+          "fileName": "audit-misaligned-pass-<< GroupId >>.yaml",
           "path": "workflows/audit-misaligned-pass",
           "type": "application/octet-stream"
         }
       ]
     },
     {
-      "name": "force-update-pass-<< groupId >>",
+      "name": "force-update-pass-<< GroupId >>",
       "version": "1.0.0",
-      "targetApplication": "workflow-manager", // mandatory do not change
+      "targetApplication": "workflow-manager",
       "applicationCompatibility": "23.3+",
       "artifact-content": [
         {
-          "fileName": "force-update-pass-<< groupId >>.yaml",
+          "fileName": "force-update-pass-<< GroupId >>.yaml",
           "path": "workflows/force-update-pass",
           "type": "application/octet-stream"
         }
@@ -546,22 +563,26 @@ Code comments are defined purely for readability. Make sure the comments are rem
 
 ///
 
-### Execution
+### Build & Installation
 
-Now that we have all the necessary filed and directory structure in place,
+We now have all the necessary files and directories in place to proceed uploading the LSO operation we have created to NSP.
 
-1. Lets ZIP the directory content and install the package into NSP using the Artifact Admin Application.
-2. Rename the file to misaligned-pass-<< groupId >>.zip
-3. Once the Artifact has been installed. go to the Device Management App.
-4. From the dropdown select All Operations and create a new Operation from `+OPERATION` button on top right.
-5. Provide in the necessary input and click Run.
+To do that, perform the following:
+
+/// details | Target directory structure (sample for Group 4)
+![execution](./images/66-ne-password/directory-struct.png)
+///
+
+1. Let's ZIP the directory content (not the directory itself).
+2. Rename the file to `misaligned-pass-<< GroupId >>.zip`
+3. Install the package into NSP using the Artifact Administrator WebUI.
 
 /// warning
-If you are compressing to zip on MacOS, run the following commands to remove unnecessary system files:
+If you are zipping the files on MacOS, run the following commands to remove unnecessary system files:
 
 ```bash
-zip -d Archive.zip __MACOSX/\*
-zip -d Archive.zip \*/.DS_Store
+zip -d misaligned-pass-<< GroupId >>.zip __MACOSX/\*
+zip -d misaligned-pass-<< GroupId >>.zip \*/.DS_Store
 ```
 ///
 
@@ -569,16 +590,30 @@ zip -d Archive.zip \*/.DS_Store
 ![execution](./images/66-ne-password/execution.png)
 ///
 
-## Summary and review
+/// note
+If you’re having trouble building the bundle with the correct content and directory structure, use the [Complete LSO Bundle Generator](./resources/bundle-generate-66.html?kind=complete) to create a fully‑structured bundle with all required contents.
+///
 
-Congratulations!  If you have got this far you have completed this activity and achieved the following:
+### Execution
 
-* You have learnt how to write Workflows
-* You have learnt how to combine workflows to make an LSO Operation
-* You have learnt to build NSP Artifacts
-* You have learnt how to use RESTCONF APIs to interact with MD nodes managed in NSP
-* You have worked with YANG modeled data
+0. Create a new user `nspuser` on both PE1 and PE2 using random passwords.
+1. After the artifact installation is complete, open the Device Management application.
+2. From the dropdown menu, select `All Operations`, then create a new operation by clicking the `+ OPERATION` button in the top-right corner.
+3. Execute the audit/realign operation on PE1 and PE2.
+4. Verify the operation results and confirm the device passwords.
+5. Modify the password on PE1 only.
+6. Execute the audit/realign operation again.
+7. Check the operation results and verify the device passwords once more.
 
-This is a pretty extensive list of achievements! Well done!
+Expected result: Any password misalignment is detected and automatically corrected.
 
-If you're hungry for more feel free to explore the same activity for an SRL node.
+## Summary
+
+Congratulations — you’ve completed this activity! Take a moment to reflect on what you achieved:
+
+* Built and packaged NSP workflows into an Artifact Bundle  
+* Combined validation and remediation logic into a single Device Operation  
+* Enforced password compliance across devices through LSOM-managed execution  
+* Interacted with devices using YANG-modeled data and RESTCONF APIs  
+
+You now have a reusable control that keeps device credentials in line with policy, backed by automation you can trust.

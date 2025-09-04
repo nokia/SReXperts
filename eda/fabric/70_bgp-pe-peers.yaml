@@ -1,4 +1,4 @@
-apiVersion: protocols.eda.nokia.com/v1alpha1
+apiVersion: protocols.eda.nokia.com/v1
 kind: DefaultBGPPeer
 metadata:
   name: uplink-unnumbered-spine11-pe2
@@ -28,7 +28,7 @@ spec:
   sendCommunityLarge: false
   sendCommunityStandard: false
 ---
-apiVersion: protocols.eda.nokia.com/v1alpha1
+apiVersion: protocols.eda.nokia.com/v1
 kind: DefaultBGPPeer
 metadata:
   name: uplink-unnumbered-spine11-pe3
@@ -58,7 +58,7 @@ spec:
   sendCommunityLarge: false
   sendCommunityStandard: false
 ---
-apiVersion: protocols.eda.nokia.com/v1alpha1
+apiVersion: protocols.eda.nokia.com/v1
 kind: DefaultBGPPeer
 metadata:
   name: uplink-unnumbered-spine12-pe2
@@ -88,7 +88,7 @@ spec:
   sendCommunityLarge: false
   sendCommunityStandard: false
 ---
-apiVersion: protocols.eda.nokia.com/v1alpha1
+apiVersion: protocols.eda.nokia.com/v1
 kind: DefaultBGPPeer
 metadata:
   name: uplink-unnumbered-spine12-pe3

@@ -224,7 +224,7 @@ markdown_extensions:
   - pymdownx.magiclink:
       repo_url_shorthand: true
       user: nokia
-      repo: srx-hackplanning-2025
+      repo: SReXperts
   - pymdownx.mark
   - pymdownx.smartsymbols:
       fractions: false

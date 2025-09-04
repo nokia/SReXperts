@@ -16,7 +16,7 @@ tags:
 | **Difficulty** | Advanced |
 | **Tools used** |  |
 | **Topology Nodes** | :material-router: PE1, :material-router: PE2 |
-| **References** | [NSP Documentation](https://documentation.nokia.com/nsp/24-11/libfiles/landing.html)<br/> [NSP Developer Portal](https://network.developer.nokia.com/learn/24_11/)<br/> [NSP Service Management](https://documentation.nokia.com/nsp/24-11/NSP_Service_Management_Guide/iptitle.html)<br/> [SROS Documentation](https://documentation.nokia.com/sr/24-10/index.html)<br/> [SROS L2 Service and EVPN Advance Configuration Guide](https://documentation.nokia.com/sr/24-10/7750-sr/titles/layer-2-services-evpn.html) |
+| **References** | [NSP Documentation](https://documentation.nokia.com/nsp/24-11/libfiles/landing.html)<br/> [NSP Developer Portal](https://network.developer.nokia.com/learn/24_11/)<br/> [NSP Service Management](https://documentation.nokia.com/nsp/24-11/NSP_Service_Management_Guide/iptitle.html)<br/> [SR OS Documentation](https://documentation.nokia.com/sr/24-10/index.html)<br/> [SR OS L2 Service and EVPN Advance Configuration Guide](https://documentation.nokia.com/sr/24-10/7750-sr/titles/layer-2-services-evpn.html) |
 
 ## Objective
 
@@ -37,7 +37,7 @@ It is tempting to skip ahead but tasks may require you to have completed previou
 Before we modernize, let’s take a moment to appreciate the traditional approach to create EPIPE services in **SR** OS.
 
 /// warning | Assumption
-You’ve already worked with **Nokia SROS** and have hands-on experience configuring **TLDP-based EPIPE services**.
+You’ve already worked with **Nokia SR OS** and have hands-on experience configuring **TLDP-based EPIPE services**.
 This section is a quick recap—not a deep dive.
 ///
 

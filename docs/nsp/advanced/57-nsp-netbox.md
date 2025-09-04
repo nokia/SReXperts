@@ -303,7 +303,7 @@ First, we need to upload your script to NetBox:
 * Note the `Action data` section - provide the following JSON snippet customized with your NSP's login details and host IP.
 
 ```json
-{"nsp_host":"nsp.srexperts.net","nsp_password":"<NSP_PASSWORD>","nsp_username":"<NSP_USERNAME>>"}
+{"nsp_host":"nsp.srexperts.net","nsp_password":"<NSP_PASSWORD>","nsp_username":"<NSP_USERNAME>"}
 ```
 
 ![Final Event Rule](./images/57-netbox/nb-event-rule-final.png)
@@ -330,6 +330,10 @@ Here is an example solution that can create and update NSP ICM Intents:
     ```python 
     --8<-- "./docs/nsp/advanced/resources/57-netbox/example-solution.py"
     ```
+
+/// hint
+If you’d like to try out the example solution, note that the Python script references the ICM templates. Each template appears twice in the script. Simply search for `NSP-Activity-57` (6 occurrences) and replace it with the template names you created in [Create ICM Templates](#create-icm-templates).
+///
 
 ### Summary
 If you've made it this far and have even a basic solution, congratulations! 

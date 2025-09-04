@@ -26,7 +26,7 @@ Using NSP Workflow Manager, you will automate this migration. You will prepare t
 
 ## Technology Explanation
 
-Automation of access port migration relies on two main capabilities in NSP: **Workflows** and **Intents** Together, Workflows and Intents allow you to move beyond manual CLI operations, enabling structured, repeatable, and reliable service migrations while maintaining control and oversight.
+Automation of access port migration relies on two main capabilities in NSP: **Workflows** and **Intents**. Together, Workflows and Intents allow you to move beyond manual CLI operations, enabling structured, repeatable, and reliable service migrations while maintaining control and oversight.
 
 ### Workflow Manager
 
@@ -59,7 +59,7 @@ Ensure the following on PE1 and PE3:
 
 - The breakout ports `1/1/c6` and `1/1/c8` exist
 - Ports `1/1/c6/1` and `1/1/c8/1` are configured as access ports with dot1q encapsulation
-- No critical conflicting services exist
+- Check for services bound to these ports, as those are potentially subject for migration
 
 Use NSP MDC or CLI to check and modify configurations. If conflicting services exist, either:
 

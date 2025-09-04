@@ -84,7 +84,7 @@ site_description: >-
 repo_name: nokia/SReXperts
 repo_url: https://github.com/nokia/SReXperts
 edit_uri: edit/main/docs/
-site_url: "https://hack.srexperts.net/"
+site_url: "https://hackathon.srexperts.net/"
 copyright: Copyright &copy; 2021-2025 Nokia
 theme:
   name: material

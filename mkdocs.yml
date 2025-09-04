@@ -223,7 +223,7 @@ markdown_extensions:
   - pymdownx.keys
   - pymdownx.magiclink:
       repo_url_shorthand: true
-      user: srexperts
+      user: nokia
       repo: srx-hackplanning-2025
   - pymdownx.mark
   - pymdownx.smartsymbols:

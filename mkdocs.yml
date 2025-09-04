@@ -81,7 +81,7 @@ site_author: Nokia
 site_description: >-
   SReXperts hackathon event guidelines
 # Repository
-repo_name: srexperts/srx-hackplanning-2025
+repo_name: nokia/SReXperts
 repo_url: https://github.com/srexperts/srx-hackplanning-2025
 edit_uri: edit/main/docs/
 site_url: "https://hack.srexperts.net/"

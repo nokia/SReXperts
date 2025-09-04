@@ -20,7 +20,7 @@ tags:
 
 ## Objectives
 
-Network device configurations evolve continuously, and its common practice to track configuration drift over time. When recent changes cause issues, you need to quickly understand what changed and when. Beyond analysis, you want the ability to revert to a known stable configuration—ideally applying a rollback as a quick fix without disrupting other services, avoiding outages that would otherwise need to wait for the next scheduled maintenance window.
+Network device configurations evolve continuously, and it's common practice to track configuration drift over time. When recent changes cause issues, you need to quickly understand what changed and when. Beyond analysis, you want the ability to revert to a known stable configuration—ideally applying a rollback as a quick fix without disrupting other services, avoiding outages that would otherwise need to wait for the next scheduled maintenance window.
 
 In this activity, you will explore an alternative to the traditional NE Backup/Restore capabilities in NSP. Key differences include:
 
@@ -32,7 +32,7 @@ In this activity, you will create your own unsigned artifact bundle, which can b
 
 The design goal is to make snapshot/rollback operations appear as standard Device Operations (LSO) in NSP. As a result, you will be able to:
 
-* Capture snapshots of individual devices or groups, on-demand and scheduled.
+* Capture snapshots of individual devices or groups, on-demand, and scheduled.
 * View configuration snapshots directly from the Device Management WebUI.
 * Compare snapshots to identify changes (e.g. drift).
 * Rollback to a snapshot safely, without disrupting ongoing services.
@@ -48,7 +48,7 @@ The device operation bundle you are developing is unsigned, allowing you to modi
 ///
 
 /// warning
-Remember, that you are using a shared NSP system. Therefore, ensure your group-number is part of the operation and workflow names you are creating to ensure uniqueness.
+Remember that you are using a shared NSP system. Therefore ensure your group-number is part of the operation and workflow names you are creating to ensure uniqueness.
 ///
 
 **You should read these tasks from top-to-bottom before beginning the activity.**
@@ -60,7 +60,7 @@ It is tempting to skip ahead but tasks may require you to have completed previou
 In the first part of this activity, you will gain practical experience in following areas of NSP:
 
 * **Artifact Manager** will be used to import the artifact bundle and monitor the installation process.
-* **Operations Manager** and Device Management* control snapshot and rollback operations.
+* **Operations Manager** and **Device Management** control snapshot and rollback operations.
 * **Workflow Manager** can be used to examine an operation execution's result.
 
 ### Getting Started
@@ -98,10 +98,10 @@ Creating things from scratch can feel daunting and even overwhelming. To save yo
 ///
 
 * Import the customized artifact bundle into NSP
-* Login to NSP.
-* Open the hamburger menu and select `Artifacts`.
-* Select `IMPORT & INSTALL`.
-* Select the zip-file to proceed by clicking on `IMPORT & INSTALL`.
+    * Login to NSP.
+    * Open the hamburger menu and select `Artifacts`.
+    * Select `IMPORT & INSTALL`.
+    * Select the zip-file to proceed by clicking on `IMPORT & INSTALL`.
 
 /// note
 For easier bundle management, consider using the [Artifact Manager Visual Studio Code extension](https://marketplace.visualstudio.com/items?itemName=Nokia.artifactadminstrator). It helps with listing, packaging, and installing artifacts directly from your IDE. Documentation is available on the [Developer Portal](https://network.developer.nokia.com/learn/24_11/nsp-administration/artifacts/artifact-visual-studio-codeextension/).
@@ -182,11 +182,11 @@ Exploration Points:
 * Notice redundancies in rollback operation inputs (e.g., backup operation vs. backup path/filename). Reflect on why these exist, by triggering rollbacks from different WebUI contexts to observe differences in workflow execution inputs.
 * Observe how the snapshot storage path includes the nodal release, and consider how this design choice ensures version accuracy and compatibility.
 
-### Improve your Operation
+### Improve your Snapshot Operation
 
 Review the workflow that takes configuration snapshots. Check, if there is anything that can be improved! Are [best practices]("https://network.developer.nokia.com/learn/24_4/network-programmability-automation-frameworks/workflow-manager-framework/wfm-workflow-development/wfm-best-practices/") appropriately applied?
 
-You may find that the action `getConfig` publishes the configuration as a JSON string. This approach works well for smaller configurations like we have in this hackathon. Applying this approach to production-scale nodal configurations can lead to publishing mega-bytes of data and is not recommended as it impacts resource consumption.
+You may find that the action `getConfig` publishes the configuration as a JSON string. This approach works well for smaller configurations like we have in this hackathon. Applying this approach to production-scale nodal configurations can lead to publishing megabytes of data and is not recommended as it impacts resource consumption.
 
 To work around this, you may consider updating the workflow. The `nsp.https` action allows to store the result in the local filesystem by using the input attribute called `fileName`. Change the task to store the JSON response as file under the path `/tmp/<% $.neName %>.nokia-conf.json`. When applying this change, you need to consider to add another input attribute `resultFilter : $.content`. This applies a YAQL expression to the response before writing it to a file, else everything would be wrapped into a top-level element called `content`.
 
@@ -199,7 +199,7 @@ To upload the file to the file-service, you need to update the task `uploadConfi
 You may spot that the JSON payload is now minified, while it was prettified before. This impacts usability when displaying or comparing backups. As of today, the action `nsp.https` does not have an option to store the result as pretty JSON. You may consider using Python to make it pretty.
 
 /// warning
-While we've applied the best practices changes on the snapshot artefacts, you may observe that the rollback workflow renders a large `nsp.https` request, that contains the entire config in the body payload. Please note, the action `nsp.https` does not have an option to load the payload body from the filesystem.
+While we've applied the best practices changes on the snapshot artifacts, you may observe that the rollback workflow renders a large `nsp.https` request, that contains the entire config in the body payload. Please note, the action `nsp.https` does not have an option to load the payload body from the filesystem.
 ///
 
 /// details | Cheatsheet
@@ -247,7 +247,7 @@ To prettify a JSON file in the filesystem, the following task in Python may help
 
 ///
 
-### Extend your Operation to support SR Linux
+### Extend your Snapshot Operation to support SR Linux
 
 If you made it to this point you have mastered operations and workflows and have even done a bit of coding. In this final part of this activity, we want to extend the snapshot operation/workflow to support SR Linux.
 
@@ -270,7 +270,7 @@ In addition, be aware that SR Linux mixes configuration (read/write) and state a
 /// note
 The NSP implementation executes a `get-config` NETCONF RPC if the query-parameter `?content=config` is provided. For gNMI, the behavior depends on the path being queried. If a class (e.g. YANG `list`) is requested, gNMI Subscribe is used. If an object (e.g. YANG `list entry` or `container`) is requested, gNMI Get is used. Only the latter has a means of restricting the content received in response to configuration only.
 
-In this activity we are focusing on root-paths to be queried, all of which are classes. In consequence the responses will contain state attributes regardless of the query-option `?content=config` being provided or not.
+In this activity, we focus on root paths that are all classes. As a result, responses will always include state attributes, regardless of whether the query-option `?content=config` is used. Consequently, SR Linux snapshots will contain both configuration and state. For this reason, we’ll stick with the snapshot operation so you can verify that snapshots can be displayed and compared as expected.
 ///
 
 You may use the [SRL YANG Explorer](https://yang.SR Linux.dev) or
@@ -282,7 +282,7 @@ NSP MDC to find appropriate root paths. You may want to start with the following
 
 It's recommended to store the output of those queries in separate files when creating your configuration snapshot, the resulting ZIP archive should now contain multiple files.
 
-/// note
+/// details
     type: success
 
 If you got stuck with the coding exercises, use the [**Complete LSO Bundle Generator**](./resources/bundle-generate-71.html?kind=complete) to create a bundle that contains an updated snapshot operation, to apply best-practices and support SRLinux. Compare the original operation with the updated operation, to understand the updates that have been applied.

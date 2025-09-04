@@ -155,6 +155,10 @@ To get a more detailed understanding about *.igen files, please check in the [re
 Spend some time to go through the generated code. The intent-type uses a visionary modular design. Resources in the `common` folder are the same for all intent-types generated. A default view-config is created to improve WebUI usability. The main files that contain custom code are the YANG module and the `script-content.mjs`. If you've designed intent-types for NSP before, you may recognize the object-oriented design. Be aware, this takes advantage of the new JavaScript engine (GraalJS), that is available since NSP 24.11.
 ///
 
+/// hint
+To create an `ip-filter` in model-driven SR OS, you must provide both the `IP Filter Name` and the `Filter ID`. While the `Filter ID` is optional in the underlying YANG model, creating filters by name alone would require automatic identifier assignment, which is not enabled by default. The same principle applies to other nodal configuration objects such as customers and services.
+///
+
 **Import intent-types and creating templates in ICM**:
 
 * Navigate to `Device Management > Configuration Intent Types`.
@@ -183,7 +187,7 @@ The most important part when creating *.igen files is device-model path. This is
 
 You may decide to exclude certain children's subtrees from the intent-type to reduce the intent complexity and to speed up rendering time using the `exclude` and/or `max-depth` statements.
 
-Port configuration is a special case, using `role: physical` and `category: port`.
+For port configuration use `role: physical` and `category: port`.
 ///
 
 /// details | Solution
@@ -201,6 +205,8 @@ Port configuration is a special case, using `role: physical` and `category: port
     "exclude": ["sonet-sdh","tdm","otu","network","gnss","dwdm","access","scheduler","transceiver","dist-cpu-protection","ethernet","hybrid-buffer-allocation","modify-buffer-allocation"]
 }
 ```
+
+The example *.igen file above excludes `ethernet` attributes. If you want attributes such as mode, encapsulation, or mtu-size to be accessible from your intent-type, you can remove the `ethernet` context from the `exclude` list. Keep in mind that the `ethernet` subtree is relatively large, which will add significant detail to the configuration forms and increases the time required to generate the intent type.
 
 Once again, be sure to update the `device` attribute so it matches the `PE1` node for your group. The example shown above corresponds to `group 1`.
 ///
@@ -226,10 +232,18 @@ A:admin@g1-pe1# info configure port 1/1/c1/1
     ethernet {
         mode network
     }
+
+(pr)[/]
+A:admin@g1-pe1# configure port 1/1/c1
+
+(pr)[/configure port 1/1/c1]
+A:admin@g1-pe1# pwc model-path 
+Present Working Context:
+/nokia-conf:configure/port=1%2F1%2Fc1
 ```
 ///
 
-Now, import the intent-type into ICM, create a template and deployments. 
+Now, import the intent-type into ICM, create a template and deployments.
 
 ### Interface Config
 
@@ -312,6 +326,11 @@ A:admin@g1-pe1# info configure router isis 0 interface p1
 ///
 
 Finally, import the intent-type into ICM, create a template and deployments.
+
+/// hint
+The generated intent-type uses the *string with autocomplete* schema-form widget to specify the ISIS interface name to be created. Existing ISIS interfaces on the node serve as the data source, which works well for creating intents in brownfield scenarios. For greenfield cases, you can simply enter the name of the ISIS interface to be created, ensuring it matches the name of the underlying *Base* router interface. To better support greenfield scenarios, you may adjust the suggest callback by modifying the path statement in `script-content.mjs` from `nokia-conf:/configure/router=Base/isis=0/interface` to `nokia-conf:/configure/router=Base/interface`.
+///
+
 
 /// note | Device Configuration and State: ISIS Interface on PE1
 ``` bash

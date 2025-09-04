@@ -78,7 +78,7 @@ Remember that you are using a single shared NSP system that is used for all grou
 your group-number is part of the operation and workflow names you are creating to ensure uniqueness.
 ///
 
-### Getting started
+### Getting Started
 
 Creating things from scratch can feel daunting and even overwhelming. To save you from piecing together all the required components that define the structure and format of an operation, we provide you with a [LSO Skeleton Bundle Generator](./resources/bundle-generate-66.html). This tool creates an artifact bundle in the exact structure expected by the system, giving you a ready-made starting point. From there, you can easily build upon it and move on to more advanced use cases.
 
@@ -615,5 +615,3 @@ Congratulations — you’ve completed this activity! Take a moment to reflect o
 * Combined validation and remediation logic into a single Device Operation  
 * Enforced password compliance across devices through LSOM-managed execution  
 * Interacted with devices using YANG-modeled data and RESTCONF APIs  
-
-You now have a reusable control that keeps device credentials in line with policy, backed by automation you can trust.

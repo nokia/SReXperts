@@ -2,28 +2,6 @@
 
 Note: these commands are for documentation purposes only, everything has been preempted on the cloud instances.
 
-## Copy files
-
-To copy the files from this repo to a remote system:
-
-```shell
-# RS_DEST=nokia@1.edadev.srexperts.net
-# RS_REMOTE_DEST=/home/nokia/eda
-RS_DEST=demo1.ohn81
-RS_REMOTE_DEST=/root/eda
-rsync -avz --delete eda/fabric ${RS_DEST}:${RS_REMOTE_DEST}
-```
-
-```shell
-# RS_DEST=nokia@1.edadev.srexperts.net
-# RS_REMOTE_DEST=/home/nokia/eda
-RS_DEST=demo1.ohn81
-RS_REMOTE_DEST=/root/eda
-rsync -avz --delete eda/topo-onboard ${RS_DEST}:${RS_REMOTE_DEST}
-```
-
-will move the `fabric` dir to `/root/eda` on the remote system.
-
 ## Clone playground
 
 The playground dir needs to be present on the target system
@@ -56,8 +34,8 @@ make download-k9s
 Copy the kubectl and k9s tools from the playground/tools dir to `/usr/local/bin` so they are available to a user:
 
 ```shell
-cp ./tools/kubectl* /usr/local/bin/kubectl
-cp ./tools/k9s* /usr/local/bin/k9s
+cp $(realpath ./tools/kubectl) /usr/local/bin/kubectl
+cp $(realpath ./tools/k9s) /usr/local/bin/k9s
 ```
 
 ### kubectl completions
@@ -98,7 +76,7 @@ alias edactl='kubectl -n eda-system exec -it $(kubectl -n eda-system get pods \
 
 ## Deploy containerlab topo
 
-The clab topo needs to be deployed without startup configs mounted to the DC1 nodes; this requirement will be lifted once the BGP fix is merged into SRL.
+The clab topo needs to be deployed without startup configs mounted to the DC1 nodes; this requirement will be lifted with 24.10.5 and 25.7+ releases (DTS 479993).
 
 For now, we need to comment out the startup configs by running the following:
 
@@ -108,16 +86,27 @@ uv run clab/comment-startup.py
 
 Note, that currently the client nodes require the bonding kernel to be loaded to support the bond interfaces:
 
-```
+```bash
 sudo modprobe bonding mmiimon=100 mode=802.3ad lacp_rate=fast
+```
+
+The clab topology make use of the following env vars, make sure they are set in your env:
+
+- INSTANCE_ID
+- EVENT_PASSWORD
+- NOKIA_UID
+- NOKIA_GID
+
+Proceed with deploying the topology:
+
+```bash
+containerlab deploy -c -t ./clab
 ```
 
 ## Deploy EDA
 
 ```shell
-# EDA_DN=1.edadev.srexperts.net
-EDA_DN=10.181.131.41
-SIMULATE=false EXT_DOMAIN_NAME=${EDA_DN} make try-eda
+SIMULATE=false make try-eda
 ```
 
 ## Add EDA License
@@ -136,13 +125,9 @@ To enable users to revert to an initial state the EDA was deployed, we need to s
 
 Execute `bash eda/record-init-tx.sh` script that will store the `TX_ID TX_HASH` pair in the `/opt/srexperts/eda-init-tx` file. This file then can be used to revert EDA to this transaction.
 
-## Exposing EDA UI
+## Accessing EDA UI
 
-EDA UI is automatically exposed when `make try-eda` finishes. But whenever there are issues with UI access we might need to restart the service:
-
-```
-make start-ui-port-forward
-```
+EDA UI is automatically exposed when `make try-eda` finishes. No additional steps required to access the UI. It is exposed over HTTPS, port 9443.
 
 ## Onboard SRX Topology
 
@@ -153,14 +138,14 @@ Start with substituting env vars in the the topo onboard files. Change into the 
 ```shell
 docker run --rm -e INSTANCE_ID=$(echo $INSTANCE_ID) -e EVENT_PASSWORD=$(echo $EVENT_PASSWORD) \
 -u $(id -u):$(id -g) \
--v $(pwd)/topo-onboard/clab:/work \
+-v $(pwd)/eda/topo-onboard/clab:/work \
 ghcr.io/hellt/envsubst:0.1.0
 ```
 
 Then apply the templated onboarding resources:
 
 ```shell
-kubectl apply -f $(pwd)/topo-onboard/clab
+kubectl apply -f $(pwd)/eda/topo-onboard/clab
 ```
 
 ## Deploy Fabric
@@ -168,8 +153,8 @@ kubectl apply -f $(pwd)/topo-onboard/clab
 Before we deploy the fabric, we need to remove some default allocation pools to keep the UI clean and let attendees create pools as they need them.
 
 ```shell
-# assuming you are in the ./eda directory
-bash cleanup-pools.sh
+# assuming you are in the repo root
+bash ./eda/cleanup-pools.sh
 ```
 
 Then we need to apply the fabric resources so that the fabric is provisioned on the srl nodes, because when EDA onboards the nodes it takes control over the config and pushes the config as it is provided in the CRs.
@@ -179,14 +164,14 @@ Again, run the substitute env vars script over the fabric resources:
 ```shell
 docker run --rm -e INSTANCE_ID=$(echo $INSTANCE_ID) -e EVENT_PASSWORD=$(echo $EVENT_PASSWORD) \
 -u $(id -u):$(id -g) \
--v $(pwd)/fabric:/work \
+-v $(pwd)/eda/fabric:/work \
 ghcr.io/hellt/envsubst:0.1.0
 ```
 
 and apply them:
 
 ```shell
-kubectl apply -f $(pwd)/fabric
+kubectl apply -f $(pwd)/eda/fabric
 ```
 
 ## Extract the kubeconfig
@@ -209,3 +194,25 @@ bash /opt/srexperts/restore-eda.sh
 ```
 
 This script restores the transaction recorded in `/opt/srexperts/eda-init-tx` by the lab provisioning script. The transaction stored in this file is the last transaction of the deployment/onboarding and represents the starting state of the platform.
+
+## Copy files
+
+To copy the files from this repo to a remote system:
+
+```shell
+# RS_DEST=nokia@1.edadev.srexperts.net
+# RS_REMOTE_DEST=/home/nokia/eda
+RS_DEST=demo1.ohn81
+RS_REMOTE_DEST=/root/eda
+rsync -avz --delete eda/fabric ${RS_DEST}:${RS_REMOTE_DEST}
+```
+
+```shell
+# RS_DEST=nokia@1.edadev.srexperts.net
+# RS_REMOTE_DEST=/home/nokia/eda
+RS_DEST=demo1.ohn81
+RS_REMOTE_DEST=/root/eda
+rsync -avz --delete eda/topo-onboard ${RS_DEST}:${RS_REMOTE_DEST}
+```
+
+will move the `fabric` dir to `/root/eda` on the remote system.

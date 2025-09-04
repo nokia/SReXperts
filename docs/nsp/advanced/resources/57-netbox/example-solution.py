@@ -286,7 +286,7 @@ class NetboxNSPICM(ScriptCls):
         network_action = self.determine_intent_action(bool(nb_interface_exists), bool(network_inventory))
 
         # deployment data
-        port_mode = "network"  # TODO: if len(connected_endpoints) > 0, network, else access
+        port_mode = "network"  # TODO: #303 if len(connected_endpoints) > 0, network, else access
         port_state = "enable" if data.get("enabled") else "disable"
         port_mtu = data.get("mtu")
 

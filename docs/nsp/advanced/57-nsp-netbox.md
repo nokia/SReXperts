@@ -5,55 +5,50 @@ tags:
   - Python
 ---
 
-# Deploying NSP Intents using Netbox
+# Integrating NSP w/ NetBox
 
 |     |     |
 | --- | --- |
-| **Activity name** | Deploying NSP Intents with NetBox |
+| **Activity name** | Integrating NSP w/ NetBox |
 | **Activity ID** | 57 |
 | **Short Description** | Use NetBox for infrastructure management on top of NSP to create/update infrastructure intents. |
 | **Difficulty** | Advanced |
-| **Tools used** | [Postman](https://www.postman.com/downloads/) |
+| **Tools used** | [Postman](https://www.postman.com/downloads/), [Postman (portable)](https://portapps.io/app/postman-portable/) |
 | **Topology Nodes** | :material-router: PE1, :material-router: PE2, :material-router: PE3, :material-router: PE4, :material-router: P1, :material-router: P2 |
-| **References** | [Nokia  Developer Portal](https://network.developer.nokia.com) (Sign up for a free account)<br/>[NSP Postman collections](https://network.developer.nokia.com/static/private/downloads/postmanCollections/24_11_NSP_Postman_Collections.zip)<br/>[Netbox Shell Documentation](https://netboxlabs.com/docs/netbox/en/stable/administration/netbox-shell/) |
+| **References** | [Nokia  Developer Portal](https://network.developer.nokia.com) (Sign up for a free account)<br/>[NSP Postman collections](https://network.developer.nokia.com/static/private/downloads/postmanCollections/24_11_NSP_Postman_Collections.zip)<br/>[NetBox Shell Documentation](https://netboxlabs.com/docs/netbox/en/stable/administration/netbox-shell/) |
 
 ## Objective
 
-Netbox is a Source of Truth platform for recording the target state of your network infrastructure, both physical and logical. NSP is an intent-driven automation platform we'll be using to control the IP network domain, based on the information defined in Netbox. In this activity, you'll create a custom Netbox script to translate Netbox's version of the network state into NSP intents to control device configuration.
+Keeping your network inventory and your operational systems in sync is a recurring challenge. You may already maintain device and service records in a central source-of-truth such as NetBox, while your devices are managed and configured through NSP. Without integration, you risk having two versions of the truth: one in your inventory database and another in the live network.
 
-This is the rough flow chart of the solution we're going to construct, the Netbox custom script is where most of the effort will be focused.
+In this activity, you'll create a custom NetBox script that translates NetBox's version of the network state into NSP intents and pushes them into the live network. This ensures that updates made in your inventory system directly drive configuration changes on the devices.
+
+This approach helps you:
+
+* Reduce manual re-entry of configuration data across systems
+* Ensure that the inventory view always corresponds to actual device state
+* Move toward event-driven operations, where network inventory changes automatically trigger configuration updates
+
+This is the rough flow chart of the solution we're going to construct, the NetBox custom script is where most of the effort will be focused.
+
 ``` mermaid
 flowchart LR
-    nb(Netbox) --> |Event-Rule| sc(Netbox <br> Custom Script)
-    sc -->|Restconf API| nsp(NSP)
+    nb(NetBox) --> |Event-Rule| sc(NetBox <br> Custom Script)
+    sc -->|RESTCONF API| nsp(NSP)
     nsp --> |gNMI/NETCONF| net(Network)
-    style sc fill:pink
+    style sc fill:red
 ```
 
-## Prerequisites
+## Technology Explanation
 
-- NSP RESTCONF APIs using POSTMAN
-- Practical programming experience using python
+### NSP Intents
+Nokia Network Services Platform (NSP) is a comprehensive network management and automation platform that uses intent-based networking principles to simplify operations. Rather than requiring operators to specify low-level device configurations, NSP allows them to declare high-level business intents that describe desired network behaviors, automatically translating these intents into device configurations and policies while continuously monitoring compliance.
 
-## NetBox
+### NetBox DCIM
+NetBox is a Source of Truth platform (SoT) for managing network infrastructure state. Its DCIM module documents network devices, racks, cables and interfaces. The platform models physical hardware through devices and network connectivity through `Interfaces`, tracking both physical connections and configurations enabling automation use-cases.
 
-### DCIM
-The Data Center Infrastructure Management (DCIM) module in Netbox provides tools for documenting network infrastructure, including devices, racks, and cables. It centers around the Device model for hardware and the Interface model for network ports, allowing operators to track both physical connections and interface configurations in a centralized system.
-
-DCIM's power lies in how it relates these components - Interfaces can be connected to other Interfaces via Cables, Devices can be mounted in Racks at specific positions, and everything can be organized by Site and Location. This creates a complete model of the physical network that serves as a source of truth for automation. The module also includes features for tracking power connections, console ports, and front/rear panel layouts of devices.
-
-For network automation use-cases, the Device and Interface models are particularly valuable as they can be integrated with other systems (like NSP) to drive configuration changes based on the documented physical state in Netbox.
-
-### IPAM
-The IP Address Management (IPAM) module in Netbox provides tools for managing IP addresses, prefixes, VLANs, and VRFs. A key feature is the IPAddress model which represents individual IP addresses and their assignments. IPAddress objects can be directly associated with Interface objects from the DCIM module, creating a clear link between physical ports and their IP addressing. This relationship is crucial for network automation as it allows operators to track both the physical connectivity and logical addressing of network devices in one system. The IPAM module supports both IPv4 and IPv6 addressing, CIDR notation, and can enforce rules around address assignment and utilization. When integrated with the Interface model, it provides a complete view of both physical and logical network configurations that can be used as a source of truth for automation platforms.
-
-## Accessing Netbox
-!!! note
-    Login to the Netbox UI via the web interface:<br>
-
-    **URL**: http://**GROUP_NUMBER**.srexperts.net:8000 <br>
-    **Username**: admin <br>
-    **Password**: same password as the instance SSH or SROS and SRL nodes <br>
+### NetBox IPAM
+The IP Address Management (IPAM) module in NetBox provides tools for managing IP addresses, prefixes, VLANs, and VRFs. A key feature is the `IPAddress` model which represents individual IP addresses and their assignments. IPAddress objects can be directly associated with Interface objects from the DCIM module, creating a clear link between physical ports and their IP addressing. The IPAM module supports both IPv4 and IPv6 addressing, CIDR notation, and can enforce rules around address assignment and utilization. 
 
 
 ## Tasks
@@ -62,18 +57,26 @@ The IP Address Management (IPAM) module in Netbox provides tools for managing IP
 
 It is tempting to skip ahead but tasks may require you to have completed previous tasks before tackling them.  
 
-### Explore Netbox
-We've already done some work to load the Hackathon topology into Netbox - this includes specifying Manufactures and Device Types, creating Racks, installing Devices into racks with hostnames, Interfaces and connecting devices to one another. 
+### Accessing NetBox
+!!! note
+    Login to the NetBox UI via the web interface:<br>
 
-#### Explore Core Netbox Components
+    **URL**: http://**GROUP_NUMBER**.srexperts.net:8000 <br>
+    **Username**: admin <br>
+    **Password**: same password as the instance SSH or SR OS and SR Linux nodes <br>
+
+### Explore NetBox
+We've already done some work to load the Hackathon topology into NetBox - this includes specifying `Manufacturers` and `Device Types`, creating `Racks`, installing `Devices` into racks, creating `Interfaces` and connecting devices to one another. 
+
+#### Explore Core NetBox Components
    * Browse the **Devices** section to see all network equipment
    * Examine the **Racks** view to understand physical infrastructure layout, use the **Elevations** menu option to view a visual representation of the rack front/rear.
    * Click into individual devices to view their basic information, browse the **Interfaces** tab to list interfaces and inspect their basic parameters.
 
 #### Run the IP Allocation Custom Script
-You'll may notice that devices don't have IPs assigned to interface within Netbox. Because each lab environment has unique IP space, we have to dynamically add IP addresses to each Netbox instance. The next instructions will show you an example of how a custom script is run interactively and what they can do.
+You may notice that devices don't have IPs assigned to interfaces within NetBox. Because each Hackathon instance VM has unique IP space, we must dynamically add IP addresses to each NetBox instance. The next instructions will show you an example of how a custom script is run interactively and what they can do.
 
-???+ note "Run Netbox IP Assignment Script"
+???+ note "Run NetBox IP Assignment Script"
     * Navigate to `Customization > Scripts > Create IP interfaces on core nodes`
     * In the `Instance id` field, put in your group number such as `10`. Be sure this is correct, your NSP intents won't work unless this is correct.
     * Click the `Run Script` button.
@@ -100,20 +103,34 @@ Once authenticated, the generated bearer-token will be used for follow-up API ca
 Be aware, that the token is only valid for a certain period of time.
 Either one must refresh it once in a while, or reauthenticate when the token has expired.
 
-If you use an older version of POSTMAN, you will find the script in a tab called **Tests**.
+If you use an older version of Postman, you will find the script in a tab called **Tests**.
 
 /// note
-The POSTMAN collection hosted on the developer portal made available by the NSP product-team stores the auth-token under `Globals`.
+The Postman collection hosted on the developer portal made available by the NSP product-team stores the auth-token under `Globals`.
 The script used in this activity stores the token in the environment instead, which allows toggling between different environments without the need to reconnect.
 ///
 
 #### List all network ports
-List all network ports using RESTCONF `GET`
-`24.11 Network Functions > Network Infrastructure Management > Network Inventory > Get vs Find Restconf API samples> GET getAllPorts`
+List all network ports using RESTCONF, browse to the following Postman endpoint:
+
+- `24.11 Network Functions` 
+    - `Network Infrastructure Management` 
+        - `Network Inventory`
+            - `Get vs Find Restconf API samples` 
+                - `GET getAllPorts`
+
 ![GetAllPorts Restconf API call](./images/57-netbox/postman-getAllPortsCall.png)
 
 #### Search NSP Inventory 
-Execute the `Filter ethernet ports` Postman example found in `24.11 Network Functions > Network Infrastructure Management > Network Inventory > Get vs Find Restconf API samples> POST Filter ethernet ports`. Because this is using the `nsp-inventory:find` RPC using RESTCONF `POST`, we can pass JSON in the `Body` tab to filter for specific ports. Inspect the **Body** tab and adjust the xpath filter.
+Execute the `Filter ethernet ports` Postman example found in:
+
+- `24.11 Network Functions`
+    - `Network Infrastructure Management`
+        - `Network Inventory`
+            - `Get vs Find Restconf API samples`
+                - `POST Filter ethernet ports`. 
+
+Because this is using the `nsp-inventory:find` RPC using RESTCONF `POST`, we can pass JSON in the **Body** tab to filter for specific ports. Inspect the **Body** tab and adjust the xpath filter.
 
 ```
 {
@@ -134,7 +151,7 @@ Inspect the results - note the `equipment-extension-port:extension` stanza in th
 We'll come back to this later.
 
 ### Create NSP ICM Templates
-We'll now set up some configuration templates we'll later reference in our Netbox script.
+We'll now set up some configuration templates we'll later reference in our NetBox script.
 Head over to the NSP UI and browse to `Device Management > Configuration Intent Types`.
 
 #### Check ICM Intent Types
@@ -142,62 +159,63 @@ Ensure our required intent-types have been imported into `Device Management`, th
 
 * `port-connector_gsros_<version>` - For basic configuration on the physical port (Admin state etc.)
 * `icm-equipment-port-ethernet` - For Ethernet configuration on the physical port (MTU, LLDP etc.)
-* `icm-router-network-interface` - For IP Interfaces added to the "Base" router (IPv4, IPv6 addresses etc.)
+* `icm-router-network-interface` - For IP Interfaces added to the SR OS `Base` router (IPv4, IPv6 addresses etc.)
 
 ![NSP Intent Types](./images/57-netbox/nsp-intent-types.png)
 
 #### Create ICM Templates
-We'll now create ICM Templates, these are the blueprints we'll use to create Intent deployments in our Netbox script. 
+We'll now create ICM Templates, these are the blueprints we'll use to create Intent deployments in our NetBox script. 
 
 * Using the drop-down next to `Device Management` browse to `Configuration Templates`.
-* Create a template called `Group 10 - NSP Activity 57 - Port Connector` using intent-type `port-connector_gsros_<version>`. Click Release.
-* Repeat for the other two intent-types: `icm-equipment-port-ethernet` and `icm-router-network-interface` using similar names swapping the "Port Connector" part.
+* Create a template called `Group <GROUP_NUMBER> - NSP Activity 57 - Port Connector` using intent-type `port-connector_gsros_<version>`, substitute in your group number. Click Release.
+* Repeat for the other two intent-types: `icm-equipment-port-ethernet` and `icm-router-network-interface` using similar names and substituting "Port Connector" for "Port Ethernet" or "Network Interface". This is a name to identify the template which we'll use later when we create intent instances.
 
 ![NSP Intent Template](./images/57-netbox/nsp-intent-template.png)
 
 #### Create ICM Configuration Deployments
 
 Create 3 ICM Configuration Deployments using your templates.
-Choose an unused port and do some basic port configuration:
+Choose an unused port and do some basic port configuration, unused ports can be determined from the topology diagram provided in the hackathon briefing.
 
 | Template | Target | Config |
 | --- | --- | --- |
 | Connector Port | NE: `PE1`<br/>Port: `1/1/c10` | Breakout: `c1-100g` |
 | Ethernet Port | NE: `PE1`<br/>Port: `1/1/c10/1` | *keep defaults* |
-| Network Interface | Interface Name: `port_1/1/c10/1` | Port Binding: `port`<br/>Port `1/1/c10/1`<br/>IPv4 Primary Address: `1.6.20.25`<br/>IPv4 Primary Prefix Length: `31` |
+| Network Interface | Interface Name: `port_1/1/c10/1` | Port Binding: `port`<br/>Port `1/1/c10/1`<br/>IPv4 Primary Address: `10.6.20.25`<br/>IPv4 Primary Prefix Length: `31` |
 
 /// note
-We'll use this naming scheme in the deployment script. This is the basic process we'll use via the API for the Netbox script.
+We'll use this naming scheme in the deployment script. This is the basic process we'll use via the API for the NetBox script.
 ///
 
 ![NSP ICM Deployments](./images/57-netbox/nsp-icm-deployments.png)
 
-* Re-execute the `Filter Ethernet ports` postman call from the previous step - can you see the `deployments` key? See the details of the deployment listed. This is how you should detect if an existing ICM Deployment already exists for a port. 
+* Re-execute the `Filter Ethernet ports` Postman call from the previous step - can you see the `deployments` key? See the details of the deployment listed. This is how you should detect if an existing ICM Deployment already exists for a port. 
 
-### Create Netbox Event Rule
+### Create NetBox Event Rule
+NetBox event rules allow for a script to be run when a NetBox object changes, such as being created, updated or deleted. The script receives the object details as an argument.
 
 #### View the Dump Data Script
-Back in the Netbox UI, browse to `Customization > Scripts` and click on the `Dump Data` script. At the top there are tabs to show the script source and to show the `Jobs` - these are the instances of the script being executed. You can click the ID number of each job execution to view the script output.
+Back in the NetBox UI, browse to `Customization > Scripts` and click on the `Dump Data` script. At the top there are tabs to show the script source and to show the `Jobs` - these are the instances of the script being executed. You can click the ID number of each job execution to view the script output.
 
 ![NSP Dump Script](./images/57-netbox/nb-dump-script.png)
 
 #### Create Dump Data Event Rule
-Netbox can create a rule that responds to changes for particular objects and trigger web hooks or script executions. We're going to create a testing rule that runs an existing script called **DumpData** - all this script does is print out the `data` parameter that's passed to the `run()` method of the script when the Event Rule is triggered.
+NetBox can create a rule that responds to changes for particular objects and trigger web hooks or script executions. We're going to create a testing rule that runs an existing script called **DumpData** - all this script does is print out the `data` parameter that's passed to the `run()` method of the script when the Event Rule is triggered.
 
 * Create an Event Rule under `Operations > Event Rules` with **Action Type** of `Script` set to the existing **DumpData** script. 
 * Note the `Action data` field where you can provide arbitrary JSON that gets included with the `data` parameter, we'll use this later. 
 * You can test this rule by making a change to a device's interface and inspecting the job log: `Operations > Jobs > <id>`. This output is a useful reference when creating your custom script.
 
-![Netbox Event Rule](./images/57-netbox/nb-event-rule.png)
+![NetBox Event Rule](./images/57-netbox/nb-event-rule.png)
 
 
-### Write Netbox Script
-Our goal is to have a python script that gets uploaded to Netbox and run whenever an interface object in Netbox is created or changed. Your challenge is to flesh out the skeleton script with all the required functionality to query NSP inventory, determine what action is needed and make calls to the NSP API to create ICM Deployments. You'll want to use Postman as your API reference to find the endpoints you need and what needs to be passed in them.
+### Write NetBox Script
+Our goal is to have a python script that gets uploaded to NetBox and run whenever an interface object in NetBox is created or changed. Your challenge is to flesh out the skeleton script with all the required functionality to query NSP inventory, determine what action is needed and make calls to the NSP API to create ICM Deployments. You'll want to use Postman as your API reference to find the endpoints you need and what needs to be passed in them.
 
-Netbox scripts should be written in your own development environment or IDE - VSCode is a great starting point.
+NetBox scripts should be written in your own development environment or IDE - VSCode is a great starting point.
 
-#### Netbox Script Skeleton
-We've provided this skeleton script as a starting point - it provides the basic structure and allows you to run the script interactively (on the terminal) or after being uploaded to Netbox. 
+#### NetBox Script Skeleton
+We've provided this skeleton script as a starting point - it provides the basic structure and allows you to run the script interactively (on the terminal) or after being uploaded to NetBox. 
 
 For running on the terminal, please ensure you've installed the `requests` pip package.
 ```
@@ -205,7 +223,7 @@ pip install requests
 ```
 
 !!! tip
-    This skeleton script has some custom magic that means it can (mostly) be run outside the Netbox execution environment. This means participants can run the script on their local machine or on the jump host to test the NSP calls. Any calls that use the Netbox models will fail, comment those out and set static values during testing.
+    This skeleton script has some custom magic that means it can (mostly) be run outside the NetBox execution environment. This means participants can run the script on their local machine or on the jump host to test the NSP calls. Any calls that use the NetBox models will fail, comment those out and set static values during testing.
 
 ??? note "skeleton.py"
     ```python 
@@ -228,29 +246,29 @@ pip install requests
 
 #### Your Turn
 There are some hints below about how you could structure your script, try your best without referring to this if you can.
-??? tip  
-    #### Script format
-    * The netbox `data` parameter doesn't indicate the action type (create, update, delete) so some logic is required to determine the required action.
-    * Write a method that can interface with the NSP Inventory API (`Filter ethernet ports`) explored earlier and search for Port/Ethernet/Interface deployments.
-    * Write a method that can create/update/delete an NSP ICM Deployment given service data parameters and the ICM template name. You'll need to explore the NSP ICM Postman collection to find the best API call to make.
-    * You'll need to create separate Port, Ethernet and Interface Deployments when the script runs.
-    * Assemble the final logic in the run() method, pulling the required information from Netbox object queries (interface details like state, MTU, IP address etc.) and pass it to the ICM deployment target_data param.
 
-You can test your script by running it interactively and pass in the sample_data.json file. As mentioned above, netbox object queries won't work - you'll need to stub those out for static values during testing. Example output from a script execution is shown below:
+#### Script format
+* The netbox `data` parameter doesn't indicate the action type (create, update, delete) so some logic is required to determine the required action.
+* Write a method that can interface with the NSP Inventory API (`Filter ethernet ports`) explored earlier and search for Port/Ethernet/Interface deployments.
+* Write a method that can create/update/delete an NSP ICM Deployment given service data parameters and the ICM template name. You'll need to explore the NSP ICM Postman collection to find the best API call to make.
+* You'll need to create separate Port, Ethernet and Interface Deployments when the script runs.
+* Assemble the final logic in the run() method, pulling the required information from NetBox object queries (interface details like state, MTU, IP address etc.) and pass it to the ICM deployment `target_data` param.
+
+You can test your script by running it interactively and pass in the `sample_data.json` file. As mentioned above, netbox object queries won't work - you'll need to stub those out for static values during testing. Example output from a script execution is shown below:
 ```bash
 > python3 ./skeleton.py sample_data.json
 > Authenticated with NSP! Status Code:200
 > Querying NSP for Port Deployments...
 > 1 Port deployment found
-> Netbox interface exists, we need to update the NSP ICM Deployment
+> NetBox interface exists, we need to update the NSP ICM Deployment
 > Updating NSP ICM Deployment...
 > SUCCESS:204 - updated NSP ICM Deployment for Port 1/1/c10.
 ```
 
-#### Useful Netbox script snippets
-The [Netbox Shell Documentation](https://netboxlabs.com/docs/netbox/en/stable/administration/netbox-shell/) is a good reference for how to query and filter models in Custom scripts. You can also access the API docs directly in Netbox (a good way to see keys on each model) at `<netbox_url>/api/`.
+#### Useful NetBox script snippets
+The [NetBox Shell Documentation](https://netboxlabs.com/docs/netbox/en/stable/administration/netbox-shell/) is a good reference for how to query and filter models in Custom scripts. You can also access the API docs directly in NetBox (a good way to see keys on each model) at `http://GROUP_NUMBER.srexperts.net:8000/api/`.
 
-* Lookup a device's `system` address using the Netbox API. 
+* Lookup a device's `system` address using the NetBox API. 
 ```python title="Get System Address"
 i = [i for i in 
         list(IPAddress.objects.filter(
@@ -259,7 +277,7 @@ i = [i for i in
     ][0]
 ```
 
-* Retrieve a Netbox interface from the id parameter in the `data` param:
+* Retrieve a NetBox interface from the id parameter in the `data` param:
 ```python title="Get Interface by ID"
 nb_interface = list(Interface.objects.filter(id=data.get('id')))
 ```
@@ -269,18 +287,20 @@ nb_interface = list(Interface.objects.filter(id=data.get('id')))
 ip_addresses = list(IPAddress.objects.filter(interface_id=data.get('id')))
 ```
 
-### Deploy to Netbox
-Once you have a basic script that can create/update/delete NSP ICM intent deployments based on the sample data, we can setup the Event Rule in Netbox.
+### Deploy to NetBox
+Once you have a basic script that can create/update/delete NSP ICM intent deployments based on the sample data, we can setup the Event Rule in NetBox.
 
 #### Upload Script
-First we need to upload your script to Netbox:
-* Browse to `Customization > Scripts > Add` and upload your script source.
-Now to hook the script up to an event rule. You can either reuse the Event Rule we created earlier, or create a second one which might be better for debugging - when an interface is changed, you'll have a Netbox `Job` output that the script was executed with from the other Event Rule.
+First, we need to upload your script to NetBox:
+
+* Browse to `Customization > Scripts > Add` and upload your script source. 
+* Associate the script to an `Event Rule`. You can either reuse the Event Rule we created earlier or create a second one which might be better for debugging.
+* When an interface is changed, a NetBox `Job` will be created with script execution output, as executed by the Event Rule.
 
 #### Create Event Rule
-* Browse to `Operations > Event Rules` in Netbox
+* Browse to `Operations > Event Rules` in NetBox
 * Create an event rule that will trigger your script. 
-* Note the `Action Data` section - provide the following JSON snippet customized with your NSP's login details and host IP.
+* Note the `Action data` section - provide the following JSON snippet customized with your NSP's login details and host IP.
 
 ```json
 {"nsp_host":"nsp.srexperts.net","nsp_password":"<NSP_PASSWORD>","nsp_username":"<NSP_USERNAME>>"}
@@ -289,16 +309,19 @@ Now to hook the script up to an event rule. You can either reuse the Event Rule 
 ![Final Event Rule](./images/57-netbox/nb-event-rule-final.png)
 
 #### Test
-Now you can test! Choose a device interface, make a change and test your script. Some example changes:
-
-* Change the Netbox interface state to "disabled" to ensure a Port Connector ICM deployment disables the interface.
-* Change the MTU of a Netbox interface to ensure the Ethernet ICM deployment changes the ethernet MTU.
-* Add an IP address to an existing interface and ensure a Network Interface ICM is created.
-* Delete an interface that already has ICM Deployments, ensure that all three Deployments are removed from NSP.
+Now you can test! Choose a device interface, make a change and test your script. 
 
 /// note
-To access the Netbox interface navigate to `Devices > DEVICE COMPONENTS > Interfaces`.
+To browse and edit device interfaces in NetBox, navigate to `Devices > Device Components > Interfaces`.
 ///
+
+Some example changes:
+
+* Change the NetBox interface state to "disabled" to ensure a Port Connector ICM deployment disables the interface.
+* Change the MTU of a NetBox interface to ensure the Ethernet ICM deployment changes the ethernet MTU.
+* Add an IP address to an existing interface and ensure a Network Interface ICM deployment is created.
+* Delete an interface that already has ICM deployments, ensure that all three deployments are removed from NSP.
+
 
 ### Solution
 Here is an example solution that can create and update NSP ICM Intents:
@@ -307,3 +330,12 @@ Here is an example solution that can create and update NSP ICM Intents:
     ```python 
     --8<-- "./docs/nsp/advanced/resources/57-netbox/example-solution.py"
     ```
+
+### Summary
+If you've made it this far and have even a basic solution, congratulations! 
+
+* You have learnt the basics of the NSP ICM RESTCONF API
+* You understand how to create NetBox Event Rules to automate configuration changes
+* You can integrate NetBox with NSP ICM to automatically deploy network changes
+
+We have illustrated the power of integrating network management systems to create automated actions that can speed up network operations, avoiding manual work. There is lots of potential with Nokia NSP to extend these ideas into a limitless number of potential use-cases.

@@ -1,4 +1,4 @@
-apiVersion: protocols.eda.nokia.com/v1alpha1
+apiVersion: protocols.eda.nokia.com/v1
 kind: DefaultBGPGroup
 metadata:
   name: bgpgroup-ebgp-pe

@@ -115,7 +115,7 @@ uv venv
 
 ///
 /// tab | expected output
-``` bash
+``` bash {.no-copy}
 Using CPython 3.11.11
 Creating virtual environment at: .venv
 Activate with: source .venv/bin/activate
@@ -136,11 +136,9 @@ You can now install pySROS.
 
 A virtual environment can be created using the builtin `venv` Python module.  Create the virtual environment using the following command.
 
-/// tab | cmd
 ``` bash
 python -m venv .venv
 ```
-///
 
 It is important to make sure that you are using this newly created virtual environment.  To do this use the Linux `source` command.
 
@@ -179,7 +177,7 @@ uv pip install --upgrade pysros
 
 ///
 /// tab | expected output
-``` bash
+``` bash {.no-copy}
 Resolved 9 packages in 793ms
       Built ncclient==0.6.19
 Prepared 9 packages in 2.96s
@@ -217,7 +215,7 @@ python -m ensurepip
 ```
 ///
 /// tab | possible outcome on Debian/Ubuntu
-``` bash
+``` bash {.no-copy}
 ensurepip is disabled in Debian/Ubuntu for the system python.
 
 Python modules for the system python are usually handled by dpkg and apt-get.
@@ -245,7 +243,7 @@ pip install --upgrade pysros
 ```
 ///
 /// tab | expected output
-``` bash
+``` bash {.no-copy}
 Collecting pysros
   Using cached pysros-25.3.1-py3-none-any.whl (85 kB)
 Collecting ncclient~=0.6.12
@@ -286,7 +284,7 @@ git clone https://github.com/nokia/pysros
 ```
 ///
 /// tab | expected output
-``` bash
+``` bash {.no-copy}
 Cloning into 'pysros'...
 remote: Enumerating objects: 1000, done.
 remote: Counting objects: 100% (121/121), done.
@@ -305,7 +303,7 @@ python -m ensurepip
 ```
 ///
 /// tab | possible outcome on Debian/Ubuntu
-``` bash
+``` bash {.no-copy}
 ensurepip is disabled in Debian/Ubuntu for the system python.
 
 Python modules for the system python are usually handled by dpkg and apt-get.
@@ -334,8 +332,8 @@ pip install .
 ```
 ///
 /// tab | expected output
-``` bash
-Processing /home/nokia/jgctest/pysros
+``` bash {.no-copy}
+Processing /home/nokia/pysros
 Collecting ncclient~=0.6.12
   Using cached ncclient-0.6.19.tar.gz (112 kB)
 Collecting lxml~=5.3.0
@@ -546,7 +544,7 @@ To be able to reproduce the output shown in the table above we require at least 
 
 #### Finding the raw data
 
-One place you might look is the [SR OS YANG explorer](https://yang.labctl.net/yang/SROS/25.3.R1/t) as it allows you to search the YANG model with a convenient web GUI. Another possible location is the MD-CLI. Last but not least, Nokia publishes the YANG models [online](https://github.com/nokia/7x50_YangModels/tree/master/latest_sros_25.3) any time a new version released. Use any of these resources to identify a path that you will be able to use to find each of the data points above for a given BGP neighbor, recognizing that those paths will be reusable when applied to a different BGP neighbor. Remember that `pwc` can provide you with reusable information.
+One place you might look is the [SR OS YANG explorer](https://yang.labctl.net/yang/SROS/25.3.R1/t) as it allows you to search the YANG model with a convenient web GUI. Another possible location is the MD-CLI. Last but not least, Nokia publishes the YANG models [online](https://github.com/nokia/7x50_YangModels/tree/master/latest_sros_25.3) any time a new version is released. Use any of these resources to identify a path that you will be able to use to find each of the data points above for a given BGP neighbor, recognizing that those paths will be reusable when applied to a different BGP neighbor. Remember that `pwc` can provide you with reusable information.
 
 /// details | Solution: finding the context
 /// tab | Using the MD-CLI Path Finder
@@ -657,7 +655,7 @@ These are the values shown for that neighbor in the table.
         peer-as 65000
     ```
     !!! tip Empty peer-as
-        This last one may have thrown you for a loop. The peer-as attribute in the statistics context applies only to dynamic-peers which this is neighbor is not. To find out the actual `peer-as` value we can instead look for the value set in the configuration. Note that this could be further obfuscated by a possible `type internal` configuration or the like that would make explicit configuration of the `peer-as` unnecessary.
+        This last one may have thrown you for a loop. The peer-as attribute in the statistics context applies only to dynamic-peers which this neighbor is not. To find out the actual `peer-as` value we can instead look for the value set in the configuration. Note that this could be further obfuscated by a possible `type internal` configuration or the like that would make explicit configuration of the `peer-as` unnecessary.
 
 
 
@@ -670,7 +668,23 @@ Most of the information needed to build the table is now at your fingertips via 
 To begin, make sure you have a working programmatic way of connecting to a model-driven SR OS machine. Use the pySROS [`connect`](https://documentation.nokia.com/html/3HE19211AAAFTQZZA01/pysros.html#pysros.management.connect) method by importing it from `pysros.management` and use the appropriate parameters to connect to `PE1` from your development environment. To complete this subtask, use the pySROS [`get`](https://documentation.nokia.com/sr/25-3/pysros/pysros.html#pysros.management.Datastore.get) method on the `running` datastore along with what you have learned to look up the configured system name to make sure you are on the router you expected to be on.
 
 /// details | Expected result
-```bash hl_lines="7"
+
+/// tab | Start the Python interpreter shell
+```bash title="In your development environment of choice or Hackathon instance"
+python
+```
+///
+
+/// tab | Connect to a node using pySROS
+```python
+from pysros.management import connect
+connection = connect(host="clab-srexperts-pe1", hostkey_verify=False, username="admin")
+connection.running.get('/configure/system/name')
+```
+///
+
+/// tab | Expected output
+```python hl_lines="7"
 $ python
 Python 3.12.3 (main, Feb  4 2025, 14:48:35) [GCC 13.3.0] on linux
 Type "help", "copyright", "credits" or "license" for more information.
@@ -682,6 +696,8 @@ Leaf('g23-pe1')
 ```
 ///
 
+///
+
 #### Gathering information from the paths you identified
 
 Next, use the `get` method to get the paths that you identified you would be needing later on. As a general rule of thumb, consider that remotely executed pySROS scripts prefer few `get` calls with [filters](https://network.developer.nokia.com/static/sr/learn/pysros/latest/pysros.html#pysros-management-datastore-get-example-content-node-filters) applied while on-box execution prefers more precise and frequent `get` calls.
@@ -691,68 +707,103 @@ Develop a solution that retrieves the paths required for building the table iden
 !!! note
     One of the BGP neighbors of `PE1` in the topology _is_ a dynamic neighbor so it does have a `peer-as` attribute under `statistics`. Is your solution able to capture that neighbor's information in addition to the information of the statically configured neighbors?
 
-??? note "Solution: gathering information"
-    ```python
-    >>> neighbor_information = connection.running.get('/state/router[router-name="Base"]/bgp/neighbor')
-    >>> result_info = {}
-    >>> for neighbor,neighbor_data in neighbor_information.items():
-    ...    info = {
-    ...        "recvMsg": neighbor_data["statistics"]["received"]["messages"],
-    ...        "sentMsg": neighbor_data["statistics"]["sent"]["messages"],
-    ...        "lastEstabTime": neighbor_data["statistics"]["last-established-time"],
-    ...    }
-    ...    prefix_dict = {}
-    ...    if "negotiated-family" in neighbor_data["statistics"]:
-    ...        for address_family in neighbor_data["statistics"]["negotiated-family"]:
-    ...            prefix_data = neighbor_data["statistics"]["family-prefix"][address_family.lower()]
-    ...            prefix_dict[address_family] = (
-    ...                prefix_data["received"], prefix_data["active"], prefix_data["sent"]
-    ...            )
-    ...        info["addrFamInfo"] = prefix_dict
-    ...    else:
-    ...        info["addrFamInfo"] = neighbor_data["statistics"]["session-state"]
-    ...    if neighbor_data["statistics"]["dynamically-configured"]:
-    ...        info["peerAS"] = neighbor_data["statistics"]["peer-as"]
-    ...        info["dynConfig"] = True
-    ...    else:
-    ...        group_associated_with_neighbor = connection.running.get('/configure/router[router-name="Base"]/bgp/neighbor[ip-address=%s]/group' % neighbor)
-    ...        peer_as_from_bgp_group = connection.running.get('/nokia-conf:configure/router[router-name="Base"]/bgp/group[group-name="%s"]/peer-as' % group_associated_with_neighbor)
-    ...        info["peerAS"] = peer_as_from_bgp_group
-    ...        info["dynConfig"] = False
-    ...    result_info[neighbor] = info
-    ...
-    >>> result_info
-    {'10.64.51.2': {'recvMsg': Leaf(7260), 'sentMsg': Leaf(7260), 'lastEstabTime': Leaf('2025-05-13T09:00:19.7Z'), 'addrFamInfo': {'IPv4': (Leaf(0), Leaf(0), Leaf(0))}, 'peerAS': Leaf(64599), 'dynConfig': False}, '10.64.54.0': {'recvMsg': Leaf(7251), 'sentMsg': Leaf(7253), 'lastEstabTime': Leaf('2025-05-13T09:04:00.9Z'), 'addrFamInfo': {'IPv4': (Leaf(0), Leaf(0), Leaf(0))}, 'peerAS': Leaf(64599), 'dynConfig': False}, 'fd00:fc00:0:51::2': {'recvMsg': Leaf(7262), 'sentMsg': Leaf(7260), 'lastEstabTime': Leaf('2025-05-13T09:00:14.9Z'), 'addrFamInfo': {'IPv6': (Leaf(3), Leaf(0), Leaf(0))}, 'peerAS': Leaf(64599), 'dynConfig': False}, 'fd00:fde8::23:11': {'recvMsg': Leaf(1499), 'sentMsg': Leaf(1238), 'lastEstabTime': Leaf('2025-05-15T11:23:59.4Z'), 'addrFamInfo': {'EVPN': (Leaf(24), Leaf(2), Leaf(8)), 'IPv4': (Leaf(50), Leaf(21), Leaf(5)), 'IPv6': (Leaf(50), Leaf(16), Leaf(4)), 'VPN-IPv4': (Leaf(22), Leaf(14), Leaf(6)), 'VPN-IPv6': (Leaf(10), Leaf(5), Leaf(3))}, 'peerAS': Leaf(65000), 'dynConfig': False}, 'fd00:fde8::23:12': {'recvMsg': Leaf(1490), 'sentMsg': Leaf(1238), 'lastEstabTime': Leaf('2025-05-15T11:23:59.4Z'), 'addrFamInfo': {'EVPN': (Leaf(36), Leaf(0), Leaf(8)), 'IPv4': (Leaf(50), Leaf(1), Leaf(5)), 'IPv6': (Leaf(50), Leaf(0), Leaf(4)), 'VPN-IPv4': (Leaf(24), Leaf(2), Leaf(6)), 'VPN-IPv6': (Leaf(12), Leaf(2), Leaf(3))}, 'peerAS': Leaf(65000), 'dynConfig': False}, 'fd00:fde8::23:13': {'recvMsg': Leaf(8086), 'sentMsg': Leaf(7271), 'lastEstabTime': Leaf('2025-05-13T09:00:17.8Z'), 'addrFamInfo': {'EVPN': (Leaf(84), Leaf(2), Leaf(8))}, 'peerAS': Leaf(65000), 'dynConfig': False}, 'fd00:fde8:0:54::': {'recvMsg': Leaf(7254), 'sentMsg': Leaf(7253), 'lastEstabTime': Leaf('2025-05-13T09:04:00.9Z'), 'addrFamInfo': {'IPv6': (Leaf(3), Leaf(0), Leaf(0))}, 'peerAS': Leaf(64599), 'dynConfig': False}, 'fe80::18b2:10ff:feff:31%leaf21': {'recvMsg': Leaf(7264), 'sentMsg': Leaf(7311), 'lastEstabTime': Leaf('2025-05-13T09:00:13.9Z'), 'addrFamInfo': {'IPv4': (Leaf(2), Leaf(2), Leaf(12)), 'IPv6': (Leaf(2), Leaf(2), Leaf(8))}, 'peerAS': Leaf(4200002001), 'dynConfig': True}}
+/// details | Solution: gathering information
+/// tab | Solution - code
+```python
+neighbor_information = connection.running.get('/state/router[router-name="Base"]/bgp/neighbor')
+result_info = {}
+for neighbor,neighbor_data in neighbor_information.items():
+   info = {
+       "recvMsg": neighbor_data["statistics"]["received"]["messages"],
+       "sentMsg": neighbor_data["statistics"]["sent"]["messages"],
+       "lastEstabTime": neighbor_data["statistics"]["last-established-time"],
+   }
+   prefix_dict = {}
+   if "negotiated-family" in neighbor_data["statistics"]:
+       for address_family in neighbor_data["statistics"]["negotiated-family"]:
+           prefix_data = neighbor_data["statistics"]["family-prefix"][address_family.lower()]
+           prefix_dict[address_family] = (
+               prefix_data["received"], prefix_data["active"], prefix_data["sent"]
+           )
+       info["addrFamInfo"] = prefix_dict
+   else:
+       info["addrFamInfo"] = neighbor_data["statistics"]["session-state"]
+   if neighbor_data["statistics"]["dynamically-configured"]:
+       info["peerAS"] = neighbor_data["statistics"]["peer-as"]
+       info["dynConfig"] = True
+   else:
+       group_associated_with_neighbor = connection.running.get('/configure/router[router-name="Base"]/bgp/neighbor[ip-address=%s]/group' % neighbor)
+       peer_as_from_bgp_group = connection.running.get('/nokia-conf:configure/router[router-name="Base"]/bgp/group[group-name="%s"]/peer-as' % group_associated_with_neighbor)
+       info["peerAS"] = peer_as_from_bgp_group
+       info["dynConfig"] = False
+   result_info[neighbor] = info
+
+result_info
+```
+///
+/// tab | Solution - output
+```python {.no-copy}
+>>> neighbor_information = connection.running.get('/state/router[router-name="Base"]/bgp/neighbor')
+>>> result_info = {}
+>>> for neighbor,neighbor_data in neighbor_information.items():
+...    info = {
+...        "recvMsg": neighbor_data["statistics"]["received"]["messages"],
+...        "sentMsg": neighbor_data["statistics"]["sent"]["messages"],
+...        "lastEstabTime": neighbor_data["statistics"]["last-established-time"],
+...    }
+...    prefix_dict = {}
+...    if "negotiated-family" in neighbor_data["statistics"]:
+...        for address_family in neighbor_data["statistics"]["negotiated-family"]:
+...            prefix_data = neighbor_data["statistics"]["family-prefix"][address_family.lower()]
+...            prefix_dict[address_family] = (
+...                prefix_data["received"], prefix_data["active"], prefix_data["sent"]
+...            )
+...        info["addrFamInfo"] = prefix_dict
+...    else:
+...        info["addrFamInfo"] = neighbor_data["statistics"]["session-state"]
+...    if neighbor_data["statistics"]["dynamically-configured"]:
+...        info["peerAS"] = neighbor_data["statistics"]["peer-as"]
+...        info["dynConfig"] = True
+...    else:
+...        group_associated_with_neighbor = connection.running.get('/configure/router[router-name="Base"]/bgp/neighbor[ip-address=%s]/group' % neighbor)
+...        peer_as_from_bgp_group = connection.running.get('/nokia-conf:configure/router[router-name="Base"]/bgp/group[group-name="%s"]/peer-as' % group_associated_with_neighbor)
+...        info["peerAS"] = peer_as_from_bgp_group
+...        info["dynConfig"] = False
+...    result_info[neighbor] = info
+...
+>>> result_info
+{'10.64.51.2': {'recvMsg': Leaf(7260), 'sentMsg': Leaf(7260), 'lastEstabTime': Leaf('2025-05-13T09:00:19.7Z'), 'addrFamInfo': {'IPv4': (Leaf(0), Leaf(0), Leaf(0))}, 'peerAS': Leaf(64599), 'dynConfig': False}, '10.64.54.0': {'recvMsg': Leaf(7251), 'sentMsg': Leaf(7253), 'lastEstabTime': Leaf('2025-05-13T09:04:00.9Z'), 'addrFamInfo': {'IPv4': (Leaf(0), Leaf(0), Leaf(0))}, 'peerAS': Leaf(64599), 'dynConfig': False}, 'fd00:fc00:0:51::2': {'recvMsg': Leaf(7262), 'sentMsg': Leaf(7260), 'lastEstabTime': Leaf('2025-05-13T09:00:14.9Z'), 'addrFamInfo': {'IPv6': (Leaf(3), Leaf(0), Leaf(0))}, 'peerAS': Leaf(64599), 'dynConfig': False}, 'fd00:fde8::23:11': {'recvMsg': Leaf(1499), 'sentMsg': Leaf(1238), 'lastEstabTime': Leaf('2025-05-15T11:23:59.4Z'), 'addrFamInfo': {'EVPN': (Leaf(24), Leaf(2), Leaf(8)), 'IPv4': (Leaf(50), Leaf(21), Leaf(5)), 'IPv6': (Leaf(50), Leaf(16), Leaf(4)), 'VPN-IPv4': (Leaf(22), Leaf(14), Leaf(6)), 'VPN-IPv6': (Leaf(10), Leaf(5), Leaf(3))}, 'peerAS': Leaf(65000), 'dynConfig': False}, 'fd00:fde8::23:12': {'recvMsg': Leaf(1490), 'sentMsg': Leaf(1238), 'lastEstabTime': Leaf('2025-05-15T11:23:59.4Z'), 'addrFamInfo': {'EVPN': (Leaf(36), Leaf(0), Leaf(8)), 'IPv4': (Leaf(50), Leaf(1), Leaf(5)), 'IPv6': (Leaf(50), Leaf(0), Leaf(4)), 'VPN-IPv4': (Leaf(24), Leaf(2), Leaf(6)), 'VPN-IPv6': (Leaf(12), Leaf(2), Leaf(3))}, 'peerAS': Leaf(65000), 'dynConfig': False}, 'fd00:fde8::23:13': {'recvMsg': Leaf(8086), 'sentMsg': Leaf(7271), 'lastEstabTime': Leaf('2025-05-13T09:00:17.8Z'), 'addrFamInfo': {'EVPN': (Leaf(84), Leaf(2), Leaf(8))}, 'peerAS': Leaf(65000), 'dynConfig': False}, 'fd00:fde8:0:54::': {'recvMsg': Leaf(7254), 'sentMsg': Leaf(7253), 'lastEstabTime': Leaf('2025-05-13T09:04:00.9Z'), 'addrFamInfo': {'IPv6': (Leaf(3), Leaf(0), Leaf(0))}, 'peerAS': Leaf(64599), 'dynConfig': False}, 'fe80::18b2:10ff:feff:31%leaf21': {'recvMsg': Leaf(7264), 'sentMsg': Leaf(7311), 'lastEstabTime': Leaf('2025-05-13T09:00:13.9Z'), 'addrFamInfo': {'IPv4': (Leaf(2), Leaf(2), Leaf(12)), 'IPv6': (Leaf(2), Leaf(2), Leaf(8))}, 'peerAS': Leaf(4200002001), 'dynConfig': True}}
+```
+///
+
+!!! note "Pretty Printing"
+    pySROS has the [printTree](https://network.developer.nokia.com/static/sr/learn/pysros/latest/pysros.html#pysros.pprint.printTree) utility that can help you display data retrieved from the system datastores and dictionaries in general in a more convenient form:
+    ```python {.no-copy}
+    >>> from pysros.pprint import printTree
+    >>> printTree(result_info)
+    +-- 10.64.51.2:
+    |   +-- recvMsg: 7260
+    |   +-- sentMsg: 7260
+    |   +-- lastEstabTime: 2025-05-13T09:00:19.7Z
+    |   +-- addrFamInfo:
+    |   |   `-- IPv4: (Leaf(0), Leaf(0), Leaf(0))
+    |   +-- peerAS: 64599
+    |   `-- dynConfig: False
+    +-- 10.64.54.0:
+    |   +-- recvMsg: 7251
+    |   +-- sentMsg: 7253
+    |   +-- lastEstabTime: 2025-05-13T09:04:00.9Z
+    |   +-- addrFamInfo:
+    |   |   `-- IPv4: (Leaf(0), Leaf(0), Leaf(0))
+    |   +-- peerAS: 64599
+    |   `-- dynConfig: False
+    +-- fd00:fc00:0:51::2:
+    |   +-- recvMsg: 7262
+    |   +-- sentMsg: 7260
+    |   +-- lastEstabTime: 2025-05-13T09:00:14.9Z
+    ... (truncated)
     ```
-
-    !!! note "Pretty Printing"
-        pySROS has the [printTree](https://network.developer.nokia.com/static/sr/learn/pysros/latest/pysros.html#pysros.pprint.printTree) utility that can help you display data retrieved from the system datastores and dictionaries in general in a more convenient form:
-        ```python
-        >>> from pysros.pprint import printTree
-        >>> printTree(result_info)
-        +-- 10.64.51.2:
-        |   +-- recvMsg: 7260
-        |   +-- sentMsg: 7260
-        |   +-- lastEstabTime: 2025-05-13T09:00:19.7Z
-        |   +-- addrFamInfo:
-        |   |   `-- IPv4: (Leaf(0), Leaf(0), Leaf(0))
-        |   +-- peerAS: 64599
-        |   `-- dynConfig: False
-        +-- 10.64.54.0:
-        |   +-- recvMsg: 7251
-        |   +-- sentMsg: 7253
-        |   +-- lastEstabTime: 2025-05-13T09:04:00.9Z
-        |   +-- addrFamInfo:
-        |   |   `-- IPv4: (Leaf(0), Leaf(0), Leaf(0))
-        |   +-- peerAS: 64599
-        |   `-- dynConfig: False
-        +-- fd00:fc00:0:51::2:
-        |   +-- recvMsg: 7262
-        |   +-- sentMsg: 7260
-        |   +-- lastEstabTime: 2025-05-13T09:00:14.9Z
-        ... (truncated)
-        ```
-
+///
 #### Displaying the information in an SR OS-style table
 
 Clearly, the output from the previous subtask isn't very appealing or usable. Look through the pySROS documentation for the available [methods](https://documentation.nokia.com/sr/25-3/pysros/pysros.html#module-pysros.pprint) for displaying data or implement your own. Use it to display the information gathered in the previous task in a format inspired by the table shown in the standard `show router bgp summary` command.
@@ -762,7 +813,7 @@ Clearly, the output from the previous subtask isn't very appealing or usable. Lo
 
 /// details | Solution: Printing a table
 /// tab | Expected outcome
-```python
+```python {.no-copy}
 >>> printTable(table,rows)
 ===============================================================================
 BGP Summary
@@ -808,94 +859,99 @@ fe80::18b2:10ff:feff:31-"leaf21"(D)
 ```
 ///
 /// tab | Implementation
+Continue with the existing Python shell you've been using so far.
 /// tab | Creating the columns
 Column widths are created to align with the pySROS Table object and how it splits rows.
 ```python
->>> from pysros.pprint import Padding
->>> width = 79 # standard width
->>> cols = [
-...     (79, "Neighbor"),
-...     (50, "Description"),
-...     Padding(79), #wrap to a new line
-...     Padding(8),
-...     (12, "          AS"),
-...     (7, "PktRcvd"),
-...     (4, "InQ"),
-...     (9, "Up/Down"),
-...     (39, "State|Rcv/Act/Sent (Addr Family)"),
-...     Padding(21),
-...     (7, "PktSent"),
-...     (5, "OutQ"),
-... ]
->>>
+from pysros.pprint import Padding
+width = 79 # standard width
+cols = [
+    (79, "Neighbor"),
+    (50, "Description"),
+    Padding(79), #wrap to a new line
+    Padding(8),
+    (12, "          AS"),
+    (7, "PktRcvd"),
+    (4, "InQ"),
+    (9, "Up/Down"),
+    (39, "State|Rcv/Act/Sent (Addr Family)"),
+    Padding(21),
+    (7, "PktSent"),
+    (5, "OutQ"),
+]
 ```
 ///
 /// tab | Populating table rows
 ```python
->>> import re
->>> from datetime import datetime, timezone
->>> from pysros.pprint import Table
->>> def format_neighbor(neighbor, dyn_config):
-...     if "%" in neighbor:
-...         ip_addr, intf = neighbor.split("%")
-...         return ip_addr + "-\"" + intf + "\"" + ("(D)" if dyn_config else "")
-...     return neighbor + ("(D)" if dyn_config else "")
-...
-...
->>> def calculate_format_timestamp(last_estab_time):
-...     match = re.match("^(\\d+)-(\\d+)-(\\d+)T(\\d+):(\\d+):(\\d+).\\dZ$", last_estab_time)
-...     year,month,day,hour,minute,second = match.groups()
-...     establish_time = datetime(int(year),int(month),int(day),int(hour),int(minute),int(second), tzinfo = timezone.utc)
-...     time_since_last_established = datetime.now(timezone.utc) - establish_time
-...     hours = time_since_last_established.seconds // 3600
-...     minutes = (time_since_last_established.seconds % 3600) // 60
-...     return "%02dd%02dh%02dm" % (time_since_last_established.days,hours,minutes)
-...
-...
->>> def addr_fam_tuple(fam_tuples):
-...    if not isinstance(fam_tuples, dict):
-...        # in this case, the state is "Connect" and the peer may not be up
-...        return (" "+str(fam_tuples),)
-...    result = []
-...    for family, pfx_info in fam_tuples.items():
-...        result.append(" %s/%s/%s (%s)" % (pfx_info[0], pfx_info[1], pfx_info[2], family))
-...    return result
-...
-...
->>> rows = []
->>> for nbr, info in result_info.items():
-...    fam_tuples = addr_fam_tuple(info["addrFamInfo"])
-...    output = format_neighbor(nbr, info["dynConfig"]) + "\n"
-...    # output += description # not present
-...    output += "%21s" % info["peerAS"]
-...    output += "%8s"%info["recvMsg"]
-...    output += "    0 "
-...    output += calculate_format_timestamp(str(info["lastEstabTime"]))
-...    output += fam_tuples[0]
-...    output += "\n"
-...    output += "%29s"%info["sentMsg"]
-...    output += "    0 "
-...    if len(fam_tuples) > 1:
-...        output += "%9s%s" % ("",fam_tuples[1])
-...    for fam_tuple in fam_tuples[2:]:
-...        output += "\n%44s%s" % ("",fam_tuple)
-...    rows.append(output)
-...
->>>
+import re
+from datetime import datetime, timezone
+from pysros.pprint import Table
+def format_neighbor(neighbor, dyn_config):
+    if "%" in neighbor:
+        ip_addr, intf = neighbor.split("%")
+        return ip_addr + "-\"" + intf + "\"" + ("(D)" if dyn_config else "")
+    return neighbor + ("(D)" if dyn_config else "")
+
+
+def calculate_format_timestamp(last_estab_time):
+    match = re.match("^(\\d+)-(\\d+)-(\\d+)T(\\d+):(\\d+):(\\d+).\\dZ$", last_estab_time)
+    year,month,day,hour,minute,second = match.groups()
+    establish_time = datetime(int(year),int(month),int(day),int(hour),int(minute),int(second), tzinfo = timezone.utc)
+    time_since_last_established = datetime.now(timezone.utc) - establish_time
+    hours = time_since_last_established.seconds // 3600
+    minutes = (time_since_last_established.seconds % 3600) // 60
+    return "%02dd%02dh%02dm" % (time_since_last_established.days,hours,minutes)
+
+
+def addr_fam_tuple(fam_tuples):
+   if not isinstance(fam_tuples, dict):
+       # in this case, the state is "Connect" and the peer may not be up
+       return (" "+str(fam_tuples),)
+   result = []
+   for family, pfx_info in fam_tuples.items():
+       result.append(" %s/%s/%s (%s)" % (pfx_info[0], pfx_info[1], pfx_info[2], family))
+   return result
+
+
+rows = []
+for nbr, info in result_info.items():
+   fam_tuples = addr_fam_tuple(info["addrFamInfo"])
+   output = format_neighbor(nbr, info["dynConfig"]) + "\n"
+   # output += description # not present
+   output += "%21s" % info["peerAS"]
+   output += "%8s"%info["recvMsg"]
+   output += "    0 "
+   output += calculate_format_timestamp(str(info["lastEstabTime"]))
+   output += fam_tuples[0]
+   output += "\n"
+   output += "%29s"%info["sentMsg"]
+   output += "    0 "
+   if len(fam_tuples) > 1:
+       output += "%9s%s" % ("",fam_tuples[1])
+   for fam_tuple in fam_tuples[2:]:
+       output += "\n%44s%s" % ("",fam_tuple)
+   rows.append(output)
+
 ```
 ///
 /// tab | Writing a printTable function
 ```python
->>> table = Table("BGP Summary", columns=cols, width=width)
->>> def printTable(table, rows):
-...    table.printHeader("BGP Summary")
-...    print("Legend : D - Dynamic Neighbor")
-...    table.printDoubleLine()
-...    table.printColumnHeaders()
-...    for row in rows:
-...        print(row)
-...    table.printSingleLine()
-...
+table = Table("BGP Summary", columns=cols, width=width)
+def printTable(table, rows):
+   table.printHeader("BGP Summary")
+   print("Legend : D - Dynamic Neighbor")
+   table.printDoubleLine()
+   table.printColumnHeaders()
+   for row in rows:
+       print(row)
+   table.printSingleLine()
+
+# and call your function
+printTable(table, rows)
+```
+///
+/// tab | Example function call output
+```python {.no-copy}
 >>> printTable(table, rows)
 ===============================================================================
 BGP Summary
@@ -1098,11 +1154,10 @@ if __name__ == "__main__":
 
 Copy that file to `PE1` using SCP or another method to prepare for the next task.
 
-```bash
+```bash {.no-copy}
 $ scp bgp_summary.py admin@clab-srexperts-pe1:/cf3:/bgp_summary.py
 Warning: Permanently added 'clab-srexperts-pe1' (ECDSA) to the list of known hosts.
-
-bgp_summary.py                                                                                                                      100% 4735     2.8MB/s   00:00
+bgp_summary.py                                              100% 4735     2.8MB/s   00:00
 ```
 
 ### Override the existing show command with a command-alias

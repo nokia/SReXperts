@@ -49,7 +49,7 @@ For this activity we will use the `PE1` and `PE2` FP5-based routers to configure
 In this activity you will:
 
 1. Enable the network to support ANYsec and create a simple MPLS service to interconnect two client hosts.
-2. Configure the client hosts, test the connectivity and use Wireshark, Edgeshark or TCPDump to observe the ANYsec packet headers. 
+2. Configure the client hosts, test the connectivity and use Wireshark, Edgeshark or TCPDump to observe the ANYsec packet headers.
 3. Create gNMIc scripts to create new ANYsec enabled services, enable or disable ANYsec for a service to demonstrate how easy is to automate ANYsec activation. You'll also create a network failure to observe that ANYsec, as any other MPLS packets, are not impacted.
 4. Finally we challenge you to automate ANYsec services using other technologies e.g with Python and pySROS.
 
@@ -59,7 +59,7 @@ In this activity you will:
 
 ANYSec is a Nokia network encryption solution available with the new FP5 models introduced in the SR OS 23.10.R1 release.
 It is a low-latency line-rate encryption mechanism that is scalable, flexible and quantum-safe.
-Based on MACSec standards as the foundation, ANYsec has flexibility to offset the authentication and encryption to allow L2, L2.5 and L3 encryption.  
+Based on MACSec standards as the foundation, ANYsec has flexibility to offset the authentication and encryption to allow L2, L2.5 and L3 encryption.
 It is currently supported for SR-ISIS, SR-OSPF and SR-OSPFv3.
 ANYsec encapsulates MKA over IP/UDP and supports tunnel slicing using Flex Algo or multi-instance IGP.
 
@@ -191,13 +191,13 @@ After configuring both PEs, validate the MACsec CA configuration.
 
 /// tab | MACsec CA validation
 ``` bash
-/show macsec connectivity-association "CA_VLL-1001" detail 
+/show macsec connectivity-association "CA_VLL-1001" detail
 ```
 ///
 /// tab | Output
 ``` bash
 [/]
-A:admin@g15-pe1# show macsec connectivity-association "CA_VLL-1001" detail 
+A:admin@g15-pe1# show macsec connectivity-association "CA_VLL-1001" detail
 
 ===============================================================================
 Connectivity Association "CA_VLL-1001"
@@ -224,7 +224,7 @@ Encryption Type              : aes-128-cmac
 ===============================================================================
 
 [/]
-A:admin@g15-pe1# 
+A:admin@g15-pe1#
 ```
 ///
 
@@ -447,7 +447,7 @@ Dynamic         18432       524287      0           492848      505856
 Reserved Label Blocks
 -------------------------------------------------------------------------------
 Reserved Label                               Start       End         Total
-Block Name                                   Label       Label       
+Block Name                                   Label       Label
 -------------------------------------------------------------------------------
 Anysec                                       32000       35999       4000
 -------------------------------------------------------------------------------
@@ -461,7 +461,7 @@ A:admin@g15-pe1#
 ///
 /// tab | Output - mka-over-ip
 ``` bash
-[/]
+(gl)[/]
 A:admin@g15-pe1# show anysec mka-over-ip
 
 ===============================================================================
@@ -472,7 +472,7 @@ Reserved Label Block        : Anysec
 Operational Status          : in-service
 ===============================================================================
 
-[/]
+(gl)[/]
 A:admin@g15-pe1#
 ```
 ///
@@ -534,7 +534,7 @@ Decrypted Octets             : 0
 ===============================================================================
 
 (gl)[/]
-A:admin@g15-pe1# 
+A:admin@g15-pe1#
 ```
 ///
 
@@ -639,6 +639,7 @@ After configuring both PEs, validate that the SDP are up at both PEs.
 ///
 /// tab | Output - SDP
 ``` bash
+[/]
 A:admin@g15-pe1# show service sdp
 
 ============================================================================
@@ -758,8 +759,8 @@ Use the following parameters respectively:
 - sap 1/1/c6/1:1001
 
 
-If you're not familiarized with the concept of SDP (Service destination points), you may refer to the 
-[Services Overview Guide - SDP section](https://documentation.nokia.com/sr/25-3/7750-sr/books/services-overview/service-entities.html#ai9erp9sk9). 
+If you're not familiarized with the concept of SDP (Service destination points), you may refer to the
+[Services Overview Guide - SDP section](https://documentation.nokia.com/sr/25-3/7750-sr/books/services-overview/service-entities.html#ai9erp9sk9).
 
 
 /// details | Hint
@@ -926,9 +927,9 @@ A:admin@g15-pe1#
 
 ### Configure clients
 
-Now that the network and the VLL service is configured we will configure the clients and test the connectivity. The client nodes `client01` and `client02` are connected to their respective `PE` node on interface `eth1`.  
+Now that the network and the VLL service is configured we will configure the clients and test the connectivity. The client nodes `client01` and `client02` are connected to their respective `PE` node on interface `eth1`.
 
-Configure the IP for each linux client using interface `eth1:1001`, vlan `1001` and subnet `192.168.51.0/24`.  
+Configure the IP for each linux client using interface `eth1:1001`, vlan `1001` and subnet `192.168.51.0/24`.
 Then verify the connectivity between the hosts.
 
 
@@ -959,7 +960,7 @@ PING 192.168.51.2 (192.168.51.2) 56(84) bytes of data.
 2 packets transmitted, 2 received, 0% packet loss, time 1001ms
 rtt min/avg/max/mdev = 5.870/8.195/10.520/2.325 ms
 
-bash# 
+bash#
 ```
 ///
 
@@ -982,18 +983,18 @@ EdgeShark is installed in your VM and it exposes a Web UI on port 5001. You can 
 
 /// tab | EdgeShark link
 ``` bash
-# (Replace `${INSTANCE_ID}` with your `Group ID`).  
-http://${INSTANCE_ID}.srexperts.net:5001 
+# (Replace `${INSTANCE_ID}` with your `Group ID`).
+http://${INSTANCE_ID}.srexperts.net:5001
 ```
 ///
 
 
 /// note
-You need SSH port forwarding in case you don't have direct reachability to the server. E.g.:  
-`ssh -L 5001:localhost:5001 srx-ws1.rd.ohn81.srexperts.net`
+You need SSH port forwarding in case you don't have direct reachability to the server. E.g.:
+`ssh -L 5001:localhost:5001 ${INSTANCE_ID}.srexperts.net`
 ///
 
-EdgeShark allows you to visualize all containers in your server, select the interfaces you want to capture, and stream the capture to your laptop. For that you need Wireshark and install the [Edgeshark external capture plugin](https://github.com/siemens/cshargextcap/releases/tag/v0.10.7) in your laptop to allow Edgeshark to open your local Wireshark to display the packets.  
+EdgeShark allows you to visualize all containers in your server, select the interfaces you want to capture, and stream the capture to your laptop. For that you need Wireshark and install the [Edgeshark external capture plugin](https://github.com/siemens/cshargextcap/releases/tag/v0.10.7) in your laptop to allow Edgeshark to open your local Wireshark to display the packets.
 
 EdgeShark allows you to cature multiple interfaces simultaneously. Start a capture at `PE1` `eth1` and `eth2` as shown below and observe the ANYsec headers.
 
@@ -1006,8 +1007,8 @@ Optionally you may consider install [ANYsec Packet Dissectors for Wireshark](#an
 
 #### Tshark and Tcpdump
 
-One advantage of TCPdump is that it is available in most Linux systems, however it is limited in decoding protocols.  
-You can still use it and look to the MPLS labels and verify that the 2nd label is from the ANYsec label range as shown in the output below.  
+One advantage of TCPdump is that it is available in most Linux systems, however it is limited in decoding protocols.
+You can still use it and look to the MPLS labels and verify that the 2nd label is from the ANYsec label range as shown in the output below.
 Tshark has more decoding capabilities and allows you to select specific interfaces to capture.
 
 
@@ -1026,14 +1027,14 @@ sudo ip netns exec clab-srexperts-client01 ping -c 1 192.168.51.2
 
 /// tab | Tshark output - Anysec
 ``` bash hl_lines="51 102"
-nokia@rd-srx-ws1-155afda:~$ sudo ip netns exec clab-srexperts-pe1 tshark -l -i eth1 -i eth2 -Y mpls -V
+❯ sudo ip netns exec clab-srexperts-pe1 tshark -l -i eth1 -i eth2 -Y mpls -V
 
 Capturing on 'eth1' and 'eth2'
  ** (tshark:2315673) 23:14:21.006908 [Main MESSAGE] -- Capture started.
  ** (tshark:2315673) 23:14:21.007039 [Main MESSAGE] -- File: "/tmp/wireshark_2_interfaces6QIE62.pcapng"
-^Ctshark: 
+^Ctshark:
 0 packets captured
-nokia@rd-srx-ws1-155afda:~$ sudo ip netns exec clab-srexperts-pe1 tshark -l -i eth1 -i eth2 -Y mpls -V
+❯ sudo ip netns exec clab-srexperts-pe1 tshark -l -i eth1 -i eth2 -Y mpls -V
 
 Capturing on 'eth1' and 'eth2'
  ** (tshark:2316298) 23:14:46.597766 [Main MESSAGE] -- Capture started.
@@ -1140,15 +1141,15 @@ Data (134 bytes)
     Data: 88e52c0000000004000000007d650001f76021f1b67bc5bf25d0ae2bfa3a015477ea45a1…
     [Length: 134]
 
-^Ctshark: 
+^Ctshark:
 2 packets captured
-nokia@rd-srx-ws1-155afda:~$
+❯
 ```
 ///
 
 /// tab | Tcpdump output - Anysec
 ``` bash hl_lines="4 15"
-nokia@rd-srx-ws1-155afda:~$ sudo ip netns exec clab-srexperts-pe1 tcpdump -nni eth1 -nnvvv  mpls
+❯ sudo ip netns exec clab-srexperts-pe1 tcpdump -nni eth1 -nnvvv  mpls
 tcpdump: listening on eth1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 ^C21:02:50.342036 MPLS (label 21022, tc 0, ttl 255)
         (label 32101, tc 0, [S], ttl 255)
@@ -1176,12 +1177,12 @@ tcpdump: listening on eth1, link-type EN10MB (Ethernet), snapshot length 262144 
 2 packets captured
 2 packets received by filter
 0 packets dropped by kernel
-nokia@rd-srx-ws1-155afda:~$
+❯
 ```
 ///
 /// tab | Tcpdump output - ICMP clear-text
 ``` bash hl_lines="4 13"
-nokia@rd-srx-ws1-155afda:~$ sudo ip netns exec clab-srexperts-pe1 tcpdump -nni eth2 -nnvvv  mpls
+❯ sudo ip netns exec clab-srexperts-pe1 tcpdump -nni eth2 -nnvvv  mpls
 tcpdump: listening on eth2, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 ^C21:39:52.121897 MPLS (label 21021, tc 0, ttl 254)
         (label 524279, tc 0, [S], ttl 255)
@@ -1205,7 +1206,7 @@ tcpdump: listening on eth2, link-type EN10MB (Ethernet), snapshot length 262144 
 2 packets captured
 2 packets received by filter
 0 packets dropped by kernel
-nokia@rd-srx-ws1-155afda:~$ 
+❯
 ```
 ///
 
@@ -1236,14 +1237,14 @@ Follow the instructions provided. In summary you need an up to date Wireshark ve
 
 ### Automate ANYsec services with gNMIc
 
-We have gone over the steps required for setting up a service between two peers that is encrypted with ANYsec. Regrettably, this involved a significant amount of manual configuration that is quite sensitive to parameters and values being aligned. Any situation where you might consider selling this to your customers via a portal where they can create, enable or disable ANYsec services at the push of a button wouldn't work if the configuration needs to be done manually.  
+We have gone over the steps required for setting up a service between two peers that is encrypted with ANYsec. Regrettably, this involved a significant amount of manual configuration that is quite sensitive to parameters and values being aligned. Any situation where you might consider selling this to your customers via a portal where they can create, enable or disable ANYsec services at the push of a button wouldn't work if the configuration needs to be done manually.
 
-Fortunately, we are focused on automation here. In this task we will use `gNMIc` calls to automate the process of creating and destroying the service.  
+Fortunately, we are focused on automation here. In this task we will use `gNMIc` calls to automate the process of creating and destroying the service.
 
 In a real deployment, a self-service portal can be offered to your customers to align service configuration with their wishes would make these calls, though for now we will do them manually.
 You may use the [MD-CLI explorer tool](https://documentation.nokia.com/aces/ixr/mdcli-explorer/index.html), to find the YANG paths to use.
 
-Your new task is to build `gNMIc` calls that can do the following:  
+Your new task is to build `gNMIc` calls that can do the following:
 
 1. Retrieve the VLL configuration present on the system in JSON format
 2. Create a new VLL service between two PE nodes
@@ -1280,8 +1281,8 @@ gnmic -a clab-srexperts-pe2 -u admin -p $EVENT_PASSWORD --insecure get \
 #### Create a new VLL service between two PE nodes
 
 Your customer requested you to add a new VLL service. You may use the existing CA and ANYsec configurations, and you only need to configure the new VLL.
-Use the JSON files from previous "Get configuration information from the system" task as reference and create the configuration files for both `client01` and `client02` as well as the `gNMIc` RPC `Set` call.  
-Use the following parameters for the new service:  
+Use the JSON files from previous "Get configuration information from the system" task as reference and create the configuration files for both `client01` and `client02` as well as the `gNMIc` RPC `Set` call.
+Use the following parameters for the new service:
 
 - service-name: anysec-vll-1002
 - service-id: 1002
@@ -1294,8 +1295,8 @@ Use the following parameters for the new service:
 The example solution for creating a service makes use of the `Set` RPC.
 
 
-/// tab | pe1 json
-``` bash title="pe1-saved-data.json
+/// tab | JSON payload for PE1
+```bash title="pe1-saved-data.json"
 {
   "admin-state": "enable",
   "customer": "1",
@@ -1320,8 +1321,8 @@ The example solution for creating a service makes use of the `Set` RPC.
 ```
 ///
 
-/// tab | pe2 json
-``` bash title="pe2-saved-data.json"
+/// tab | JSON payload for PE2
+```bash title="pe2-saved-data.json"
 {
   "admin-state": "enable",
   "customer": "1",
@@ -1360,7 +1361,7 @@ gnmic -a clab-srexperts-pe2 -u admin -p $EVENT_PASSWORD --insecure set \
 
 /// tab | expected output
 ``` bash
-$ gnmic -a clab-srexperts-pe1 -u admin -p $EVENT_PASSWORD --insecure set     --update-path '/configure/service/epipe[service-name="anysec-vll-1002"]'     --update-file pe1-saved-data.json
+$ gnmic -a clab-srexperts-pe1 -u admin -p $EVENT_PASSWORD --insecure set --update-path '/configure/service/epipe[service-name="anysec-vll-1002"]' --update-file pe1-saved-data.json
 {
   "source": "clab-srexperts-pe1",
   "timestamp": 1747000595813352651,
@@ -1381,14 +1382,14 @@ $
 
 You have completed this task as you now have a `gNMIc` call to add service configuration to model-driven SR OS.
 
-In a real deployment, for distinct customers you may need to deploy distinct CAs, distinct ANYsec configs and PSKs. 
-With ANYsec you mays achieve granularity per service and you can also configure slicing with traffic-engineering using e.g. Flex-Algo.
+In a real deployment, for distinct customers you may need to deploy distinct CAs, distinct ANYsec configs and PSKs.
+With ANYsec you can achieve granularity per service and you can also configure slicing with traffic-engineering using e.g. Flex-Algo.
 
 
 
 #### Test the new service
 
-Your next task is to configure the clients and test the new service with the commands below. 
+Your next task is to configure the clients and test the new service with the commands below.
 
 
 /// tab | Client1 configuration
@@ -1411,10 +1412,10 @@ ip -d link show eth1.1002
 
 You may validate from the PE's CLI, using the clients and the packet inspection techniques seen previously, to make sure your calls have the expected result.
 
-**Challenge:** Create gNMIC set to disable the link between the PE1 and P1 while you capture traffic and obverse the impact on the traffic. 
+**Challenge:** Create gNMIC set to disable the link between the PE1 and P1 while you capture traffic and obverse the impact on the traffic.
 
 /// details | Solution
-Solution example to disable/enable the link between PE1 and P1. Note that you must disable the link on both sides. 
+Solution example to disable/enable the link between PE1 and P1. Note that you must disable the link on both sides.
 /// tab | gNMIC disable link PE1-P1
 ``` bash
 gnmic -a clab-srexperts-pe1:57400 -u admin -p $EVENT_PASSWORD --insecure set --update-path '/configure/port[port-id=1/1/c1/1]/admin-state' --update-value disable
@@ -1481,7 +1482,7 @@ gnmic -a clab-srexperts-pe2 -u admin -p $EVENT_PASSWORD --insecure getset \
 
 #### Remove the VLL service from the PE nodes
 
-Lets suppose that your customer no longer needs the service and wants to remove it. 
+Lets suppose that your customer no longer needs the service and wants to remove it.
 With the automation portal tool a customer can always clean up their own service configurations on your PE nodes if they so wish. Use `gNMIc` to connect to a remote system from the CLI with the [`Set`](https://gnmic.openconfig.net/cmd/set/) RPC to delete the previously created VLL `anysec-vll-1002`.
 
 /// details | Solution

@@ -10,7 +10,7 @@
 | **Topology Nodes**    | leaf11, leaf12, leaf13, spine11, spine12                                                                                                                                                                     |
 | **References**        | [Allocation Pools documentation][allocation-docs]                                                                                                               |
 
-[allocation-docs]: https://docs.eda.dev/user-guide/allocation-pools/
+[allocation-docs]: https://docs.eda.dev/25.8/user-guide/allocation-pools/
 
 Allocation of identifiers such as IP addresses, VLAN IDs, subinterface indexes and so on is a critical aspect of network design and management. Given that EDA acts as an authority for configuration of the managed targets, it automates and controls how resource identifiers are assigned via the concept of Allocation Pools.
 
@@ -61,6 +61,12 @@ By using the `.namespace.allocations.v1.template.instance.allocation` EQL query 
 Your task is to align the allocation values used in the fabric to match a specific ASN address scheme convention employed by the organization.
 
 We'll go step-by-step through the process of reviewing the current ASN assignments and then applying the new custom ASN scheme to the fabric. We'll use both the CLI and the EDA UI to accomplish this, and verify the changes with a EQL query.
+
+/// danger
+
+This set of tasks changes ASN numbering in the data center fabric, impacting the peering sessions with PE devices. While this is expected, when you finish with this exercise you must [reset the EDA](../index.md#reset-eda) to its original state to ensure that the service configuration is set to the original state.
+
+///
 
 ### Concepts & Naming Conventions
 
@@ -124,8 +130,12 @@ First, let's verify what ASNs are currently assigned to the fabric devices befor
       resourceVersion: "1145904"
       uid: 2b1ec70a-3d9d-404b-8493-f87640d43638
     spec:
+      publishAllocations: true
       segments:
-      - size: 1000
+      - allocations:
+        - name: srexperts-fabric-spine
+          value: 4200001000
+        size: 1000
         start: 4200001000
     ```
   
@@ -139,7 +149,7 @@ Next, let's confirm which ASN pool is being used by our Fabric via the EDA UI. T
 
 Log in to the EDA web interface using the connectivity and credential details provided.
 
-![EDA Main](../../images/EDA_maina_CA.PNG)
+![EDA Main](https://gitlab.com/rdodin/pics/-/wikis/uploads/e4e0ab87c7063977adfd3de4f91320ae/CleanShot_2025-04-08_at_14.48.42_2x.png)
 
 **2. Identify the ASN Pool used by the Leaf nodes**  
 
@@ -151,20 +161,20 @@ Let's find what allocation pool is being used for the leaf switches, by checking
 * Select the **Autonomous System Pool** in the left nav bar. You should see the right pane to scroll to the position where the ASN allocation pool name is set for the leaf nodes.  
   > *For example, it might indicate “Autonomous System Pool: srexperts-asnpool” or display another pool name.*
 
-![used-pool](https://gitlab.com/rdodin/pics/-/wikis/uploads/942bc1a8332d315124ef221de9e9e5e8/CleanShot_2025-04-16_at_13.37.14_2x.png)
+![used-pool](https://gitlab.com/rdodin/pics/-/wikis/uploads/0e5ca597a4d01ee2f1c7f3e7c9b8f6ba/CleanShot_2025-08-15_at_10.45.17.webp)
 
 **3. Verify assigned AS Number**  
 After you identified the pool name used for the leafs, check what AS Numbers have been assigned to the actual leaf nodes.
 
 Using the nav bar of the Fabric resource, follow the **Status** -> **Leaf Nodes** path to see leaf nodes and their AS Numbers that are currently assigned.
 
-![Verify ASN Assignment](https://gitlab.com/rdodin/pics/-/wikis/uploads/0a4156292e1027caeecc08dbafbce70f/CleanShot_2025-04-16_at_14.08.11_2x.png)
+![Verify ASN Assignment](https://gitlab.com/rdodin/pics/-/wikis/uploads/00fdb76c6cb9c13b3e0218493a92d2af/CleanShot_2025-08-15_at_10.53.25.webp)
 
 **4. Check Pool configuration**  
 
 Using the pool name identified in step 2, find this pool in the Allocation Pools and check its configuration.
 
-![ASN Pool Detail](../../images/ASN_pool_CA.PNG)
+![ASN Pool Detail](https://gitlab.com/rdodin/pics/-/wikis/uploads/c97c923d92bca142b81a1c121f028cf0/CleanShot_2025-08-15_at_10.50.06.webp)
 
 **5. For Spine Nodes**  
 
@@ -337,9 +347,15 @@ Feel free to experiment further:
 * See how EDA behaves when two pools overlap.
 * Pre-allocate specific values to particular nodes using the allocations field.
 
-For deeper insights, consult the [EDA documentation](https://docs.eda.dev/user-guide/allocation-pools/).
+For deeper insights, consult the [EDA documentation](https://docs.eda.dev/25.8/user-guide/allocation-pools/).
 
 Congratulations! You have successfully implemented custom resource allocations in Nokia EDA and learned how to enforce naming conventions via automated network deployments. This wraps up the lab. Proceed to the next activity or apply these principles to your own network designs. Happy automating!
+
+/// danger
+
+This set of tasks changes ASN numbering in the data center fabric, impacting the peering sessions with PE devices. While this is expected, when you finish with this exercise you must [reset the EDA](../index.md#reset-eda) to its original state to ensure that the service configuration is set to the original state.
+
+///
 
 ## Summary
 

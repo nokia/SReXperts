@@ -40,7 +40,7 @@ Before making configuration changes, network engineers commonly back up the curr
 
 Checkpoints are named using the format `checkpoint-<#>.json`, where `<#>` is a sequential number, 0 representing the most recent checkpoint. At any time, users can roll back the device configuration to a previously saved checkpoint, ensuring a reliable and efficient method for configuration recovery.
 
-The list of saved checkpoint configurations can be obtained with the command `show system configuration checkpoint`.
+The list of saved checkpoint configurations can be obtained with the command `info from state / system configuration checkpoint {} | as table | filter fields name comment username created` (there is often an alias to provide this long command).
 
 ### Access Control List (ACL)
 An Access Control List (ACL) is a set of rules used within a network environment to evaluate packets individually, determining whether to allow or deny access. Each ACL entry includes a match condition and an associated action, which can be one of the following: accept, drop, log, or a rate-limit policer.
@@ -56,7 +56,7 @@ Captured traffic can be viewed directly in the CLI, either in a simplified forma
 
 ## Tasks
 
-**You should read these tasks from top-to-bottom before beginning the activity**.  
+**You should read these tasks from top-to-bottom before beginning the activity**.
 
 **It is tempting to skip ahead but tasks may require you to have completed previous tasks before tackling them.**
 
@@ -117,7 +117,7 @@ After creating the checkpoint, run the `show` command to view the list of availa
 
 ``` bash
 save checkpoint
-show system configuration checkpoint
+info from state / system configuration checkpoint {} | as table | filter fields name comment username created
 ```
 
 ///
@@ -129,7 +129,7 @@ show system configuration checkpoint
 
 
 --{ + running }--[  ]--
-A:g15-spine11# show system configuration checkpoint
+A:g15-spine11# info from state / system configuration checkpoint {} | as table | filter fields name comment username created
 +-----+---------------------------------------+-----------------------+------------------+-------------------------------+
 | Id  |    Name                               |      Comment          |     Username     |   Created                     |
 +=====+=======================================+=======================+==================+===============================+
@@ -296,15 +296,55 @@ To do this:
 
 1. Create the ACL and enable statistics tracking (set statistics-per-entry to true to monitor matched packets).
 
-2. Add an entry with matching criteria for ICMP traffic, define the match conditions (e.g. protocol type = ICMP) and specify the desired action. 
+2. Add an entry with matching criteria for ICMP traffic, define the match conditions (e.g. protocol type = ICMP) and specify the desired action.
 
 3. Apply the ACL to the appropriate interface (this should be the same interface that the ICMP packets were observed on during the packet capture in the previous task).
 
 
 /// details | Solution (check if you get stuck)
+    type: success
+/// tab | Commands
 ```
-type: success
-A:g15-spine11# enter candidate
+enter candidate
+acl {
+    acl-filter ping_leaf type ipv4 {
+        description "ACL to capture ICMP request from leaf"
+        statistics-per-entry true
+        entry 10 {
+            match {
+                ipv4 {
+                    protocol icmp
+                    destination-ip {
+                        prefix 10.46.15.31/32
+                    }
+                    icmp {
+                        type echo
+                    }
+                    source-ip {
+                        prefix 10.46.15.33/32
+                    }
+                }
+            }
+            action {
+                accept {
+                }
+            }
+        }
+    }
+    interface ethernet-1/1.0 {
+        input {
+            acl-filter ping_leaf type ipv4 {
+            }
+        }
+    }
+}
+diff
+commit stay
+```
+///
+/// tab | Expected `diff` output
+```
+--{ * candidate shared default }--[  ]--
 A:g15-spine11# diff
       acl {
 +         acl-filter ping_leaf type ipv4 {
@@ -338,10 +378,9 @@ A:g15-spine11# diff
 +             }
 +         }
       }
-
 ```
 ///
-
+///
 ### Check ACL statistics
 Repeat the ping command on the leaf, just as you did before.
 
@@ -359,7 +398,7 @@ show acl ipv4-filter ping_leaf entry 10
 
 ///
 
-/// tab | expected output
+/// tab | Expected output
 
 ``` bash
 A:g15-spine11# show acl ipv4-filter ping_leaf entry 10
@@ -397,8 +436,27 @@ To do this:
 This will drop ICMP packets from reaching their destination, effectively blocking the pings sent from the leaf.
 
 /// details | Solution (check if you get stuck)
+    type: success
+/// tab | Commands
 ```
-A:g15-spine11# enter candidate
+enter candidate
+acl {
+    acl-filter ping_leaf type ipv4 {
+        entry 10 {
+            action {
+                drop {
+                }
+            }
+        }
+    }
+}
+diff
+commit stay
+```
+///
+/// tab | Expected `diff` output
+```
+--{ +* candidate shared default }--[  ]--
 A:g15-spine11# diff
       acl {
           acl-filter ping_leaf type ipv4 {
@@ -411,8 +469,8 @@ A:g15-spine11# diff
               }
           }
       }
-
 ```
+///
 ///
 
 ### Clear and check ACL statistics

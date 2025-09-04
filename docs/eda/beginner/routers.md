@@ -8,9 +8,8 @@
 | --------------------- | ---------------------------------------------------------------------------------------------------------- |
 | **Short Description** | Creating a router with EDA to achieve layer 3 connectivity                                                 |
 | **Difficulty**        | Beginner                                                                                                   |
-| **Resources used**        | **Virtual Networks** → **Routers** / **Routed Interfaces**                                                                                                         |
+| **Resources used**    | **Virtual Networks** → **Routers** / **Routed Interfaces**                                                 |
 | **Topology Nodes**    | :material-server: client11, :material-server: client13, :material-router: leaf11, :material-router: leaf13 |
-| **References**        | /                                                                                                          |
 
 This is the second exercise in a 4-part series about using EDA to achieve connectivity to, from, and within your datacenter. In this exercise, we will achieve layer-3 connectivity between two hosts in different broadcast domains.
 
@@ -77,7 +76,7 @@ Using the IP configuration provided in the [Objective](#objective) section, veri
 To connect to the shell of the client nodes, you should connect to the server running your lab and then ssh to each node, for example, for `client11`:
 
 ```bash title="execute from the lab server"
-ssh user@clab-srexperts-client11
+ssh admin@clab-srexperts-client11
 ```
 
 <div class="embed-result">
@@ -181,7 +180,7 @@ Time to create your first Router and see what it gets you.
 
 Using the "Create" button in the top-right, you can create a new Router. In the center of the screen you can see all configuration options for the new Router, and on the right is a YAML representation that could be used for automation.
 
-![Creating a router](../../images/eda/eda_router_creation.png)
+![Creating a router](https://gitlab.com/rdodin/pics/-/wikis/uploads/d17e1bd394b5044e23a7ce977b3f775c/CleanShot_2025-08-14_at_18.34.55.webp)
 
 By creating a new Router resource we intend our network elements to have a VRF that will serve as a virtual routing instance for the two clients.
 
@@ -210,7 +209,7 @@ The solution can be found below in YAML format, if you want to refer to it. You 
     type: success
 
 ```yaml
-apiVersion: services.eda.nokia.com/v1alpha1
+apiVersion: services.eda.nokia.com/v1
 kind: Router
 metadata:
   name: router
@@ -243,14 +242,14 @@ Additionally, you want to give the routed interface both an IPv4 and an IPv6 add
 
 Before you commit, do a [dry-run](../beginner/declarative-intents.md#dry-run) first, just like in the previous exercise! This will allow you to inspect the configuration pushed to the nodes. After you commit this change to the fabric, you should be able to see the routed interface status reflected in the GUI. You can also navigate to your router, and find out which leaf nodes are now participating in the service.
 
-![Status of the router](../../images/eda/eda_router_status.png)
+![Status of the router](https://gitlab.com/rdodin/pics/-/wikis/uploads/8d87c3d901b90ddddcedc2aff23ccb02/CleanShot_2025-08-14_at_18.39.08.webp)
 
 /// details | Solution
     type: success
 //// tab | interface for client11
 
 ```yaml
-apiVersion: services.eda.nokia.com/v1alpha1
+apiVersion: services.eda.nokia.com/v1
 kind: RoutedInterface
 metadata:
   name: router-client11
@@ -272,7 +271,7 @@ spec:
 //// tab | interface for client13
 
 ```yaml
-apiVersion: services.eda.nokia.com/v1alpha1
+apiVersion: services.eda.nokia.com/v1
 kind: RoutedInterface
 metadata:
   name: router-client13

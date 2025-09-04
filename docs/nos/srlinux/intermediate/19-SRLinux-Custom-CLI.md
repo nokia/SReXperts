@@ -20,7 +20,7 @@ tags:
 
 
 SR Linux CLI is an open-source, Python-based, and pluggable engine.
-It allows users to implement custom CLI `global`, `show`, and `tools` commands that run alongside the native CLI commands. SR Linux provides a Python framework to develop those commands.  
+It allows users to implement custom CLI `global`, `show`, and `tools` commands that run alongside the native CLI commands. SR Linux provides a Python framework to develop those commands.
 
 
 
@@ -29,7 +29,7 @@ In this activity, we will explore the native CLI commands, how the Python CLI pl
 
 ## Objective
 
-Imagine you are managing a network with SR Linux nodes, and you receive a request to create several custom `global`, `show`, and `tools` commands for the operations and engineering teams. These new commands will also be used by automation tools to collect system information efficiently.  
+Imagine you are managing a network with SR Linux nodes, and you receive a request to create several custom `global`, `show`, and `tools` commands for the operations and engineering teams. These new commands will also be used by automation tools to collect system information efficiently.
 
 Some examples are:
 
@@ -41,11 +41,11 @@ Some examples are:
 
 In this activity we'll guide you through the `show traffic` custom CLI command deployment.
 
-The objectives of this exercise are:  
+The objectives of this exercise are:
 
-   1. Familiarize with the SR Linux CLI engine filesystem and explore native CLI plugins  
-   2. Create a modified `show version` plugin using an existing native plugin as reference with custom modifications  
-   3. Create a new custom CLI `show traffic` command step-by-step  
+   1. Familiarize with the SR Linux CLI engine filesystem and explore native CLI plugins
+   2. Create a modified `show version` plugin using an existing native plugin as reference with custom modifications
+   3. Create a new custom CLI `show traffic` command step-by-step
 
 
 With this activity you'll learn how flexible it is to modify or implement a new SRLinux custom CLI plugin.
@@ -53,15 +53,15 @@ With this activity you'll learn how flexible it is to modify or implement a new 
 ## Technology explanation
 <!-- Text from: https://github.com/srl-labs/learn-srlinux/blob/main/docs/cli/plugins/index.md -->
 
-The pluggable architecture of SR Linux CLI allows you to create custom CLI commands using the same infrastructure as the native SR Linux commands.  
+The pluggable architecture of SR Linux CLI allows you to create custom CLI commands using the same infrastructure as the native SR Linux commands.
 
 The Python-based CLI engine allows a user to create the custom CLI commands in the following categories:
 
-- **show** commands  
-    These are your much-loved show commands that print out the state of the system in a human-readable format, often in a table.  
-- **global** commands  
-    These are operational commands like `ping`, `traceroute`, `file`, `bash`, etc.  
-- **tools** commands  
+- **show** commands
+    These are your much-loved show commands that print out the state of the system in a human-readable format, often in a table.
+- **global** commands
+    These are operational commands like `ping`, `traceroute`, `file`, `bash`, etc.
+- **tools** commands
     These represent a run-to-completion task or an operation. Like a reboot or a request to load a configuration from a file.
 
 
@@ -79,12 +79,12 @@ When SR Linux CLI is started, the available commands (native and user-defined) a
 
 ## Tasks
 
-**You should read these tasks from top-to-bottom before beginning the activity**.  
+**You should read these tasks from top-to-bottom before beginning the activity**.
 
-It is tempting to skip ahead but tasks may require you to have completed previous tasks before tackling them.  
+It is tempting to skip ahead but tasks may require you to have completed previous tasks before tackling them.
 
 
-For the activity tasks you will login to `leaf11`.  
+For the activity tasks you will login to `leaf11`.
 You may use the `bash` CLI command to move to the Linux shell from the SR Linux CLI.
 
 /// tab | login with SSH to `sr_cli`
@@ -96,26 +96,26 @@ ssh admin@clab-srexperts-leaf11
 ///
 
 
- There are 3 tasks sections below:  
+ There are 3 tasks sections below:
 
-   1. Explore the native CLI plugins  
-   
-   2. Create modified `show version` CLI  
+   1. Explore the native CLI plugins
 
-   3. Create `show traffic` custom CLI  
+   2. Create modified `show version` CLI
+
+   3. Create `show traffic` custom CLI
 
 
-**Let's now start the activity tasks!**  
+**Let's now start the activity tasks!**
 
 
 ### Explore the native CLI plugins
 
-Before you start deploying your own custom CLI plugins you decide to inspect the existing native plugins to learn and use as examples.  
+Before you start deploying your own custom CLI plugins you decide to inspect the existing native plugins to learn and use as examples.
 
-In this section you'll familiarize yourself with the SR Linux CLI engine filesystem and explore native CLI plugins.  
+In this section you'll familiarize yourself with the SR Linux CLI engine filesystem and explore native CLI plugins.
 
-Customized CLI commands can be added to SR Linux using a Python plugin framework. The native `global`, `show` and `tools` SR Linux commands use this same framework, and their source code is available to any CLI user with admin access rights. 
-The existing native CLI commands can be used to learn how to create additional CLI commands. 
+Customized CLI commands can be added to SR Linux using a Python plugin framework. The native `global`, `show` and `tools` SR Linux commands use this same framework, and their source code is available to any CLI user with admin access rights.
+The existing native CLI commands can be used to learn how to create additional CLI commands.
 
 1. Login to `leaf11` and move to the linux `bash` shell.
 
@@ -237,7 +237,7 @@ The existing native CLI commands can be used to learn how to create additional C
     -rw-r--r-- 1 root root 21378 Feb 19 22:24 watch.py
     -rw-r--r-- 1 root root 11373 Feb 19 22:24 writable_schema.py
     -rw-r--r-- 1 root root  3539 Feb 19 22:24 yang_models.py
-    admin@g15-leaf11:/opt/srlinux/python/virtual-env/lib/python3.11/dist-packages/srlinux/mgmt/cli/plugins$ 
+    admin@g15-leaf11:/opt/srlinux/python/virtual-env/lib/python3.11/dist-packages/srlinux/mgmt/cli/plugins$
     ```
     ///
     ///
@@ -246,15 +246,15 @@ The existing native CLI commands can be used to learn how to create additional C
 
 
     /// details | Explanation version.py
-    From the output file list you should recognize several of those commands, such as `clear`, `date`, `echo`, `info` or `ping`. These are some of the **global** CLI commands available in `sr_cli`.  
+    From the output file list you should recognize several of those commands, such as `clear`, `date`, `echo`, `info` or `ping`. These are some of the **global** CLI commands available in `sr_cli`.
     ///
 
 
 
-4. Do you recognize any `show` CLI command? Can you find where the `show` CLI commands are located?   
+4. Do you recognize any `show` CLI command? Can you find where the `show` CLI commands are located?
 
     /// details | Solution: Native `show` CLI plugins list
-    The native `show` CLI commands Python source code files are located under `plugins/reports` directory. 
+    The native `show` CLI commands Python source code files are located under `plugins/reports` directory.
     /// tab | cmd
 
     ``` bash
@@ -438,22 +438,22 @@ The existing native CLI commands can be used to learn how to create additional C
     -rw-r--r-- 1 root root 24245 Feb 19 22:24 tunnel_interface_reports.py
     -rw-r--r-- 1 root root 12390 Feb 19 22:24 tunnel_vxlan_reports.py
     -rw-r--r-- 1 root root  6578 Feb 19 22:24 version.py
-    admin@g15-leaf11:/opt/srlinux/python/virtual-env/lib/python3.11/dist-packages/srlinux/mgmt/cli/plugins/reports$ 
+    admin@g15-leaf11:/opt/srlinux/python/virtual-env/lib/python3.11/dist-packages/srlinux/mgmt/cli/plugins/reports$
     ```
     ///
 
-    You should be able to guess some commands from the file names, like `show bgp summary`, `show interface`, or `show system application`. All the SR linux show commands are implemented in this directory.  
+    You should be able to guess some commands from the file names, like `show bgp summary`, `show interface`, or `show system application`. All the SR linux show commands are implemented in this directory.
 
     ///
 
 
 
 
-5. Explore the `show version` file to see one of the simplest CLI show commands of the system. Can you find the file? 
+5. Explore the `show version` file to see one of the simplest CLI show commands of the system. Can you find the file?
 In parallel, open a second terminal session side-by-side, and login to `leaf11` `sr-cli` shell, so that you can execute the CLI command and see the output while looking at the Python file:
 
     /// details | Solution: Native `show version` CLI plugins list
-    The `show version` file is the version.py. 
+    The `show version` file is the version.py.
     /// tab | Output - show version
 
     ``` bash
@@ -759,7 +759,7 @@ In parallel, open a second terminal session side-by-side, and login to `leaf11` 
     ///
 
 
-    In the beginning of `version.py` you find:  
+    In the beginning of `version.py` you find:
 
     -  the import statements  (line 1 to 9)
 
@@ -773,30 +773,30 @@ In parallel, open a second terminal session side-by-side, and login to `leaf11` 
 
 
 
-    Few notes regarding the code:  
+    Few notes regarding the code:
 
-    *  the CLI command is appended to the CLI command tree using `cli.show_mode.add_command()` to append the CLI command under the `show` branch. (line 32)  
+    *  the CLI command is appended to the CLI command tree using `cli.show_mode.add_command()` to append the CLI command under the `show` branch. (line 32)
 
-    *  the syntax definition is done directly in the `add_command()` method. This is the same as first creating a syntax object and then using it as a parameter.  (line 33)  
+    *  the syntax definition is done directly in the `add_command()` method. This is the same as first creating a syntax object and then using it as a parameter.  (line 33)
 
-    *  there's a callback `method_print()` which is executed when the `show version` command is entered by a CLI user.  (line 33)  
+    *  there's a callback `method_print()` which is executed when the `show version` command is entered by a CLI user.  (line 33)
 
-    *  there is a schema object that is passed to the `add_command()` method using the `_get_schema()`. This is specific to show commands.  (line 34)  
+    *  there is a schema object that is passed to the `add_command()` method using the `_get_schema()`. This is specific to show commands.  (line 34)
 
-    *  the `_get_schema()` method builds a schema consisting of one node called `basic system info` that has multiple fields (`hostname`,`chassis type`, etc). (line 42 to 61)  
+    *  the `_get_schema()` method builds a schema consisting of one node called `basic system info` that has multiple fields (`hostname`,`chassis type`, etc). (line 42 to 61)
 
-    *  the schema object is a placeholder for the data to be displayed by the command.  
+    *  the schema object is a placeholder for the data to be displayed by the command.
 
 
-    When the callback function is executed it:  
+    When the callback function is executed it:
 
-    *  retrieves relevant data in the state datastore with `_fetch_state()`.  (line 37)  
+    *  retrieves relevant data in the state datastore with `_fetch_state()`.  (line 37)
 
-    *  populates the retrieved data into the schema object with `_populate_data()`.  (line 38)  
+    *  populates the retrieved data into the schema object with `_populate_data()`.  (line 38)
 
-    *  specifies how the retrieved data should be formatted on the screen with `_set_formatters()`.  (line 39)  
+    *  specifies how the retrieved data should be formatted on the screen with `_set_formatters()`.  (line 39)
 
-    *  instruct SR Linux to display the retrieved data by calling the `print_data()` method of the output object.  (line 40)   
+    *  instruct SR Linux to display the retrieved data by calling the `print_data()` method of the output object.  (line 40)
 
 
 
@@ -877,16 +877,16 @@ In parallel, open a second terminal session side-by-side, and login to `leaf11` 
     ///
 
 
-    Few notes regarding the code:  
+    Few notes regarding the code:
 
-    *  Lines 64 to 67 set 4 different xpaths into the state datastore 
+    *  Lines 64 to 67 set 4 different xpaths into the state datastore
 
     *  The following lines retrieve the values associated with the 4 xpaths and store them in local data objects (_hostname_data, _chassis_data, _software_version and _control_data)
 
-    *  You can get the same information using the CLI `info from state` command. The xpath strings using the notation with `/` must be translated into the YANG model hierarchy. For example, `/system/name/host-name` is translated into the YANG elements `system name host-name`.  
+    *  You can get the same information using the CLI `info from state` command. The xpath strings using the notation with `/` must be translated into the YANG model hierarchy. For example, `/system/name/host-name` is translated into the YANG elements `system name host-name`.
 
 
-3. Run the `info from state` commands in your CLI session. 
+3. Run the `info from state` commands in your CLI session.
 
 
     /// tab | `info from state`
@@ -992,7 +992,7 @@ In parallel, open a second terminal session side-by-side, and login to `leaf11` 
 
 
 
-4. The `_populate_data()` method parses the info returned from the state datastore to extract the relevant information and then assigns a value to each of the fields of the schema.  
+4. The `_populate_data()` method parses the info returned from the state datastore to extract the relevant information and then assigns a value to each of the fields of the schema.
 The `_set_formatters()` method specifies how the schema should be displayed. It uses the formatter function `TagValueFormatter()` to display each field in the schema as a tag/value pair, one per row. It also specifies that there should be a border above and a border below.
 
 
@@ -1077,13 +1077,13 @@ The `_set_formatters()` method specifies how the schema should be displayed. It 
     ///
 
 
-5. You may compare the output of the `show version` command with the differente fields of the schema.  
-You can see that the different fields from the schema are displayed line by line. The system has automatically adjusted the width of the columns to the widest field and there is a border above and below all the fiels. Note that you can change the number of columns for your CLI session and SR linux automatically calculates how wide the borders need to be. 
+5. You may compare the output of the `show version` command with the differente fields of the schema.
+You can see that the different fields from the schema are displayed line by line. The system has automatically adjusted the width of the columns to the widest field and there is a border above and below all the fiels. Note that you can change the number of columns for your CLI session and SR linux automatically calculates how wide the borders need to be.
 When implementing a show command, the focus is on the schema definition rather that on the output formatting. Once the schema values are filled in, SR Linux can automatically format the output.
 
 
 
-    > **Note 1:** It is possible to use the `as json` modifier for the show commands to display the output in JSON notation instead of displaying as text. If you compare with the python code, you can see that it's the schema definition that is being displayed. 
+    > **Note 1:** It is possible to use the `as json` modifier for the show commands to display the output in JSON notation instead of displaying as text. If you compare with the python code, you can see that it's the schema definition that is being displayed.
 
     > **Note 2:** The SR Linux containes several classes and utility functions. The formatters and format utilities allows to customize the outputs look-and-feel. E.g. you have the `show version | as table` that displays the output in a table format. You can achieve the same by using the `ColumnFormatter()` instead of the `TagValueFormatter()` in your code.
 
@@ -1159,7 +1159,7 @@ When implementing a show command, the focus is on the schema definition rather t
 
     /// tab | ColumnFormatter
 
-    ```py title="Using ColumnFormatter instead of TagValueFormatter"  
+    ```py title="Using ColumnFormatter instead of TagValueFormatter"
     from srlinux.data import TagValueFormatter, Border, Data, ColumnFormatter
     def _set_formatters(self, data):
         data.set_formatter('/basic system info', Border(ColumnFormatter(), Border.Above | Border.Below))
@@ -1180,17 +1180,17 @@ When implementing a show command, the focus is on the schema definition rather t
 
 ### Create modified `show version` custom CLI
 
-You now understand the SR Linux plugin architecture and you have explored the native CLI plugins. So you decide to create a modified version of the `show version` plugin.  
+You now understand the SR Linux plugin architecture and you have explored the native CLI plugins. So you decide to create a modified version of the `show version` plugin.
 
-In this section you'll create a new plugin using an existing native `show version` plugin as reference and apply custom modifications.  
-Using an existing native command, duplicate and modify it to adapt to your purpose is a relatively easy way to create a new plugin.  
+In this section you'll create a new plugin using an existing native `show version` plugin as reference and apply custom modifications.
+Using an existing native command, duplicate and modify it to adapt to your purpose is a relatively easy way to create a new plugin.
 
-At the start of a CLI session, SR linux scans the following directories to check for new CLI plugins: 
+At the start of a CLI session, SR linux scans the following directories to check for new CLI plugins:
 
-*  `/home/<user>/cli/plugins`: a plugin in this directory is usable only for this user  
+*  `/home/<user>/cli/plugins`: a plugin in this directory is usable only for this user
 
-*  `/etc/opt/srlinux/cli/plugins`: a plugin in this directory is usable for all users  
-  
+*  `/etc/opt/srlinux/cli/plugins`: a plugin in this directory is usable for all users
+
 
 In this exercise you'll use the `show version` command file to create a new custom CLI show command.
 
@@ -1204,18 +1204,18 @@ In this exercise you'll use the `show version` command file to create a new cust
     ///
 
     ///warning
-    Don't forget to check and adjust the folder permissions with `chmod` if needed. 
+    Don't forget to check and adjust the folder permissions with `chmod` if needed.
     ///
 
     /// note
 
-    If you prefer to use VSCode, we suggest you to add the server home folder to you workspace (`~/` or `/home/nokia/`).  
-    The `~/clab-srexperts/leaf11/config/cli/plugins` is bound to the `leaf11's` `/etc/opt/srlinux/cli/plugins` folder.  
-    As such, you may edit the `~/clab-srexperts/leaf11/config/cli/plugins/version_srx.py` directly from VSCode.  
+    If you prefer to use VSCode, we suggest you to add the server home folder to you workspace (`~/` or `/home/nokia/`).
+    The `~/clab-srexperts/leaf11/config/cli/plugins` is bound to the `leaf11's` `/etc/opt/srlinux/cli/plugins` folder.
+    As such, you may edit the `~/clab-srexperts/leaf11/config/cli/plugins/version_srx.py` directly from VSCode.
 
     ///
 
-2. Edit the version_srx.py and change the `load()` method Syntax string and help text. 
+2. Edit the version_srx.py and change the `load()` method Syntax string and help text.
 
 
     /// tab | version_srx.py syntax
@@ -1231,7 +1231,7 @@ In this exercise you'll use the `show version` command file to create a new cust
 
 
 3. You can now test the new CLI command. To load the new CLI command the CLI session must be restarted. You can logout/login or open a new `sr_cli` session.
-Then you can use the new CLI command. 
+Then you can use the new CLI command.
 
 
     /// tab | version_srx.py cmd
@@ -1244,16 +1244,16 @@ Then you can use the new CLI command.
     ``` bash
     --{ + running }--[  ]--
     A:g15-leaf11# show <TAB>
-                        /                   interface           platform            tunnel-interface   
-                        acl                 lag                 system              version            
-                        arpnd               network-instance    tunnel              version_srexperts  
+                        /                   interface           platform            tunnel-interface
+                        acl                 lag                 system              version
+                        arpnd               network-instance    tunnel              version_srexperts
 
 
 
     --{ + running }--[  ]--
     A:g15-leaf11# show version<TAB>
-                            version            
-                            version_srexperts  
+                            version
+                            version_srexperts
 
 
 
@@ -1296,18 +1296,18 @@ Then you can use the new CLI command.
 
     > **Tip:** You can use `show <TAB>` and the `show version_srexperts ?` to verify the syntax and options available.
 
-What has changed in the output compared to the native plugin output? 
+What has changed in the output compared to the native plugin output?
 
 /// details | Answer
     type: success
-The output of the new CLI command is the same as the `show version` as we didn't change anything. 
-    
-**Let's do it now!**  
+The output of the new CLI command is the same as the `show version` as we didn't change anything.
+
+**Let's do it now!**
 ///
 
-#### Add extra fields to your command  
+#### Add extra fields to your command
 
-You task is to add an extra field to the output to display the current time as shown below.  
+You task is to add an extra field to the output to display the current time as shown below.
 
 
 
@@ -1341,18 +1341,18 @@ A:g15-leaf11#
 /// details | Tip
     type: tip
 
-There are multiple ways to achieve the solution, you can you use the python datetime module or retrieve this value from system information current-datetime state datastore.  
-These are the steps using the python datetime module:  
+There are multiple ways to achieve the solution, you can you use the python datetime module or retrieve this value from system information current-datetime state datastore.
+These are the steps using the python datetime module:
 
 1. Add an extra filed `Current time` to the schema.
 2. Import the `datetime` module
 3. Update the `_populate_data()` method.
 4. Reload the plugin.
 
-And these are the steps using system information current-datetime state datastore:  
+And these are the steps using system information current-datetime state datastore:
 
 1. Add an extra filed `Current time` to the schema.
-2. Retrieve the current-datetime at `_fetch_state()` method 
+2. Retrieve the current-datetime at `_fetch_state()` method
 3. Update the `_populate_data()` method.
 4. Reload the plugin.
 
@@ -1403,7 +1403,7 @@ These are the steps using the python datetime module:
     ```
     ///
 
-    /// tab | `_populate_data` `current_time` 
+    /// tab | `_populate_data` `current_time`
     ``` py hl_lines="5"
     def _populate_data(self, state, arguments):
         result = Data(arguments.schema)
@@ -1415,14 +1415,14 @@ These are the steps using the python datetime module:
     ```
     ///
 
-    > **Note:** Although the extra fields in the schema is defined as `Current Time`, its actual name in the schema structure becomes `current_time`. The name is converted to lower case and the space character is replaced by an underscore to avoid Python miss interpretations. The same occurs for the `'-' (dash)` character in the field name, it is replaced by the underscore.  
+    > **Note:** Although the extra fields in the schema is defined as `Current Time`, its actual name in the schema structure becomes `current_time`. The name is converted to lower case and the space character is replaced by an underscore to avoid Python miss interpretations. The same occurs for the `'-' (dash)` character in the field name, it is replaced by the underscore.
 
 
 
 And these are the steps using system information current-datetime state datastore:
 
 1. Add an extra filed `Current time` to the schema.
-2. Retrieve the `current-datetime` at `_fetch_state()` method 
+2. Retrieve the `current-datetime` at `_fetch_state()` method
 3. Update the `_populate_data()` method.
 4. Reload the plugin.
 
@@ -1454,10 +1454,10 @@ And these are the steps using system information current-datetime state datastor
     ```
     ///
 
-    /// tab | import datetime
+    /// tab | look up system time
     ``` py
     def _fetch_state(self, state):
-        
+
         current_time_path = build_path('/system/information/current-datetime')
         try:
             self._current_time_data = state.server_data_store.get_data(current_time_path, recursive=False)
@@ -1466,7 +1466,7 @@ And these are the steps using system information current-datetime state datastor
     ```
     ///
 
-    /// tab | _populate_data current_time 
+    /// tab | _populate_data current_time
     ``` py hl_lines="5"
     def _populate_data(self, state, arguments):
 
@@ -1475,11 +1475,11 @@ And these are the steps using system information current-datetime state datastor
     ///
 
 
-You can now test the changes. Logout/login or open a new `sr_cli` session and execute the command again.  
-Then you can use the new CLI command. 
+You can now test the changes. Logout/login or open a new `sr_cli` session and execute the command again.
+Then you can use the new CLI command.
 
 
-/// tab | version_srx.py 
+/// tab | version_srx.py
 ``` bash
 show version_srexperts
 ```
@@ -1521,7 +1521,7 @@ The current time is now displayed along with the output. This also shows that th
 
 #### Change the output format
 
-You next task is to change the CLI command to display the output in a table format as shown below.  
+You next task is to change the CLI command to display the output in a table format as shown below.
 
 
 /// tab | version_srx.py column format
@@ -1545,8 +1545,8 @@ You may refer to [SR Linux Classes and utility functions](https://documentation.
 
 /// details | Tip
     type: tip
-  
-You just need to perform two small changes:  
+
+You just need to perform two small changes:
 
 1. You need to import the `ColumnFormatter` module from `srlinux.data`.
 2. You need to edit the `_set_formaters()` method at the end of the `version_srx.py`
@@ -1574,21 +1574,21 @@ def _set_formatters(self, data):
 
 
 
-And with these changes you create a modified version of a native plugin as a custom plugin.  
-Are you ready now to create you own plugin from scratch? 
+And with these changes you create a modified version of a native plugin as a custom plugin.
+Are you ready now to create you own plugin from scratch?
 
 
-### Create `show traffic` custom CLI  
+### Create `show traffic` custom CLI
 
-In this section you will create a new CLI command from scratch and step-by-step.  
+In this section you will create a new CLI command from scratch and step-by-step.
 
-The request is to create a `show traffic` plugin that displays an overview of the chassis traffic.  
-The output shall include:  
+The request is to create a `show traffic` plugin that displays an overview of the chassis traffic.
+The output shall include:
 
  - a table with the input/output rates and utilization percentages per port (only for those admin-enabled).
  - the aggregate input and output for the chassis
 
-The intended output is shown below: 
+The intended output is shown below:
 
 ```title="show traffic"
 --{ + running }--[  ]--
@@ -1608,14 +1608,14 @@ Total rate-out: 267.57 Kbps
 ```
 
 
-/// admonition 
+/// admonition
     type: question
-Is there another way to get this without a CLI plugin?   
+Is there another way to get this without a CLI plugin?
 ///
 
 /// details | Answer
     type: tip
-  
+
 
 You can use the command below but it doesn't give you the percentage or the total values and its not flexible.
 /// tab | `from state / interface * traffic-rate`
@@ -1702,35 +1702,35 @@ A:g15-leaf11#
 
 ///
 
-To create the new plugin you will follow these steps:  
+To create the new plugin you will follow these steps:
 
-1.  Create the `show_traffic.py` file  
-2.  Define the import statements, the Plugin class and load method  
-3.  Define the CLI command syntax  
-4.  Define the schema  
-5.  Callback  
-    - Fetching state  
-    - Populating data  
-    - Adding formatters  
-    - Printing output  
+1.  Create the `show_traffic.py` file
+2.  Define the import statements, the Plugin class and load method
+3.  Define the CLI command syntax
+4.  Define the schema
+5.  Callback
+    - Fetching state
+    - Populating data
+    - Adding formatters
+    - Printing output
 6. Test your new plugin
 
 ///note
-The SR Linux CLI needs to be restarted to load new code changes made on CLI plugins. To avoid log-out and log-in often during your development, switch to SR Linux bash shell and run `sr_cli show traffic`. This implicitly executes a new SR Linux CLI instance before executing `show traffic`. 
+The SR Linux CLI needs to be restarted to load new code changes made on CLI plugins. To avoid log-out and log-in often during your development, switch to SR Linux bash shell and run `sr_cli show traffic`. This implicitly executes a new SR Linux CLI instance before executing `show traffic`.
 ///
 
 #### Create the `show_traffic.py` file
-Recall that at the start of a CLI session, SR linux scans the following directories to check for new CLI plugins: 
+Recall that at the start of a CLI session, SR linux scans the following directories to check for new CLI plugins:
 
-*  `/home/<user>/cli/plugins`: a plugin in this directory is usable only foth this user  
+*  `/home/<user>/cli/plugins`: a plugin in this directory is usable only foth this user
 
-*  `/etc/opt/srlinux/cli/plugins`: a plugin in this directory is usable for all users  
+*  `/etc/opt/srlinux/cli/plugins`: a plugin in this directory is usable for all users
 
-Your first step is to deploy the `show_traffic.py` plugin under one of these folders. We suggest you to use VSCode to create the file. If you need guidance, have a look to the tip below. Then proceed to the following sections for guidance to deploy the plugin. 
+Your first step is to deploy the `show_traffic.py` plugin under one of these folders. We suggest you to use VSCode to create the file. If you need guidance, have a look to the tip below. Then proceed to the following sections for guidance to deploy the plugin.
 
-/// details | Tip: Create the plugin file 
+/// details | Tip: Create the plugin file
     type: tip
-Create the plugin file using one of the following options:   
+Create the plugin file using one of the following options:
 
 
    - A) Using VSCode, create the file `show_traffic.py` under the server `~/clab-srexperts/leaf11/config/cli/plugins` folder. There's a bind between this directory and the leaf11's plugins folder, so if you create the file under this folder it will be automatically mapped to `leaf11`. After the file is created verify that it is present under leaf11's `/etc/opt/srlinux/cli/plugins/` folder.
@@ -1748,7 +1748,7 @@ total 32
 drwxrwxrwx+ 2 srlinux srlinux 4096 Apr 15 10:23 .
 drwxrwxrwx+ 3 srlinux srlinux 4096 Mar 31 15:58 ..
 -rw-r--r--  1 root    root    4603 Apr 15 10:19 show_traffic.py
-admin@g15-leaf11:~$ 
+admin@g15-leaf11:~$
 ```
 ///
 
@@ -1761,22 +1761,22 @@ touch show_traffic.py
 ```
 ///
 
-> **Note:** You can copy/paste code directly to `vi`, howhever, to keep your indentation you need to enable paste mode (Esc + `:set paste`) then move to insertation mode and paste your code. 
+> **Note:** You can copy/paste code directly to `vi`, howhever, to keep your indentation you need to enable paste mode (Esc + `:set paste`) then move to insertation mode and paste your code.
 ///
 
-#### Define the import statements, the Plugin class and load() method 
+#### Define the import statements, the Plugin class and load() method
 
-You need to import packages that are going to be required in the plugin. 
-The plugin needs to have a class called Plugin that inherits from the CliPlugin with a `load` public method. The SR Linux CLI engine scans the user directories and loads all the plugins that match this signature.  
+You need to import packages that are going to be required in the plugin.
+The plugin needs to have a class called Plugin that inherits from the CliPlugin with a `load` public method. The SR Linux CLI engine scans the user directories and loads all the plugins that match this signature.
 
 The `load` method of the Plugin class is the entry point for the CLI plugin. It is where you add your new CLI command to one of the CLI modes - `show`, `global` or `tools`.
-Since we want to create a `show traffic` command, we are going to "mount" our command to the show hierarchy.  
+Since we want to create a `show traffic` command, we are going to "mount" our command to the show hierarchy.
 
-The `add_command` method of the CLI mode receives the command definition arguments such as:  
+The `add_command` method of the CLI mode receives the command definition arguments such as:
 
-- syntax - how the command is structured syntactically  
-- schema - what schema defines the data that the command operates on  
-- callback - what function to call when the command is executed  
+- syntax - how the command is structured syntactically
+- schema - what schema defines the data that the command operates on
+- callback - what function to call when the command is executed
 
 ///details | Hint
     type: tip
@@ -1786,7 +1786,7 @@ Copy the structure from the `show version` plugin or the github [uptime-cli-plug
 
 /// details | Start code: `import`, class `Plugin` and `load()` method
     type: success
-``` py 
+``` py
 from srlinux.data import Border, Data, TagValueFormatter, ColumnFormatter
 from srlinux.location import build_path
 from srlinux.mgmt.cli import CliPlugin
@@ -1810,15 +1810,15 @@ class Plugin(CliPlugin):
 ```
 ///
 
-#### Define the CLI command syntax 
-The command's syntax defines the command representation - its name, help strings and the arguments it accepts. 
-To define a command syntax, we need to create an object of the Syntax class; this is what the `_syntax()` method does.  
+#### Define the CLI command syntax
+The command's syntax defines the command representation - its name, help strings and the arguments it accepts.
+To define a command syntax, we need to create an object of the Syntax class; this is what the `_syntax()` method does.
 
 For our `show traffic` command we just define the command name and the help text in different flavors in the `_syntax()` object.
 
 /// details | possible solution: CLI syntax
     type: success
-``` py 
+``` py
     def _syntax(self):
         return Syntax(
             name="traffic",
@@ -1828,20 +1828,20 @@ For our `show traffic` command we just define the command name and the help text
 ```
 ///
 
-#### Define the schema  
-You might be wondering, what is a schema and why do we need it for such a simple thing as a CLI command?  
-For a given show command the schema describes the data that the command intends to print out. As per our intent, the `show traffic` command should print out two things: 
+#### Define the schema
+You might be wondering, what is a schema and why do we need it for such a simple thing as a CLI command?
+For a given show command the schema describes the data that the command intends to print out. As per our intent, the `show traffic` command should print out two things:
 
  - a table with the input/output rates and utilization percentages per admin-enabled port.
  - the aggregate input/output rate for the chassis.
 
-But, still, why do we need a schema to print values? Can't we just use print the values?  
-The answer is that a schema makes it possible to have multiple output formats without implementing the logic for each of them. In SR Linux we can display the output using distinct output modifiers such as: default tag/value, table, json, yaml or xml.  
+But, still, why do we need a schema to print values? Can't we just use print the values?
+The answer is that a schema makes it possible to have multiple output formats without implementing the logic for each of them. In SR Linux we can display the output using distinct output modifiers such as: default tag/value, table, json, yaml or xml.
 Without having a schema-modeled data structure, we would have to implement the logic for each of the output formats ourselves.
 
-/// admonition 
+/// admonition
     type: question
-- You already know how the schema looks like for a fixed list of `key:value` pairs like in `show version` plugin. But how it would look like for a list table with a dynamic number of rows? 
+- You already know how the schema looks like for a fixed list of `key:value` pairs like in `show version` plugin. But how it would look like for a list table with a dynamic number of rows?
 ///
 ///details | Hint
     type: tip
@@ -1849,14 +1849,14 @@ Check how it is done on a native plugin such as `show interface brief`.   [Recal
 ///
 ///details | Hint
     type: tip
-You might add multiple children to the schema. 
+You might add multiple children to the schema.
 
 For example, you could create one to hold the ports data, and other to hold the chassis aggregate rate data. This would allow you to set different formatters and different data structures to each.
 ///
 
 /// details | possible solution: schema
     type: success
-``` py 
+``` py
     def _schema(self):
         root = FixedSchemaRoot()
         root.add_child(
@@ -1878,16 +1878,16 @@ For example, you could create one to hold the ports data, and other to hold the 
 ///
 #### _print() Callback - Fetching state, Populating data, adding formatters and printing output
 
-We described the syntax of the `show traffic` command and defined the schema for the data it operates on. The final task is to create the callback function - the one that gets called when the command is executed and does all the useful work.  
-We provide the callback function as the second argument to the add_command method and it is up to us how we call it. Most often the show commands will have the callback function named _print, as show commands print out some data to the output.  
+We described the syntax of the `show traffic` command and defined the schema for the data it operates on. The final task is to create the callback function - the one that gets called when the command is executed and does all the useful work.
+We provide the callback function as the second argument to the add_command method and it is up to us how we call it. Most often the show commands will have the callback function named _print, as show commands print out some data to the output.
 
-///tip 
+///tip
 From example native scripts such as `show version`, start by writing the high level `_print()` method and leave the called methods unimplemented for now.
 ///
 
 /// details | possible solution: Callback skeleton code
     type: success
-``` py 
+``` py
 def _print(self, state, arguments, output, **_kwargs):
         data = self._fetch_state(state)
         result = self._populate_data(data)
@@ -1896,10 +1896,10 @@ def _print(self, state, arguments, output, **_kwargs):
 
     def _fetch_state(self, state):
         pass
-    
+
     def _populate_data(self, fetched_data):
         pass
-    
+
     def _set_formatters(self, data):
         pass
 ```
@@ -1912,7 +1912,7 @@ Complete the `_fetch_state()` method. This is where you collect the data from `s
  - Which interfaces represent the ports?
  - Is there a YANG path that contains the traffic-rate information?
  - Which YANG path provide information about if a port is administratively enabled?
- - Which other piece of information you need to be able to calculate the utilization % of each port? 
+ - Which other piece of information you need to be able to calculate the utilization % of each port?
 ///
 
 
@@ -1972,7 +1972,7 @@ percent = (traffic_rate_in_bps/port_speed_bps)*100
 ///
 
 #### Adding formatters
-What left is to set the formatters on the resulting `Data` object so that is printed according to your preference.  
+What left is to set the formatters on the resulting `Data` object so that is printed according to your preference.
 Complete `_set_formatters()` method.
 
 If you followed a similar schema to the one provided at beginning of the exercise, then your `Data` object has 2 children:
@@ -1982,7 +1982,7 @@ If you followed a similar schema to the one provided at beginning of the exercis
 
 You can use different formatters for each.
 
-/// admonition 
+/// admonition
     type: question
 - What would be the appropriate formatter for each child?
 ///
@@ -2091,7 +2091,7 @@ class Plugin(CliPlugin):
             syntax=self._syntax(),
             callback=self._print,
             schema=self._schema())
-    
+
     def _syntax(self):
         return Syntax(
             name="traffic",
@@ -2126,7 +2126,7 @@ class Plugin(CliPlugin):
     def _fetch_state(self, state):
         path = build_path('/interface[name={mgmt0,ethernet-*}]')
         return state.server_data_store.get_data(path, recursive=True)
-    
+
     def _populate_data(self, fetched_data):
         result = Data(self._schema())
         total_in_bps = 0
@@ -2163,7 +2163,7 @@ class Plugin(CliPlugin):
         total.total_rate_out=bps2text(total_out_bps)
 
         return result
-    
+
     def _set_formatters(self, data):
         data.set_formatter('/port', ColumnFormatter(widths={'Port': 19,'speed':6,'util-in':10,'util-out':10}))
         data.set_formatter('/chassis', Border(TagValueFormatter(), Border.Below))
@@ -2172,10 +2172,10 @@ class Plugin(CliPlugin):
 
 ## Summary and review
 
-Congratulations! If you have got this far you have completed this activity and achieved the following:  
+Congratulations! If you have got this far you have completed this activity and achieved the following:
 
-- Explored the native plugins folders, files and code.  
-- Created a modified custom plugin based on the `show version` native plugin.  
+- Explored the native plugins folders, files and code.
+- Created a modified custom plugin based on the `show version` native plugin.
 - Created the `show traffic` CLI plugin that prints the interface and system traffic rate and added it to the CLI as if it was a built-in command.
 
 The CLI Plugin infrastructure allows you to create commands that make operational sense for your network, whenever you want them and without any vendor involvement. It provides the full visibility into the system and makes it easy to get the data with all the output formats SR Linux supports - text, table, json, yaml, xml, etc.

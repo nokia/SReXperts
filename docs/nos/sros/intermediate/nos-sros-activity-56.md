@@ -133,12 +133,12 @@ Look inside the files to understand where each piece of information is stored an
 
 ### Run the existing playbook and look at the output
 
-Run the existing playbook using the `ansible-playbook` command. Use a CLI flag to point to the inventory file and check the output. What do you notice?
+Run the existing playbook from your group's hackathon VM instance using the `ansible-playbook` command. Use a CLI flag to point to the inventory file and check the output. What do you notice?
 
 /// Details | Output
 /// tab | Command
 ```bash
-$ ansible-playbook playbook.yml -i inventory.yml
+ansible-playbook playbook.yml -i inventory.yml
 ```
 ///
 /// tab | Expected Output

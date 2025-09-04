@@ -1,4 +1,3 @@
-
 # Copyright 2024 Nokia
 # Licensed under the BSD 3-Clause License.
 # SPDX-License-Identifier: BSD-3-Clause
@@ -18,9 +17,7 @@ topology:
       image: vr-sros:25.3.R1
       license: /opt/srexperts/license-sros25.txt
     nokia_srlinux:
-      image: ghcr.io/nokia/srlinux:24.10.4
-      exec:
-        - bash -c "sr_cli /tools system configuration generate-checkpoint name final-config"
+      image: ghcr.io/nokia/srlinux:24.10.3
       binds:
         - configs/srl/lldp-interface-descriptions.py:/opt/srlinux/eventmgr/lldp-interface-descriptions.py:ro
       stages:
@@ -697,11 +694,11 @@ topology:
         graph-groupLabelPos: bottom-center
         graph-group: Network Tools
         graph-level: "1"
-    
+
     prometheus:
       kind: linux
       mgmt-ipv4: 10.128.${INSTANCE_ID}.72
-      image: prom/prometheus:v2.51.2
+      image: quay.io/prometheus/prometheus:v2.51.2
       binds:
         - configs/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       ports:
@@ -714,7 +711,7 @@ topology:
         graph-groupLabelPos: bottom-center
         graph-group: Network Tools
         graph-level: "1"
-      
+
     grafana:
       kind: linux
       mgmt-ipv4: 10.128.${INSTANCE_ID}.73
@@ -746,7 +743,7 @@ topology:
     syslog:
       kind: linux
       mgmt-ipv4: 10.128.${INSTANCE_ID}.74
-      image: linuxserver/syslog-ng:4.5.0
+      image: quay.io/linuxserver.io/syslog-ng:4.5.0
       binds:
         - configs/syslog/syslog-ng.conf:/config/syslog-ng.conf:rslave
         - configs/syslog/log/messages:/var/log/messages:rslave
@@ -759,7 +756,7 @@ topology:
         graph-groupLabelPos: bottom-center
         graph-group: Network Tools
         graph-level: "1"
-      
+
     promtail:
       kind: linux
       mgmt-ipv4: 10.128.${INSTANCE_ID}.75
@@ -773,7 +770,7 @@ topology:
         graph-groupLabelPos: bottom-center
         graph-group: Network Tools
         graph-level: "1"
-      
+
     loki:
       kind: linux
       mgmt-ipv4: 10.128.${INSTANCE_ID}.76
@@ -787,16 +784,16 @@ topology:
         graph-groupLabelPos: bottom-center
         graph-group: Network Tools
         graph-level: "1"
-      
+
     ### NETBOX STACK ###
     netbox:
       kind: linux
-      image: netboxcommunity/netbox:v4.2-3.2.0
+      image: quay.io/netboxcommunity/netbox:v4.2-3.2.0
       mgmt-ipv4: 10.128.${INSTANCE_ID}.81
       ports:
         - "8000:8080"
       user: unit:root
-      exec: 
+      exec:
         - chown -R unit:root /opt/netbox/netbox/media/
         - chown -R unit:root /opt/netbox/netbox/reports/
         - chown -R unit:root /opt/netbox/netbox/scripts/
@@ -808,7 +805,7 @@ topology:
       env-files:
         - configs/netbox/envs/netbox.env
       healthcheck:
-        test: 
+        test:
           - curl -f http://localhost:8080/login/ || exit 1
         start-period: 90
         timeout: 3
@@ -819,14 +816,14 @@ topology:
         graph-groupLabelPos: bottom-center
         graph-group: Network Tools
         graph-level: "1"
-      
+
     netbox-worker:
       kind: linux
-      image: netboxcommunity/netbox:v4.2-3.2.0
+      image: quay.io/netboxcommunity/netbox:v4.2-3.2.0
       ports: # none
       mgmt-ipv4: 10.128.${INSTANCE_ID}.82
       user: unit:root
-      exec: 
+      exec:
         - chown -R unit:root /opt/netbox/netbox/media/
         - chown -R unit:root /opt/netbox/netbox/reports/
         - chown -R unit:root /opt/netbox/netbox/scripts/
@@ -838,8 +835,8 @@ topology:
       env-files:
         - configs/netbox/envs/netbox.env
       cmd: /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py rqworker
-      healthcheck: 
-        test: 
+      healthcheck:
+        test:
           - ps -aux | grep -v grep | grep -q rqworker || exit 1
         start-period: 20
         timeout: 3
@@ -850,14 +847,14 @@ topology:
         graph-groupLabelPos: bottom-center
         graph-group: Network Tools
         graph-level: "1"
-      
+
     netbox-housekeeping:
       kind: linux
-      image: netboxcommunity/netbox:v4.2-3.2.0
+      image: quay.io/netboxcommunity/netbox:v4.2-3.2.0
       ports: # none
       mgmt-ipv4: 10.128.${INSTANCE_ID}.83
       user: unit:root
-      exec: 
+      exec:
         - chown -R unit:root /opt/netbox/netbox/media/
         - chown -R unit:root /opt/netbox/netbox/reports/
         - chown -R unit:root /opt/netbox/netbox/scripts/
@@ -870,7 +867,7 @@ topology:
         - configs/netbox/envs/netbox.env
       cmd: /opt/netbox/housekeeping.sh
       healthcheck:
-        test: 
+        test:
           - ps -aux | grep -v grep | grep -q housekeeping || exit 1
         start-period: 20
         timeout: 3
@@ -881,41 +878,41 @@ topology:
         graph-groupLabelPos: bottom-center
         graph-group: Network Tools
         graph-level: "1"
-      
+
     postgres:
       kind: linux
       image: postgres:17-alpine
       mgmt-ipv4: 10.128.${INSTANCE_ID}.84
       healthcheck:
-        test: 
+        test:
           - pg_isready -q -t 2 -d netbox -U netbox
         start-period: 20
         timeout: 30
         interval: 10
         retries: 5
-      env-files: 
+      env-files:
         - configs/netbox/envs/postgres.env
       binds:
-        - ./configs/netbox/config/postgres-init:/docker-entrypoint-initdb.d        
+        - ./configs/netbox/config/postgres-init:/docker-entrypoint-initdb.d
       labels:
         graph-posX: "665"
         graph-posY: "465"
         graph-groupLabelPos: bottom-center
         graph-group: Network Tools
         graph-level: "1"
-      
+
     redis:
       kind: linux
-      image: valkey/valkey:8.0-alpine
+      image: ghcr.io/valkey-io/valkey:8.0-alpine
       mgmt-ipv4: 10.128.${INSTANCE_ID}.85
       healthcheck: &redis-healthcheck
-        test: 
+        test:
           - '[ $$(valkey-cli --pass "$${REDIS_PASSWORD}" ping) = ''PONG'' ]'
         start-period: 5
         timeout: 3
         interval: 1
         retries: 5
-      env-files: 
+      env-files:
         - configs/netbox/envs/redis.env
       binds:
         - ./configs/netbox/config/redis-data:/data
@@ -928,10 +925,10 @@ topology:
 
     redis-cache:
       kind: linux
-      image: valkey/valkey:8.0-alpine
+      image: ghcr.io/valkey-io/valkey:8.0-alpine
       mgmt-ipv4: 10.128.${INSTANCE_ID}.86
       healthcheck: *redis-healthcheck
-      env-files: 
+      env-files:
         - configs/netbox/envs/redis-cache.env
       binds:
         - ./configs/netbox/config/redis-cache-data:/data
@@ -941,33 +938,7 @@ topology:
         graph-groupLabelPos: bottom-center
         graph-group: Network Tools
         graph-level: "1"
-      
-    ### DEV TOOLS ###
-    codeserver:
-      kind: linux
-      user: ${NOKIA_UID}:${NOKIA_GID}
-      mgmt-ipv4: 10.128.${INSTANCE_ID}.90
-      image: ghcr.io/coder/code-server:latest
-      binds:
-        - ${HOME}:/home/coder
-        - /opt/srexperts/vscode-extensions:/opt/srexperts/vscode-extensions
-        - ./configs/coder:/entrypoint.d
-        - /var/run/docker.sock:/var/run/docker.sock
-        - /var/lib/docker/containers:/var/lib/docker/containers
-        - /usr/bin/containerlab:/usr/bin/containerlab:ro
-        - /usr/bin/docker:/usr/bin/docker:ro
-      ports:
-        - 80:8080
-      env:
-        PASSWORD: ${EVENT_PASSWORD}
-        USER: ${NOKIA_UID}
-      labels:
-        graph-posX: "565"
-        graph-posY: "465"
-        graph-groupLabelPos: bottom-center
-        graph-group: Network Tools
-        graph-level: "1"
-      
+
   links:
     # links from P1
     - endpoints: ["p1:eth1", "pe1:eth1"]

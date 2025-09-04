@@ -211,16 +211,31 @@ For `PE2` the NETCONF port is mapped to the your group's hackathon VM's port 504
 
 Once the connection object has been created, try to `get` the system's `oper-name` attribute from the running datastore to confirm we connected to the correct node.
 
-/// details | Solution - Connecting and executing a basic `get`
-```bash
+/// details | Solution - connecting and executing a basic `get`
+/// tab | Start the Python interpreter shell
+```bash title="In your development environment of choice or your group's Hackathon VM."
+python
+```
+///
+/// tab | Connect and get something using pySROS
+```python
+from pysros.management import connect
+connection = connect(host="23.srexperts.net", username="admin", hostkey_verify=False, password=#PROVIDED#, port=50422)
+connection.running.get('/configure/system/name')
+```
+///
+/// tab | Expected outcome
+```bash {.no-copy}
 (env) wsl-ubuntu: python
 Python 3.10.12 (main, Jan 17 2025, 14:35:34) [GCC 11.4.0] on linux
 Type "help", "copyright", "credits" or "license" for more information.
 >>> from pysros.management import connect
 >>> connection = connect(host="23.srexperts.net", username="admin", hostkey_verify=False, password=#PROVIDED#, port=50422)
 >>> connection.running.get('/state/system/oper-name')
-Leaf('g8-pe2')
+Leaf('g23-pe2')
 ```
+///
+
 /// admonition | Host key verification
     type: warning
 As you can see from the example output or as you might have noticed, the `hostkey_verify` keyword parameter for the `connect` call is set to `False`. This makes us vulnerable to man-in-the-middle attacks. The alternative to disabling the verification is explicitly connecting to each node on the desired port to save the associated key, however for lab environments that are cleaned up and recreated regularly this is not efficient. In addition, the danger of this vulnerability is lessened greatly in such lab environments. In any live network environment `hostkey_verify` should be set to `True`.
@@ -230,6 +245,14 @@ As you can see from the example output or as you might have noticed, the `hostke
 ///tip | Pretty Output
 You can use the [`printTree` function](https://network.developer.nokia.com/static/sr/learn/pysros/latest/pysros.html#pysros.pprint.TreePrinter){:target="_blank"} to print data retrieved in a more readable format
 
+/// tab | Code
+```python
+from pysros.pprint import printTree
+data=connection.running.get('/state/port[port-id="1/1/c4/1"]/statistics')
+printTree(data)
+```
+///
+/// tab | Execution
 ```python
 >>> from pysros.pprint import printTree
 >>> data=connection.running.get('/state/port[port-id="1/1/c4/1"]/statistics')
@@ -270,7 +293,7 @@ You can use the [`printTree` function](https://network.developer.nokia.com/stati
             `-- queue-id: 8
 ```
 ///
-
+///
 
 #### Get LLDP information using your interactive interpreter
 
@@ -367,10 +390,9 @@ To complete this sub-task, implement logic in Python that retrieves `remote-port
 ///
 /// tab | Solution
 ```python
->>> from pysros.pprint import printTree
->>> lldp_state=connection.running.get('/state/port',\
-... filter={"ethernet": {"lldp": {"dest-mac": { "remote-system": { "system-name": { }, "remote-port-id": { } } } } } } )
->>>
+from pysros.pprint import printTree
+lldp_state=connection.running.get('/state/port',filter={"ethernet": {"lldp": {"dest-mac": { "remote-system": { "system-name": { }, "remote-port-id": { } } } } } } )
+printTree(lldp_state)
 ```
 ///
 
@@ -585,8 +607,8 @@ Having built up the code, we can now copy it onto our model-driven SR OS `PE2` n
 
 If you are developing on your own platform, the port mapped to `PE2`'s port 22 is `50022`. If you are working on your group's hackathon VM you can go directly to `clab-srexperts-pe2`.
 
-??? note "[vrnetlab](https://github.com/hellt/vrnetlab/tree/master/sros) SR OS tftpboot"
-    If you use SR OS in containerlab, a file location is created and is reachable from within SR OS as a TFTP location, `tftp://172.31.255.29/`. In the Hackathon topology and environment, for node `PE2`, that location is `/home/nokia/clab-srexperts/pe2/tftpboot/`. The result of this is that any file you put in that folder will be accessible from within SR OS using TFTP. This could be used as an alternative to `scp` or manually copying over the file contents for containerlab environnments.
+??? note "[vrnetlab](https://github.com/srl-labs/vrnetlab/tree/master/nokia/sros) SR OS tftpboot"
+    If you use SR OS in containerlab, a file location is created and is reachable from within SR OS as a TFTP location, `tftp://172.31.255.29/`. In the Hackathon topology and environment, for node `PE2`, that location is `/home/nokia/clab-srexperts/pe2/tftpboot/`. The result of this is that any file you put in that folder will be accessible from within SR OS using TFTP. This could be used as an alternative to `scp` or manually copying over the file contents for containerlab environments.
 
 /// details | Running your script with `pyexec`
 ```
@@ -669,9 +691,9 @@ With the `log` configuration and the code ready, the `script` object to be refer
 Finally, create the policy referenced by the event-handler from the previous step. To do this, add configuration to `/configure system script-control` that references the created `python-script` object. Once complete, `commit` your changes into the running datastore to make sure they are usable in the next section.
 
 /// details | Solution - Script and EHS configuration
+Commands required to make the necessary configuration updates:
 ```
-*(pr)[/]
-A:admin@g23-pe2# compare
+edit-config private
     configure {
         log {
             event-handling {
@@ -723,6 +745,8 @@ A:admin@g23-pe2# compare
             }
         }
     }
+commit
+quit-config
 ```
 ///
 
@@ -747,6 +771,16 @@ With everything in place, try bringing down and restoring an LLDP session to tri
 /// Details | Bring down and recover LLDP neighborships
 /// tab | For a single port
 ```
+edit-config private
+/configure port 1/1/c1/1 ethernet lldp dest-mac nearest-bridge receive false transmit false
+commit
+/configure port 1/1/c1/1 ethernet lldp dest-mac nearest-bridge receive true transmit true
+commit
+quit-config
+```
+///
+/// tab | For a single port - example
+```
 (pr)[/]
 A:admin@g23-pe2# # Bring down the LLDP session on port 1/1/c1/1
 
@@ -767,6 +801,16 @@ A:admin@g23-pe2# commit
 ```
 ///
 /// tab | For all ports
+```
+edit-config private
+delete /configure apply-groups "lldp"
+commit
+/configure apply-groups "lldp"
+commit
+quit-config
+```
+///
+/// tab | For all ports (example)
 ```
 (pr)[/]
 A:admin@g23-pe2# # Bring down the LLDP session on all ports by removing all LLDP configuration
@@ -792,7 +836,7 @@ A:admin@g23-pe2#
 ///
 ///
 
-Does your solution behave as expected? Before proceeding, make sure the `apply-group` or / and LLDP configuration is in the same state as it was originally in order not to interfere with any other usecases.
+Does your solution behave as expected? Before proceeding, make sure the `apply-group` or / and LLDP configuration is in the same state as it was originally in order not to interfere with any other activities.
 
 Testing your script on `PE2` is well and good, however the real use case only becomes apparent once you make changes on neighboring nodes and let your automation pick up on the events.
 

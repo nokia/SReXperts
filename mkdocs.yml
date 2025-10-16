@@ -2,7 +2,7 @@
 # Licensed under the BSD 3-Clause License.
 # SPDX-License-Identifier: BSD-3-Clause
 
-site_name: Hackathon 2025
+site_name: SReXplore 2025
 nav:
   - Home: index.md
   - Network Operating Systems:
@@ -79,12 +79,12 @@ nav:
 
 site_author: Nokia
 site_description: >-
-  SReXperts hackathon event guidelines
+  SReXperts SReXplore event guidelines
 # Repository
 repo_name: nokia/SReXperts
 repo_url: https://github.com/nokia/SReXperts
 edit_uri: edit/main/docs/
-site_url: "https://hackathon.srexperts.net/"
+site_url: "https://srexplore.srexperts.net/"
 copyright: Copyright &copy; 2021-2025 Nokia
 theme:
   name: material

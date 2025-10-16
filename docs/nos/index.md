@@ -1,6 +1,6 @@
 # Network Operating Systems (NOS)
 
-This section contains the activities for the NOS stream of the 2025 SReXperts hackathon.
+This section contains the activities for the NOS stream of the SReXplore event at SReXperts 2025.
 
 Network Operating Systems (NOS) sit right at the heart of the Internet and operate the critical infrastructure of both countries and organizations.  They provide a very specialized software system capable of making split second decisions to ensure network traffic is directed to the right location, at the right time, with the right priority and without compromise.
 
@@ -14,7 +14,7 @@ Of course, progress doesn't stop, and Network Operating Systems need to evolve f
 
 Nokia has two modern, model-driven, programmable Network Operating Systems in the IP portfolio: [SR OS](https://www.nokia.com/ip-networks/service-router-operating-system-nos/) focused on the core infrastructure of network operators, and [SR Linux](https://www.nokia.com/ip-networks/service-router-linux-NOS/) focused on the data-center.
 
-In this hackathon you have the opportunity to undertake challenges on both Network Operating Systems with a focus on model-driven automation and programmability.
+In this event you have the opportunity to undertake challenges on both Network Operating Systems with a focus on model-driven automation and programmability.
 
 ## Tackling the activities
 
@@ -22,7 +22,7 @@ A number of activities have been created for you to follow, separated by our rou
 
 ### Split by Network Operating System (NOS): SR OS and SR Linux
 
-For organizational purposes, we have separated those activities focusing on SR OS from those focusing on SR Linux.  That doesn't mean that you need to pick one NOS and stick with it.  The hackathon is a great opportunity to both expand your knowledge on familiar NOS' and to get exposure on unfamiliar ones.
+For organizational purposes, we have separated those activities focusing on SR OS from those focusing on SR Linux.  That doesn't mean that you need to pick one NOS and stick with it.  The event is a great opportunity to both expand your knowledge on familiar NOS' and to get exposure on unfamiliar ones.
 
 ### Standalone activities and not in order
 
@@ -34,9 +34,9 @@ Each activity is a stand alone use-case.  Each has a scenario, a set of objectiv
 
 OK, famous last words we know but, each group's network is totally self-contained.  No changes you make will effect any other group's activities and no-one will get upset if you break everything, so dive right in and don't be afraid to try it and see.
 
-### Help us make the hackathon the best it can be
+### Help us make the event the best it can be
 
-Each year we review the feedback and lessons learned from the previous years hackathon as we want to continually deliver the best, and most useful, experience we can.  To help us do this we have two asks:
+Each year we review the feedback and lessons learned from the previous years event as we want to continually deliver the best, and most useful, experience we can.  To help us do this we have two asks:
 
 - You will notice, next to each task there is a blue `Start` button.  When you start to attempt each task, would you please click the button.
 - When you complete an activity (or even if you don't manage to complete it), you will find a very short questionairre at the end.  Would you please fill it out as honestly as you feel able to, we won't be offended if you think something was awful, and equally we like praise as much as the next person!
@@ -49,7 +49,7 @@ Each group has their own complete network, including an IP core running segment 
 
 The NOS stream activities focus on the SR OS and SR Linux devices in the network, but many of them also use the Linux client and subscriber devices as well.
 
-To gain access to any of the devices you can either connect using SSH to your groups hackathon server (also references as hackathon VM in a number of the activities) or use the ports mapped directly to the node and service you want to connect to from your own laptop.  More details are available on the [main page of this hackathon site](../index.md).
+To gain access to any of the devices you can either connect using SSH to your groups event server (also referenced as hackathon VM in a number of the activities) or use the ports mapped directly to the node and service you want to connect to from your own laptop.  More details are available on the [main page of this site](../index.md).
 
 **Refer to your handout for the username and passwords of any of the equipment in your network.**
 
@@ -59,11 +59,11 @@ If you need help at anytime you have a few options:
 
 
 - Take a look at the reference material and hints provided in the activities.
-- Ask other members of your group, or other groups for help.  Collaboration is one of the best elements of the hackathon.
+- Ask other members of your group, or other groups for help.  Collaboration is one of the best elements of the event.
 - Put your hand up or otherwise grab the attention of one of the team to assist you (that is what they are there for so please use them!)
 
 ## Ask us (almost) anything
 
-Not only are the team here to help you with anything in the hackathon, but they also have a wide range of knowledge about Nokia, our products, our services and our technologies.  Please ask anything that's on your mind.
+Not only are the team here to help you with anything in the event, but they also have a wide range of knowledge about Nokia, our products, our services and our technologies.  Please ask anything that's on your mind.
 
 We'd also love to hear from you about what you're doing with automation and programmability in your network and any of the amazing or more challenging things you are working on.

@@ -70,7 +70,7 @@ topology:
     vRR:
       kind: nokia_srlinux
       license: /opt/srexperts/license-srlinux24.txt
-      type: ixrx1b
+      type: ixr-x1b
       mgmt-ipv4: 10.128.${INSTANCE_ID}.13
       startup-config: configs/srl/vRR.cfg
       ports:
@@ -336,7 +336,7 @@ topology:
     # DC1
     spine11:
       kind: nokia_srlinux
-      type: ixrh2
+      type: ixr-h2
       group: spine
       mgmt-ipv4: 10.128.${INSTANCE_ID}.31
       startup-config: configs/srl/__clabNodeName__.cfg
@@ -351,7 +351,7 @@ topology:
         graph-level: "1"
     spine12:
       kind: nokia_srlinux
-      type: ixrh2
+      type: ixr-h2
       group: spine
       mgmt-ipv4: 10.128.${INSTANCE_ID}.32
       startup-config: configs/srl/__clabNodeName__.cfg
@@ -366,7 +366,7 @@ topology:
         graph-level: "1"
     leaf11:
       kind: nokia_srlinux
-      type: ixrd2l
+      type: ixr-d2l
       group: leaf
       mgmt-ipv4: 10.128.${INSTANCE_ID}.33
       binds:
@@ -384,7 +384,7 @@ topology:
         graph-level: "1"
     leaf12:
       kind: nokia_srlinux
-      type: ixrd2l
+      type: ixr-d2l
       group: leaf
       mgmt-ipv4: 10.128.${INSTANCE_ID}.34
       startup-config: configs/srl/__clabNodeName__.cfg
@@ -399,7 +399,7 @@ topology:
         graph-level: "1"
     leaf13:
       kind: nokia_srlinux
-      type: ixrd2l
+      type: ixr-d2l
       group: leaf
       mgmt-ipv4: 10.128.${INSTANCE_ID}.35
       binds:
@@ -494,7 +494,7 @@ topology:
     # DC2
     leaf21:
       kind: nokia_srlinux
-      type: ixrd2l
+      type: ixr-d2l
       group: leaf
       mgmt-ipv4: 10.128.${INSTANCE_ID}.41
       startup-config: configs/srl/leaf21.cfg
@@ -533,7 +533,7 @@ topology:
     # MISC
     ixp1:
       kind: nokia_srlinux
-      type: ixrd2l
+      type: ixr-d2l
       group: leaf
       mgmt-ipv4: 10.128.${INSTANCE_ID}.51
       startup-config: configs/srl/ixp1.cfg
@@ -548,7 +548,7 @@ topology:
         graph-level: "1"
     agg1:
       kind: nokia_srlinux
-      type: ixrd2l
+      type: ixr-d2l
       group: leaf
       mgmt-ipv4: 10.128.${INSTANCE_ID}.52
       startup-config: configs/srl/agg1.cfg
@@ -562,7 +562,7 @@ topology:
     peering2:
       kind: nokia_srlinux
       license: /opt/srexperts/license-srlinux24.txt
-      type: ixrx3b
+      type: ixr-x3b
       mgmt-ipv4: 10.128.${INSTANCE_ID}.53
       startup-config: configs/srl/peering2.cfg
       ports:

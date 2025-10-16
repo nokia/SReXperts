@@ -10,12 +10,12 @@ tags:
 
 # Network Services Platform (NSP)
 
-This section contains the activities for the NSP stream of the 2025 SReXperts hackathon.
+This section contains the activities for the NSP stream of the SReXplore event at SReXperts 2025.
 
 At Nokia, we’re committed to deliver the best experience — whether you're working with our industry-leading routing hardware, our model-driven
 network operating systems (SR OS and SR Linux), or our advanced network management solutions, NSP (Network Services Platform) and EDA.
 
-During the 2025 Hackathon, you’ll get the chance to explore and experiment with our network technologies - whether it’s through on-box automation
+During the 2025 event, you’ll get the chance to explore and experiment with our network technologies - whether it’s through on-box automation
 or integrating open-source tools. But we take it one step further. With Nokia’s Network Services Platform (NSP), you gain a powerful automation
 framework that provides end-to-end network visibility and enables you to provision, monitor, and assure your services and infrastructure with confidence.
 
@@ -35,11 +35,11 @@ Development Environment by choice. If you have the ability to install VS Code on
 And it's fun! If you are into programming, you may already have it.
 
 /// note
-If you cannot install VS Code for administrative reasons, don’t worry! You can use `code-server`, a server-hosted version of VS Code that runs in your web browser while offering the same familiar experience. Even better: code-server is already deployed in the hackathon labs with all required extensions pre-installed, ready for you to connect. This means you can run Visual Studio Code during this hackathon directly from your browser without any setup.
+If you cannot install VS Code for administrative reasons, don’t worry! You can use `code-server`, a server-hosted version of VS Code that runs in your web browser while offering the same familiar experience. Even better: code-server is already deployed in the event labs with all required extensions pre-installed, ready for you to connect. This means you can run Visual Studio Code during this event directly from your browser without any setup.
 ///
 
 NOKIA is actively contributing VS Code extensions to improve Developer eXperience around our networking products and technologies being used.
-In this hackathon, you have the opportunity to use the following extensions contributed by Nokia in action:
+In this event, you have the opportunity to use the following extensions contributed by Nokia in action:
 
 * [NSP Intent Manager extension](https://github.com/nokia/vscode-intent-manager)
 * [NSP Workflow Manager extension](https://github.com/nokia/vscode-workflow-manager)
@@ -62,8 +62,8 @@ code changes back to the project. By this you become part of our community helpi
 A number of activities have been created for you to follow, separated by our rough estimation of difficulty level (opinions may vary :smile:).
 Feel free to attempt any of them.
 
-Remind, activities are to provide you with ideas and guidance. If you want to go freestyle, just do it! We will help you at our best ability.
-However, it's your opportunity to practice and learn! Don't just come with a crazy idea and expect the hackathon support to solve it for you.
+Reminder: Activities are there to provide you with ideas and guidance. If you want to go freestyle, just do it! We will help you to the best of our best abilities.
+However, it's your opportunity to practice and learn!
 
 ### Standalone activities and not in order
 
@@ -80,9 +80,9 @@ However, we are using a single, shared NSP instance.
 Access control is widely in place to avoid people step on each others toes.
 Make sure to name your automation artifacts uniquely adding your group-id to avoid surprises.
 
-### Help us make the hackathon the best it can be
+### Help us make the event the best it can be
 
-Each year we review the feedback and lessons learned from the previous years hackathon as we want to continually deliver the best, and most useful, experience we can.  To help us do this we have two asks:
+Each year we review the feedback and lessons learned from the previous years event as we want to continually deliver the best, and most useful, experience we can.  To help us do this we have two asks:
 
 - You will notice, next to each task there is a blue `Start` button.  When you start to attempt each task, would you please click the button.
 - When you complete an activity (or even if you don't manage to complete it), you will find a very short questionairre at the end.  Would you please fill it out as honestly as you feel able to, we won't be offended if you think something was awful, and equally we like praise as much as the next person!
@@ -94,11 +94,11 @@ These two small asks will help us continue to improve your experience for when y
 If you need help at anytime you have a few options:
 
 - Take a look at the reference material and hints provided in the activities.
-- Ask other members of your group, or other groups for help.  Collaboration is one of the best elements of the hackathon.
+- Ask other members of your group, or other groups for help.  Collaboration is one of the best elements of the event.
 - Put your hand up or otherwise grab the attention of one of the team to assist you (that is what they are there for so please use them!)
 
 ## Ask us (almost) anything
 
-Not only are the team here to help you with anything in the hackathon, but they also have a wide range of knowledge about Nokia, our products, our services and our technologies.  Please ask anything that's on your mind.
+Not only are the team here to help you with anything in the event, but they also have a wide range of knowledge about Nokia, our products, our services and our technologies.  Please ask anything that's on your mind.
 
 We'd also love to hear from you about what you're doing with automation and programmability in your network and any of the amazing or more challenging things you are working on.

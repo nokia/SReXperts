@@ -18,7 +18,7 @@ While the concept of declarative intents or blueprints is not new, in EDA made s
 
 And it would be a miss to keep EDA anchored to Nokia-only devices, that is why we ensured that EDA core is **multivendor** and users can leverage EDA superpowers with other vendors and their devices and APIs[^1].
 
-At SReXperts Hackathon, you get a unique chance to spend a day with EDA by venturing into the exercises meticulously crafted by the EDA team and be the judge of its capabilities.
+At this SReXplore event, you get a unique chance to spend a day with EDA by venturing into the exercises meticulously crafted by the EDA team and be the judge of its capabilities.
 
 ## How to get through the exercises?
 
@@ -172,7 +172,7 @@ The workflow below demonstrates how a VLAN resource gets added to the transactio
 
 ## Namespace selector
 
-When you first login to EDA as administrator, you have access to all available EDA namespaces. Since in this hackathon you will only work in the default `eda` namespace, you can select it using the namespace selector as shown below:
+When you first login to EDA as administrator, you have access to all available EDA namespaces. Since in this event you will only work in the default `eda` namespace, you can select it using the namespace selector as shown below:
 
 ![ns-select](https://gitlab.com/rdodin/pics/-/wikis/uploads/10f8c7779ea629e14214fb88c1280edb/CleanShot_2025-05-14_at_23.27.05_2x.png)
 
@@ -182,7 +182,7 @@ By switching from All Namespaces to the `eda` namespace the UI will fill in the 
 
 As you go through the exercises, you will create and modify quite a few resources in EDA. It might happen that the resources from one unfinished challenge will interfere with the tasks you attempt next.
 
-In such cases you can manually delete conflicting resources, but if you want to reset EDA to a state as it was at the beginning of the hackathon, you can easily do this by running the following command from the lab server:
+In such cases you can manually delete conflicting resources, but if you want to reset EDA to a state as it was at the beginning of the event, you can easily do this by running the following command from the lab server:
 
 ```bash
 bash /opt/srexperts/restore-eda.sh

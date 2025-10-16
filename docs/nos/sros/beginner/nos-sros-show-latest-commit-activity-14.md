@@ -827,7 +827,7 @@ To do this, you can use Python's [`datetime` module](https://docs.python.org/3.4
 
 !!! warning
 
-    While SROS supports the `datetime` module, it doesn't implement the [`srtptime` function](https://docs.python.org/3.4/library/datetime.html#strftime-and-strptime-behavior),
+    While SROS supports the `datetime` module, it doesn't implement the [`strptime` function](https://docs.python.org/3.4/library/datetime.html#strftime-and-strptime-behavior),
     which would be used in most Python environments to parse the timestamp string into a `datetime` object.
     An alternative approach compatible with SROS is to use regular expressions with the [`re` module](https://docs.python.org/3.4/library/re.html#module-re).
     Note that the implementation of `re` is also limited on SROS. More details on differences in the implementation are available [here](https://docs.micropython.org/en/latest/library/re.html).
@@ -849,7 +849,7 @@ highest_commit_id = max(connection.running.get_list_keys(path))
 path = "/nokia-state:state/system/management-interface/configuration-region[region-name=\"configure\"]/commit-history/commit-id[id=%s]" % highest_commit_id
 commit = connection.running.get(path)
 
-match = re.match("^(\\d+)-(\\d+)-(\\d+)T(\\d+):(\\d+):(\\d+)\.\\dZ$", str(commit['timestamp']))
+match = re.match(r"^(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)\.\dZ$", str(commit['timestamp']))
 commit_year = int(match.group(1))
 commit_month = int(match.group(2))
 commit_day = int(match.group(3))
@@ -879,7 +879,7 @@ print("{}d {}h {}m {}s ago".format(commit_time_delta_days, commit_time_delta_hou
 >>> path = "/nokia-state:state/system/management-interface/configuration-region[region-name=\"configure\"]/commit-history/commit-id[id=%s]" % highest_commit_id
 >>> commit = connection.running.get(path)
 >>>
->>> match = re.match("^(\\d+)-(\\d+)-(\\d+)T(\\d+):(\\d+):(\\d+)\.\\dZ$", str(commit['timestamp']))
+>>> match = re.match(r"^(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)\.\dZ$", str(commit['timestamp']))
 >>> commit_year = int(match.group(1))
 >>> commit_month = int(match.group(2))
 >>> commit_day = int(match.group(3))
@@ -922,7 +922,7 @@ for id in sorted(data.keys()):
     commit = data[id]
     row = []
     row.append(id)
-    match = re.match("^(\\d+)-(\\d+)-(\\d+)T(\\d+):(\\d+):(\\d+)\.\\dZ$", str(commit['timestamp']))
+    match = re.match(r"^(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)\.\dZ$", str(commit['timestamp']))
     commit_year = int(match.group(1))
     commit_month = int(match.group(2))
     commit_day = int(match.group(3))
@@ -968,7 +968,7 @@ table.print(rows)
 ...     commit = data[id]
 ...     row = []
 ...     row.append(id)
-...     match = re.match("^(\\d+)-(\\d+)-(\\d+)T(\\d+):(\\d+):(\\d+)\.\\dZ$", str(commit['timestamp']))
+...     match = re.match(r"^(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)\.\dZ$", str(commit['timestamp']))
 ...     commit_year = int(match.group(1))
 ...     commit_month = int(match.group(2))
 ...     commit_day = int(match.group(3))

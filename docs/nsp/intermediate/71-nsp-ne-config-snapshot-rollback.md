@@ -20,7 +20,7 @@ tags:
 
 ## Objectives
 
-Network device configurations evolve continuously, and it's common practice to track configuration drift over time. When recent changes cause issues, you need to quickly understand what changed and when. Beyond analysis, you want the ability to revert to a known stable configuration—ideally applying a rollback as a quick fix without disrupting other services, avoiding outages that would otherwise need to wait for the next scheduled maintenance window.
+Network device configurations evolve continuously, and it is common practice to track configuration drift over time. When recent changes cause issues, you need to quickly understand what changed and when. Beyond analysis, you want the ability to revert to a known stable configuration—ideally applying a rollback as a quick fix without disrupting other services, avoiding outages that would otherwise need to wait for the next scheduled maintenance window.
 
 In this activity, you will explore an alternative to the traditional NE Backup/Restore capabilities in NSP. Key differences include:
 
@@ -48,7 +48,7 @@ The device operation bundle you are developing is unsigned, allowing you to modi
 ///
 
 /// warning
-Remember that you are using a shared NSP system. Therefore ensure your group-number is part of the operation and workflow names you are creating to ensure uniqueness.
+Remember that you are using a shared NSP system. Therefore, ensure your group-number is part of the operation and workflow names you are creating to ensure uniqueness.
 ///
 
 **You should read these tasks from top-to-bottom before beginning the activity.**
@@ -128,7 +128,7 @@ In this step you will test your new operation. We continue using group 2 as an e
 7. After the creation the user can check the operation status, it should set to `completed`.
 8. Check the operation result and cross-navigate to see the underlying workflow executions.
 
-After finishing all steps we would have successfully used a custom workflow to create NE snapshots without relying on copying `config.cfg` from the NE.
+After finishing all steps, we would have successfully used a custom workflow to create NE snapshots without relying on copying `config.cfg` from the NE.
 
 ### Access Configuration Snapshots
 
@@ -178,9 +178,9 @@ Exploration Points:
 * Break down the components of an artifact bundle to understand how artifacts are packaged and deployed.
 * Analyze the elements of an operation artifact (operation model, mapping, script, etc.) and how they work together.
 * Examine the role of the mapping profile in linking inputs and outputs to the underlying model.
-* Compare workflow input/output definitions against the operation model and mapping, and see how they align with the WebUI rendering.
+* Compare workflow input/output definitions against the operation model and mapping. See how they align with the WebUI rendering.
 * Notice redundancies in rollback operation inputs (e.g., backup operation vs. backup path/filename). Reflect on why these exist, by triggering rollbacks from different WebUI contexts to observe differences in workflow execution inputs.
-* Observe how the snapshot storage path includes the nodal release, and consider how this design choice ensures version accuracy and compatibility.
+* Observe how the snapshot storage path includes the nodal release and consider how this design choice ensures version accuracy and compatibility.
 
 ### Improve your Snapshot Operation
 
@@ -188,7 +188,7 @@ Review the workflow that takes configuration snapshots. Check, if there is anyth
 
 You may find that the action `getConfig` publishes the configuration as a JSON string. This approach works well for smaller configurations like we have in this hackathon. Applying this approach to production-scale nodal configurations can lead to publishing megabytes of data and is not recommended as it impacts resource consumption.
 
-To work around this, you may consider updating the workflow. The `nsp.https` action allows to store the result in the local filesystem by using the input attribute called `fileName`. Change the task to store the JSON response as file under the path `/tmp/<% $.neName %>.nokia-conf.json`. When applying this change, you need to consider to add another input attribute `resultFilter : $.content`. This applies a YAQL expression to the response before writing it to a file, else everything would be wrapped into a top-level element called `content`.
+To work around this, you may consider updating the workflow. The `nsp.https` action allows to store the result in the local filesystem by using the input attribute called `fileName`. Change the task to store the JSON response as file under the path `/tmp/<% $.neName %>.nokia-conf.json`. When applying this change, you need to consider adding another input attribute `resultFilter : $.content`. This applies a YAQL expression to the response before writing it to a file, else everything would be wrapped into a top-level element called `content`.
 
 /// warning
 By using `/tmp` for temporary storage, consider the case that multiple snapshots (typically on different target nodes) are generated in parallel. Therefore, consider using unique filenames, so parallel operation executions will not impact each other.

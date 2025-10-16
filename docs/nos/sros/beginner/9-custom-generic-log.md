@@ -130,6 +130,7 @@ In the box below you see that the full configuration for setting up the EHS on t
                 version python3
             }
         }
+    }
     ```
     2-make-directory for ehs execution results
     ```
@@ -149,6 +150,7 @@ In the box below you see that the full configuration for setting up the EHS on t
                 }
             }
         }
+    }
     ```
     4-filter logs intended to trigger the event handler
     ```hl_lines="9"
@@ -166,6 +168,7 @@ In the box below you see that the full configuration for setting up the EHS on t
                 }
             }
         }
+    }
 
     ```
     5-event-handler links the script-policy to the ehs that can be triggered by logs
@@ -183,6 +186,7 @@ In the box below you see that the full configuration for setting up the EHS on t
                 }
             }
         }
+    }
 
     ```
     6-event-trigger links the filtered logs to the event-handler
@@ -200,6 +204,7 @@ In the box below you see that the full configuration for setting up the EHS on t
                 }
             }
         }
+    }
 
     ```
 Before proceeding, execute the command to create a results directory on :material-router: PE2:

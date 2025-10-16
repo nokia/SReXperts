@@ -13,3 +13,15 @@
 body[data-md-color-scheme="slate"] .feedback-title {
   color: #0FB3E3;
 }
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 0.5px solid var(--md-default-fg-color--light);
+  background: var(--md-default-bg-color);
+  color: var(--md-default-fg-color);
+  font-family: 'NokiaPureText';
+  resize: none;
+  overflow-y: auto;
+}

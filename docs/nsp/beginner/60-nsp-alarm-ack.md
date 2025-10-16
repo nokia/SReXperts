@@ -92,23 +92,26 @@ It is tempting to skip ahead but tasks may require you to have completed previou
 
 ### Get Alarms
 
-Open NSP WebUI and open `Workflows` found under the `PROGRAMMING` category.
+* Open NSP WebUI.
+* Click on `☰` icon on the top left corner to open the so-called hamburger menu and select `Workflows` found under the `PROGRAMMING` category.
+* Click on `Main` → `Dashboard` to open the dropdown menu and select the `Actions` view.
+* On the left, you will see two types of actions: `Ad-hoc Actions` and `System Actions`.
+* Navigate to `System Actions` and search for the `nsp.https` action.
+* Open the `nsp.https` context-menu (three dots on the right) and select `Run`.
+* Provide the `Input` in YAML format as shown below to execute a [RESTCONF](https://www.rfc-editor.org/rfc/rfc8040.html)-compliant `GET` query and click on the `RUN` button to execute the request.
 
-Select `Actions` view.
+/// note | `nsp.https` input to list **all** alarms
+```yaml
+url: https://restconf-gateway/restconf/data/nsp-fault:alarms/alarm-list/alarm
+method: GET
+```
 
-On the left side, we have two types of actions: `Ad-hoc Actions` and `System Actions`.
+To explore the NSP APIs more deeply, the [Developer Portal](https://network.developer.nokia.com/api-documentation) and the corresponding [Postman collection](https://documenter.getpostman.com/view/26248101/2sAY4uCNvf#de0ea146-e51a-455a-84c5-19f438712103) are good starting points. You will find the API endpoints required to query and acknowledge alarms.
+///
 
-Let’s start by getting a list of all major alarms on the network:
+* Now, lets retrieve a list of all major alarms in NSP, by adjusting the `nsp.https` input like this:
 
-* Navigate to the `Systems Actions` and search for the `nsp.https` action.
-* Click on the 3 dots on the right side and choose `Run`.
-* Explore the RESTCONF Alarms API in [Developer Portal](https://network.developer.nokia.com/api-documentation) including the corresponding [Postman collection](https://documenter.getpostman.com/view/26248101/2sAY4uCNvf#de0ea146-e51a-455a-84c5-19f438712103) to find API endpoints to query and acknowledge alarms.
-* Retrieve a list of all major alarms in NSP using RESTCONF by running the `nsp.https` action from WFM WebUI.
-
-If you got stuck, find the `nsp.https` action input below to retrieve the list of all major alarms.
-
-/// details | Possible Solution
-    type: success
+/// note | `nsp.https` input to list **major** alarms
 ```yaml
 url: https://restconf-gateway/restconf/operations/nsp-inventory:find
 method: POST
@@ -117,35 +120,43 @@ body:
     xpath-filter: /nsp-fault:alarms/alarm-list/alarm[perceived-severity = 'major']
     include-meta: false
 ```
+
+While the filtering options available through a standard RESTCONF GET request are quite limited, the NSP-specific operation `nsp-inventory:find` provides support for XPATH filters. By adjusting the path expression, it becomes straightforward to filter for specific attribute values.
 ///
 
-Adjust the filter, for example by picking different severity levels like `critical`, `minor`, or `warning`.
-Review the JSON response returned. Try to filter by other alarm attributes, such as alarm-type.
+* Adjust the filter, for example by picking different severity levels like `critical`, `minor`, or `warning` by updating the `xpath-filter` value.
+* Review the JSON response and identify additional attributes to filter on, such as alarm-type. Update the xpath-filter accordingly, and when filtering by alarm-type-id or alarm-type-qualifier, use the values from the initial query to ensure they match existing entries.
 
-/// details | Possible Solution
-    type: success
-Update the `xpath-filter` to match your selection criteria. If you are filtering by `alarm-type-id` or `alarm-type-qualifier`, use the output from your initial query to ensure that the values correspond to existing entries.
 
+/// note | `nsp.https` input to list alarms of specific `alarm-type` value
 ```yaml
 url: https://restconf-gateway/restconf/operations/nsp-inventory:find
 method: POST
 body:
   input:
-    xpath-filter: >-
-      /nsp-fault:alarms/alarm-list/alarm[alarm-type-qualifier = 'PeerConnectionDown']
+    xpath-filter: /nsp-fault:alarms/alarm-list/alarm[alarm-type-qualifier = 'PeerConnectionDown']
     include-meta: false
 ```
+
+Make sure your query response includes alarms, since the next step will use YAQL to transform the YAML output.
+
 ///
 
 ### Process Alarm API Response
 
-Copy the received response and navigate to the `Yaqluator` in the upper right corner of the Actions page. The Yaqluator functionality allows you to quickly prototype YAQL expressions based on the received response. Paste the response on the bottom left side YAML/JSON Context section.
+Copy the response into your clipboard.
 
-In the upper YAQL Expression section use the following filter expression to get the list of alarm-names:
+/// Warning
+The `COPY` button in the action run dialogue copies the request, not the response! To copy the response use your operating system’s standard shortcuts (on macOS: `CMD-A`, `CMD-C`; on Windows: `CTRL-A`, `CTRL-C`).
+///
+
+Open Yaqluator using the **`.*`** button. Yaqluator lets you quickly prototype YAQL expressions against the received response. Paste the YAML response from your clipboard into the `Context` field (replacing the default `{}`), then enter the following string in the `Expression` field to list the alarm types:
 
 ```yaml
 $.result.content.get('nsp-inventory:output').data.select($.get('alarm-type-qualifier'))
 ```
+
+Click the `EVALUATE` button. The alarm type value for each alarm in the response is shown the `Result` section.
 
 Try to filter for other attributes like `alarm-fdn`, `alarm-type-id`, and `ne-id`.
 
@@ -199,6 +210,10 @@ workflowname:
 
 Adjust workflow name, description, inputs and tasks as needed. You may start by just providing a single `alarmFdn` as input. The workflow itself, could be a single task that is running action `nsp.https` with the corresponding inputs, e.g. `method`, `url`, and `body`.
 
+/// tip | Pro Tip
+Earlier we warned that the `COPY` button in the action execution dialog does not copy the response. However, it is very useful: Pressing this button copies an instrumentalized task definition into your clipboard, which you can directly paste into your workflow definition.
+///
+
 As a next step check the Mistral documentation for the [`with-items`](https://docs.openstack.org/mistral/ocata/dsl/dsl_v2.html#processing-collections) attribute, to process collections. While the update is rather small, your workflow is now able to acknowledge a list of alarms.
 
 If you got stuck, the workflow below provides one way of solving this.
@@ -235,6 +250,8 @@ version: '2.0'
 ///
 
 This workflow can be difficult to run as it requires a list of objects as input, and each object must include an attribute called `fdn`. To make execution easier, we will create a user-friendly input form that allows selecting from currently active alarms.
+
+From the WebUI, a workflow must first be `Validated` and `Created`. At this point it is in `DRAFT` mode. To run it, you need to publish it to `RELEASED`. If you want to make further edits, switch it back to `DRAFT`. When working in Visual Studio Code, you can save time: the workflow extension automatically handles these steps for you.
 
 ### Add a Workflow Input Form
 

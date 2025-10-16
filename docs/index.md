@@ -3,24 +3,24 @@ hide:
   - navigation
 ---
 
-# Welcome to the Hackathon at SReXperts 2025
+# Welcome to the SReXplore event at SReXperts 2025
 
-Welcome to the 2025 SReXperts hackathon.
+Welcome to the 2025 SReXplore event at SReXperts.
 
-We are very glad to welcome you to this special event, the 20th anniversary for SReXperts (and the 5th for the hackathon).
+We are very glad to welcome you to this special event, the 20th anniversary for SReXperts (and the 5th for the event).
 
-Nokia prides itself on the excellent technical products, solutions that we deliver to the market, and this hackathon is no exception.  A large team of engineers,
+Nokia prides itself on the excellent technical products, solutions that we deliver to the market, and this event is no exception.  A large team of engineers,
 developers and product managers have been working hard to deliver what, we'll hope you agree, is a challenging and informative set of activities to challenge
 you, no matter what you experience level.
 
 ## Open to all and something for everyone
 
-Whether you're a relative novice to Nokia's products, or a seasoned expert, there is something in this hackathon for you!  All you will need is your trusty laptop,
+Whether you're a relative novice to Nokia's products, or a seasoned expert, there is something in this event for you!  All you will need is your trusty laptop,
 an afternoon of focus and possibly some coffee (supplied!) and you should find something to benefit both you and your organizations.
 
 ## Getting started
 
-This page is your starting point into the hackathon, it should get you familiar with the lab environment provided by Nokia, and provide an overview of the suggested sample activities.
+This page is your starting point into the event, it should get you familiar with the lab environment provided by Nokia, and provide an overview of the suggested sample activities.
 
 **Please read this page all the way through before attempting any of the activities.**
 
@@ -32,8 +32,8 @@ Need help, not a problem, pop your hand in the air and an eager expert will be t
 
 ## Lab Environment
 
-For this hackathon each (group of) participant(s) will receive their own dedicated cloud instance (VM) running a copy of the generic lab topology.  You will see this called "your VM",
-"your group's hackathon VM", "your instance", "your server" and other similar phrases in the activities.  They all mean the same thing, your own dedicated could instance.
+For this event each (group of) participant(s) will receive their own dedicated cloud instance (VM) running a copy of the generic lab topology.  You will see this called "your VM",
+"your group's hackathon VM", "your group's event VM", "your instance", "your server" and other similar phrases in the activities.  They all mean the same thing, your own dedicated cloud instance.
 
 If everything went according to plan, you should have received a physical piece of paper which contains:
 
@@ -42,13 +42,13 @@ If everything went according to plan, you should have received a physical piece 
 - HTTPS URL's for this repository and access to a web based IDE in case you don't have one installed on your operating system.
 
 /// warning
-The public cloud compute instances will be destroyed once the hackathon is concluded.</p>
+The public cloud compute instances will be destroyed once the event is concluded.</p>
 Please make sure to backup any code, config, etc. <u>offline</u> (e.g. onto your laptop) if you'd like to keep it after the hacakthon.
 ///
 
 ### Group ID
 
-Please refer to the paper provided by the hackathon session leader. If nothing has been provided, not a problem, pop your hand in the air and someone will allocate you one before you can say "Aequeosalinocalcalinoceraceoaluminosocupreovitriolic".
+Please refer to the paper provided by the event session leader. If nothing has been provided, not a problem, pop your hand in the air and someone will allocate you one before you can say "Aequeosalinocalcalinoceraceoaluminosocupreovitriolic".
 
 | Group ID | hostname instance |
 | --- | --- |
@@ -59,7 +59,7 @@ Please refer to the paper provided by the hackathon session leader. If nothing h
 
 ### SSH
 
-The simplest way to get going is to use your SSH client to connect to your group's hackathon VM instance and work from there.  All tools and applications are pre-installed and you will have direct access to your entire network.
+The simplest way to get going is to use your SSH client to connect to your group's event VM instance and work from there.  All tools and applications are pre-installed and you will have direct access to your entire network.
 
 SSH is also important if you want to driectly access your network from your laptop but more on that later.
 
@@ -70,18 +70,18 @@ SSH is also important if you want to driectly access your network from your lapt
 | password | `refer to the paper provided or the slide presented` |
 
 /// tip
-If you're familiar with SSH and wish to setup passwordless access, you can use `ssh-keygen -h` to generate a public/private key pair and then `ssh-copy-id` to copy it towards your group's hackathon instance.
+If you're familiar with SSH and wish to setup passwordless access, you can use `ssh-keygen -h` to generate a public/private key pair and then `ssh-copy-id` to copy it towards your group's event instance.
 ///
 
 ### WiFi
 
-WiFi is important here.  Without it your hackathon experience is going to be rather dull.  To connect to the hackthon event's WiFi, refer to the paper provided or the slide presented.
+WiFi is important here.  Without it your event experience is going to be rather dull.  To connect to the hackthon event's WiFi, refer to the paper provided or the slide presented.
 
 ### Topology
 
-When accessing your hackathon VM instance you'll find that the [SReXperts GitHub repository](https://github.com/nokia/srexperts) contains all of the documentation, examples, solutions and loads of other great stuff, has already been cloned for you.
+When accessing your event VM instance you'll find that the [SReXperts GitHub repository](https://github.com/nokia/srexperts) contains all of the documentation, examples, solutions and loads of other great stuff, has already been cloned for you.
 
-In this hackathon, every group has their own complete service-provider network at their disposal.  Your network comprises an IP backbone with Provider (P) and Provider Edge (PE) routers, a broadband dial-in network, a peering edge network, an internet exchange point, multiple data-centers and a number of client and subscriber devices.  This network is already deployed and provisioned and is ready to go!
+In this event, every group has their own complete service-provider network at their disposal.  Your network comprises an IP backbone with Provider (P) and Provider Edge (PE) routers, a broadband dial-in network, a peering edge network, an internet exchange point, multiple data-centers and a number of client and subscriber devices.  This network is already deployed and provisioned and is ready to go!
 
 *Don't worry: This is your personal group network, you cannot impact any other groups.*
 
@@ -112,7 +112,7 @@ The above topology contains a number of functional blocks to help you in areas y
 
 ### Accessing Topology nodes
 
-#### From your group's hackathon instance VM
+#### From your group's event instance VM
 
 To access the lab nodes from within the VM, users should identify the names of the deployed nodes using the `sudo containerlab inspect -a` command.  You will notice they all start with `clab-srexperts-`.  Your entire network is [powered by ContainerLab](https://containerlab.dev).
 
@@ -1212,4 +1212,4 @@ gh repo clone nokia/SReXperts
 
 ## Thanks and contributions
 
-As you can imagine, creating the activities that make up this hackathon is a lot of work.  The hackathon team would like to thank the following team members (in alphabetical order) for their contributions: Asad Arafat, Bhavish Khatri, Diogo Pinheiro, Guilherme Cale, Hans Thienpondt, James Cumming, Joao Machado, Kaelem Chandra, Laleh Kiani, Louis Van Eeckhoudt, Maged Makramalla, Miguel Redondo Ferrero, Roman Dodin, Saju Salahudeen, Samier Barguil, Shafkat Waheed, Shashi Sharma, Simon Tibbitts, Siva Sivakumar, Subba Konda, Sven Wisotzky, Thomas Hendriks, Tiago Amado. Zeno Dhaene, Tim Raphael and Vasileios Tekidis
+As you can imagine, creating the activities that make up this event is a lot of work.  The event team would like to thank the following team members (in alphabetical order) for their contributions: Asad Arafat, Bhavish Khatri, Diogo Pinheiro, Guilherme Cale, Hans Thienpondt, James Cumming, Joao Machado, Kaelem Chandra, Laleh Kiani, Louis Van Eeckhoudt, Maged Makramalla, Miguel Redondo Ferrero, Roman Dodin, Saju Salahudeen, Samier Barguil, Shafkat Waheed, Shashi Sharma, Simon Tibbitts, Siva Sivakumar, Subba Konda, Sven Wisotzky, Thomas Hendriks, Tiago Amado. Zeno Dhaene, Tim Raphael and Vasileios Tekidis

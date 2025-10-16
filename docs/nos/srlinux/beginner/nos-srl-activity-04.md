@@ -15,27 +15,27 @@ tags:
 | **Short Description**       | Re-direct traffic to another temporary destination like firewall or packet inspector </p> Example usecases include: a temporary firewall and SDN controlled path injection </p>  |
 | **Difficulty**              | Beginner |
 | **Tools used**              | [gRIBIc](https://gribic.kmrd.dev/) |
-| **Topology Nodes**          | :material-router: peering1, :material-router: peering2 |
+| **Topology Nodes**          | :material-router: pe1, :material-router: peering2 |
 | **References**              | [gRPC website](https://grpc.io/)<br/>[Openconfig gRIBI Specification](https://github.com/openconfig/gribi)<br/>[SR Linux documentation](https://documentation.nokia.com/srlinux/)<br/>[gNxI protobuf reference](https://gnxi.srlinux.dev/)<br/>[gRIBIc client](https://gribic.kmrd.dev/)<br/> |
 
 
-A temporary firewall application is installed behind `peering1` and traffic for a specific prefix on `peering2` should be temporarily re-routed to this application. After some time, the re-routing should be removed. Your task is to program a route dynamically using APIs on `peering2` for a prefix and later remove it.
+A temporary firewall application is installed behind `pe1` and traffic for a specific prefix on `peering2` should be temporarily re-routed to this application. After some time, the re-routing should be removed. Your task is to program a route dynamically using APIs on `peering2` for a prefix and later remove it.
 
 ## Objective
 
-We will create a loopback on `peering1` and assume the loopback IP as the IP of the firewall. Our task is to route traffic from `peering2` to the loopback IP on `peering1` using an on-demand injected route with a specific next hop.
+We will create a loopback on `pe1` and assume the loopback IP as the IP of the firewall. Our task is to route traffic from `peering2` to the loopback IP on `pe1` using an on-demand injected route with a specific next hop.
 
 ```
-        peering2----------------------------------peering1
+        peering2----------------------------------pe1
   (LB: 22.10.22.10/32)                      (LB: 31.10.31.11/32)
     (NH: 10.64.51.1)                          (NH: 10.64.51.2)
 ```
 
 In this activity, we will:
 
-1. Create loopback interfaces on both `peering1` and `peering2` nodes.
-2. On `peering1` node, we will create a static route to reach the `peering2` loopback.
-3. Dynamically inject a route using API on `peering2` to reach `peering1` loopback.
+1. Create loopback interfaces on both `pe1` and `peering2` nodes.
+2. On `pe1` node, we will create a static route to reach the `peering2` loopback.
+3. Dynamically inject a route using API on `peering2` to reach `pe1` loopback.
 4. Ping between the 2 loopbacks.
 5. Dynamically remove the injected route
 
@@ -117,9 +117,9 @@ This gRIBI payload includes the following parameters:
 
 **You should read these tasks from top-to-bottom before beginning the activity**.  
 
-We will create loopbacks on `peering1` and `peering2`. On `peering1`, we will create a static route to reach `peering2` loopback.
+We will create loopbacks on `pe1` and `peering2`. On `pe1`, we will create a static route to reach `peering2` loopback.
 
-### Configure loopback on `peering1` (an SR OS router)
+### Configure loopback on `pe1` (an SR OS router)
 
 Run `edit-config private` to enter the candidate mode and then `commit` after changes are completed.
 
@@ -176,8 +176,8 @@ set / interface lo1 subinterface 0 ipv4 address 22.10.22.10/32
 ```
 ///
 
-### Configure static route on `peering1`
-Create a static route on `peering1` to reach the loopback on `peering2`.
+### Configure static route on `pe1`
+Create a static route on `pe1` to reach the loopback on `peering2`.
 
 /// tab | cmd
 
@@ -196,7 +196,7 @@ admin show configuration full-context | match static
 /// tab | expected output
 
 ``` bash
-A:admin@g15-peering1# admin show configuration full-context | match static
+A:admin@g15-pe1# admin show configuration full-context | match static
     /configure router "Base" static-routes route 22.10.22.10/32 route-type unicast next-hop "10.64.51.2" admin-state enable
 ```
 ///
@@ -315,13 +315,13 @@ As expected, there are no gRIBI routes that are currently installed.
 
 ### Inject route on `peering2`
 
-To reach `peering1` loopback IP, there should be a route on `peering2` with a next hop. This is typically advertised in a routing protocol like OSPF, ISIS, BGP or manually created as a static route.
+To reach `pe1` loopback IP, there should be a route on `peering2` with a next hop. This is typically advertised in a routing protocol like OSPF, ISIS, BGP or manually created as a static route.
 
 Your task is to inject this route using an API call using gRPC gRIBI service.
 
 After a successful ping is verified, remove the injected route using API call.
 
-Prepare the gRIBI payload to inject the route for the loopback IP on `peering1`.
+Prepare the gRIBI payload to inject the route for the loopback IP on `pe1`.
 
 Before injecting the route, check if there are any existing routes to this destination.
 
@@ -339,7 +339,7 @@ show network-instance default route-table ipv4-unicast prefix 31.10.31.11/32
 ```
 ///
 
-Using gRIBIc, inject a route into `peering2` RIB to reach `peering1` loopback 31.10.31.11/32
+Using gRIBIc, inject a route into `peering2` RIB to reach `pe1` loopback 31.10.31.11/32
 
 Use `gRIBI Modify` RPC to inject this route to `peering2`. Replace `file.yml` with your payload file.
 
@@ -405,7 +405,7 @@ A:g15-peering2# show network-instance default route-table ipv4-unicast prefix 31
 ### Test connectivity between the loopback addresses
 Now that we created a route to reach the loopbacks on either nodes, we should be able to ping between the loopbacks.
 
-Try ping on `peering2` towards `peering1` loopback 31.10.31.11/32
+Try ping on `peering2` towards `pe1` loopback 31.10.31.11/32
 
 /// tab | cmd
 

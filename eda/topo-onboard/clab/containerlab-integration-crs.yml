@@ -131,6 +131,7 @@ spec:
   version: 24.10.3
   versionPath: .system.information.version
   versionMatch: v24\.10\.3.*
+  llmDb: https://eda-asvr.eda-system.svc/eda-system/llm-dbs/llm-db-srlinux-ghcr-24.10.3/llm-embeddings-srl-24-10-3.tar.gz
   yang: https://eda-asvr.eda-system/eda-system/schemaprofiles/srlinux-ghcr-24.10.3/srlinux-24.10.3.zip
   nodeUser: admin
   onboardingPassword: NokiaSrl1!

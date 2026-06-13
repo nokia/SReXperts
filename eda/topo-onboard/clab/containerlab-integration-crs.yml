@@ -1,19 +1,10 @@
-# --- SCHEMA PROFILE ARTIFACT ---
-apiVersion: artifacts.eda.nokia.com/v1
-kind: Artifact
-metadata:
-  name: srlinux-ghcr-24.10.3
-  namespace: eda-system
-  labels:
-    role: hackathon-infra
-spec:
-  filePath: srlinux-24.10.3.zip
-  remoteFileUrl:
-    fileUrl: https://github.com/nokia/srlinux-yang-models/releases/download/v24.10.3/srlinux-24.10.3-201.zip
-  repo: schemaprofiles
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
 # --- INIT ---
 ---
-apiVersion: bootstrap.eda.nokia.com/v1alpha1
+apiVersion: bootstrap.eda.nokia.com/v1
 kind: Init
 metadata:
   name: init-base
@@ -22,49 +13,11 @@ metadata:
     role: hackathon-infra
 spec:
   commitSave: true
----
-# --- NODE-SECURITY-PROFILE ---
----
-apiVersion: core.eda.nokia.com/v1
-kind: NodeSecurityProfile
-metadata:
-  name: managed-tls
-  namespace: eda
-  labels:
-    role: hackathon-infra
-spec:
-  nodeSelector:
-    - eda.nokia.com/security-profile=managed
-  tls:
-    csrParams:
-      certificateValidity: 2160h
-      city: Sunnyvale
-      country: US
-      csrSuite: CSRSUITE_X509_KEY_TYPE_RSA_2048_SIGNATURE_ALGORITHM_SHA_2_256
-      org: NI
-      orgUnit: EDA
-      state: California
-    issuerRef: eda-node-issuer
----
-# --- NODE-USER-GROUP ---
----
-apiVersion: aaa.eda.nokia.com/v1alpha1
-kind: NodeGroup
-metadata:
-  name: sudo
-  namespace: eda
-  labels:
-    role: hackathon-infra
-spec:
-  services:
-    - GNMI
-    - CLI
-    - NETCONF
-    - GNOI
-    - GNSI
-    - JSON-RPC
-  superuser: true
----
+  mgmt:
+    staticRoutes:
+      - nextHop: 10.128.${INSTANCE_ID}.1
+        prefix: 0.0.0.0/0
+
 # --- NODE-USER ---
 ---
 apiVersion: core.eda.nokia.com/v1
@@ -120,7 +73,7 @@ spec:
 apiVersion: core.eda.nokia.com/v1
 kind: NodeProfile
 metadata:
-  name: srexperts-srlinux-24.10.3
+  name: srexperts-srlinux-26.3.1
   namespace: eda
   labels:
     role: hackathon-infra
@@ -128,11 +81,11 @@ spec:
   port: 57410
   annotate: true
   operatingSystem: srl
-  version: 24.10.3
+  version: 26.3.1
   versionPath: .system.information.version
-  versionMatch: v24\.10\.3.*
-  llmDb: https://eda-asvr.eda-system.svc/eda-system/llm-dbs/llm-db-srlinux-ghcr-24.10.3/llm-embeddings-srl-24-10-3.tar.gz
-  yang: https://eda-asvr.eda-system/eda-system/schemaprofiles/srlinux-ghcr-24.10.3/srlinux-24.10.3.zip
+  versionMatch: v26\.3\.1.*
+  llmDb: https://eda-asvr.eda-system.svc/_base_/llm-dbs/llm-db-srlinux-ghcr-26.3.1/llm-embeddings-srl-26-3-1.tar.gz
+  yang: https://eda-asvr.eda-system.svc/_base_/schemaprofiles/srlinux-ghcr-26.3.1/srlinux-26.3.1.zip
   nodeUser: admin
   onboardingPassword: NokiaSrl1!
   onboardingUsername: admin
@@ -155,13 +108,12 @@ metadata:
     role: hackathon-infra
   namespace: eda
 spec:
-  nodeProfile: srexperts-srlinux-24.10.3
+  nodeProfile: srexperts-srlinux-26.3.1
   operatingSystem: srl
-  platform: 7220 IXR-D2L
-  version: 24.10.3
+  platform: 7220 IXR-D3L
+  version: 26.3.1
   productionAddress:
-    ipv4: 10.128.${INSTANCE_ID}.33
-    ipv6: ""
+    ipv4: 10.128.${INSTANCE_ID}.33/24
 ---
 apiVersion: core.eda.nokia.com/v1
 kind: TopoNode
@@ -176,13 +128,12 @@ metadata:
     role: hackathon-infra
   namespace: eda
 spec:
-  nodeProfile: srexperts-srlinux-24.10.3
+  nodeProfile: srexperts-srlinux-26.3.1
   operatingSystem: srl
-  platform: 7220 IXR-D2L
-  version: 24.10.3
+  platform: 7220 IXR-D3L
+  version: 26.3.1
   productionAddress:
-    ipv4: 10.128.${INSTANCE_ID}.34
-    ipv6: ""
+    ipv4: 10.128.${INSTANCE_ID}.34/24
 ---
 apiVersion: core.eda.nokia.com/v1
 kind: TopoNode
@@ -197,13 +148,12 @@ metadata:
     role: hackathon-infra
   namespace: eda
 spec:
-  nodeProfile: srexperts-srlinux-24.10.3
+  nodeProfile: srexperts-srlinux-26.3.1
   operatingSystem: srl
-  platform: 7220 IXR-D2L
-  version: 24.10.3
+  platform: 7220 IXR-D3L
+  version: 26.3.1
   productionAddress:
-    ipv4: 10.128.${INSTANCE_ID}.35
-    ipv6: ""
+    ipv4: 10.128.${INSTANCE_ID}.35/24
 ---
 apiVersion: core.eda.nokia.com/v1
 kind: TopoNode
@@ -218,13 +168,12 @@ metadata:
     role: hackathon-infra
   namespace: eda
 spec:
-  nodeProfile: srexperts-srlinux-24.10.3
+  nodeProfile: srexperts-srlinux-26.3.1
   operatingSystem: srl
-  platform: 7220 IXR-H2
-  version: 24.10.3
+  platform: 7220 IXR-D5
+  version: 26.3.1
   productionAddress:
-    ipv4: 10.128.${INSTANCE_ID}.31
-    ipv6: ""
+    ipv4: 10.128.${INSTANCE_ID}.31/24
 ---
 apiVersion: core.eda.nokia.com/v1
 kind: TopoNode
@@ -239,17 +188,16 @@ metadata:
     role: hackathon-infra
   namespace: eda
 spec:
-  nodeProfile: srexperts-srlinux-24.10.3
+  nodeProfile: srexperts-srlinux-26.3.1
   operatingSystem: srl
-  platform: 7220 IXR-H2
-  version: 24.10.3
+  platform: 7220 IXR-D5
+  version: 26.3.1
   productionAddress:
-    ipv4: 10.128.${INSTANCE_ID}.32
-    ipv6: ""
+    ipv4: 10.128.${INSTANCE_ID}.32/24
 ---
 # --- INTERFACES ---
 ---
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
   name: spine11-ethernet-1-1
@@ -259,7 +207,7 @@ metadata:
     role: hackathon-infra
 spec:
   enabled: true
-  encapType: "null"
+  encapType: "Null"
   ethernet:
     stormControl:
       enabled: false
@@ -269,35 +217,35 @@ spec:
       interface: ethernet-1-1
       lacpPortPriority: 32768
       node: g${INSTANCE_ID}-spine11
-  type: interface
+  type: Interface
   mtu: 9198
   description: "inter-switch link to leaf11"
 ---
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
-  name: leaf11-ethernet-1-49
+  name: leaf11-ethernet-1-31
   namespace: eda
   labels:
     eda.nokia.com/role: interSwitch
     role: hackathon-infra
 spec:
   enabled: true
-  encapType: "null"
+  encapType: "Null"
   ethernet:
     stormControl:
       enabled: false
   lldp: true
   members:
     - enabled: true
-      interface: ethernet-1-49
+      interface: ethernet-1-31
       lacpPortPriority: 32768
       node: g${INSTANCE_ID}-leaf11
-  type: interface
+  type: Interface
   mtu: 9198
   description: "inter-switch link to spine11"
 ---
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
   name: spine11-ethernet-1-2
@@ -307,7 +255,7 @@ metadata:
     role: hackathon-infra
 spec:
   enabled: true
-  encapType: "null"
+  encapType: "Null"
   ethernet:
     stormControl:
       enabled: false
@@ -317,35 +265,35 @@ spec:
       interface: ethernet-1-2
       lacpPortPriority: 32768
       node: g${INSTANCE_ID}-spine11
-  type: interface
+  type: Interface
   mtu: 9198
   description: "inter-switch link to leaf12"
 ---
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
-  name: leaf12-ethernet-1-49
+  name: leaf12-ethernet-1-31
   namespace: eda
   labels:
     eda.nokia.com/role: interSwitch
     role: hackathon-infra
 spec:
   enabled: true
-  encapType: "null"
+  encapType: "Null"
   ethernet:
     stormControl:
       enabled: false
   lldp: true
   members:
     - enabled: true
-      interface: ethernet-1-49
+      interface: ethernet-1-31
       lacpPortPriority: 32768
       node: g${INSTANCE_ID}-leaf12
-  type: interface
+  type: Interface
   mtu: 9198
   description: "inter-switch link to spine11"
 ---
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
   name: spine11-ethernet-1-3
@@ -355,7 +303,7 @@ metadata:
     role: hackathon-infra
 spec:
   enabled: true
-  encapType: "null"
+  encapType: "Null"
   ethernet:
     stormControl:
       enabled: false
@@ -365,35 +313,35 @@ spec:
       interface: ethernet-1-3
       lacpPortPriority: 32768
       node: g${INSTANCE_ID}-spine11
-  type: interface
+  type: Interface
   mtu: 9198
   description: "inter-switch link to leaf13"
 ---
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
-  name: leaf13-ethernet-1-49
+  name: leaf13-ethernet-1-31
   namespace: eda
   labels:
     eda.nokia.com/role: interSwitch
     role: hackathon-infra
 spec:
   enabled: true
-  encapType: "null"
+  encapType: "Null"
   ethernet:
     stormControl:
       enabled: false
   lldp: true
   members:
     - enabled: true
-      interface: ethernet-1-49
+      interface: ethernet-1-31
       lacpPortPriority: 32768
       node: g${INSTANCE_ID}-leaf13
-  type: interface
+  type: Interface
   mtu: 9198
   description: "inter-switch link to spine11"
 ---
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
   name: spine12-ethernet-1-1
@@ -403,7 +351,7 @@ metadata:
     role: hackathon-infra
 spec:
   enabled: true
-  encapType: "null"
+  encapType: "Null"
   ethernet:
     stormControl:
       enabled: false
@@ -413,35 +361,35 @@ spec:
       interface: ethernet-1-1
       lacpPortPriority: 32768
       node: g${INSTANCE_ID}-spine12
-  type: interface
+  type: Interface
   mtu: 9198
   description: "inter-switch link to leaf11"
 ---
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
-  name: leaf11-ethernet-1-50
+  name: leaf11-ethernet-1-32
   namespace: eda
   labels:
     eda.nokia.com/role: interSwitch
     role: hackathon-infra
 spec:
   enabled: true
-  encapType: "null"
+  encapType: "Null"
   ethernet:
     stormControl:
       enabled: false
   lldp: true
   members:
     - enabled: true
-      interface: ethernet-1-50
+      interface: ethernet-1-32
       lacpPortPriority: 32768
       node: g${INSTANCE_ID}-leaf11
-  type: interface
+  type: Interface
   mtu: 9198
   description: "inter-switch link to spine12"
 ---
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
   name: spine12-ethernet-1-2
@@ -451,7 +399,7 @@ metadata:
     role: hackathon-infra
 spec:
   enabled: true
-  encapType: "null"
+  encapType: "Null"
   ethernet:
     stormControl:
       enabled: false
@@ -461,35 +409,35 @@ spec:
       interface: ethernet-1-2
       lacpPortPriority: 32768
       node: g${INSTANCE_ID}-spine12
-  type: interface
+  type: Interface
   mtu: 9198
   description: "inter-switch link to leaf12"
 ---
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
-  name: leaf12-ethernet-1-50
+  name: leaf12-ethernet-1-32
   namespace: eda
   labels:
     eda.nokia.com/role: interSwitch
     role: hackathon-infra
 spec:
   enabled: true
-  encapType: "null"
+  encapType: "Null"
   ethernet:
     stormControl:
       enabled: false
   lldp: true
   members:
     - enabled: true
-      interface: ethernet-1-50
+      interface: ethernet-1-32
       lacpPortPriority: 32768
       node: g${INSTANCE_ID}-leaf12
-  type: interface
+  type: Interface
   mtu: 9198
   description: "inter-switch link to spine12"
 ---
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
   name: spine12-ethernet-1-3
@@ -499,7 +447,7 @@ metadata:
     role: hackathon-infra
 spec:
   enabled: true
-  encapType: "null"
+  encapType: "Null"
   ethernet:
     stormControl:
       enabled: false
@@ -509,31 +457,31 @@ spec:
       interface: ethernet-1-3
       lacpPortPriority: 32768
       node: g${INSTANCE_ID}-spine12
-  type: interface
+  type: Interface
   mtu: 9198
   description: "inter-switch link to leaf13"
 ---
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
-  name: leaf13-ethernet-1-50
+  name: leaf13-ethernet-1-32
   namespace: eda
   labels:
     eda.nokia.com/role: interSwitch
     role: hackathon-infra
 spec:
   enabled: true
-  encapType: "null"
+  encapType: "Null"
   ethernet:
     stormControl:
       enabled: false
   lldp: true
   members:
     - enabled: true
-      interface: ethernet-1-50
+      interface: ethernet-1-32
       lacpPortPriority: 32768
       node: g${INSTANCE_ID}-leaf13
-  type: interface
+  type: Interface
   mtu: 9198
   description: "inter-switch link to spine12"
 ---
@@ -545,7 +493,7 @@ metadata:
   labels:
     eda.nokia.com/role: interSwitch
     role: hackathon-infra
-  name: spine11-e1-1-leaf11-e1-49
+  name: spine11-e1-1-leaf11-e1-31
   namespace: eda
 spec:
   links:
@@ -554,8 +502,8 @@ spec:
         interfaceResource: spine11-ethernet-1-1
         node: g${INSTANCE_ID}-spine11
       remote:
-        interface: ethernet-1-49
-        interfaceResource: leaf11-ethernet-1-49
+        interface: ethernet-1-31
+        interfaceResource: leaf11-ethernet-1-31
         node: g${INSTANCE_ID}-leaf11
       type: interSwitch
 ---
@@ -565,7 +513,7 @@ metadata:
   labels:
     eda.nokia.com/role: interSwitch
     role: hackathon-infra
-  name: spine11-e1-2-leaf12-e1-49
+  name: spine11-e1-2-leaf12-e1-31
   namespace: eda
 spec:
   links:
@@ -574,8 +522,8 @@ spec:
         interfaceResource: spine11-ethernet-1-2
         node: g${INSTANCE_ID}-spine11
       remote:
-        interface: ethernet-1-49
-        interfaceResource: leaf12-ethernet-1-49
+        interface: ethernet-1-31
+        interfaceResource: leaf12-ethernet-1-31
         node: g${INSTANCE_ID}-leaf12
       type: interSwitch
 ---
@@ -585,7 +533,7 @@ metadata:
   labels:
     eda.nokia.com/role: interSwitch
     role: hackathon-infra
-  name: spine11-e1-3-leaf13-e1-49
+  name: spine11-e1-3-leaf13-e1-31
   namespace: eda
 spec:
   links:
@@ -594,8 +542,8 @@ spec:
         interfaceResource: spine11-ethernet-1-3
         node: g${INSTANCE_ID}-spine11
       remote:
-        interface: ethernet-1-49
-        interfaceResource: leaf13-ethernet-1-49
+        interface: ethernet-1-31
+        interfaceResource: leaf13-ethernet-1-31
         node: g${INSTANCE_ID}-leaf13
       type: interSwitch
 ---
@@ -605,7 +553,7 @@ metadata:
   labels:
     eda.nokia.com/role: interSwitch
     role: hackathon-infra
-  name: spine12-e1-1-leaf11-e1-50
+  name: spine12-e1-1-leaf11-e1-32
   namespace: eda
 spec:
   links:
@@ -614,8 +562,8 @@ spec:
         interfaceResource: spine12-ethernet-1-1
         node: g${INSTANCE_ID}-spine12
       remote:
-        interface: ethernet-1-50
-        interfaceResource: leaf11-ethernet-1-50
+        interface: ethernet-1-32
+        interfaceResource: leaf11-ethernet-1-32
         node: g${INSTANCE_ID}-leaf11
       type: interSwitch
 ---
@@ -625,7 +573,7 @@ metadata:
   labels:
     eda.nokia.com/role: interSwitch
     role: hackathon-infra
-  name: spine12-e1-2-leaf12-e1-50
+  name: spine12-e1-2-leaf12-e1-32
   namespace: eda
 spec:
   links:
@@ -634,8 +582,8 @@ spec:
         interfaceResource: spine12-ethernet-1-2
         node: g${INSTANCE_ID}-spine12
       remote:
-        interface: ethernet-1-50
-        interfaceResource: leaf12-ethernet-1-50
+        interface: ethernet-1-32
+        interfaceResource: leaf12-ethernet-1-32
         node: g${INSTANCE_ID}-leaf12
       type: interSwitch
 ---
@@ -645,7 +593,7 @@ metadata:
   labels:
     eda.nokia.com/role: interSwitch
     role: hackathon-infra
-  name: spine12-e1-3-leaf13-e1-50
+  name: spine12-e1-3-leaf13-e1-32
   namespace: eda
 spec:
   links:
@@ -654,23 +602,26 @@ spec:
         interfaceResource: spine12-ethernet-1-3
         node: g${INSTANCE_ID}-spine12
       remote:
-        interface: ethernet-1-50
-        interfaceResource: leaf13-ethernet-1-50
+        interface: ethernet-1-32
+        interfaceResource: leaf13-ethernet-1-32
         node: g${INSTANCE_ID}-leaf13
       type: interSwitch
+
+
 # --- MANAGEMENT ROUTER ---
----
-apiVersion: bootstrap.eda.nokia.com/v1alpha1
-kind: ManagementRouter
-metadata:
-  name: mgmt
-  namespace: eda
-  labels:
-    role: hackathon-infra
-spec:
-  nodeSelector:
-    - eda.nokia.com/role=leaf
-    - eda.nokia.com/role=spine
+# ---
+# apiVersion: bootstrap.eda.nokia.com/v1alpha1
+# kind: ManagementRouter
+# metadata:
+#   name: mgmt
+#   namespace: eda
+#   labels:
+#     role: hackathon-infra
+# spec:
+#   nodeSelector:
+#     - eda.nokia.com/role=leaf
+#     - eda.nokia.com/role=spine
+
 # --- EDA DISCOVERY GRPC SERVER ---
 # this configlet adds eda-discovery grpc server
 # so in case we need to redeploy EDA after it onboarded nodes
@@ -678,7 +629,7 @@ spec:
 # this configlet will adds it back and makes it possible to
 # rediscover previously onboarded nodes
 ---
-apiVersion: config.eda.nokia.com/v1alpha1
+apiVersion: config.eda.nokia.com/v1
 kind: Configlet
 metadata:
   name: eda-discovery
@@ -686,7 +637,7 @@ metadata:
   labels:
     role: hackathon-infra
 spec:
-  endpointSelector:
+  endpointSelectors:
     - containerlab=managed
   operatingSystem: srl
   configs:
@@ -709,86 +660,12 @@ spec:
         }
 
 
-# --- EDA COMMON INSECURE GRPC SERVER ---
-# since EDA removes any prior existing config from the node
-# we need to bring back the server running on the default 57400
-# so that other tools could've used the original port
-# we also make this server insecure to match SR OS config
----
-apiVersion: config.eda.nokia.com/v1alpha1
-kind: Configlet
-metadata:
-  name: insecure-mgmt
-  namespace: eda
-  labels:
-    role: hackathon-infra
-spec:
-  endpointSelector:
-    - containerlab=managed
-  operatingSystem: srl
-  configs:
-    - path: .system.grpc-server{.name=="insecure-mgmt"}
-      operation: Create
-      config: |-
-        {
-          "name": "insecure-mgmt",
-          "admin-state": "enable",
-          "rate-limit": 65535,
-          "session-limit": 1024,
-          "network-instance": "mgmt",
-          "port": 57400,
-          "services": [
-            "gnmi",
-            "gnoi",
-            "p4rt",
-            "gnsi"
-          ]
-        }
-
-
-# --- EDA COMMON SECURE GRPC SERVER ---
-# since EDA removes any prior existing config from the node
-# we need to bring back the explicit server running on port 57401
-# so that other tools could've used the original port
----
-apiVersion: config.eda.nokia.com/v1alpha1
-kind: Configlet
-metadata:
-  name: secure-mgmt
-  namespace: eda
-  labels:
-    role: hackathon-infra
-spec:
-  endpointSelector:
-    - containerlab=managed
-  operatingSystem: srl
-  configs:
-    - path: .system.grpc-server{.name=="secure-mgmt"}
-      operation: Create
-      config: |-
-        {
-          "name": "secure-mgmt",
-          "admin-state": "enable",
-          "rate-limit": 65535,
-          "session-limit": 1024,
-          "default-tls-profile": true,
-          "network-instance": "mgmt",
-          "port": 57401,
-          "services": [
-            "gnmi",
-            "gnoi",
-            "p4rt",
-            "gnsi"
-          ]
-        }
-
-
 # --- EDA COMMON SYSLOG SERVER ---
 # considering we don't have a way (yet) to configure a
 # common syslog server, this makes sure the SReXperts
 # syslog server is applied on all EDA managed devices
 ---
-apiVersion: config.eda.nokia.com/v1alpha1
+apiVersion: config.eda.nokia.com/v1
 kind: Configlet
 metadata:
   name: syslog-mgmt
@@ -796,7 +673,7 @@ metadata:
   labels:
     role: hackathon-infra
 spec:
-  endpointSelector:
+  endpointSelectors:
     - containerlab=managed
   operatingSystem: srl
   configs:
@@ -823,25 +700,14 @@ spec:
         }
 
 
-# --- EDA SYSTEM DEFAULT IP MTU ---
-# considering we don't have a way (yet) to configure a
-# common default ip mtu, this makes sure the SReXperts
-# ip default mtu is applied on all EDA managed devices
+# --- DEFAULT MTU ---
 ---
-apiVersion: config.eda.nokia.com/v1alpha1
-kind: Configlet
+apiVersion: siteinfo.eda.nokia.com/v1
+kind: DefaultMTU
 metadata:
-  name: system-ip-mtu
+  name: ip-mtu
   namespace: eda
-  labels:
-    role: hackathon-infra
 spec:
-  configs:
-    - config: |-
-        {
-          "default-ip-mtu": 9000
-        }
-      operation: Create
-      path: .system.mtu
-  endpointSelector:
+  layer3MTU: 9000
+  nodeSelectors:
     - containerlab=managed

@@ -1,0 +1,107 @@
+<!--
+ Copyright 2026 Nokia
+ Licensed under the BSD 3-Clause License.
+ SPDX-License-Identifier: BSD-3-Clause
+-->
+
+{#-
+  This file was automatically generated - do not edit
+-#}
+{% set class = "md-header" %}
+{% if "navigation.tabs.sticky" in features %}
+  {% set class = class ~ " md-header--shadow md-header--lifted" %}
+{% elif "navigation.tabs" not in features %}
+  {% set class = class ~ " md-header--shadow" %}
+{% endif %}
+<header class="{{ class }}" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="{{ lang.t('header') }}">
+    <a href="{{ config.extra.homepage | d(nav.homepage.url, true) | url }}" title="{{ config.site_name | e }}" class="md-header__button md-logo" aria-label="{{ config.site_name }}" data-md-component="logo">
+      {% include "partials/logo.html" %}
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      {% set icon = config.theme.icon.menu or "material/menu" %}
+      {% include ".icons/" ~ icon ~ ".svg" %}
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <a href="{{ config.extra.homepage | d(nav.homepage.url, true) | url }}" class="md-ellipsis">
+            {{ config.site_name }}
+          </a>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            {% if page.meta and page.meta.title %}
+              {{ page.meta.title }}
+            {% else %}
+              {{ page.title }}
+            {% endif %}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- topology label (no embedded diagram — avoids draw.io viewer gray panel) -->
+    {%raw%}
+    <figure style="display: flex;  justify-content: center; /* horizontal */   align-items: center;     /* vertical */;">
+      <div class="thumbnail-container" style="position: relative; display: inline-block; border-color: #9e9e9e; border-radius: 0.25rem; border: 0px solid; width: 100px; height: 100%; overflow: hidden;">
+        <div class='mxgraph'
+                style='width:100%;height:100%;margin:0 auto; display:block'
+                data-mxgraph='{"url":"./../../../../../images/srx.clab.drawio","page":0,"zoom":0.02,"highlight":"#0000ff","nav":true,"resize":true,"edit":"_blank","dark-mode":false}'>
+        </div>
+        <div class="overlay-box" style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            color: var(--md-primary-fg-color);
+            background-color: var(--md-primary-bg-color);
+            font-family: NokiaPureText;
+            font-size: 0.70rem;
+            opacity: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            pointer-events: none; /* Allows clicks to pass through this overlay */
+        ">
+           <p><b>Topology</b></p>
+        </div>
+      </div>
+    </figure>
+    <script type="text/javascript" src="https://viewer.diagrams.net/js/viewer-static.min.js" async></script>
+    {% endraw %}
+    {% if config.theme.palette %}
+      {% if not config.theme.palette is mapping %}
+        {% include "partials/palette.html" %}
+      {% endif %}
+    {% endif %}
+    {% if not config.theme.palette is mapping %}
+      {% include "partials/javascripts/palette.html" %}
+    {% endif %}
+    {% if config.extra.alternate %}
+      {% include "partials/alternate.html" %}
+    {% endif %}
+    {% if "material/search" in config.plugins %}
+      {% set search = config.plugins["material/search"] | attr("config") %}
+      {% if search.enabled %}
+        <label class="md-header__button md-icon" for="__search">
+          {% set icon = config.theme.icon.search or "material/magnify" %}
+          {% include ".icons/" ~ icon ~ ".svg" %}
+        </label>
+        {% include "partials/search.html" %}
+      {% endif %}
+    {% endif %}
+    {% if config.repo_url %}
+      <div class="md-header__source">
+        {% include "partials/source.html" %}
+      </div>
+    {% endif %}
+  </nav>
+  {% if "navigation.tabs.sticky" in features %}
+    {% if "navigation.tabs" in features %}
+      {% include "partials/tabs.html" %}
+    {% endif %}
+  {% endif %}
+</header>

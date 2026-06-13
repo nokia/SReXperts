@@ -1,0 +1,64 @@
+---
+version: '2.0'
+
+nspWebUI.portListDevice1:
+  description: |
+      action: nspWebUI.portListDevice1
+      since: NSP 21.3
+      short_description: Queries the list of NSP managed ports
+      description:
+        - This action is targeted to be used by schema-form suggests/pickers
+        - RESTCONF nsp-inventory is used
+        - Action returns access and hybrid ports for NSP managed devices
+        - If schema-form contains input parameter 'deviceId1' ports will get pre-filtered
+      input:
+        token_auth:
+          description: To comply with schema-form and provide user context
+          type: String
+          mandatory: False
+        formValues:
+          description: provide to prefilter ports using deviceId1
+          type: Dictionary
+          mandatory: False
+      output:
+        type: list of dicts
+        description: inventory of ports with name, description, adminState, encapType and portMode
+      examples:
+        "List of all ports": |
+          getAllPorts:
+            action: nspWebUI.portListDevice1
+            input: 
+              token_auth: ""
+              formValues: {}
+        "List of filtered ports": |
+          getFilteredPorts:
+            action: nspWebUI.portListDevice1
+            input:
+              token_auth: ""
+              formValues:
+                deviceId1: 1.1.1.4
+      example_responses:
+        Success: |
+          result:
+          - name: 1/1/1
+            description: 10/100-ethernet-tx
+            adminState: unlocked
+            encapType: dot1q
+            portMode: access
+
+  base: nsp.https
+  base-input:
+    url: https://restconf-gateway/restconf/operations/nsp-inventory:find
+    body:
+      input:
+        xpath-filter: /nsp-equipment:network/network-element<% switch($.formValues.get("deviceId1")=> "[ne-id='"+$.formValues.deviceId1+"']", $ => "") %>/hardware-component/port[boolean(port-details[port-mode='access' or port-mode='hybrid'])]
+        fields: name;description;admin-state;port-details
+        sort-by:
+          - ne-id
+    method: POST    
+    resultFilter: $.content.get('nsp-inventory:output').data.select({name=>$.name,description=>$.description,adminState=>$.get('admin-state'),encapType=>$.get('port-details')[0].get('encap-type'),portMode=>$.get('port-details')[0].get('port-mode')})
+    auth: <% $.token_auth %>
+  input:
+    - token_auth
+    - formValues: {}
+  output: <% $.content %>

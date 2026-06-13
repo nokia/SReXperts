@@ -1,0 +1,270 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+
+version: '2.0'
+
+create-evpn-epipe-service-with-resource-pool:
+  description: creates an EVPN-EPIPE service by retrieving the required resources from the given Resource Pool.
+  
+  type: direct
+  
+  tags:
+    - Service Create
+    - Resource Pool
+    
+  workflow_meta:
+    title:   Create EVPN-EPIPE Service with Resource Pool
+    author:  WFM
+    version: '1.0.0'
+    dependencies:
+      platform:
+        nspOS: ['25.11']
+
+  input:
+    - serviceName
+    - deviceId1
+    - portId1
+    - deviceId2
+    - portId2
+    - numericPoolName
+    - numericPoolScope
+
+  vars:
+    status: ""
+    errorMessage: ""
+    errorDetails: ""
+    neServiceId: ""
+    sapId1: ""
+    sapId2: ""
+    portEncapTypeList: []
+    nodeDetails: []
+    result: {}
+    epipeServiceTemplate: "EPIPE_SERVICE_01_SITE_SR_01"
+    epipeServiceSiteTemplate: "EPIPE_SITE_SR_01"
+
+  output:
+    result: <% $.result %>
+    status: success
+
+  output-on-error:
+    result: <% $.result %>
+    status: failed
+
+  tasks:
+    startTask:
+      description: "Starting task"
+      action: std.noop
+      publish:
+        status: 'Workflow execution started'
+        nodeDetails: [{"node": "<% $.deviceId1 %>", "port": "<% $.portId1 %>"}, {"node": "<% $.deviceId2 %>", "port": "<% $.portId2 %>"}]
+      on-success:
+        - verifyPoolPresence
+
+    verifyPoolPresence:
+      action: nsp.https
+      input:
+        url: 'https://restconf-gateway/restconf/data/nsp-resource-pool:resource-pools/numeric-resource-pools=<% $.numericPoolName %>,<% $.numericPoolScope %>'
+        method: GET
+      publish:
+        poolExist: <% switch(task().result.status = 200 => 'yes', task().result.status != 200 => 'no') %>
+      publish-on-error:
+        errorMessage: <% switch(task().result.status = 404 => 'Resource pool not found. Make sure the pool name and scope are correct.', true => 'Failed to get resource pool information') %>
+        errorDetails: "<% task().name %>: <% task().result %>"
+      on-success:
+        - retrieveResourceFromPool : <% $.poolExist = 'yes' %>
+        - errorHandler: <% $.poolExist != 'yes' %>
+      on-error: 
+        - errorHandler
+    
+    retrieveResourceFromPool:
+      action: nsp.https
+      input:
+        url: 'https://restconf-gateway/restconf/data/nsp-resource-pool:resource-pools/numeric-resource-pools=<% $.numericPoolName %>,<% $.numericPoolScope %>/obtain-value-from-pool'
+        method: POST
+        body:
+          {
+            "nsp-resource-pool:input": {
+                "reference": "<% $.serviceName %>",
+                "owner": "<% $.serviceName %>",
+                "confirmed": true,
+                "all-or-nothing": false,
+                "total-number-of-resources": 1
+            }
+          }
+      publish:
+        neServiceId: <% switch(task().result.status = 200 and len(task().result.content["nsp-resource-pool:output"]["num-consumed-resources"]) > 0 => task().result.content["nsp-resource-pool:output"]["num-consumed-resources"][0]["value"], true => "") %>
+        errorMessage: <% switch(task().result.status = 200 and len(task().result.content["nsp-resource-pool:output"]["num-consumed-resources"]) > 0 => '', task().result.status = 200 and len(task().result.content["nsp-resource-pool:output"]["num-consumed-resources"]) = 0 => 'Resource pool returned no consumed resources. Check pool utilization', true => 'Failed to retrieve resource from pool') %>
+        errorDetails: <% switch(task().result.status = 200 and len(task().result.content["nsp-resource-pool:output"]["num-consumed-resources"]) > 0 => '', true => task().result) %>
+      publish-on-error:
+        errorMessage: "Failed to retrieve resource from pool"
+        errorDetails: "<% task().name %>: <% task().result %>"
+      on-success:
+        - fetchPortEncapType: <% len($.errorMessage) = 0 %>
+        - errorHandler: <% len($.errorMessage) != 0 %>
+      on-error: 
+        - errorHandler
+
+    fetchPortEncapType:
+      description: Fetch port encapsulation type (sub-workflow get_encap_type_from_inventory)
+      with-items: data in <% $.nodeDetails %>
+      workflow: get-encap-type-from-inventory
+      input:
+        neId: '<% $.data.node %>'
+        port: '<% $.data.port %>'
+      publish:
+        portEncapWorkflowResults: <% task().result %>
+      publish-on-error:
+        errorMessage: "Failed to fetch port encapsulation type"
+        errorDetails: "<% task().name %>: <% task().result %>"
+      on-success:
+        - normalizePortEncapList: <% len($.errorMessage) = 0 %>
+        - errorHandler: <% len($.errorMessage) != 0 %>
+      on-error: 
+        - errorHandler
+
+    normalizePortEncapList:
+      description: Flatten nested workflow outputs to a list of encap-type strings
+      action: nsp.python
+      input:
+        context: <% $.portEncapWorkflowResults %>
+        script: |
+          r = context
+          if not isinstance(r, list):
+            r = [r]
+          out = []
+          for item in r:
+            if isinstance(item, dict) and "result" in item:
+              out.append(item["result"])
+            else:
+              out.append(item)
+          return out
+      publish:
+        portEncapTypeList: <% task().result %>
+      publish-on-error:
+        errorMessage: "Failed to normalize port encapsulation types"
+        errorDetails: "<% task().name %>: <% task().result %>"
+      on-success:
+        - formSAPIds: <% len($.errorMessage) = 0 %>
+        - errorHandler: <% len($.errorMessage) != 0 %>
+      on-error:
+        - errorHandler
+    
+    formSAPIds:
+      description: Form SAP IDs based on the retrieved NE Service ID and port encapsulation type
+      action: nsp.python
+      input:
+        context: 
+          portIdList: [<% $.portId1 %>, <% $.portId2 %>]
+          portEncapTypeList: <% $.portEncapTypeList %>
+          neServiceId: <% $.neServiceId %>
+        script: |
+          def SAPDefinition(portId, portEncapType, neServiceId):
+            if portEncapType == "qinq":
+              sapId = portId + ":" + neServiceId + "." + neServiceId;
+            elif portEncapType == "dot1q":
+              sapId = portId + ":" + neServiceId;
+            else:
+              sapId = portId
+            return sapId
+
+          def formSAPIds(portIdList, portEncapTypeList, neServiceId):
+            sapIds = []
+            for portId, portEncapType in zip(portIdList, portEncapTypeList):
+              sapIds.append(SAPDefinition(portId, portEncapType, neServiceId))
+            return sapIds
+          return formSAPIds(context["portIdList"], context["portEncapTypeList"], context["neServiceId"])
+      publish:
+        sapId1: <% task().result[0] %>
+        sapId2: <% task().result[1] %>
+      on-success:
+        - renderServicePayload
+      on-error:
+        - errorHandler
+    
+    renderServicePayload:
+      description: Render service payload using Jinja template and the retrieved/formulated data from previous steps
+      action: nsp.jinja_template
+      input:
+        name: "create-service-payload-template"
+        data:
+          epipeServiceTemplate: <% $.epipeServiceTemplate %>
+          epipeServiceSiteTemplate: <% $.epipeServiceSiteTemplate %>
+          serviceName: <% $.serviceName %>
+          neServiceId: <% $.neServiceId %>
+          deviceId1: <% $.deviceId1 %>
+          deviceId2: <% $.deviceId2 %>
+          sapId1: <% $.sapId1 %>
+          sapId2: <% $.sapId2 %>
+      publish:
+        servicePayload: <% task().result.template %>
+      publish-on-error:
+        errorMessage: 'Failed to render service payload'
+        errorDetails: '<% task().name %>: <% task().result %>'
+      on-success:
+        - deployService
+      on-error:
+        - errorHandler
+
+    deployService:
+      description: Deploy service using the rendered payload and wait for 20sec after deploy request.
+      action: nsp.https
+      wait-after: 20
+      input:
+        url: 'https://restconf-gateway/restconf/data/nsp-service-site-intent:intent-base'
+        method: POST
+        body: <% $.servicePayload %>
+      publish:
+        deploymentResponses: <% task().result %>
+      publish-on-error:
+        errorMessage: "Failed to deploy service"
+        errorDetails: "<% task().name %>: <% task().result %>"
+      on-success:
+        - evaluateDeploymentResults
+      on-error:
+        - errorHandler
+
+    evaluateDeploymentResults:
+      description: Evaluate deployment result for all items
+      action: nsp.https
+      input:
+        url: 'https://restconf-gateway/restconf/operations/nsp-inventory:find'
+        method: POST
+        body: {
+            "input": {
+                "xpath-filter": "/nsp-service:services/service-layer/eline[service-id='<% $.serviceName %>']",
+                "include-meta": "false",
+                "depth": 4
+            }
+        }
+        resultFilter: $.content["nsp-inventory:output"]["data"][0]["service-extension:eline-svc"]
+      publish:
+        deploymentStatus: <% task().result.content["deployer-details"]["overall-deployer-state"] %>
+        deployLogs: <% task().result.content["slc-details"]["logs"] %>
+      publish-on-error:
+        errorMessage: "Failed to get service deployment status"
+        errorDetails: "<% task().name %>: <% task().result %>"
+      on-success:
+        - exitTask: <% $.deploymentStatus = 'success' %>
+        - errorHandler: <% $.deploymentStatus != 'success' %>
+      on-error:
+        - errorHandler
+
+    exitTask:
+      description: "Success task"
+      action: std.noop
+      publish:
+        result:
+          status: 'Successfully created service with resource pool data'
+          errorMessage: ""
+          errorDetails: ""
+
+    errorHandler:
+      description: "Failure task"
+      action: std.fail
+      publish-on-error:
+        result:
+          status: 'Failed to create service with resource pool data'
+          errorMessage: <% $.errorMessage %>
+          errorDetails: <% $.errorDetails %>

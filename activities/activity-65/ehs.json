@@ -1,0 +1,61 @@
+{
+    "filter": [
+        {
+          "filter-name": "200",
+          "default-action": "drop",
+          "named-entry": [
+            {
+              "entry-name": "nc-spike",
+              "action": "forward",
+              "match": {
+                "message": [
+                  {
+                    "eq": "alarm-index 1000",
+                    "regexp": true
+                  },
+                  {
+                    "eq": "tmnxPortNetEgressFwdInProfOcts",
+                    "regexp": true
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "event-handling": {
+        "handler": [
+          {
+            "name": "handler-stop-pcap",
+            "admin-state": "enable",
+            "entry": [
+              {
+                "id": 10,
+                "script-policy": {
+                  "name": "spolicy-stop-pcap"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "event-trigger": [
+        {
+          "snmp": [
+            {
+              "event": "risingAlarm",
+              "admin-state": "enable",
+              "entry": [
+                {
+                  "id": 10,
+                  "handler": "handler-stop-pcap",
+                  "filter": "200",
+                  "admin-state": "enable"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+      
+    }

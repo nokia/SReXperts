@@ -1,8 +1,12 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
 # --- Custom underlay BGP export policy ---
 # this is required to export the IRB anycast gateway
 # route to the WAN network, so connectivity is achieved
 # throughout the network
-apiVersion: routingpolicies.eda.nokia.com/v1alpha1
+apiVersion: routingpolicies.eda.nokia.com/v1
 kind: Policy
 metadata:
   name: ebgp-isl-export-policy-srexperts-fabric-custom
@@ -11,84 +15,80 @@ metadata:
     role: hackathon-infra
 spec:
   defaultAction:
-    policyResult: reject
+    policyResult: Reject
     bgp:
-      localPreference: null
       setOrigin: "igp"
-      asPathPrepend: null
-      asPathReplace: []
-      asPathRemove: null
-  statement:
+  statements:
     - action:
         bgp:
-          localPreference: 100
-        policyResult: accept
+          setLocalPreference: 100
+        policyResult: Accept
       match:
         prefixSet: prefixset-grt
-        protocol: LOCAL
+        protocol: Local
       name: "10"
     - action:
         bgp:
-          localPreference: 100
-        policyResult: accept
+          setLocalPreference: 100
+        policyResult: Accept
       match:
         protocol: BGP
       name: "15"
     - action:
         bgp:
-          localPreference: 100
-        policyResult: accept
+          setLocalPreference: 100
+        policyResult: Accept
       match:
-        protocol: AGGREGATE
+        protocol: Aggregate
       name: "20"
     - action:
         bgp:
-          localPreference: 100
-        policyResult: accept
+          setLocalPreference: 100
+        policyResult: Accept
       match:
         bgp:
-          evpnRouteType:
+          evpnRouteTypes:
             - 1
       name: "25"
     - action:
         bgp:
-          localPreference: 100
-        policyResult: accept
+          setLocalPreference: 100
+        policyResult: Accept
       match:
         bgp:
-          evpnRouteType:
+          evpnRouteTypes:
             - 2
       name: "30"
     - action:
         bgp:
-          localPreference: 100
-        policyResult: accept
+          setLocalPreference: 100
+        policyResult: Accept
       match:
         bgp:
-          evpnRouteType:
+          evpnRouteTypes:
             - 3
       name: "35"
     - action:
         bgp:
-          localPreference: 100
-        policyResult: accept
+          setLocalPreference: 100
+        policyResult: Accept
       match:
         bgp:
-          evpnRouteType:
+          evpnRouteTypes:
             - 4
       name: "40"
     - action:
         bgp:
-          localPreference: 100
-        policyResult: accept
+          setLocalPreference: 100
+        policyResult: Accept
       match:
         bgp:
-          evpnRouteType:
+          evpnRouteTypes:
             - 5
       name: "45"
 ---
 # prefix set for the custom underlay export policy
-apiVersion: routingpolicies.eda.nokia.com/v1alpha1
+apiVersion: routingpolicies.eda.nokia.com/v1
 kind: PrefixSet
 metadata:
   name: prefixset-grt
@@ -96,7 +96,7 @@ metadata:
   labels:
     role: hackathon-infra
 spec:
-  prefix:
+  prefixes:
     - endRange: 128
       exact: false
       prefix: fd00:fde8::${INSTANCE_ID}:0/120

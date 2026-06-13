@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<!--
+ Copyright 2026 Nokia
+ Licensed under the BSD 3-Clause License.
+ SPDX-License-Identifier: BSD-3-Clause
+-->
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>NE Checkpoint + Revert combined bundle (40)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400&display=swap" />
+  <style>
+    .font-nunito { font-family: Nunito, sans-serif; }
+  </style>
+</head>
+<body>
+  <section class="hero is-fullheight font-nunito">
+    <div class="hero-body">
+      <div class="container is-max-tablet">
+        <h2 class="title">SReXperts — Activity 40</h2>
+        <h3 class="subtitle">NE Checkpoint + Revert combined artifact (v1.0.0)</h3>
+        <p class="pb-1">Generates <code>ne-checkpoint-revert-1.0.0-gNN.zip</code> (checkpoint workflows and operation, revert workflows, suggest actions).</p>
+
+        <div class="field">
+          <label class="label">Group ID</label>
+          <div class="control">
+            <input
+              class="input font-nunito"
+              type="number"
+              id="groupId"
+              min="1"
+              max="99"
+              placeholder="1–99"
+            />
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="control has-text-right">
+            <button class="button is-success has-text-white" id="generateBtn">Generate ZIP</button>
+            <button class="button is-link ml-2" id="uploadNspBtn" type="button">Upload to NSP</button>
+          </div>
+        </div>
+
+        <div id="progressPanel" class="mt-4" hidden>
+          <p class="mb-2" id="progressMessage"></p>
+          <progress class="progress is-link" id="progressBar" max="100" value="0"></progress>
+        </div>
+        <p class="has-text-success" id="status"></p>
+        <div id="errorPanel" class="notification is-danger is-light mt-3" role="alert" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    function getCurrentUtcFormatted() {
+      const now = new Date();
+      const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const dayName = days[now.getUTCDay()];
+      const day = String(now.getUTCDate()).padStart(2, "0");
+      const monthName = months[now.getUTCMonth()];
+      const year = now.getUTCFullYear();
+      return `${dayName}, ${day} ${monthName} ${year} ` +
+        `${String(now.getUTCHours()).padStart(2, "0")}:` +
+        `${String(now.getUTCMinutes()).padStart(2, "0")}:` +
+        `${String(now.getUTCSeconds()).padStart(2, "0")} UTC`;
+    }
+
+    function groupTag(groupId) {
+      return "group" + String(groupId).padStart(2, "0");
+    }
+
+    function personalize(text, groupId) {
+      return text.replace(/group00/g, groupTag(groupId));
+    }
+
+    const VERSION = "1.0.0";
+
+    /**
+     * NSP CAM artifact API base (no trailing slash); upload + install requests use this origin.
+     * Group ID 2–40 → nsp1cam; 41–79 → nsp2cam. Other IDs (1, 80–99) use nsp1cam.
+     */
+    function getNspCamApiBase(groupId) {
+      if (groupId >= 41 && groupId <= 79) {
+        return "https://nsp2cam.srexperts.net";
+      }
+      return "https://nsp1cam.srexperts.net";
+    }
+
+    const CHECKPOINT_README = `# Checkpoint Management in NSP
+
+|     |     |
+| --- | --- |
+| **Activity name** | Checkpoint creation workflow |
+| **Activity ID** | 40 |
+| **Short Description** | This workflow allows for local checkpoint creation in SRL. To be updated for SR OS and to copy in FS  |
+| **Difficulty** | Intermediate |
+| **Topology Nodes** | SRL first. SR OS with customization |
+| **References** | [Workflow Development](https://network.developer.nokia.com/learn/25_11/artifact-development/programming/workflows/wfm-workflow-development/) |
+
+## Description
+
+This workflow is designed to create local checkpoints on Nokia network elements (NEs) using the Service Router Linux (SRL) platform. It can be customized for use with SR OS and further adapted to upload the content into NSP File Service (FS). The workflow automates the process of checkpoint creation, ensuring consistency and efficiency in backup operations across supported NE families and versions.`;
+
+    const CHECKPOINT_WF_JSON = `{
+    "type": "object",
+    "properties": [
+        {
+            "name": "neId",
+            "title": "NE ID",
+            "description": "description for neId",
+            "columnSpan": 4,
+            "newRow": true,
+            "readOnly": false,
+            "required": false,
+            "type": "string",
+            "component": {
+                "input": "autoComplete"
+            },
+            "suggest": {
+                "action": "nspWebUI.neList",
+                "name": [
+                    "neId"
+                ]
+            }
+        },
+        {
+            "name": "saveFS",
+            "title": "SAVE FS",
+            "description": "description for saveFS",
+            "columnSpan": 4,
+            "newRow": true,
+            "readOnly": false,
+            "required": false,
+            "type": "boolean",
+            "default": false
+        }
+    ]
+}`;
+
+    const CHECKPOINT_WF_YAML = `---
+version: '2.0'
+
+ne-checkpoint-group00:
+  type: direct
+  tags:
+    - LSO
+
+  workflow_meta:
+    title: Takes a checkpoint of the selected object on a MD SROS device
+    author: NOKIA R&D
+    version: '2.0.0'
+    license: 
+    package: LSOM NE Checkpoint
+    deprecated: false
+
+  input:
+    - neId
+    - saveFS: false
+
+  output:
+    lsoInfo: <% $.lsoInfo %>
+    checkpoint: <% $.checkpoint %>
+    saveFS: <% $.saveFS %>
+    filePath: <% $.dirName %>/<% $.timestamp %>
+    neSoftwareVersion: <% $.neSoftwareVersion %>
+    
+  output-on-error:
+    lsoInfo: "Error: <% $.lsoInfo %>"
+    checkpoint: <% $.checkpoint %>
+    filePath: <% $.dirName %>/<% $.timestamp %>
+    neSoftwareVersion: <% $.neSoftwareVersion %>
+    
+  vars:
+    lsoInfo: "Failed"
+    lsoStageError: "Failed"
+    checkpoint: "unknown"
+    filePath: "unknown"
+    neSoftwareVersion: "unknown"
+    dryRun: <% options().dryRun %>
+    stop: "([\\\\s\\\\S]*)(\\\\^*)[\\r\\n]*(MINOR:)([\\\\s\\\\S]*)|(([\\\\s\\\\S]*)(\\\\^*)[\\r\\n]*(Error:|ERROR:)([\\\\s\\\\S]*))"
+   
+  tasks:
+    lsoStageMapping:
+      action: std.noop
+      publish:
+        timestamp: <% regex(":").replace(regex(" ").replace(get_UTC_time(),"-"),".") %>
+        lsoWorkflowStageMapping:
+          ne-checkpoint:
+          - getDeviceInfo
+          - createSRLcheckpoint
+          - createSROScheckpoint
+          - createBackupFolder
+          - transferCheckpoint
+      on-success:
+        - getDeviceInfo
+    
+    getDeviceInfo:
+      action: nsp.https
+      input:
+        method: POST
+        url: https://restconf-gateway/restconf/operations/nsp-inventory:find
+        body: 
+          input:
+            xpath-filter: /nsp-ne-control:ne-control/discovered-ne[ne-id='<% $.neId %>']
+            fields: ne-id;ne-name;version;communication-state;ne-vendor;ne-family
+        resultFilter: $.content.get("nsp-inventory:output").data
+        scriptFilter: |
+          return context[0]
+      publish:
+        dirName: /lsom/checkpoint/<% task().result.content.get("ne-vendor") %>/<% task().result.content.get("ne-family").replace(" ","_") %>/<% task().result.content.get("ne-id") %>
+        neName: <% task().result.content.get("ne-name") %>
+        neId: <% task().result.content.get("ne-id") %>
+        neSoftwareVersion: <% task().result.content.get("version") %>
+        productFamily: <% task().result.content.get("ne-family") %>
+      publish-on-error:
+        lsoInfo: "Failed: fetching node details"
+        lsoStageError: <% task().result %>
+      on-success:
+        - createSRLcheckpoint: <% $.productFamily.indexOf("SRLinux") != -1 %>
+        - createSROScheckpoint: <% $.productFamily.indexOf("7750 SR") != -1 %>
+
+    createSRLcheckpoint:
+      action: nsp.managed_cli
+      input:
+        neId: <% $.neId %>
+        stopOn: <% $.stop %>
+        idleTimeout: 30
+        closeSession: true
+        cmds:
+          - environment cli-engine type basic
+          - echo "Start"
+          - tools system configuration generate-checkpoint name nsp_<% $.timestamp %>
+          - echo "End"
+      publish:
+        sourcePath: /etc/opt/srlinux/checkpoint/checkpoint-0.json
+        checkpoint: checkpoint-0.json
+      on-success:
+        - CheckpointSuccess
+      on-error:
+        - CheckpointFailed
+
+    createSROScheckpoint:
+      action: std.noop
+      on-success:
+        - CheckpointSuccess
+      on-error:
+        - CheckpointFailed
+
+    CheckpointSuccess:
+      join: 0
+      publish:
+        lsoInfo: "Checkpoint Successful"
+      on-complete:
+        - succeed 
+
+    CheckpointFailed:
+      join: 0
+      action: std.fail
+      input:
+        error_data: <% $.lsoInfo %>   
+      publish-on-error:
+        lsoStageError: <% $.lsoStageError %>
+        lsoInfo: <% task().result %> 
+
+`;
+
+    const CHECKPOINT_OP_YAML = `# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+phases:
+  - phase: "Execute"
+    description: Backup NE Config using checkpoints
+    concurrency_count: 20
+    ne_families:
+      - family_type: 7750 SR, 7250 IXR SRLinux, 7220 IXR SRLinux
+        ne_versions:
+          - version: all
+            workflow_name: ne-checkpoint-group00
+            workflow_inputs:`;
+
+    const CHECKPOINT_OP_YANG = `module ne-checkpoint-group00{
+  yang-version 1.1;
+  namespace "urn:nokia:nsp:model:lso:operation:ne-checkpoint-group00";
+  prefix ne-checkpoint-group00;
+
+  import nsp-lso-operation {
+    prefix nlo;
+  }
+
+  organization "Nokia";
+  contact "";
+  description "NSP Operation Manager - NE Config Snapshot";
+
+  revision 2026-03-02 {
+    description "second version";
+  }
+
+  revision 2024-05-01 {
+    description "initial version";
+  }
+
+  augment "/nlo:lso-operations/nlo:operation" {
+    when "operation-type='ne-checkpoint-group00'";
+    description
+      "Augmentation of ne-checkpoint-group00 operation config data.";
+    container ne-checkpoint-group00-operation  {
+      description
+        "Config data container for the NE snapshot operation.";
+      leaf saveFS {
+        type boolean; 
+        default "false";
+        mandatory true;
+        description
+          "Indicates if the checkpoint is stored in File System.";
+      }
+    }
+  }
+
+  augment "/nlo:lso-operations/nlo:operation/nlo:executions/nlo:execution" {
+    when "../../operation-type='ne-checkpoint-group00'";
+    description "Augmentation of operation execution state data";
+    container ne-checkpoint-group00-execution {
+      description "State data container for backup execution.";
+
+      leaf checkpoint {
+        type string;
+        description
+          "Indicates the backup file created in the NSP.";
+      }
+
+      leaf neSoftwareVersion {
+        type string;
+        description
+          "Indicates the Network Element Version.";
+      }
+
+      leaf filePath {
+        type string;
+        description
+          "Indicates the backup file path created in the NSP.";
+      }
+
+      leaf saveFS {
+        type boolean;
+        description
+          "Indicates if the checkpoint is stored in File System.";
+      }
+    }
+  }
+}`;
+
+    const CHECKPOINT_OPERATION_TYPES = `{
+  "operation-type": {
+    "name": "ne-checkpoint-group00",
+    "description": "Operation for NE Config Snapshot",
+    "category": "backup",
+    "created-by": "nsp_internal_system_user",
+    "operation-model": "ne-checkpoint-group00.yang",
+    "profile": "ne-checkpoint-group00.yaml",
+    "life-cycle-state": "released",
+    "additional-tag": ["SReXperts"],
+    "version": "1.0.0"
+  }
+}`;
+
+    const REVERT_README = `# Checkpoint Management in NSP
+
+|     |     |
+| --- | --- |
+| **Activity name** | Checkpoint revert workflow |
+| **Activity ID** | 40 |
+| **Short Description** | This workflow allows to revert from a local checkpoint in SRL. To be updated for SR OS and to load from NSP FS  |
+| **Difficulty** | Intermediate |
+| **Topology Nodes** | SRL first. SR OS with customization |
+| **References** | [Workflow Development](https://network.developer.nokia.com/learn/25_11/artifact-development/programming/workflows/wfm-workflow-development/) |
+
+## Description
+
+This workflow is designed to revert from local checkpoints on Nokia network elements (NEs) using the Service Router Linux (SRL) platform. It can be customized for use with SR OS and further adapted to upload the content into NSP File Service (FS). The workflow automates the process of reverting from existing checkpoint, ensuring consistency and efficiency in backup operations across supported NE families and versions.`;
+
+    /** Schema form for revert workflow; suggest actions reference getLCCheckpoints-group00 / getFSCheckpoints-group00 (personalized). */
+    const REVERT_WF_JSON = `{
+    "type": "object",
+    "properties": [
+        {
+            "name": "neId",
+            "title": "NE ID",
+            "description": "description for neId",
+            "columnSpan": 4,
+            "newRow": true,
+            "readOnly": false,
+            "required": false,
+            "type": "leafref",
+            "componentProps": {
+                "displayKeyId": "neId"
+            },
+            "suggest": {
+                "action": "nspWebUI.neList",
+                "name": [
+                    "neId",
+                    "neName",
+                    "neFamily"
+                ]
+            },
+            "properties": [
+                {
+                    "name": "neId",
+                    "type": "string",
+                    "title": "NE ID"
+                },
+                {
+                    "name": "neName",
+                    "type": "string",
+                    "title": "NE Name"
+                },
+                {
+                    "name": "neFamily",
+                    "type": "string",
+                    "title": "NE Family"
+                }
+            ],
+            "setFieldValues": [
+                {
+                    "name": "neName",
+                    "value": "neName"
+                },
+                {
+                    "name": "neFamily",
+                    "value": "neFamily"
+                }
+            ]
+        },
+        {
+            "name": "neName",
+            "title": "NE Name",
+            "description": "Name",
+            "columnSpan": 4,
+            "newRow": true,
+            "readOnly": true,
+            "required": false,
+            "type": "string",
+            "default": ""
+        },
+        {
+            "name": "neFamily",
+            "title": "Family",
+            "description": "NE Family",
+            "columnSpan": 4,
+            "newRow": true,
+            "readOnly": true,
+            "required": false,
+            "type": "string",
+            "default": ""
+        },
+        {
+            "name": "fromFS",
+            "title": "FROM FS",
+            "description": "Load from NSP FP",
+            "columnSpan": 4,
+            "newRow": true,
+            "readOnly": false,
+            "required": false,
+            "type": "boolean",
+            "default": false
+        },
+        {
+            "name": "pathLocal",
+            "title": "Path in device",
+            "description": "Local path in the device",
+            "columnSpan": 4,
+            "newRow": true,
+            "readOnly": false,
+            "required": false,
+            "type": "string",
+            "default": "",
+            "when": "./input/fromFS = 'false'",
+            "component": "autoComplete",
+            "suggest": {
+                "action": "getLCCheckpoints-group00"
+            }
+        },
+        {
+            "name": "pathFS",
+            "title": "Path in FS",
+            "description": "Path in NSP FS",
+            "columnSpan": 4,
+            "newRow": true,
+            "readOnly": false,
+            "required": false,
+            "type": "string",
+            "default": "",
+            "when": "./input/fromFS = 'true'",
+            "component": "autoComplete",
+            "suggest": {
+                "action": "getFSCheckpoints-group00"
+            }
+        }
+    ]
+}`;
+
+    /** Combined-bundle revert workflow (ne-checkpoint-revert-group00 skeleton), not the standalone revert bundle. */
+    const CHECKREVERT_WF_YAML = `---
+version: '2.0'
+
+ne-revert-group00:
+  type: direct
+  
+  tags:
+    - Revert
+    - SReXperts
+
+  workflow_meta:
+    title: Reverts from existing checkpoint
+    author: NOKIA R&D
+    version: '1.0.0'
+    deprecated: false
+
+  input:
+    - neId
+    - neName
+    - neFamily
+    - fromFS: false
+    - pathLocal: ""
+    - pathFS: ""
+
+  vars:
+    info: "Failed"
+    stageError: "Failed"
+    loadFile: ""
+    fromFS: <% $.fromFS %>
+    dryRun: <% options().dryRun %>
+    stop: "([\\\\s\\\\S]*)(\\\\^*)[\\r\\n]*(MINOR:)([\\\\s\\\\S]*)|(([\\\\s\\\\S]*)(\\\\^*)[\\r\\n]*(Error:|ERROR:)([\\\\s\\\\S]*))"
+
+  output:
+    info: <% $.info %>
+    loadFile: <% $.loadFile %>
+    fromFS: <% $.fromFS %>
+
+  output-on-error:
+    info: "Error: <% $.info %>"
+
+  tasks:
+    stageMapping:
+      action: nsp.python
+      input:
+        context:
+          neFamily: <% $.neFamily %>
+          fromFS: <% $.fromFS %>
+          pathLocal: <% $.pathLocal %>
+          pathFS: <% $.pathFS %>
+        script: |
+          if "SRLinux" in context["neFamily"]:
+            loadFile = "/etc/opt/srlinux/checkpoint/"+context["pathLocal"].split("_")[-1]
+            loadPath = "/etc/opt/srlinux/checkpoint/"
+            loadFromFS = "/tmp/"
+            fileExt = "json"
+          else:
+            loadFile = "cf3:/"+context["pathLocal"].split("_")[-1]
+            loadPath = "cf3:/"
+            loadFromFS = "cf3:/"
+            fileExt = "cfg"
+          return {
+            "loadFile": loadFile,
+            "loadPath": loadPath,
+            "loadFromFS": loadFromFS,
+            "fileExt": fileExt
+          }
+      publish:
+        loadFile: <% task().result.loadFile %>
+        loadPath: <% task().result.loadPath %>
+        loadFromFS: <% task().result.loadFromFS %>
+        fileExt: <% task().result.fileExt %>
+        timestamp: <% regex(":").replace(regex(" ").replace(get_UTC_time(),"-"),".") %>
+      publish-on-error:
+        info: "Failed to determine the file path and extension for the checkpoint file based on NE family"
+      on-success:
+        - revertFromFileSRL: <% not $.fromFS and $.neFamily.indexOf("SRLinux") != -1 %>
+      on-error:
+        - RevertFailed
+
+    revertFromFileSRL:
+      action: nsp.managed_cli
+      input:
+        neId: <% $.neId %>
+        stopOn: <% $.stop %>
+        idleTimeout: 30
+        closeSession: true
+        cmds:
+          - environment cli-engine type basic
+          - echo "Start"
+          - enter candidate
+          - load file <% $.loadFile %>
+          - commit now
+          - <% switch($.fromFS = true => "bash rm /tmp/nsp_checkpoint.json", $.fromFS = false => "echo 'Local'") %>
+          - echo "End"
+      publish:
+        info: "Revert from file <% $.loadFile %> successfully completed"
+      publish-on-error:
+        info: "Revert from file <% $.loadFile %> failed"
+      on-success:
+        - RevertSuccess
+      on-error:
+        - RevertFailed
+      
+    RevertSuccess:
+      join: 0
+      publish:
+        info: "Checkpoint Successful"
+      on-complete:
+        - succeed 
+
+    RevertFailed:
+      join: 0
+      action: std.fail
+      input:
+        error_data: <% $.info %>   
+      publish-on-error:
+        stageError: <% $.stageError %>
+        info: <% task().result %>  `;
+
+    const REVERT_ACTION_LC = `---
+version: '2.0'
+
+getLCCheckpoints-group00:
+  description:  |
+    Test script filter
+  base: nsp.managed_cli
+  base-input:
+    neId: <% $.formValues.neId %>
+    stopOn: "([\\\\s\\\\S]*)(\\\\^*)[\\r\\n]*(MINOR:)([\\\\s\\\\S]*)|(([\\\\s\\\\S]*)(\\\\^*)[\\r\\n]*(Error:|ERROR:)([\\\\s\\\\S]*))"
+    sessionId: 'new'
+    idleTimeout: 10
+    closeSession: true
+    cmds: <% switch($.formValues.neFamily.indexOf("SRLinux") != -1 => ["bash ls",'bash stat -c "%y_%n" -- /etc/opt/srlinux/checkpoint/*'], $.formValues.neFamily.indexOf("7750 SR") != -1 => ["/!md-cli","file list cf3:"]) %>
+    scriptFilter: |
+      aux = context[1].split("\\r\\n")[:-2]
+      sros = "7750 SR" in "<% $.formValues.neFamily %>"
+      result=[]
+      for i in aux:
+        if sros:
+          if "config.cfg" in i:
+            parts=i.split()
+            result.append(parts[0].replace("/","-")+"_"+parts[1]+"_"+parts[-1])
+        else:
+          parts=i.split(" ")
+          result.append(parts[0]+"_"+parts[1].split(".")[0]+"_"+parts[-1].split("/")[-1])
+      return result
+  input:
+    - token_auth
+    - formValues: {"neId": "fd00:fde8::1:24", "neName": "g1-pe4", "neFamily": "7750 SR"}
+  output: <% $.responses %>
+
+`;
+
+    const REVERT_ACTION_FS = `---
+version: '2.0'
+
+getFSCheckpoints-group00:
+  description:  |
+    Test script filter
+  base: nsp.https
+  base-input:
+    url: https://nsp-file-service/nsp-file-service-app/rest/api/v1/directory?dirName=/lsom/checkpoint/Nokia/<% $.formValues.get("neFamily").replace(" ","_") %>/<% $.formValues.get("neId") %>&recursive=false
+    method: GET
+    resultFilter: $.content.data.select($.fileName)
+  input:
+    - token_auth
+    - formValues: {"neId": "fd00:fde8::3:33", "neName": "g3-leaf11", "neFamily": "7220 IXR SRLinux"}
+  output: <% $.content %>
+`;
+
+    function artifactEntry(path, fileName) {
+      return {
+        type: "application/octet-stream",
+        path,
+        fileName
+      };
+    }
+
+    function buildCheckrevertMetadata(groupId, creationDate) {
+      const g = groupTag(groupId);
+      return {
+        "meta-data-header": {
+          version: VERSION,
+          buildNumber: "1",
+          formatVersion: "1.0",
+          createdBy: "SReXperts",
+          creationDate,
+          title: "NE Checkpoint",
+          description: "NE Checkpoint Operation Bundle for SReXperts"
+        },
+        "artifact-meta-data": [
+          {
+            targetApplication: "workflow-manager",
+            applicationCompatibility: "25.8+",
+            version: VERSION,
+            name: `actions-revert-${g}`,
+            "artifact-content": [
+              artifactEntry(`content/actions-revert-${g}`, `getFSCheckpoints-${g}.action`),
+              artifactEntry(`content/actions-revert-${g}`, `getLCCheckpoints-${g}.action`)
+            ]
+          },
+          {
+            targetApplication: "workflow-manager",
+            applicationCompatibility: "25.8+",
+            version: VERSION,
+            name: `ne-checkpoint-${g}`,
+            "artifact-content": [
+              artifactEntry(`content/ne-checkpoint-${g}`, "README.md"),
+              artifactEntry(`content/ne-checkpoint-${g}`, `ne-checkpoint-${g}.json`),
+              artifactEntry(`content/ne-checkpoint-${g}`, `ne-checkpoint-${g}.yaml`)
+            ]
+          },
+          {
+            targetApplication: "workflow-manager",
+            applicationCompatibility: "25.8+",
+            version: VERSION,
+            name: `ne-revert-${g}`,
+            "artifact-content": [
+              artifactEntry(`content/ne-revert-${g}`, "README.md"),
+              artifactEntry(`content/ne-revert-${g}`, `ne-revert-${g}.json`),
+              artifactEntry(`content/ne-revert-${g}`, `ne-revert-${g}.yaml`)
+            ]
+          },
+          {
+            targetApplication: "lsom-server-app",
+            applicationCompatibility: "25.8+",
+            version: VERSION,
+            name: `operation-checkpoint-${g}`,
+            "artifact-content": [
+              artifactEntry(`content/operation-checkpoint-${g}`, `ne-checkpoint-${g}.yaml`),
+              artifactEntry(`content/operation-checkpoint-${g}`, `ne-checkpoint-${g}.yang`),
+              artifactEntry(`content/operation-checkpoint-${g}`, "operation_types.json")
+            ]
+          }
+        ]
+      };
+    }
+
+    function parseGroupId() {
+      const groupIdRaw = document.getElementById("groupId").value.trim();
+      const groupId = parseInt(groupIdRaw, 10);
+      if (!groupIdRaw || isNaN(groupId)) {
+        return { ok: false, error: "Please enter a valid Group ID." };
+      }
+      if (groupId < 1 || groupId > 99) {
+        return { ok: false, error: "Group ID must be between 1 and 99." };
+      }
+      return { ok: true, groupId };
+    }
+
+    function hideError() {
+      const el = document.getElementById("errorPanel");
+      el.hidden = true;
+      el.textContent = "";
+    }
+
+    function showError(message) {
+      const el = document.getElementById("errorPanel");
+      el.textContent = message;
+      el.hidden = false;
+    }
+
+    function setProgress(visible, percent, message) {
+      const panel = document.getElementById("progressPanel");
+      const bar = document.getElementById("progressBar");
+      const msg = document.getElementById("progressMessage");
+      panel.hidden = !visible;
+      bar.value = percent;
+      msg.textContent = message || "";
+    }
+
+    function delay(ms) {
+      return new Promise(function (resolve) {
+        setTimeout(resolve, ms);
+      });
+    }
+
+    /** Poll GET bundle until summary.status is Installed. */
+    const BUNDLE_INSTALL_POLL_INTERVAL_MS = 2000;
+    const BUNDLE_INSTALL_POLL_MAX_ATTEMPTS = 150;
+
+    async function readResponseDetail(res) {
+      const text = await res.text();
+      if (!text) {
+        return res.statusText || String(res.status);
+      }
+      try {
+        return JSON.stringify(JSON.parse(text), null, 2);
+      } catch {
+        return text;
+      }
+    }
+
+    async function buildBundleZip(groupId) {
+      const g = groupTag(groupId);
+      const creationDate = getCurrentUtcFormatted();
+      const zip = new JSZip();
+
+      zip.file("metadata.json", JSON.stringify(buildCheckrevertMetadata(groupId, creationDate), null, 2));
+
+      const ar = `actions-revert-${g}`;
+      zip.file(`content/${ar}/getFSCheckpoints-${g}.action`, personalize(REVERT_ACTION_FS, groupId));
+      zip.file(`content/${ar}/getLCCheckpoints-${g}.action`, personalize(REVERT_ACTION_LC, groupId));
+
+      const ck = `ne-checkpoint-${g}`;
+      zip.folder("content").folder(ck).file("README.md", personalize(CHECKPOINT_README, groupId));
+      zip.file(`content/${ck}/ne-checkpoint-${g}.json`, personalize(CHECKPOINT_WF_JSON, groupId));
+      zip.file(`content/${ck}/ne-checkpoint-${g}.yaml`, personalize(CHECKPOINT_WF_YAML, groupId));
+
+      const rv = `ne-revert-${g}`;
+      zip.folder("content").folder(rv).file("README.md", personalize(REVERT_README, groupId));
+      zip.file(`content/${rv}/ne-revert-${g}.json`, personalize(REVERT_WF_JSON, groupId));
+      zip.file(`content/${rv}/ne-revert-${g}.yaml`, personalize(CHECKREVERT_WF_YAML, groupId));
+
+      const op = `operation-checkpoint-${g}`;
+      zip.file(`content/${op}/ne-checkpoint-${g}.yaml`, personalize(CHECKPOINT_OP_YAML, groupId));
+      zip.file(`content/${op}/ne-checkpoint-${g}.yang`, personalize(CHECKPOINT_OP_YANG, groupId));
+      zip.file(`content/${op}/operation_types.json`, personalize(CHECKPOINT_OPERATION_TYPES, groupId));
+
+      const blob = await zip.generateAsync({ type: "blob" });
+      const bundleName = `ne-checkpoint-revert-1.0.0-g`+String(groupId);
+      return { blob, bundleName };
+    }
+
+    function bundleZipFileName(bundleName) {
+      return bundleName + ".zip";
+    }
+
+    async function uploadArtifact(base, groupId, blob, bundleName) {
+      const url =
+        `${base}/nsp/cam/group/${groupId}/bundle/upload`;
+      const formData = new FormData();
+      formData.append("file", blob, bundleZipFileName(bundleName));
+      const res = await fetch(url, { method: "POST", body: formData });
+      if (!res.ok) {
+        const detail = await readResponseDetail(res);
+        throw new Error(`Upload failed (${res.status} ${res.statusText}). ${detail}`);
+      }
+      return res.json().catch(() => ({}));
+    }
+
+    async function installArtifact(base, groupId, bundleName) {
+      const enc = encodeURIComponent(bundleZipFileName(bundleName));
+      const url =
+        `${base}/nsp/cam/group/${groupId}/bundle/${enc}/install`;
+      const res = await fetch(url, { method: "POST" });
+      if (!res.ok) {
+        const detail = await readResponseDetail(res);
+        throw new Error(`Install failed (${res.status} ${res.statusText}). ${detail}`);
+      }
+      return res.json().catch(() => ({}));
+    }
+
+    /**
+     * GET /nsp/cam/group/{group_id}/bundle/{bundle_name} until summary.status is Installed.
+     */
+    async function waitForBundleInstalled(base, groupId, bundleName, onPoll) {
+      const enc = encodeURIComponent(bundleZipFileName(bundleName));
+      const url = `${base}/nsp/cam/group/${groupId}/bundle/${enc}`;
+      for (let attempt = 1; attempt <= BUNDLE_INSTALL_POLL_MAX_ATTEMPTS; attempt++) {
+        const res = await fetch(url, { method: "GET" });
+        if (!res.ok) {
+          const detail = await readResponseDetail(res);
+          throw new Error(`Bundle status check failed (${res.status} ${res.statusText}). ${detail}`);
+        }
+        const data = await res.json().catch(() => ({}));
+        const summary = data && data.summary;
+        const statusStr =
+          summary && typeof summary.status === "string" ? summary.status.trim() : "";
+        if (/^installed$/i.test(statusStr)) {
+          return data;
+        }
+        if (statusStr && /^(failed|error|rejected|invalid)$/i.test(statusStr)) {
+          throw new Error(
+            `Installation did not succeed: summary.status is "${statusStr}".`
+          );
+        }
+        if (typeof onPoll === "function") {
+          onPoll(attempt, statusStr, summary);
+        }
+        await delay(BUNDLE_INSTALL_POLL_INTERVAL_MS);
+      }
+      throw new Error(
+        `Timeout: summary.status did not become "Installed" after ${BUNDLE_INSTALL_POLL_MAX_ATTEMPTS} checks (~${Math.round((BUNDLE_INSTALL_POLL_MAX_ATTEMPTS * BUNDLE_INSTALL_POLL_INTERVAL_MS) / 60000)} min).`
+      );
+    }
+
+    /**
+     * POST /nsp/cam/group/{group_id}/bundle/{bundle_name}/associate with body {}.
+     */
+    async function associateBundle(base, groupId, bundleName) {
+      const enc = encodeURIComponent(bundleZipFileName(bundleName));
+      const url =
+        `${base}/nsp/cam/group/${groupId}/bundle/${enc}/associate`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      });
+      if (!res.ok) {
+        const detail = await readResponseDetail(res);
+        throw new Error(`Associate failed (${res.status} ${res.statusText}). ${detail}`);
+      }
+      return res.json().catch(() => ({}));
+    }
+
+    document.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        document.getElementById("generateBtn").click();
+      }
+    });
+
+    const generateBtn = document.getElementById("generateBtn");
+    const uploadNspBtn = document.getElementById("uploadNspBtn");
+
+    generateBtn.addEventListener("click", async () => {
+      const status = document.getElementById("status");
+      status.textContent = "";
+      hideError();
+      setProgress(false, 0, "");
+
+      const parsed = parseGroupId();
+      if (!parsed.ok) {
+        window.alert(parsed.error);
+        return;
+      }
+      const { groupId } = parsed;
+
+      status.textContent = "Generating ZIP…";
+      try {
+        const { blob, bundleName } = await buildBundleZip(groupId);
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `${bundleName}.zip`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        status.textContent = "ZIP generated and downloaded.";
+      } catch (err) {
+        const msg = err && err.message ? err.message : String(err);
+        showError(`Generation failed: ${msg}`);
+        status.textContent = "";
+      }
+    });
+
+    uploadNspBtn.addEventListener("click", async () => {
+      const status = document.getElementById("status");
+      status.textContent = "";
+      hideError();
+
+      const parsed = parseGroupId();
+      if (!parsed.ok) {
+        window.alert(parsed.error);
+        return;
+      }
+      const { groupId } = parsed;
+
+      generateBtn.disabled = true;
+      uploadNspBtn.disabled = true;
+
+      try {
+        const camBase = getNspCamApiBase(groupId);
+        setProgress(true, 10, "Step 1 of 5: Generating bundle…");
+        const { blob, bundleName } = await buildBundleZip(groupId);
+
+        setProgress(true, 25, `Step 2 of 5: Uploading bundle to ${new URL(camBase).host}…`);
+        await uploadArtifact(camBase, groupId, blob, bundleName);
+
+        setProgress(true, 35, "Waiting 5 seconds before install…");
+        await delay(5000);
+
+        setProgress(true, 50, "Step 3 of 5: Installing bundle on NSP…");
+        await installArtifact(camBase, groupId, bundleName);
+
+        await waitForBundleInstalled(
+          camBase,
+          groupId,
+          bundleName,
+          function (attempt, statusStr, summary) {
+            const namePart =
+              summary && summary.name != null ? String(summary.name) : bundleZipFileName(bundleName);
+            const pct = Math.min(90, 58 + Math.min(attempt, 32));
+            setProgress(
+              true,
+              pct,
+              "Step 4 of 5: Validating installation — waiting for summary.status \"Installed\"… " +
+                "poll #" +
+                attempt +
+                ", status: \"" +
+                (statusStr || "—") +
+                "\", name: " +
+                namePart
+            );
+          }
+        );
+
+        setProgress(true, 94, "Step 5 of 5: Associating bundle…");
+        await associateBundle(camBase, groupId, bundleName);
+
+        setProgress(true, 100, "Done: uploaded, installed, validated, and associated.");
+        status.textContent =
+          `Completed ${bundleZipFileName(bundleName)} for group ${groupId} on ${new URL(camBase).host} (installed + associated).`;
+      } catch (err) {
+        const msg = err && err.message ? err.message : String(err);
+        showError(msg);
+        setProgress(false, 0, "");
+        status.textContent = "";
+      } finally {
+        generateBtn.disabled = false;
+        uploadNspBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

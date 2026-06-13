@@ -1,8 +1,12 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
 # --- Configlets IRB GRT ---
 # this configlet creates a dedicated IRB for the MAC-VRF
 # that need to be connected to the GRT. This is not
 # supported yet in EDA
-apiVersion: config.eda.nokia.com/v1alpha1
+apiVersion: config.eda.nokia.com/v1
 kind: Configlet
 metadata:
   name: irb-grt
@@ -10,7 +14,7 @@ metadata:
   labels:
     role: hackathon-infra
 spec:
-  endpointSelector:
+  endpointSelectors:
     - eda.nokia.com/role=leaf
   operatingSystem: srl
   configs:
@@ -76,7 +80,7 @@ spec:
         }
 ---
 # configlet to tie the IRB to the GRT
-apiVersion: config.eda.nokia.com/v1alpha1
+apiVersion: config.eda.nokia.com/v1
 kind: Configlet
 metadata:
   name: netinst-default-irb1
@@ -84,7 +88,7 @@ metadata:
   labels:
     role: hackathon-infra
 spec:
-  endpointSelector:
+  endpointSelectors:
     - eda.nokia.com/role=leaf
   operatingSystem: srl
   configs:
@@ -99,20 +103,20 @@ spec:
             ]
         }
 ---
-# configlet to tie the IRB to MACVRF-1
-apiVersion: config.eda.nokia.com/v1alpha1
+# configlet to tie the IRB to MACVRF-11
+apiVersion: config.eda.nokia.com/v1
 kind: Configlet
 metadata:
-  name: netinst-macvrf1-irb1
+  name: netinst-macvrf11-irb1
   namespace: eda
   labels:
     role: hackathon-infra
 spec:
-  endpointSelector:
+  endpointSelectors:
     - eda.nokia.com/role=leaf
   operatingSystem: srl
   configs:
-    - path: .network-instance{.name=="macvrf1"}
+    - path: .network-instance{.name=="macvrf11"}
       operation: Create
       config: |-
         {

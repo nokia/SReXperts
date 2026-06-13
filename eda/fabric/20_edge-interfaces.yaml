@@ -1,4 +1,8 @@
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
   labels:
@@ -9,48 +13,39 @@ metadata:
 spec:
   description: Multi-homed device connected to port 2
   enabled: true
-  encapType: dot1q
+  encapType: Dot1q
   ethernet:
-    standbySignaling: lacp
+    standbySignaling: LACP
   lag:
     lacp:
       adminKey: 12
-      interval: fast
+      interval: Fast
       lacpFallback:
-        mode: static
-        timeout: 60
-      mode: active
-      systemIdMac: "00:00:00:00:00:12"
-      systemPriority: 32768
+        mode: Static
+      mode: Active
+      systemMAC: "00:00:00:00:00:12"
     minLinks: 1
     multihoming:
       esi: 01:DC:01:12:12:12:12:00:00:01
-      mode: all-active
-      reloadDelayTimer: 100
-      revertive: false
-      preferredActiveNode: ""
-    type: lacp
+      mode: AllActive
+    type: LACP
   lldp: false
   members:
-    - aggregateId: "1"
+    - aggregateID: "1"
       enabled: true
       interface: ethernet-1-2
-      lacpPortPriority: 32768
       node: g${INSTANCE_ID}-leaf11
-    - aggregateId: "1"
+    - aggregateID: "1"
       enabled: true
       interface: ethernet-1-2
-      lacpPortPriority: 32768
       node: g${INSTANCE_ID}-leaf12
-    - aggregateId: "1"
+    - aggregateID: "1"
       enabled: true
       interface: ethernet-1-2
-      lacpPortPriority: 32768
       node: g${INSTANCE_ID}-leaf13
-  type: lag
-  mtu: null
+  type: LAG
 ---
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
   labels:
@@ -60,17 +55,17 @@ metadata:
   namespace: eda
 spec:
   enabled: true
-  encapType: dot1q
+  encapType: Dot1q
   lldp: false
   members:
     - enabled: true
       interface: ethernet-1-1
       lacpPortPriority: 32768
       node: g${INSTANCE_ID}-leaf11
-  type: interface
+  type: Interface
   description: "leaf11-client11"
 ---
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
   labels:
@@ -80,17 +75,17 @@ metadata:
   namespace: eda
 spec:
   enabled: true
-  encapType: dot1q
+  encapType: Dot1q
   lldp: false
   members:
     - enabled: true
       interface: ethernet-1-3
       lacpPortPriority: 32768
       node: g${INSTANCE_ID}-leaf13
-  type: interface
+  type: Interface
   description: "leaf13-client13"
 ---
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
   name: spine11-ethernet-1-31
@@ -99,17 +94,17 @@ metadata:
     role: hackathon-infra
 spec:
   enabled: true
-  encapType: "null"
+  encapType: "Null"
   lldp: true
   members:
     - enabled: true
       interface: ethernet-1-31
       lacpPortPriority: 32768
       node: g${INSTANCE_ID}-spine11
-  type: interface
+  type: Interface
   description: "spine11-ethernet-1-31"
 ---
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
   name: spine11-ethernet-1-32
@@ -118,17 +113,17 @@ metadata:
     role: hackathon-infra
 spec:
   enabled: true
-  encapType: "null"
+  encapType: "Null"
   lldp: true
   members:
     - enabled: true
       interface: ethernet-1-32
       lacpPortPriority: 32768
       node: g${INSTANCE_ID}-spine11
-  type: interface
+  type: Interface
   description: "spine11-ethernet-1-32"
 ---
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
   name: spine12-ethernet-1-31
@@ -137,17 +132,17 @@ metadata:
     role: hackathon-infra
 spec:
   enabled: true
-  encapType: "null"
+  encapType: "Null"
   lldp: true
   members:
     - enabled: true
       interface: ethernet-1-31
       lacpPortPriority: 32768
       node: g${INSTANCE_ID}-spine12
-  type: interface
+  type: Interface
   description: "spine12-ethernet-1-31"
 ---
-apiVersion: interfaces.eda.nokia.com/v1alpha1
+apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
 metadata:
   name: spine12-ethernet-1-32
@@ -156,12 +151,12 @@ metadata:
     role: hackathon-infra
 spec:
   enabled: true
-  encapType: "null"
+  encapType: "Null"
   lldp: true
   members:
     - enabled: true
       interface: ethernet-1-32
       lacpPortPriority: 32768
       node: g${INSTANCE_ID}-spine12
-  type: interface
+  type: Interface
   description: "spine12-ethernet-1-32"

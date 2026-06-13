@@ -1,0 +1,169 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+---
+version: '2.0'
+
+srx-ne-revert-final:
+  type: direct
+  
+  tags:
+    - SReXperts
+
+  workflow_meta:
+    title: Reverts from existing checkpoint
+    author: NOKIA R&D
+    version: '1.0.0'
+    license: 
+    package: LSOM NE Revert
+    deprecated: false
+
+  input:
+    - neId
+    - neName
+    - neFamily
+    - fromFS: false
+    - pathLocal: ""
+    - pathFS: ""
+
+  vars:
+    lsoInfo: "Failed"
+    lsoStageError: "Failed"
+    loadFile: ""
+    fromFS: <% $.fromFS %>
+    dryRun: <% options().dryRun %>
+    stop: "([\\s\\S]*)(\\^*)[\r\n]*(MINOR:)([\\s\\S]*)|(([\\s\\S]*)(\\^*)[\r\n]*(Error:|ERROR:)([\\s\\S]*))"
+
+  output:
+    lsoInfo: <% $.lsoInfo %>
+    loadFile: <% $.loadFile %>
+    fromFS: <% $.fromFS %>
+
+  output-on-error:
+    lsoInfo: "Error: <% $.lsoInfo %>"
+
+  tasks:
+    lsoStageMapping:
+      action: nsp.python
+      input:
+        context:
+          neFamily: <% $.neFamily %>
+          fromFS: <% $.fromFS %>
+          pathLocal: <% $.pathLocal %>
+          pathFS: <% $.pathFS %>
+        script: |
+          if "SRLinux" in context["neFamily"]:
+            loadFile = "/etc/opt/srlinux/checkpoint/"+context["pathLocal"].split("_")[-1]
+            loadPath = "/etc/opt/srlinux/checkpoint/"
+            loadFromFS = "/tmp/"
+            fileExt = "json"
+          else:
+            loadFile = "cf3:/"+context["pathLocal"].split("_")[-1]
+            loadPath = "cf3:/"
+            loadFromFS = "cf3:/"
+            fileExt = "cfg"
+          return {
+            "loadFile": loadFile,
+            "loadPath": loadPath,
+            "loadFromFS": loadFromFS,
+            "fileExt": fileExt
+          }
+      publish:
+        loadFile: <% task().result.loadFile %>
+        loadPath: <% task().result.loadPath %>
+        loadFromFS: <% task().result.loadFromFS %>
+        fileExt: <% task().result.fileExt %>
+        timestamp: <% regex(":").replace(regex(" ").replace(get_UTC_time(),"-"),".") %>
+        lsoWorkflowStageMapping:
+          ne-revert:
+          - revertFromFileSRL
+      publish-on-error:
+        lsoInfo: "Failed to determine the file path and extension for the checkpoint file based on NE family"
+      on-success:
+        - transferCheckpoint: <% $.fromFS %> 
+        - revertFromFileSRL: <% not $.fromFS and $.neFamily.indexOf("SRLinux") != -1 %>
+        - revertFromFileSROS: <% not $.fromFS and $.neFamily.indexOf("7750 SR") != -1 %>
+      on-error:
+        - RevertFailed
+
+    transferCheckpoint:
+      action: lso_transferFilesToNe
+      input:
+        neId: <% $.neId %>
+        sourcePath: "<% $.pathFS %>/nsp_checkpoint.<% $.fileExt %>"
+        destinationPath: <% $.loadFromFS %>
+        ftUuid: <% $.neId+"-nsp_"+$.timestamp %>
+      publish:
+        lsoInfo: "Checkpoint file transferred to NE successfully"
+        loadFile: "<% $.loadFromFS %>nsp_checkpoint.<% $.fileExt %>"
+      publish-on-error:
+        lsoInfo: "Failed to transfer checkpoint file to NE"
+      on-success:
+        - revertFromFileSRL: <% $.neFamily.indexOf("SRLinux") != -1 %>
+        - revertFromFileSROS: <% $.neFamily.indexOf("7750 SR") != -1 %>
+      on-error:
+        - RevertFailed
+
+    revertFromFileSRL:
+      action: nsp.managed_cli
+      input:
+        neId: <% $.neId %>
+        stopOn: <% $.stop %>
+        idleTimeout: 30
+        closeSession: true
+        cmds:
+          - environment cli-engine type basic
+          - echo "Start"
+          - enter candidate
+          - load file <% $.loadFile %>
+          - commit now
+          - <% switch($.fromFS = true => "bash rm /tmp/nsp_checkpoint.json", $.fromFS = false => "echo 'Local'") %>
+          - echo "End"
+      publish:
+        lsoInfo: "Revert from file <% $.loadFile %> successfully completed"
+      publish-on-error:
+        lsoInfo: "Revert from file <% $.loadFile %> failed"
+      on-success:
+        - RevertSuccess
+      on-error:
+        - RevertFailed
+
+    revertFromFileSROS:
+      action: nsp.managed_cli
+      input:
+        neId: <% $.neId %>
+        stopOn: <% $.stop %>
+        idleTimeout: 30
+        closeSession: true
+        cmds:
+          - /!md-cli
+          - configure private
+          - load full-replace <% $.loadFile %>
+          - commit
+          - exit
+          #- <% switch($.fromFS = true => "file remove "+$.loadFile, $.fromFS = false => "") %>
+      publish:
+        lsoInfo: "Revert from file <% $.loadFile %> successfully completed"
+      publish-on-error:
+        lsoInfo: "Revert from file <% $.loadFile %> failed"
+      on-success:
+        - RevertSuccess
+      on-error:
+        - RevertFailed
+      
+    RevertSuccess:
+      join: 0
+      publish:
+        lsoInfo: "Checkpoint Successful"
+      on-complete:
+        - succeed 
+
+    RevertFailed:
+      join: 0
+      action: std.fail
+      input:
+        error_data: <% $.lsoInfo %>   
+      publish-on-error:
+        lsoStageError: <% $.lsoStageError %>
+        lsoInfo: <% task().result %> 

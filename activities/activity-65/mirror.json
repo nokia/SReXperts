@@ -1,0 +1,23 @@
+
+{
+        "mirror-dest": {
+            "service-name": "test-pcap",
+            "admin-state": "enable",
+            "slice-size": 256,
+            "service-id": 500,
+            "pcap": {
+                "session-name": "test",
+                "file-url": "ftp://<username>:<password>@<host>/cf3:/test.pcap",
+                "router-instance": "management"
+            }
+        },
+        "mirror-source": {
+            "service-name": "test-pcap",
+            "admin-state": "enable",
+            "port": {
+                "port-id": "1/1/c3/1",
+                "egress": true
+            }
+        }
+    }
+

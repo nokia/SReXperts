@@ -1,4 +1,8 @@
-apiVersion: routingpolicies.eda.nokia.com/v1alpha1
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+apiVersion: routingpolicies.eda.nokia.com/v1
 kind: Policy
 metadata:
   name: accept-all
@@ -7,4 +11,4 @@ metadata:
     role: hackathon-infra
 spec:
   defaultAction:
-    policyResult: accept
+    policyResult: Accept

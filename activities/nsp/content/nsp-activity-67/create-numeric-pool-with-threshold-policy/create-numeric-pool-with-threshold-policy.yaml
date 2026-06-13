@@ -1,0 +1,143 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+
+version: '2.0'
+
+create-numeric-pool-with-threshold-policy:
+  description: Creates a Threshold Policy and a scoped Numeric Resource Pool with that policy attached, in a single workflow execution.
+
+  type: direct
+
+  tags:
+    - Resource Pool
+    - Threshold Policy
+
+  workflow_meta:
+    title:   Create Numeric Pool with Threshold Policy
+    author:  WFM
+    version: '1.0.0'
+    dependencies:
+      platform:
+        nspOS: ['25.11']
+
+  input:
+    - numericPoolName
+    - numericPoolScope
+    - poolDescription: ""
+    - minValue
+    - maxValue
+    - thresholdWarning
+    - thresholdMinor
+    - thresholdMajor
+
+  vars:
+    status: ""
+    errorMessage: ""
+    errorDetails: ""
+    result: {}
+    thresholdPolicyName: ""
+
+  output:
+    result: <% $.result %>
+    status: success
+
+  output-on-error:
+    result: <% $.result %>
+    status: failed
+
+  tasks:
+    startTask:
+      description: "Starting task — derive threshold policy name"
+      action: std.noop
+      publish:
+        status: 'Workflow execution started'
+        thresholdPolicyName: '<% $.numericPoolName %>-policy'
+      on-success:
+        - createThresholdPolicy
+
+    createThresholdPolicy:
+      description: Create the Threshold Policy with warning, minor, and major utilization percentages
+      action: nsp.https
+      input:
+        url: 'https://restconf-gateway/restconf/data/nsp-resource-pool:threshold-policy'
+        method: POST
+        body:
+          {
+            "nsp-resource-pool:threshold-policies": [
+              {
+                "name": "<% $.thresholdPolicyName %>",
+                "threshold-type": "utilization",
+                "warning": <% int($.thresholdWarning) %>,
+                "minor": <% int($.thresholdMinor) %>,
+                "major": <% int($.thresholdMajor) %>
+              }
+            ]
+          }
+      publish:
+        policyCreated: <% switch(task().result.status = 201 => true, true => false) %>
+      publish-on-error:
+        policyExists: <% switch(task().result.status = 409 => true, true => false) %>
+        errorMessage: "Failed to create threshold policy"
+        errorDetails: "<% task().name %>: <% task().result %>"
+      on-success:
+        - createNumericPool: <% $.policyCreated = true %>
+        - errorHandler: <% $.policyCreated != true %>
+      on-error:
+        - createNumericPool: <% $.policyExists = true %>
+        - errorHandler: <% $.policyExists != true %>
+
+    createNumericPool:
+      description: Create the Numeric Resource Pool and attach the threshold policy in the same request
+      action: nsp.https
+      input:
+        url: 'https://restconf-gateway/restconf/data/nsp-resource-pool:resource-pools'
+        method: POST
+        body:
+          {
+            "nsp-resource-pool:numeric-resource-pools": [
+              {
+                "name": "<% $.numericPoolName %>",
+                "scope": "<% $.numericPoolScope %>",
+                "type": "nsp-resource-pool-utils:numerical",
+                "description": "<% $.poolDescription %>",
+                "numeric-spec": {
+                  "min-value": <% int($.minValue) %>,
+                  "max-value": <% int($.maxValue) %>
+                },
+                "threshold-policy": "<% $.thresholdPolicyName %>"
+              }
+            ]
+          }
+      publish:
+        poolCreated: <% switch(task().result.status = 201 => true, true => false) %>
+      publish-on-error:
+        errorMessage: <% switch(task().result.status = 409 => "Numeric pool already exists", true => "Failed to create numeric pool") %>
+        errorDetails: "<% task().name %>: <% task().result %>"
+      on-success:
+        - exitTask: <% $.poolCreated = true %>
+        - errorHandler: <% $.poolCreated != true %>
+      on-error:
+        - errorHandler
+
+    exitTask:
+      description: "Success task"
+      action: std.noop
+      publish:
+        result:
+          status: 'Successfully created threshold policy and numeric pool'
+          poolName: <% $.numericPoolName %>
+          poolScope: <% $.numericPoolScope %>
+          thresholdPolicyName: <% $.thresholdPolicyName %>
+          errorMessage: ""
+          errorDetails: ""
+
+    errorHandler:
+      description: "Failure task"
+      action: std.fail
+      publish-on-error:
+        result:
+          status: 'Failed to create threshold policy or numeric pool'
+          errorMessage: <% $.errorMessage %>
+          errorDetails: <% $.errorDetails %>

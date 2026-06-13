@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     el = el.nextElementSibling
   }
 
-  startButtonStyle = 'padding: 2px 10px; font-size: 12px; border-radius: 9999px; margin-top: 20px;'
+  startButtonStyle = 'padding: 2px 10px; font-size: 12px; border-radius: 9999px; margin-top: 20px; margin-left: 10px;'
 
   h3s.forEach(heading => {
     const btn = document.createElement('button')

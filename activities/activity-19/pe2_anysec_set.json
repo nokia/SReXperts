@@ -1,0 +1,80 @@
+{
+  "updates": [
+    {
+      "path": "configure/anysec",
+      "value": {
+        "mka-over-ip": {
+          "mka-udp-port": 10000
+        },
+        "mpls": {
+          "security-termination-policies": {
+            "policy": [
+              {
+                "admin-state": "enable",
+                "igp-instance-id": 0,
+                "local-address": "10.46.{{ getenv "INSTANCE_ID" }}.22",
+                "policy-name": "STP_All",
+                "protocol": "sr-isis",
+                "rx-must-be-encrypted": false
+              }
+            ]
+          },
+          "service-encryption": {
+            "encryption-group": [
+              {
+                "admin-state": "enable",
+                "ca-name": "CA_A",
+                "encryption-label": 2202,
+                "group-name": "EG_A",
+                "peer": [
+                  {
+                    "admin-state": "enable",
+                    "peer-ip-address": "10.46.{{ getenv "INSTANCE_ID" }}.23"
+                  }
+                ],
+                "security-termination-policy": "STP_All"
+              },
+              {
+                "admin-state": "enable",
+                "ca-name": "CA_B",
+                "encryption-label": 2302,
+                "group-name": "EG_B",
+                "peer": [
+                  {
+                    "admin-state": "enable",
+                    "peer-ip-address": "10.46.{{ getenv "INSTANCE_ID" }}.23"
+                  }
+                ],
+                "security-termination-policy": "STP_All"
+              }
+            ]
+          }
+        },
+        "reserved-label-block": "Anysec"
+      }
+    },
+    {
+      "path": "configure/service/epipe[service-name=Svc-A_Epipe]",
+      "value": {
+        "admin-state": "enable",
+        "customer": "1",
+        "description": "Epipe Svc A",
+        "service-id": 1002,
+        "service-mtu": 8100,
+        "sap": [
+          {
+            "sap-id": "1/1/c6/1:1002",
+            "admin-state": "enable"
+          }
+        ],
+        "spoke-sdp": [
+          {
+            "sdp-bind-id": "2333:1002",
+            "admin-state": "enable",
+            "anysec-encryption-group": "EG_A"
+          }
+        ]
+      }
+    }
+  ]
+}

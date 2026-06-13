@@ -1,0 +1,94 @@
+name: trigger-service-resync-report
+version: 1.0.0
+template: |
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <style>
+        .font-nokia-pure-text {
+          font-family: "NokiaPure", sans-serif;
+        }
+        .headline {
+          color: #183693;
+          font-size: 20px;
+          margin: 0px 0px 15px 0px;
+          text-align: center;
+        }
+        .main-content {
+          padding: 6px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        table {
+          width: 80%;
+          font-size: 15px;
+          text-align: left;
+          border-collapse: collapse;
+        }
+        thead {
+          background-color: #eaeaea;
+        }
+        td, th {
+          padding: 10px;
+        }
+        tr td:last-child {
+          text-align: right;
+        }
+        .row-service {
+          border-top: 1px solid #aeaeae;
+          border-bottom: 1px solid #aeaeae;
+        }
+        .admin-state {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid transparent;
+          background-color: #e7e7e7;
+          font-family: "NokiaPure", sans-serif;
+          border-radius: 4px;
+          padding: 2px 8px;
+          font-size: 14px;
+        }
+        .admin-state.success {
+          background-color: #228B22;
+          color: white;
+        }
+        .admin-state.error {
+          background-color: #C62828;
+          color: white;
+        }
+      </style>
+    </head>
+    <body>
+      <p class="headline">Trigger Service Resync – Results</p>
+      <div class="main-content font-nokia-pure-text">
+        <table>
+          <thead>
+            <tr>
+              <th>Service Type</th>
+              <th>Node ID</th>
+              <th>Node Name</th>
+              <th>Status</th>
+              <th>Error</th>
+            </tr>
+          </thead>
+          <tbody>
+  {%- for entry in config -%}
+            <tr class="row-service">
+              <td>{{ entry.get("service_type", "") }}</td>
+              <td>{{ entry.get("ne_id", "") }}</td>
+              <td>{{ entry.get("ne_name", "") }}</td>
+              <td>
+                <span class="admin-state{% if entry.get('status') == 'success' %} success{% elif entry.get('status') == 'error' %} error{% endif %}">
+                  {{ entry.get("status", "") }}
+                </span>
+              </td>
+              <td>{{ entry.get("error", "") or "—" }}</td>
+            </tr>
+  {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
+    </body>
+  </html>

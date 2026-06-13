@@ -1,0 +1,45 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+apiVersion: ai.core.eda.nokia.com/v1
+kind: Provider
+metadata:
+  name: openai
+  namespace: eda-system
+spec:
+  endpoint:
+    apiKey: >-
+      ${LLM_API_KEY}
+    url: https://api.openai.com/v1/responses
+  models:
+    - description: Balanced GPT-4.1 for chat and tool calls
+      name: gpt-4.1
+      priority: Priority
+      supportNestedResponses: true
+      temperature: "0"
+      type: Responses
+      usage:
+        - Chat
+    - description: Fast lightweight model for routing/classification
+      name: gpt-5-mini
+      priority: Priority
+      supportNestedResponses: true
+      type: Responses
+      usage:
+        - Routing
+    - description: Flagship reasoning model
+      name: gpt-5.1
+      priority: Priority
+      reasoningLevel:
+        - Low
+        - Medium
+        - High
+      supportNestedResponses: true
+      type: Responses
+      usage:
+        - Reasoning
+    - description: Embedding model
+      name: text-embedding-ada-002
+      supportNestedResponses: false
+      type: Embeddings

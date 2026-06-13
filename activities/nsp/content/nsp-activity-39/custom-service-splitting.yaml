@@ -1,0 +1,414 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+version: '2.0'
+
+custom-service-splitting:
+  description: Discover group-scoped multi-site services, recommend target service names with a selected built-in algorithm, and report the suggested split payload for approval.
+
+  type: direct
+
+  tags:
+    - sf-network-operation
+
+  vars:
+    svc_offset: 0
+    svc_total_count: 0
+    service_id_detail: []
+    list_for_report: []
+
+  input:
+    # Enter your assigned group value, for example group3.
+    - group-id: ''
+    # Values exposed by the workflow form: split-by-customer-id or split-by-site-name.
+    - splitting-algorithm: split-by-customer-id
+    # Final lab step: use this as the approval gate for the execution subworkflow.
+    - approved: false
+
+  output:
+    result: <% $.get('result', '') %>
+
+  tasks:
+    start:
+      action: std.noop
+      on-complete:
+        - load_jinja_templates
+
+    load_jinja_templates:
+      action: std.noop
+      publish:
+        reportTemplate: <% fetch_jinja('service-splitting-report') %>
+      on-success:
+        - find-service
+
+    find-service:
+      action: nsp.https
+      input:
+        url: 'https://<% locate_nsp() %>/restconf/operations/nsp-inventory:find'
+        method: POST
+        body:
+          input:
+            depth: 9
+            fields: "name;description;tenant;service-id;service-extension:l3vpn-svc;service-extension:elan-svc;site(name;site-id;description;ipservice-site-detail;service-extension:l3vpn-site;service-extension:elan-site)"
+            offset: <% $.svc_offset %>
+            sort-by: []
+            xpath-filter: "/nsp-service:services/service-layer/elan|/nsp-service:services/service-layer/l3vpn"
+            limit: 100
+        contentType: 'application/json'
+        accept: 'application/json'
+      publish:
+        service_id_detail: <% $.service_id_detail.concat(task().result.content["nsp-inventory:output"].data) %>
+        svc_offset: <% task().result.content["nsp-inventory:output"]["end-index"] + 1 %>
+        svc_total_count: <% task().result.content["nsp-inventory:output"]["total-count"] %>
+      publish-on-error:
+        status: <% task().result.status %>
+      on-complete:
+        - find-service: <% $.svc_offset != $.svc_total_count %>
+        - get-node: <% $.svc_offset = $.svc_total_count %>
+
+    get-node:
+      action: nsp.https
+      input:
+        url: 'https://<% locate_nsp() %>/restconf/data/nsp-equipment:network/network-element?include-meta=false&fields=ne-id;ne-name;product'
+        method: GET
+        contentType: 'application/json'
+        accept: 'application/json'
+      publish:
+        node_detail: <% task().result.content["nsp-equipment:network-element"] %>
+      publish-on-error:
+        status: <% task().result.status %>
+      on-success:
+        - get-nodes-for-customer-info
+
+    get-nodes-for-customer-info:
+      action: nsp.python
+      input:
+        context:
+          node_detail: <% $.node_detail %>
+          group_id: <% $['group-id'] %>
+        script: |
+          def _srl_hint(item):
+              v = item.get('product')
+              if v is None or v == '':
+                  return ''
+              return str(v).lower()
+
+          def _group_suffix(raw_group_id):
+              group = str(raw_group_id or '').strip().lower()
+              if not group:
+                  return ''
+
+              suffix = group
+              if group.startswith('group'):
+                  suffix = group.replace('group', '', 1).strip('-_ ')
+              elif group.startswith('g'):
+                  suffix = group[1:].strip('-_ ')
+              return suffix or group
+
+          def _node_group_suffix(raw_node_name):
+              node_name = str(raw_node_name or '').strip().lower()
+              if not node_name:
+                  return ''
+
+              if node_name.startswith('group'):
+                  remainder = node_name.replace('group', '', 1).lstrip('-_ ')
+              elif node_name.startswith('g'):
+                  remainder = node_name[1:]
+              else:
+                  return ''
+
+              suffix = []
+              for ch in remainder:
+                  if ch.isdigit():
+                      suffix.append(ch)
+                  else:
+                      break
+
+              return ''.join(suffix)
+
+          group_suffix = _group_suffix(context.get('group_id'))
+          nodes = []
+          for item in context.get('node_detail') or []:
+              ne_id = item.get('ne-id')
+              if not ne_id:
+                  continue
+              hint = _srl_hint(item)
+              if 'srl' in hint or 'srlinux' in hint:
+                  continue
+              node_group_suffix = _node_group_suffix(item.get('ne-name'))
+              if group_suffix and node_group_suffix != group_suffix:
+                  continue
+              nodes.append({
+                  'ne_id': ne_id,
+                  'ne_name': item.get('ne-name'),
+                  'product': item.get('product'),
+              })
+          return nodes
+      publish:
+        nodes_for_customer_info: <% task().result %>
+      on-success:
+        - get-customer-info
+
+    get-customer-info:
+      with-items: item in <% $.nodes_for_customer_info %>
+      action: nsp.https
+      input:
+        url: 'https://<% locate_nsp() %>/restconf/data/network-device-mgr:network-devices/network-device=<% $.item.ne_id %>/root/nokia-conf:/configure/service/customer?with-defaults=report-all'
+        method: GET
+        contentType: 'application/json'
+        accept: 'application/json'
+      publish:
+        customer_info: <% task().result %>
+      publish-on-error:
+        customer_info: <% task().result %>
+      on-complete:
+        - create-customer-info-list
+
+    create-customer-info-list:
+      action: nsp.python
+      input:
+        context:
+          customer_info: <% $.customer_info %>
+        script: |
+          result = []
+
+          for entry in context.get('customer_info') or []:
+              if not isinstance(entry, dict):
+                  continue
+              if entry.get('status') and int(entry.get('status')) >= 400:
+                  continue
+              if 'url' not in entry or 'content' not in entry:
+                  continue
+              customers = entry.get('content', {}).get('nokia-conf:customer')
+              if not customers:
+                  continue
+              device_id = entry['url'].split('network-device=')[1].split('/')[0]
+              customer_list = [{'customer-id': customer['customer-id'], 'customer-name': customer['customer-name']} for customer in customers]
+              result.append({device_id: customer_list})
+
+          return result
+      publish:
+        customer_info_list: <% task().result %>
+      on-success:
+        - filter-out-brownfield-services
+
+    filter-out-brownfield-services:
+      action: nsp.python
+      input:
+        context:
+          service_id_detail: <% $.service_id_detail %>
+        script: |
+          filtered_services = [
+              service for service in context.get('service_id_detail') or []
+              if not ('service-extension:elan-svc' in service or 'service-extension:l3vpn-svc' in service)
+          ]
+
+          return filtered_services
+      publish:
+        brownfield_services: <% task().result %>
+      on-success:
+        - run-splitting-algorithm
+
+    run-splitting-algorithm:
+      action: nsp.python
+      input:
+        context:
+          brownfield_services: <% $.brownfield_services %>
+          service_id_detail: <% $.service_id_detail %>
+          node_detail: <% $.node_detail %>
+          customer_info_list: <% $.customer_info_list %>
+          group_id: <% $['group-id'] %>
+          splitting_algorithm: <% $['splitting-algorithm'] %>
+        script: |
+          def group_tokens(raw_group_id):
+              group = str(raw_group_id or '').strip().lower()
+              if not group:
+                  return []
+              tokens = {group}
+              if group.startswith('group'):
+                  suffix = group.replace('group', '', 1).strip('-_ ')
+                  if suffix:
+                      tokens.update({suffix, 'group' + suffix, 'group-' + suffix, 'group_' + suffix})
+              else:
+                  tokens.update({'group' + group, 'group-' + group, 'group_' + group})
+              return [token for token in tokens if token]
+
+          def service_matches_group(service, tokens):
+              if not tokens:
+                  return True
+              values = [
+                  service.get('service-id'),
+                  service.get('name'),
+                  service.get('description'),
+              ]
+              for site in service.get('site') or []:
+                  values.extend([
+                      site.get('name'),
+                      site.get('description'),
+                      site.get('site-id'),
+                  ])
+              searchable = ' '.join(str(value).lower() for value in values if value not in (None, ''))
+              return any(token in searchable for token in tokens)
+
+          def customer_lookup(customer_info_list):
+              lookup = {}
+              for customer_data in customer_info_list or []:
+                  for ne_id, customers in customer_data.items():
+                      lookup[ne_id] = {
+                          str(customer.get('customer-name')).lower(): str(customer.get('customer-id'))
+                          for customer in customers
+                      }
+              return lookup
+
+          def normalized_tenant_id(site, ne_id, customers_by_ne):
+              tenant_id = (
+                  site.get('service-extension:elan-site', {}).get('tenant-id') or
+                  site.get('service-extension:l3vpn-site', {}).get('tenant-id')
+              )
+              if tenant_id and not str(tenant_id).isdigit():
+                  return customers_by_ne.get(ne_id, {}).get(str(tenant_id).lower(), tenant_id)
+              return tenant_id
+
+          def service_state(service):
+              if 'service-extension:elan-svc' in service or 'service-extension:l3vpn-svc' in service:
+                  return 'associated'
+              return 'brownfield'
+
+          def target_state(service_states, target_service_name):
+              return service_states.get(str(target_service_name), 'new')
+
+          def site_payload(site, target_service_name, service_states):
+              return {
+                  'nsp-model:identifier': site['nsp-model:identifier'],
+                  'tenant-id': site['tenant-id'],
+                  'ne-id': site['ne_id'],
+                  'ne-name': site['ne_name'],
+                  'service-type': site['service_type'],
+                  'site-name': site['name'],
+                  'target-service-name': target_service_name,
+                  'service-name': site['service_name'],
+                  'ne-service-id': site['ne_service_id'],
+                  'target-service-state': target_state(service_states, target_service_name)
+              }
+
+          def split_by_customer_id(service_id, site_list, service_states):
+              by_tenant = {}
+              for site in site_list:
+                  by_tenant.setdefault(site['tenant-id'], []).append(site)
+              if len(by_tenant) < 2:
+                  return []
+
+              split_sites = []
+              for tenant_id, sites in by_tenant.items():
+                  split_sites.extend(site_payload(site, site['default_service_name'], service_states) for site in sites)
+              return [{service_id: split_sites}]
+
+          def split_by_site_name(service_id, site_list, service_states):
+              by_name = {}
+              for site in site_list:
+                  by_name.setdefault(site['name'], []).append(site)
+              if len(by_name) < 2:
+                  return []
+
+              split_sites = []
+              for site_name, sites in by_name.items():
+                  split_sites.extend(site_payload(site, site_name, service_states) for site in sites)
+              return [{service_id: split_sites}]
+
+          def selected_algorithm(name):
+              algorithms = {
+                  'split-by-customer-id': split_by_customer_id,
+                  'split-by-tenant-id': split_by_customer_id,
+                  'split-by-site-name': split_by_site_name,
+              }
+              normalized = str(name or 'split-by-customer-id').strip().lower().replace('_', '-')
+              return algorithms.get(normalized, split_by_customer_id)
+
+          node_detail = context.get('node_detail') or []
+          service_id_detail = context.get('service_id_detail') or []
+          brownfield_services = context.get('brownfield_services') or []
+          split_algorithm = selected_algorithm(context.get('splitting_algorithm'))
+          ne_id_to_name = {entry['ne-id']: entry['ne-name'] for entry in node_detail}
+          customers_by_ne = customer_lookup(context.get('customer_info_list'))
+          tokens = group_tokens(context.get('group_id'))
+          service_states = {}
+          for service in service_id_detail:
+              state = service_state(service)
+              service_id_value = service.get('service-id')
+              service_name_value = service.get('name')
+              if service_id_value is not None:
+                  service_states[str(service_id_value)] = state
+              if service_name_value is not None:
+                  service_states[str(service_name_value)] = state
+          final_output_data = []
+
+          for service in brownfield_services:
+              if 'site' not in service or len(service['site']) < 2 or not service_matches_group(service, tokens):
+                  continue
+              service_id = service.get('service-id')
+              site_list = []
+              for site in service.get('site', []):
+                  nsp_identifier = site.get('@', {}).get('nsp-model:identifier')
+                  if not nsp_identifier or 'site-id=' not in nsp_identifier:
+                      continue
+                  ne_id = nsp_identifier.split('site-id=')[1].split(']')[0].strip("'")
+                  tenant_id = normalized_tenant_id(site, ne_id, customers_by_ne)
+                  if not tenant_id:
+                      continue
+                  ne_service_id = site.get('ipservice-site-detail', {}).get('ne-service-id')
+                  site_name = site.get('name') or nsp_identifier.split('name=')[1].split(']')[0].strip("'")
+                  site_list.append({
+                      'nsp-model:identifier': nsp_identifier,
+                      'tenant-id': str(tenant_id),
+                      'ne_id': ne_id,
+                      'ne_name': ne_id_to_name.get(ne_id, "UNKNOWN_SITE"),
+                      'name': site_name,
+                      'service_type': nsp_identifier.split('/')[3].split('[')[0],
+                      'default_service_name': site_name,
+                      'service_name': service.get('name') or service_id,
+                      'ne_service_id': ne_service_id
+                  })
+              final_output_data.extend(split_algorithm(service_id, site_list, service_states))
+
+          return final_output_data
+      publish:
+        list_for_report: <% task().result %>
+      on-success:
+        - build_report_context
+
+    build_report_context:
+      action: nsp.python
+      input:
+        context:
+          group_id: <% $['group-id'] %>
+          splitting_algorithm: <% $['splitting-algorithm'] %>
+          approved: <% $.approved %>
+          list_for_report: <% $.list_for_report %>
+        script: |
+          return {
+            'report_context': {
+              'report_state': 'recommendations',
+              'group_id': context.get('group_id') or '',
+              'splitting_algorithm': context.get('splitting_algorithm') or '',
+              'list_for_report': context.get('list_for_report') or [],
+              'approved': bool(context.get('approved'))
+            }
+          }
+      publish:
+        report_context: <% task().result.get('report_context', {}) %>
+      on-success:
+        - render_report
+
+    render_report:
+      action: nsp.python
+      input:
+        context:
+          rendered_html: <% resolve_jinja($.get('reportTemplate', fetch_jinja('service-splitting-report')), $.get('report_context', {})) %>
+        script: |
+          html = context.get('rendered_html') or ''
+          if not isinstance(html, str):
+              html = str(html)
+          return {'result': ''.join(line.strip() for line in html.splitlines())}
+      publish:
+        result: <% task().result.get('result', '') %>

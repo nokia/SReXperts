@@ -1,0 +1,18 @@
+version: "2.0"
+
+nsp.neList:
+  description: List NEs
+  base: nsp.https
+  base-input:
+    method: POST
+    url: https://<% locate_nsp() %>:8545/restconf/operations/nsp-inventory:find
+    body:
+      input:
+        xpath-filter: /nsp-equipment:network/network-element
+        fields: ne-name;ne-id;ip-address
+        sort-by: ["ne-id"]
+    resultFilter: $.content.get("nsp-inventory:output")
+  input:
+    - formValues: ""
+    - token_auth
+  output: <% $.content.data.select({name => $.get("ne-id")}) %>

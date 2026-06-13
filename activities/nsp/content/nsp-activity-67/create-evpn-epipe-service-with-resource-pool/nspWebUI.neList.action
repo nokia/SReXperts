@@ -1,0 +1,57 @@
+---
+version: '2.0'
+
+nspWebUI.neList:
+  description: |
+      action: nspWebUI.neList
+      since: NSP 21.3
+      short_description: Queries the list of NSP managed devices
+      description:
+        - This action is targeted to be used by schema-form suggests/pickers
+        - RESTCONF nsp-inventory is used
+        - Actions returns both NFMP and MDM managed devices
+      input:
+        token_auth:
+          description: To comply with schema-form and provide user context
+          type: String
+          mandatory: False
+        formValues:
+          description: not used, but needed to comply with schema-form
+          type: Dictionary
+          mandatory: False
+      output:
+        type: list of dicts
+        description: inventory of nodes managed by NSP
+      example_responses:
+        Success: |
+          result:
+          - neId: 1.1.2.1
+            mgmtIP: 192.168.2.1
+            neName: Sydney
+            neFamily: 7750 SR
+            neType: 7750 SR-12
+            version: TiMOS-B-19.10.R2
+            location: Australia
+          - neId: 1.1.2.2
+            mgmtIP: 192.168.2.2
+            neName: Melbourne
+            neFamily: 7750 SR
+            neType: 7750 SR-12
+            version: TiMOS-B-20.5.R1
+            location: Australia
+  base: nsp.https
+  base-input:
+    url: https://restconf-gateway/restconf/operations/nsp-inventory:find
+    body:
+      input:
+        xpath-filter: '/nsp-equipment:network/network-element'
+        fields: ne-id;ne-name;ip-address;version;location;type;product
+        sort-by:
+          - ne-id
+    resultFilter: $.content.get('nsp-inventory:output').data.select({neId=>$.get('ne-id'),neName=>$.get('ne-name'),mgmtIP=>$.get('ip-address'),version=>$.version,location=>$.location,neType=>$.type,neFamily=>$.product})
+    method: POST
+    auth: <% $.token_auth %>
+  input:
+    - token_auth
+    - formValues: {}
+  output: <% $.content %>

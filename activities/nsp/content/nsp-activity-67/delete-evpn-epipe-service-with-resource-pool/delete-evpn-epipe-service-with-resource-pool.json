@@ -1,0 +1,73 @@
+{
+  "type": "object",
+  "properties": [
+    {
+      "name": "serviceName",
+      "title": "SERVICE NAME",
+      "description": "description for serviceName",
+      "columnSpan": 2,
+      "newRow": true,
+      "readOnly": false,
+      "required": true,
+      "type": "leafref",
+      "componentProps": {
+        "displayKeyId": "serviceName"
+      },
+      "suggest": {
+        "action": "nspWebUI.listElineServices"
+      },
+      "properties": [
+        {
+          "name": "serviceName",
+          "type": "string",
+          "title": "Service Name"
+        }
+      ]
+    },
+    {
+      "name": "numericPoolName",
+      "title": "NUMERIC POOL NAME",
+      "description": "description for numericPoolName",
+      "columnSpan": 2,
+      "newRow": true,
+      "readOnly": false,
+      "required": false,
+      "type": "leafref",
+      "componentProps": {
+        "displayKeyId": "name"
+      },
+      "suggest": {
+        "action": "nspWebUI.listNumericPools"
+      },
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "title": "Name"
+        },
+        {
+          "name": "scope",
+          "type": "string",
+          "title": "Scope"
+        }
+      ],
+      "setFieldValues": [
+        {
+          "name": "numericPoolScope",
+          "value": "scope"
+        }
+      ]
+    },
+    {
+      "name": "numericPoolScope",
+      "title": "NUMERIC POOL SCOPE",
+      "description": "description for numericPoolScope",
+      "columnSpan": 2,
+      "newRow": true,
+      "readOnly": true,
+      "required": true,
+      "type": "string",
+      "default": ""
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+
+version: '2.0'
+
+reserve-or-release-numeric-pool:
+  description: Reserves one or more specific values in a Numeric Resource Pool for a labeled future use, or releases previously reserved values — controlled by the 'action' input (reserve | release).
+
+  type: direct
+
+  tags:
+    - Resource Pool
+    - Reserve
+    - Release
+
+  workflow_meta:
+    title:   Reserve or Release Numeric Pool Values
+    author:  WFM
+    version: '1.0.0'
+    dependencies:
+      platform:
+        nspOS: ['25.11']
+
+  input:
+    - action
+    - numericPoolName
+    - numericPoolScope
+    - values
+    - reference: ""
+    - owner: ""
+
+  vars:
+    status: ""
+    errorMessage: ""
+    errorDetails: ""
+    parsedValues: []
+    result: {}
+
+  output:
+    result: <% $.result %>
+    status: success
+
+  output-on-error:
+    result: <% $.result %>
+    status: failed
+
+  tasks:
+    startTask:
+      description: "Starting task — validate action input"
+      action: std.noop
+      publish:
+        status: 'Workflow execution started'
+        actionValid: <% switch($.action = 'reserve' => true, $.action = 'release' => true, true => false) %>
+        errorMessage: <% switch($.action = 'reserve' => '', $.action = 'release' => '', true => "Invalid action. Allowed values are 'reserve' or 'release'.") %>
+        errorDetails: <% switch($.action = 'reserve' => '', $.action = 'release' => '', true => "Received action- " + $.action) %>
+      on-success:
+        - parseValues: <% $.actionValid = true %>
+        - errorHandler: <% $.actionValid != true %>
+
+    parseValues:
+      description: Parse the values input into a proper integer list (handles both string '[1,2]' and native list from form)
+      action: nsp.python
+      input:
+        context: <% $.values %>
+        script: |
+          import json
+          v = context
+          if isinstance(v, str):
+            v = json.loads(v)
+          return [int(x) for x in v]
+      publish:
+        parsedValues: <% task().result %>
+      publish-on-error:
+        errorMessage: "Failed to parse values input — make sure it is a valid JSON array of integers, e.g. [1, 2]"
+        errorDetails: "<% task().name %>: <% task().result %>"
+      on-success:
+        - verifyPoolPresence
+      on-error:
+        - errorHandler
+
+    verifyPoolPresence:
+      description: Verify the target numeric pool exists before acting
+      action: nsp.https
+      input:
+        url: 'https://restconf-gateway/restconf/data/nsp-resource-pool:resource-pools/numeric-resource-pools=<% $.numericPoolName %>,<% $.numericPoolScope %>'
+        method: GET
+      publish:
+        poolExist: <% switch(task().result.status = 200 => 'yes', task().result.status != 200 => 'no') %>
+      publish-on-error:
+        errorMessage: <% switch(task().result.status = 404 => 'Resource pool not found. Make sure the pool name and scope are correct.', true => 'Failed to get resource pool information') %>
+        errorDetails: "<% task().name %>: <% task().result %>"
+      on-success:
+        - reserveValues: <% $.poolExist = 'yes' and $.action = 'reserve' %>
+        - releaseValues: <% $.poolExist = 'yes' and $.action = 'release' %>
+        - errorHandler:  <% $.poolExist != 'yes' %>
+      on-error:
+        - errorHandler
+
+    reserveValues:
+      description: Reserve one or more specific values in the pool for a labeled future use
+      action: nsp.https
+      input:
+        url: 'https://restconf-gateway/restconf/data/nsp-resource-pool:resource-pools/numeric-resource-pools=<% $.numericPoolName %>,<% $.numericPoolScope %>/reserve'
+        method: POST
+        body:
+          {
+            "nsp-resource-pool:input": {
+              "owner": "<% $.owner %>",
+              "reference": "<% $.reference %>",
+              "confirmed": true,
+              "reserve-values": <% $.parsedValues %>
+            }
+          }
+      publish:
+        reserveOk: <% switch(task().result.status = 200 => true, task().result.status = 201 => true, task().result.status = 204 => true, true => false) %>
+      publish-on-error:
+        errorMessage:  <% switch(task().result.status = 409 => 'One or more values are already reserved or consumed. Choose different values or release them first.', true => 'Failed to reserve pool values') %>
+        errorDetails: "<% task().name %>: <% task().result %>"
+      on-success:
+        - exitTask: <% $.reserveOk = true %>
+        - errorHandler: <% $.reserveOk != true %>
+      on-error:
+        - errorHandler
+
+    releaseValues:
+      description: Release previously reserved values back to the pool
+      action: nsp.https
+      input:
+        url: 'https://restconf-gateway/restconf/data/nsp-resource-pool:resource-pools/numeric-resource-pools=<% $.numericPoolName %>,<% $.numericPoolScope %>/release-values'
+        method: POST
+        body:
+          {
+            "nsp-resource-pool:input": {
+              "values": <% $.parsedValues %>
+            }
+          }
+      publish:
+        releaseOk: <% switch(task().result.status = 200 => true, task().result.status = 204 => true, true => false) %>
+      publish-on-error:
+        errorMessage: <% switch(task().result.status = 404 => 'No reservation found for these values. Confirm the values match what was reserved.', true => 'Failed to release pool values') %>
+        errorDetails: "<% task().name %>: <% task().result %>"
+      on-success:
+        - exitTask: <% $.releaseOk = true %>
+        - errorHandler: <% $.releaseOk != true %>
+      on-error:
+        - errorHandler
+
+    exitTask:
+      description: "Success task"
+      action: std.noop
+      publish:
+        result:
+          status: <% switch($.action = 'reserve' => 'Successfully reserved values in numeric pool', true => 'Successfully released values from numeric pool') %>
+          action: <% $.action %>
+          numericPoolName: <% $.numericPoolName %>
+          numericPoolScope: <% $.numericPoolScope %>
+          values: <% $.parsedValues %>
+          errorMessage: ""
+          errorDetails: ""
+
+    errorHandler:
+      description: "Failure task"
+      action: std.fail
+      publish-on-error:
+        result:
+          status: <% switch($.action = 'reserve' => 'Failed to reserve values in numeric pool', $.action = 'release' => 'Failed to release values from numeric pool', true => 'Workflow failed') %>
+          errorMessage: <% $.errorMessage %>
+          errorDetails: <% $.errorDetails %>

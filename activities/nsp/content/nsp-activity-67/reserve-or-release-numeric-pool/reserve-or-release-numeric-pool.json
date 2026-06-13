@@ -1,0 +1,101 @@
+{
+  "type": "object",
+  "properties": [
+    {
+      "name": "action",
+      "title": "ACTION",
+      "description": "Choose 'reserve' to hold values for future use, or 'release' to free previously reserved values",
+      "columnSpan": 1,
+      "newRow": true,
+      "readOnly": false,
+      "required": true,
+      "type": "string",
+      "enum": [
+        "reserve",
+        "release"
+      ],
+      "default": "reserve"
+    },
+    {
+      "name": "numericPoolName",
+      "title": "POOL NAME",
+      "description": "Name of the numeric pool to act on",
+      "columnSpan": 2,
+      "newRow": true,
+      "readOnly": false,
+      "required": true,
+      "type": "leafref",
+      "componentProps": {
+        "displayKeyId": "name"
+      },
+      "suggest": {
+        "action": "nspWebUI.listNumericPools"
+      },
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "title": "Name"
+        },
+        {
+          "name": "scope",
+          "type": "string",
+          "title": "Scope"
+        }
+      ],
+      "setFieldValues": [
+        {
+          "name": "numericPoolScope",
+          "value": "scope"
+        }
+      ]
+    },
+    {
+      "name": "numericPoolScope",
+      "title": "POOL SCOPE",
+      "description": "Scope of the pool (auto-filled when pool name is selected)",
+      "columnSpan": 2,
+      "newRow": true,
+      "readOnly": true,
+      "required": true,
+      "type": "string",
+      "default": ""
+    },
+    {
+      "name": "values",
+      "title": "VALUES",
+      "description": "List of numeric values to reserve or release — enter as a JSON array, e.g. [4, 5]",
+      "columnSpan": 2,
+      "newRow": true,
+      "readOnly": false,
+      "required": true,
+      "type": "list",
+      "component": {
+        "input": "simpleInputPicker",
+        "list": "simplePropertyList"
+      }
+    },
+    {
+      "name": "reference",
+      "title": "REFERENCE",
+      "description": "Label identifying this reservation (used for reserve only)",
+      "columnSpan": 1,
+      "newRow": true,
+      "readOnly": false,
+      "required": false,
+      "type": "string",
+      "default": ""
+    },
+    {
+      "name": "owner",
+      "title": "OWNER",
+      "description": "Owner of this reservation (used for reserve only)",
+      "columnSpan": 1,
+      "newRow": false,
+      "readOnly": false,
+      "required": false,
+      "type": "string",
+      "default": ""
+    }
+  ]
+}

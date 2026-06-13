@@ -1,0 +1,16 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+---
+all:
+  vars:
+    eda_api_url: "https://eda.1.srexperts.net"
+    tls_skip_verify: true
+    eda_username: "admin"
+    # eda_password: "admin"
+    eda_password: "SReXperts2026!"
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+  hosts:
+    localhost:
+      ansible_connection: local

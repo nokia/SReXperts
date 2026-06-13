@@ -1,4 +1,8 @@
-apiVersion: protocols.eda.nokia.com/v1
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+apiVersion: protocols.eda.nokia.com/v2
 kind: DefaultBGPGroup
 metadata:
   name: bgpgroup-ebgp-pe
@@ -8,21 +12,21 @@ metadata:
 spec:
   bfd: false
   client: false
-  exportPolicy:
+  exportPolicies:
     - accept-all
-  importPolicy:
+  importPolicies:
     - accept-all
   ipv4Unicast:
-    advertiseIPV6NextHops: true
+    advertiseIPv6NextHops: true
     enabled: true
-    receiveIPV6NextHops: true
+    receiveIPv6NextHops: true
     maxReceivedRoutes: null
   ipv6Unicast:
     enabled: true
     maxReceivedRoutes: null
   l2VPNEVPN:
     enabled: false
-    advertiseIPV6NextHops: false
+    advertiseIPv6NextHops: false
     maxReceivedRoutes: null
   nextHopSelf: false
   sendCommunityLarge: false

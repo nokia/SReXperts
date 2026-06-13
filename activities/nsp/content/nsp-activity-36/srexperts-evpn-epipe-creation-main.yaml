@@ -1,0 +1,122 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+---
+version: '2.0'
+
+srexperts-evpn-epipe-creation-main:
+  type: direct
+  workflow_meta:
+    title: EVPN Epipe Site-Based Orchestrator
+    author: Asad Arafat
+    email: asad.arafat@nokia.com
+    version: "0.1.0"
+    deprecated: false
+
+  description: |
+    Builds EVPN Epipe site-based requests from startId to endId, then invokes
+    the site-based child workflow once per generated service.
+
+  input:
+    - startId: 1
+    - endId: 99
+    - templateName: EPIPE_SERVICE_01_SITE_SR_01
+    - custName: Default customer
+    - portA: 1/1/c6/1
+    - portB: 1/1/c6/1
+    - siteBasedIntentType: true
+    - child_workflow_id: srexperts-evpn-epipe-creation
+
+  output:
+    jobs_count: <% $.jobs_count or 0 %>
+    jobs: <% $.jobs or [] %>
+    child_results: <% $.child_results or [] %>
+    range_warning: <% $.range_warning or '' %>
+
+  tasks:
+    build_jobs:
+      action: nsp.python
+      input:
+        context: "<% $ %>"
+        script: |
+          ctx = context or {}
+
+          def to_int(value, default):
+            try:
+              return int(value)
+            except Exception:
+              return default
+
+          def to_bool(value, default=True):
+            if isinstance(value, bool):
+              return value
+            if value is None:
+              return default
+            return str(value).strip().lower() not in ('false', '0', 'no', 'off', '')
+
+          start_id = to_int(ctx.get('startId'), 1)
+          end_id = to_int(ctx.get('endId'), 99)
+          template_name = str(ctx.get('templateName') or 'EPIPE_SERVICE_01_SITE_SR_01')
+          cust_name = str(ctx.get('custName') or 'Default customer')
+          port_a = str(ctx.get('portA') or '1/1/c6/1')
+          port_b = str(ctx.get('portB') or '1/1/c6/1')
+          site_based_intent_type = to_bool(ctx.get('siteBasedIntentType'), True)
+
+          jobs = []
+          range_warning = ''
+
+          if end_id < start_id:
+            range_warning = 'endId is lower than startId; no child workflows were generated.'
+          else:
+            for site_index in range(start_id, end_id + 1):
+              svc_id = '%02d' % site_index
+              jobs.append({
+                'templateName': template_name,
+                'targets': [
+                  {
+                    'custName': cust_name,
+                    'svcId': svc_id,
+                    'svcName': 'epipe-%s' % svc_id,
+                    'siteA': 'fd00:fde8::%d:21' % site_index,
+                    'portA': port_a,
+                    'siteB': 'fd00:fde8::%d:22' % site_index,
+                    'portB': port_b
+                  }
+                ],
+                'siteBasedIntentType': site_based_intent_type
+              })
+
+          return {
+            'jobs': jobs,
+            'jobs_count': len(jobs),
+            'range_warning': range_warning
+          }
+      publish:
+        jobs: <% task().result.jobs %>
+        jobs_count: <% task().result.jobs_count %>
+        range_warning: <% task().result.range_warning %>
+      on-success:
+        - dispatch_jobs
+
+    dispatch_jobs:
+      action: std.noop
+      on-success:
+        - run_child_workflows: <% ($.jobs_count or 0) > 0 %>
+        - finish_noop: <% ($.jobs_count or 0) = 0 %>
+
+    run_child_workflows:
+      with-items: job in <% $.jobs %>
+      concurrency: 1
+      workflow: <% $.child_workflow_id %>
+      input:
+        templateName: <% $.job.templateName %>
+        targets: <% $.job.targets %>
+        siteBasedIntentType: <% $.job.siteBasedIntentType %>
+      publish:
+        child_results: <% task().result %>
+      on-success:
+        - finish_noop
+
+    finish_noop:
+      action: std.noop

@@ -1,4 +1,8 @@
-apiVersion: protocols.eda.nokia.com/v1
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+apiVersion: protocols.eda.nokia.com/v2
 kind: DefaultBGPPeer
 metadata:
   name: uplink-unnumbered-spine11-pe2
@@ -6,29 +10,22 @@ metadata:
   labels:
     role: hackathon-infra
 spec:
-  bfd: false
-  client: false
   dynamicNeighbor: true
-  dynamicNeighborAllowedPeerAS:
+  dynamicNeighborAllowedPeerASs:
     - 65000
   group: bgpgroup-ebgp-pe
   interface: interface-spine11-ethernet-1-32
-  interfaceKind: DEFAULTINTERFACE
+  interfaceKind: DefaultInterface
   ipv4Unicast:
-    advertiseIPV6NextHops: true
+    advertiseIPv6NextHops: true
     enabled: true
-    receiveIPV6NextHops: true
+    receiveIPv6NextHops: true
   ipv6Unicast:
     enabled: true
-  l2VPNEVPN:
-    enabled: false
-    advertiseIPV6NextHops: false
   nextHopSelf: false
   peerInterface: interface-spine11-ethernet-1-32
-  sendCommunityLarge: false
-  sendCommunityStandard: false
 ---
-apiVersion: protocols.eda.nokia.com/v1
+apiVersion: protocols.eda.nokia.com/v2
 kind: DefaultBGPPeer
 metadata:
   name: uplink-unnumbered-spine11-pe3
@@ -36,29 +33,22 @@ metadata:
   labels:
     role: hackathon-infra
 spec:
-  bfd: false
-  client: false
   dynamicNeighbor: true
-  dynamicNeighborAllowedPeerAS:
+  dynamicNeighborAllowedPeerASs:
     - 65000
   group: bgpgroup-ebgp-pe
   interface: interface-spine11-ethernet-1-31
-  interfaceKind: DEFAULTINTERFACE
+  interfaceKind: DefaultInterface
   ipv4Unicast:
-    advertiseIPV6NextHops: true
+    advertiseIPv6NextHops: true
     enabled: true
-    receiveIPV6NextHops: true
+    receiveIPv6NextHops: true
   ipv6Unicast:
     enabled: true
-  l2VPNEVPN:
-    enabled: false
-    advertiseIPV6NextHops: false
   nextHopSelf: false
   peerInterface: interface-spine11-ethernet-1-31
-  sendCommunityLarge: false
-  sendCommunityStandard: false
 ---
-apiVersion: protocols.eda.nokia.com/v1
+apiVersion: protocols.eda.nokia.com/v2
 kind: DefaultBGPPeer
 metadata:
   name: uplink-unnumbered-spine12-pe2
@@ -66,29 +56,22 @@ metadata:
   labels:
     role: hackathon-infra
 spec:
-  bfd: false
-  client: false
   dynamicNeighbor: true
-  dynamicNeighborAllowedPeerAS:
+  dynamicNeighborAllowedPeerASs:
     - 65000
   group: bgpgroup-ebgp-pe
   interface: interface-spine12-ethernet-1-32
-  interfaceKind: DEFAULTINTERFACE
+  interfaceKind: DefaultInterface
   ipv4Unicast:
-    advertiseIPV6NextHops: true
+    advertiseIPv6NextHops: true
     enabled: true
-    receiveIPV6NextHops: true
+    receiveIPv6NextHops: true
   ipv6Unicast:
     enabled: true
-  l2VPNEVPN:
-    enabled: false
-    advertiseIPV6NextHops: false
   nextHopSelf: false
   peerInterface: interface-spine12-ethernet-1-32
-  sendCommunityLarge: false
-  sendCommunityStandard: false
 ---
-apiVersion: protocols.eda.nokia.com/v1
+apiVersion: protocols.eda.nokia.com/v2
 kind: DefaultBGPPeer
 metadata:
   name: uplink-unnumbered-spine12-pe3
@@ -96,27 +79,17 @@ metadata:
   labels:
     role: hackathon-infra
 spec:
-  bfd: false
-  client: false
   dynamicNeighbor: true
-  dynamicNeighborAllowedPeerAS:
+  dynamicNeighborAllowedPeerASs:
     - 65000
   group: bgpgroup-ebgp-pe
   interface: interface-spine12-ethernet-1-31
-  interfaceKind: DEFAULTINTERFACE
+  interfaceKind: DefaultInterface
   ipv4Unicast:
-    advertiseIPV6NextHops: true
+    advertiseIPv6NextHops: true
     enabled: true
-    receiveIPV6NextHops: true
+    receiveIPv6NextHops: true
   ipv6Unicast:
     enabled: true
-  l2VPNEVPN:
-    enabled: false
-    advertiseIPV6NextHops: false
   nextHopSelf: false
   peerInterface: interface-spine12-ethernet-1-31
-  sendCommunityLarge: false
-  sendCommunityStandard: false
-  localPreference: null
-  multiHopMaxHop: null
-  grStaleRouteTime: null

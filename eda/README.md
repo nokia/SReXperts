@@ -8,6 +8,7 @@ The playground dir needs to be present on the target system
 
 ```shell
 git clone https://github.com/nokia-eda/playground.git
+cd playground
 ```
 
 ## Ensure sysctls are raised
@@ -26,16 +27,14 @@ while in the playground dir call:
 
 ```shell
 make download-tools
-make download-k9s
 ```
 
-## Copy kubectl and k9s
+## Make tools available in PATH
 
-Copy the kubectl and k9s tools from the playground/tools dir to `/usr/local/bin` so they are available to a user:
+To make the tools available in PATH, run the following, prepend the path with the directory of the tools.
 
 ```shell
-cp $(realpath ./tools/kubectl) /usr/local/bin/kubectl
-cp $(realpath ./tools/k9s) /usr/local/bin/k9s
+export PATH=$(realpath ./tools):$PATH
 ```
 
 ### kubectl completions
@@ -76,14 +75,6 @@ alias edactl='kubectl -n eda-system exec -it $(kubectl -n eda-system get pods \
 
 ## Deploy containerlab topo
 
-The clab topo needs to be deployed without startup configs mounted to the DC1 nodes; this requirement will be lifted with 24.10.5 and 25.7+ releases (DTS 479993).
-
-For now, we need to comment out the startup configs by running the following:
-
-```bash
-uv run clab/comment-startup.py
-```
-
 Note, that currently the client nodes require the bonding kernel to be loaded to support the bond interfaces:
 
 ```bash
@@ -96,6 +87,30 @@ The clab topology make use of the following env vars, make sure they are set in 
 - EVENT_PASSWORD
 - NOKIA_UID
 - NOKIA_GID
+- SSH_PUBLIC_KEY (your public key that you want to use in your Node User)
+
+SSH public key can be set to the available pub key in users home dir for local testing:
+
+```bash
+export SSH_PUBLIC_KEY=$(cat ~/.ssh/id_rsa.pub)
+```
+
+Then check the env vars:
+
+```bash
+echo "INSTANCE_ID: $INSTANCE_ID"
+echo "EVENT_PASSWORD: $EVENT_PASSWORD"
+echo "NOKIA_UID: $NOKIA_UID"
+echo "NOKIA_GID: $NOKIA_GID"
+echo "SSH_PUBLIC_KEY: $SSH_PUBLIC_KEY"
+```
+
+The topology also needs to linux bridges to be create, created them using ip link:
+
+```bash
+sudo ip link add pe1-p1 type bridge
+sudo ip link add pe2-p1 type bridge
+```
 
 Proceed with deploying the topology:
 
@@ -133,13 +148,14 @@ EDA UI is automatically exposed when `make try-eda` finishes. No additional step
 
 As the DC nodes run in clab next to the EDA deployment, we need to onboard them to the EDA cluster.
 
-Start with substituting env vars in the the topo onboard files. Change into the `eda` directory in the root of the hackathon repo and run:
+Start with substituting env vars in the the topo onboard files and run:
 
 ```shell
-docker run --rm -e INSTANCE_ID=$(echo $INSTANCE_ID) -e EVENT_PASSWORD=$(echo $EVENT_PASSWORD) \
+docker run --rm -e \
+INSTANCE_ID=$(echo -n $INSTANCE_ID) -e EVENT_PASSWORD="$(echo -n $EVENT_PASSWORD)" -e SSH_PUBLIC_KEY="$(echo -n $SSH_PUBLIC_KEY)" \
 -u $(id -u):$(id -g) \
 -v $(pwd)/eda/topo-onboard/clab:/work \
-ghcr.io/hellt/envsubst:0.1.0
+ghcr.io/hellt/envsubst:0.2.0
 ```
 
 Then apply the templated onboarding resources:
@@ -162,10 +178,11 @@ Then we need to apply the fabric resources so that the fabric is provisioned on 
 Again, run the substitute env vars script over the fabric resources:
 
 ```shell
-docker run --rm -e INSTANCE_ID=$(echo $INSTANCE_ID) -e EVENT_PASSWORD=$(echo $EVENT_PASSWORD) \
+# INSTANCE_ID=1 EVENT_PASSWORD=SReXperts2026!
+docker run --rm -e INSTANCE_ID=$(echo -n $INSTANCE_ID) -e EVENT_PASSWORD="$(echo -n $EVENT_PASSWORD)" \
 -u $(id -u):$(id -g) \
 -v $(pwd)/eda/fabric:/work \
-ghcr.io/hellt/envsubst:0.1.0
+ghcr.io/hellt/envsubst:0.2.0
 ```
 
 and apply them:
@@ -216,3 +233,47 @@ rsync -avz --delete eda/topo-onboard ${RS_DEST}:${RS_REMOTE_DEST}
 ```
 
 will move the `fabric` dir to `/root/eda` on the remote system.
+
+## EDA and Ansible
+
+To automate some provisioning tasks we use Ansible collections for EDA.
+
+Install the collections to a local collections tree, execute from the repo root:
+
+```bash
+uv --directory eda run ansible-galaxy collection install -p ./.ansible/collections -r galaxy-requirements.yml
+```
+
+With the collections installed, you can now use `ansible-playbook` to run plays against the EDA cluster using the `inventory.yml` file that defines the connection parameters of the EDA cluster.
+
+```bash
+uv --directory eda run ansible-playbook -i inventory.yml ./playbooks/users.yaml
+```
+
+This will create 2 users (`admin2` and `admin3`) by default.
+
+To create a different number of user:
+
+```bash
+uv --directory eda run ansible-playbook -i inventory.yml ./playbooks/users.yaml -e eda_extra_admin_user_count=20
+```
+
+## CX on EDA
+
+To support activities around Digital Twin/CX on EDA we spin a single VM that is shared by all attendees. It is configured with many admin users (admin admin2 admin3 ... admin80) based on the max number of instances.
+
+This system spins up EDA with `simulate=true` and uses containerized images for SR-SIM and SRL-SIM. Since the default node profile for SR OS comes without the containerImage in its spec, we need to set it by running kubectl patch on the node profile CR `sros-ghcr-26.3.r1`:
+
+```bash
+SRSIM_IMAGE=europe-west1-docker.pkg.dev/nhc-f4160d67/containerlab/nokia_srsim:26.3.R1
+kubectl -n eda patch nodeprofile sros-ghcr-26.3.r1 --type=merge -p '{"spec":{"containerImage":"'${SRSIM_IMAGE}'"}}'
+```
+
+Then we need to also set the SR-SIM license in the already existing `sros-ghcr-26.3.r1-dummy-license` configmap by reading its content from disk `/opt/srexperts/sros.license`:
+
+```bash
+jq -n --rawfile lic /opt/srexperts/sros.license '{data:{"license.key": $lic}}' > /tmp/cm-patch.json
+kubectl -n eda-system patch configmap sros-ghcr-26.3.r1-dummy-license --type=merge --patch-file=/tmp/cm-patch.json
+```
+
+Now we can use the SR-SIM and SRL-SIM images to spin up the CX topology.

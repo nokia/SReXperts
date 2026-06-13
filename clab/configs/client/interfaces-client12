@@ -19,6 +19,7 @@ iface bond0
 # VLAN 1
 auto bond0.1
 iface bond0.1
+    mtu 8700
     requires bond0
     address 10.64.30.12/24
     address fd00:fde8:0:30::12/64
@@ -26,30 +27,34 @@ iface bond0.1
     post-up ip -6 r a fd00:fde8::/32 via fd00:fde8:0:30::1 dev bond0.1
 
 # VLAN 101
-auto bond0.101
-iface bond0.101
+auto bond0.1101
+iface bond0.1101
+    mtu 8700
     requires bond0
     address 192.168.30.12/24
     address fd00:ffdd:0:30::12/64
-    post-up ip r a 192.168.0.0/16 via 192.168.30.1 dev bond0.101
-    post-up ip -6 r a fd00:ffdd::/32 via fd00:ffdd:0:30::1 dev bond0.101
+    post-up ip r a 192.168.0.0/16 via 192.168.30.1 dev bond0.1101
+    post-up ip -6 r a fd00:ffdd::/32 via fd00:ffdd:0:30::1 dev bond0.1101
 
 # VLAN 200 - SRL Ansible
-auto bond0.200
-iface bond0.200
+auto bond0.1200
+iface bond0.1200
+    mtu 8700
     address 10.65.34.12/24
-    post-up ip r a 10.65.0.0/16 via 10.65.34.1 dev bond0.200
+    post-up ip r a 10.65.0.0/16 via 10.65.34.1 dev bond0.1200
 
 # VLAN 300 - SRL EDA
-auto bond0.300
-iface bond0.300
+auto bond0.1300
+iface bond0.1300
+    mtu 8700
     address 10.30.0.12/24
     address fd00:fdfd:0:3000::12/64
 
 # VLAN 312 - SRL EDA
-auto bond0.312
-iface bond0.312
+auto bond0.1312
+iface bond0.1312
+    mtu 8700
     address 10.30.2.12/24
     address fd00:fdfd:0:3002::12/64
-    post-up ip r a 10.30.0.0/16 via 10.30.2.1 dev bond0.312
-    post-up ip -6 r a fd00:fdfd::/32 via fd00:fdfd:0:3002::1 dev bond0.312
+    post-up ip r a 10.30.0.0/16 via 10.30.2.1 dev bond0.1312
+    post-up ip -6 r a fd00:fdfd::/32 via fd00:fdfd:0:3002::1 dev bond0.1312

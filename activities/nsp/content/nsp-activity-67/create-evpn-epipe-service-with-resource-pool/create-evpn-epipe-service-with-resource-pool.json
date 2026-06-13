@@ -1,0 +1,215 @@
+{
+    "type": "object",
+    "properties": [
+      {
+        "name": "serviceName",
+        "title": "SERVICE NAME",
+        "description": "Service Name",
+        "columnSpan": 2,
+        "newRow": true,
+        "readOnly": false,
+        "required": true,
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "deviceId1",
+        "title": "Site A",
+        "description": "Device Id 1",
+        "columnSpan": 2,
+        "newRow": true,
+        "readOnly": false,
+        "required": false,
+        "type": "leafref",
+        "componentProps": {
+          "displayKeyId": "neId"
+        },
+        "suggest": {
+          "action": "nspWebUI.neList",
+          "name": [
+            "neId",
+            "neName",
+            "neFamily"
+          ]
+        },
+        "properties": [
+          {
+            "name": "neId",
+            "type": "string",
+            "title": "NE ID"
+          },
+          {
+            "name": "neName",
+            "type": "string",
+            "title": "NE Name"
+          },
+          {
+            "name": "neFamily",
+            "type": "string",
+            "title": "NE Family"
+          }
+        ]
+      },
+      {
+        "name": "portId1",
+        "title": "PORT A",
+        "description": "description for portId1",
+        "columnSpan": 1,
+        "newRow": false,
+        "readOnly": false,
+        "required": false,
+        "type": "leafref",
+        "dependsOn": "input.deviceId1",
+        "componentProps": {
+          "displayKeyId": "name"
+        },
+        "suggest": {
+          "action": "nspWebUI.portListDevice1"
+        },
+        "properties": [
+          {
+            "name": "name",
+            "type": "string",
+            "title": "Port Name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "title": "Description"
+          },
+          {
+            "name": "encapType",
+            "type": "string",
+            "title": "Encapsulation Type"
+          },
+          {
+            "name": "portMode",
+            "type": "string",
+            "title": "Port Mode"
+          }
+        ]
+      },
+      {
+        "name": "deviceId2",
+        "title": "Site B",
+        "description": "Device Id 2",
+        "columnSpan": 2,
+        "newRow": true,
+        "readOnly": false,
+        "required": false,
+        "type": "leafref",
+        "componentProps": {
+          "displayKeyId": "neId"
+        },
+        "suggest": {
+          "action": "nspWebUI.neList",
+          "name": [
+            "neId",
+            "neName",
+            "neFamily"
+          ]
+        },
+        "properties": [
+          {
+            "name": "neId",
+            "type": "string",
+            "title": "NE ID"
+          },
+          {
+            "name": "neName",
+            "type": "string",
+            "title": "NE Name"
+          },
+          {
+            "name": "neFamily",
+            "type": "string",
+            "title": "NE Family"
+          }
+        ]
+      },
+      {
+        "name": "portId2",
+        "title": "PORT B",
+        "description": "description for portId2",
+        "columnSpan": 1,
+        "newRow": false,
+        "readOnly": false,
+        "required": false,
+        "type": "leafref",
+        "dependsOn": "input.deviceId2",
+        "componentProps": {
+          "displayKeyId": "name"
+        },
+        "suggest": {
+          "action": "nspWebUI.portListDevice2"
+        },
+        "properties": [
+          {
+            "name": "name",
+            "type": "string",
+            "title": "Port Name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "title": "Description"
+          },
+          {
+            "name": "encapType",
+            "type": "string",
+            "title": "Encapsulation Type"
+          },
+          {
+            "name": "portMode",
+            "type": "string",
+            "title": "Port Mode"
+          }
+        ]
+      },
+      {
+        "name": "numericPoolName",
+        "title": "NUMERIC POOL NAME",
+        "description": "description for numericPoolName",
+        "columnSpan": 2,
+        "newRow": true,
+        "readOnly": false,
+        "required": false,
+        "type": "leafref",
+        "componentProps": {
+          "displayKeyId": "name"
+        },
+        "suggest": {
+          "action": "nspWebUI.listNumericPools"
+        },
+        "properties": [
+          {
+            "name": "name",
+            "type": "string",
+            "title": "Name"
+          },
+          {
+            "name": "scope",
+            "type": "string",
+            "title": "Scope"
+          }
+        ],
+        "setFieldValues": [
+          {
+            "name": "numericPoolScope",
+            "value": "scope"
+          }
+        ]
+      },
+      {
+        "name": "numericPoolScope",
+        "title": "NUMERIC POOL SCOPE",
+        "description": "description for numericPoolScope",
+        "columnSpan": 2,
+        "newRow": true,
+        "readOnly": true,
+        "required": true,
+        "type": "string",
+        "default": ""
+      }
+    ]
+  }

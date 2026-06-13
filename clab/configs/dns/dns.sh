@@ -14,5 +14,5 @@ chown -R admin:admin /home/admin/.ssh
 echo "admin ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 echo "admin:$USER_PASSWORD" | chpasswd
 
-dnsmasq
+dnsmasq --server=/oob/ --server=/grt/ --server=/.srexperts.net/
 

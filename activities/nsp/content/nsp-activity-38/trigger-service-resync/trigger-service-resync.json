@@ -1,0 +1,78 @@
+{
+  "type": "object",
+  "properties": [
+    {
+      "name": "group",
+      "title": "GROUP",
+      "description": "Workgroup number for node name prefix (e.g. g1-pe1, g2-pe2).",
+      "columnSpan": 1,
+      "newRow": true,
+      "readOnly": false,
+      "required": false,
+      "type": "number"
+    },
+    {
+      "name": "node_scope",
+      "title": "NODE SCOPE",
+      "description": "Target nodes: all (PE1 and PE2), pe1 only, or pe2 only (matched by ne-name).",
+      "columnSpan": 1,
+      "newRow": false,
+      "readOnly": false,
+      "required": false,
+      "type": "string",
+      "default": "all",
+      "enum": [
+        "all",
+        "pe1",
+        "pe2"
+      ],
+      "validations": {
+        "patterns": []
+      }
+    },
+    {
+      "name": "service_type_l3vpn",
+      "title": "L3VPN (VPRN)",
+      "description": "Resync L3VPN / VPRN services.",
+      "columnSpan": 1,
+      "newRow": true,
+      "readOnly": false,
+      "required": false,
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "name": "service_type_elan",
+      "title": "ELAN (VPLS)",
+      "description": "Resync ELAN / VPLS services.",
+      "columnSpan": 1,
+      "newRow": true,
+      "readOnly": false,
+      "required": false,
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "name": "service_type_eline",
+      "title": "ELINE (EPIPE)",
+      "description": "Resync E-Line / Epipe services.",
+      "columnSpan": 1,
+      "newRow": true,
+      "readOnly": false,
+      "required": false,
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "name": "service_type_ies",
+      "title": "IES",
+      "description": "Resync IES services.",
+      "columnSpan": 1,
+      "newRow": true,
+      "readOnly": false,
+      "required": false,
+      "type": "boolean",
+      "default": false
+    }
+  ]
+}

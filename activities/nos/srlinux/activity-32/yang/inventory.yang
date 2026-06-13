@@ -1,0 +1,21 @@
+module inventory {
+    yang-version 1.1;
+    namespace "github.com/srexperts/inventory";
+    prefix "ndk-inventory";
+
+    description
+        "inventory YANG module";
+
+    revision "2026-04-01" {
+        description
+            "initial release";
+    }
+
+    container inventory {
+        leaf location {
+            description "Node location";
+            type string;
+            config true;
+        }
+    }
+}

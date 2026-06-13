@@ -5,7 +5,7 @@
 
 ifup -a
 
-sudo echo '*/5  *  *  *  *    ifdown eth1.100; ifup eth1.100' > /etc/crontabs/root
+#sudo echo '*/5  *  *  *  *    ifdown eth1.100; ifup eth1.100' > /etc/crontabs/root
 
 mkdir -p /home/admin/.ssh
 touch /home/admin/.ssh/authorized_keys

@@ -1,0 +1,93 @@
+{
+  "type": "object",
+  "properties": [
+    {
+      "name": "numericPoolScope",
+      "title": "POOL SCOPE (GROUP ID)",
+      "description": "Scope that scopes this pool to your group — use your activity group ID",
+      "columnSpan": 1,
+      "newRow": true,
+      "readOnly": false,
+      "required": true,
+      "type": "integer",
+      "default": ""
+    },
+    {
+      "name": "numericPoolName",
+      "title": "POOL NAME",
+      "description": "Name for the new numeric resource pool (include your group number)",
+      "columnSpan": 2,
+      "newRow": true,
+      "readOnly": false,
+      "required": true,
+      "type": "string",
+      "default": ""
+    },
+    {
+      "name": "poolDescription",
+      "title": "POOL DESCRIPTION",
+      "description": "Optional description for the pool (e.g. 'vlan-id pool')",
+      "columnSpan": 2,
+      "newRow": true,
+      "readOnly": false,
+      "required": false,
+      "type": "string",
+      "default": ""
+    },
+    {
+      "name": "minValue",
+      "title": "MIN VALUE",
+      "description": "Minimum numeric value in the pool range (inclusive)",
+      "columnSpan": 1,
+      "newRow": true,
+      "readOnly": false,
+      "required": true,
+      "type": "integer",
+      "default": 1
+    },
+    {
+      "name": "maxValue",
+      "title": "MAX VALUE",
+      "description": "Maximum numeric value in the pool range (inclusive)",
+      "columnSpan": 1,
+      "newRow": false,
+      "readOnly": false,
+      "required": true,
+      "type": "integer",
+      "default": 5
+    },
+    {
+      "name": "thresholdWarning",
+      "title": "WARNING THRESHOLD (%)",
+      "description": "Pool utilization % at which a warning alarm is raised",
+      "columnSpan": 2,
+      "newRow": true,
+      "readOnly": false,
+      "required": true,
+      "type": "integer",
+      "default": 50
+    },
+    {
+      "name": "thresholdMinor",
+      "title": "MINOR THRESHOLD (%)",
+      "description": "Pool utilization % at which a minor alarm is raised",
+      "columnSpan": 2,
+      "newRow": true,
+      "readOnly": false,
+      "required": true,
+      "type": "integer",
+      "default": 70
+    },
+    {
+      "name": "thresholdMajor",
+      "title": "MAJOR THRESHOLD (%)",
+      "description": "Pool utilization % at which a major alarm is raised",
+      "columnSpan": 2,
+      "newRow": true,
+      "readOnly": false,
+      "required": true,
+      "type": "integer",
+      "default": 90
+    }
+  ]
+}

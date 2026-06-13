@@ -1,6 +1,6 @@
 # Network Operating Systems (NOS)
 
-This section contains the activities for the NOS stream of the SReXplore event at SReXperts 2025.
+This section contains the activities for the NOS stream of the Hackathon event at SReXperts 2026.
 
 Network Operating Systems (NOS) sit right at the heart of the Internet and operate the critical infrastructure of both countries and organizations.  They provide a very specialized software system capable of making split second decisions to ensure network traffic is directed to the right location, at the right time, with the right priority and without compromise.
 
@@ -12,9 +12,9 @@ These modern operating systems are designed and built with automation in mind, d
 
 Of course, progress doesn't stop, and Network Operating Systems need to evolve further to include programmability solutions both on the device for rapid, human-free operational activities, and remotely to open the network management ecosystem up for operators.
 
-Nokia has two modern, model-driven, programmable Network Operating Systems in the IP portfolio: [SR OS](https://www.nokia.com/ip-networks/service-router-operating-system-nos/) focused on the core infrastructure of network operators, and [SR Linux](https://www.nokia.com/ip-networks/service-router-linux-NOS/) focused on the data-center.
+Nokia has two modern, model-driven, programmable Network Operating Systems in the IP portfolio: [SR OS](https://www.nokia.com/ip-networks/service-router-operating-system-nos/) focused on the core infrastructure of network operators, and [SR Linux](https://www.nokia.com/ip-networks/service-router-linux-NOS/) focused on the data-center and lean-core applications.
 
-In this event you have the opportunity to undertake challenges on both Network Operating Systems with a focus on model-driven automation and programmability.
+In this event you have the opportunity to undertake challenges on both Network Operating Systems with a focus on model-driven monitoring, troubleshooting, visibility, automation and programmability.
 
 ## Tackling the activities
 
@@ -56,7 +56,6 @@ To gain access to any of the devices you can either connect using SSH to your gr
 ## Help!
 
 If you need help at anytime you have a few options:
-
 
 - Take a look at the reference material and hints provided in the activities.
 - Ask other members of your group, or other groups for help.  Collaboration is one of the best elements of the event.

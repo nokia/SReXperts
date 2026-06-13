@@ -1,0 +1,312 @@
+{
+  "meta-data-header": {
+    "version": "1.0.0",
+    "buildNumber": "1",
+    "formatVersion": "1.0",
+    "createdBy": "SRX Hackathon 2026",
+    "creationDate": "Tue, 02 Jun 2026 15:33:13 UTC",
+    "title": "NSP activity workflow bundle",
+    "description": "Workflow-manager artifacts for SRX hackathon NSP activities."
+  },
+  "artifact-meta-data": [
+    {
+      "name": "srexperts-evpn-epipe-creation-main",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "srexperts-evpn-epipe-creation-main.yaml",
+          "path": "content/nsp-activity-36",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "srexperts-evpn-epipe-creation",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "srexperts-evpn-epipe-creation.yaml",
+          "path": "content/nsp-activity-36",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "srexperts-tshoot-evpn-epipe",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "srexperts-tshoot-evpn-epipe.yaml",
+          "path": "content/nsp-activity-36",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "check-data-sync-mappers",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "check-data-sync-mappers.yaml",
+          "path": "content/nsp-activity-38/check-data-sync-mappers",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "check-data-sync-mappers-report",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "check-data-sync-mappers-report.jinja",
+          "path": "content/nsp-activity-38/check-data-sync-mappers",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "configure-brownfield-services",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "configure-brownfield-services.yaml",
+          "path": "content/nsp-activity-38/configure-brownfield-services",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "configure-brownfield-report",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "configure-brownfield-report.jinja",
+          "path": "content/nsp-activity-38/configure-brownfield-services",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "get-auto-stitch-setting",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "get-auto-stitch-setting.yaml",
+          "path": "content/nsp-activity-38/set-auto-stitch-rule",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "set-auto-stitch-rule",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "set-auto-stitch-rule.yaml",
+          "path": "content/nsp-activity-38/set-auto-stitch-rule",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "auto-stitch-setting",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "auto-stitch-setting.jinja",
+          "path": "content/nsp-activity-38/set-auto-stitch-rule",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "trigger-service-resync",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "trigger-service-resync.yaml",
+          "path": "content/nsp-activity-38/trigger-service-resync",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "trigger-service-resync-report",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "trigger-service-resync-report.jinja",
+          "path": "content/nsp-activity-38/trigger-service-resync",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "custom-service-splitting",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "custom-service-splitting.yaml",
+          "path": "content/nsp-activity-39",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "execute-approved-splits",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "execute-approved-splits.yaml",
+          "path": "content/nsp-activity-39",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "service-splitting-report",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "service-splitting-report.jinja",
+          "path": "content/nsp-activity-39",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "srx-ne-checkpoint-final",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "srx-ne-checkpoint-final.yaml",
+          "path": "content/nsp-activity-40",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "srx-ne-revert-final",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "srx-ne-revert-final.yaml",
+          "path": "content/nsp-activity-40",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "create-evpn-epipe-service-with-resource-pool",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "create-evpn-epipe-service-with-resource-pool.yaml",
+          "path": "content/nsp-activity-67/create-evpn-epipe-service-with-resource-pool",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "get-encap-type-from-inventory",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "get-encap-type-from-inventory.yaml",
+          "path": "content/nsp-activity-67/create-evpn-epipe-service-with-resource-pool",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "create-service-payload-template",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "create-service-payload-template.jinja",
+          "path": "content/nsp-activity-67/create-evpn-epipe-service-with-resource-pool",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "create-numeric-pool-with-threshold-policy",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "create-numeric-pool-with-threshold-policy.yaml",
+          "path": "content/nsp-activity-67/create-numeric-pool-with-threshold-policy",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "delete-evpn-epipe-service-with-resource-pool",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "delete-evpn-epipe-service-with-resource-pool.yaml",
+          "path": "content/nsp-activity-67/delete-evpn-epipe-service-with-resource-pool",
+          "type": "application/octet-stream"
+        }
+      ]
+    },
+    {
+      "name": "reserve-or-release-numeric-pool",
+      "version": "1.0.0",
+      "targetApplication": "workflow-manager",
+      "applicationCompatibility": "25.11+",
+      "artifact-content": [
+        {
+          "fileName": "reserve-or-release-numeric-pool.yaml",
+          "path": "content/nsp-activity-67/reserve-or-release-numeric-pool",
+          "type": "application/octet-stream"
+        }
+      ]
+    }
+  ]
+}

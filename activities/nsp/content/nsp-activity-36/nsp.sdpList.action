@@ -1,0 +1,18 @@
+version: "2.0"
+
+nsp.sdpList:
+  description: List SDPs
+  base: nsp.https
+  base-input:
+    method: POST
+    url: https://<% locate_nsp() %>:8545/restconf/operations/nsp-inventory:find
+    body:
+      input:
+        xpath-filter: /nsp-service:services/tunnel-layer/mpls-tunnel[source-ne-id='<% let(x => $.formValues) -> switch($x.get("__attribute") = "sdpAB" => $x.siteA, $x.get("__attribute") = "sdpBA" => $x.siteB) %>'][destination-ne-id='<% let(x => $.formValues) -> switch($x.get("__attribute") = "sdpAB" => $x.siteB, $x.get("__attribute") = "sdpBA" => $x.siteA) %>']
+        fields: name;description;source-ne-id;destination-ne-id;id
+        sort-by: ["id"]
+    resultFilter: $.content.get("nsp-inventory:output")
+  input:
+    - formValues: ""
+    - token_auth
+  output: <% $.content.data.select({id => $.get("id")}) %>

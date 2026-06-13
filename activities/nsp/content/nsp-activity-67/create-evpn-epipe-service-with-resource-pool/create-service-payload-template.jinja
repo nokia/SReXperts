@@ -1,0 +1,139 @@
+name: create-service-payload-template
+template: |
+  {
+      "nsp-service-site-intent:intent": [
+          {
+              "service-name": "{{ serviceName }}",
+              "olc-state": "deployed",
+              "service-template-name": "{{ epipeServiceTemplate }}",
+              "service-intent-specific-data": {
+                  "epipe-service:epipe-service": {
+                      "set-site-customer-id": true,
+                      "set-site-description": true,
+                      "admin-state": "unlocked",
+                      "set-site-admin-state": true,
+                      "set-site-ne-service-id": true,
+                      "customer-id": 1,
+                      "description": "{{ serviceName }} description",
+                      "ne-service-id": {{ neServiceId }}
+                  }
+              },
+              "site": [
+                  {
+                      "device-id": "{{ deviceId1 }}",
+                      "site-template-name": "{{ epipeServiceSiteTemplate }}",
+                      "site-name": "{{ serviceName }}",
+                      "site-intent-specific-data": {
+                          "epipe-site-sr:epipe-site-sr": {
+                              "sap": [
+                                  {
+                                      "sap-id": "{{ sapId1 }}",
+                                      "description": "{{ serviceName }} description",
+                                      "admin-state": "enable"
+                                  }
+                              ],
+                              "description": "{{ serviceName }} description",
+                              "bgp": [
+                                  {
+                                      "route-target": {
+                                          "import": "target:65100:{{ neServiceId }}",
+                                          "export": "target:65100:{{ neServiceId }}"
+                                      },
+                                      "bgp-instance": 1,
+                                      "route-distinguisher": "65100:{{ neServiceId }}"
+                                  }
+                              ],
+                              "admin-state": "enable",
+                              "bgp-evpn": {
+                                  "evi": {{ neServiceId }},
+                                  "local-attachment-circuit": [
+                                      {
+                                          "eth-tag": "{{ neServiceId }}1",
+                                          "name": "ac-{{ neServiceId }}1",
+                                          "bgp": 1
+                                      }
+                                  ],
+                                  "remote-attachment-circuit": [
+                                      {
+                                          "eth-tag": "{{ neServiceId }}2",
+                                          "name": "ac-{{ neServiceId }}2",
+                                          "bgp": 1
+                                      }
+                                  ],
+                                  "mpls": [
+                                      {
+                                          "bgp-instance": 1,
+                                          "auto-bind-tunnel": {
+                                              "resolution": "any"
+                                          },
+                                          "admin-state": "enable"
+                                      }
+                                  ]
+                              },
+                              "customer": 1
+                          }
+                      }
+                  },
+                  {
+                      "device-id": "{{ deviceId2 }}",
+                      "site-template-name": "{{ epipeServiceSiteTemplate }}",
+                      "site-name": "{{ serviceName }}",
+                      "site-intent-specific-data": {
+                          "epipe-site-sr:epipe-site-sr": {
+                              "sap": [
+                                  {
+                                      "sap-id": "{{ sapId2 }}",
+                                      "description": "{{ serviceName }} description",
+                                      "admin-state": "enable"
+                                  }
+                              ],
+                              "description": "{{ serviceName }} description",
+                              "bgp": [
+                                  {
+                                      "route-target": {
+                                          "import": "target:65100:{{ neServiceId }}",
+                                          "export": "target:65100:{{ neServiceId }}"
+                                      },
+                                      "bgp-instance": 1,
+                                      "route-distinguisher": "65100:{{ neServiceId }}"
+                                  }
+                              ],
+                              "admin-state": "enable",
+                              "bgp-evpn": {
+                                  "evi": {{ neServiceId }},
+                                  "local-attachment-circuit": [
+                                      {
+                                          "eth-tag": "{{ neServiceId }}2",
+                                          "name": "ac-{{ neServiceId }}2",
+                                          "bgp": 1
+                                      }
+                                  ],
+                                  "remote-attachment-circuit": [
+                                      {
+                                          "eth-tag": "{{ neServiceId }}1",
+                                          "name": "ac-{{ neServiceId }}1",
+                                          "bgp": 1
+                                      }
+                                  ],
+                                  "mpls": [
+                                      {
+                                          "bgp-instance": 1,
+                                          "auto-bind-tunnel": {
+                                              "resolution": "any"
+                                          },
+                                          "admin-state": "enable"
+                                      }
+                                  ]
+                              },
+                              "customer": 1
+                          }
+                      }
+                  }
+              ]
+          }
+      ]
+  }
+tags: []
+description: IBSF Evpn-Epipe service create intent JSON payload template
+version: 1.0.0
+provided_by: admin

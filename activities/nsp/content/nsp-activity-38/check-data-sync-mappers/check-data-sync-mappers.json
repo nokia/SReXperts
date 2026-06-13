@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "properties": [
+    {
+      "name": "group",
+      "title": "Group",
+      "description": "Required workgroup number used to automatically check g<N>-pe1 and g<N>-pe2 (for example, group 1 checks g1-pe1 and g1-pe2).",
+      "columnSpan": 4,
+      "newRow": true,
+      "readOnly": false,
+      "required": true,
+      "type": "number"
+    }
+  ]
+}

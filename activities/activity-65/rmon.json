@@ -1,0 +1,28 @@
+{
+"thresholds": {
+        "rmon": {
+          "alarm": [
+            {
+              "rmon-alarm-id": 1000,
+              "variable-oid": "tmnxPortNetEgressFwdInProfOcts.1.1647313089.8",
+              "interval": 5,
+              "sample-type": "delta",
+              "rising-threshold": "400000",
+              "rising-event": 1000,
+              "falling-threshold": "100000",
+              "falling-event": 200
+            }
+          ],
+          "event": [
+            {
+              "rmon-event-id": 1000,
+              "event-type": "both"
+            },
+            {
+              "rmon-event-id": 200,
+              "event-type": "log"
+            }
+          ]
+        }
+      }
+    }

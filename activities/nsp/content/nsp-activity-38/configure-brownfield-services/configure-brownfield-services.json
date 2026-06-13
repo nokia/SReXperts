@@ -1,0 +1,82 @@
+{
+  "type": "object",
+  "properties": [
+    {
+      "name": "group",
+      "title": "Group",
+      "description": "Required workgroup number (1, 2, …). Sets unique service names activity-38-gN-vprn / …-vpls and IDs 501+(N-1)*100 and 601+(N-1)*100.",
+      "columnSpan": 1,
+      "newRow": true,
+      "readOnly": false,
+      "required": true,
+      "type": "number"
+    },
+    {
+      "name": "operation",
+      "title": "Operation",
+      "description": "Configure pushes VPRN/VPLS to devices; remove deletes the matching service instances for this group and scope.",
+      "columnSpan": 2,
+      "newRow": true,
+      "readOnly": false,
+      "required": false,
+      "type": "string",
+      "default": "configure",
+      "enum": [
+        "configure",
+        "remove"
+      ],
+      "validations": {
+        "patterns": []
+      }
+    },
+    {
+      "name": "plan",
+      "title": "Plan",
+      "description": "If true, dry run only — no PATCH or DELETE is sent; workflow outputs plan_detail with what would be done.",
+      "columnSpan": 1,
+      "newRow": false,
+      "readOnly": false,
+      "required": false,
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "name": "service_scope",
+      "title": "Service Scope",
+      "description": "all = one VPRN and one VPLS per targeted PE; vprn_only or vpls_only limits to that service type.",
+      "columnSpan": 1,
+      "newRow": true,
+      "readOnly": false,
+      "required": false,
+      "type": "string",
+      "default": "all",
+      "enum": [
+        "all",
+        "vprn_only",
+        "vpls_only"
+      ],
+      "validations": {
+        "patterns": []
+      }
+    },
+    {
+      "name": "node_scope",
+      "title": "Node Scope",
+      "description": "Which PE(s) to target: names must match g<group>-pe1 / g<group>-pe2 (e.g. g1-pe1 for group 1).",
+      "columnSpan": 1,
+      "newRow": false,
+      "readOnly": false,
+      "required": false,
+      "type": "string",
+      "default": "all",
+      "enum": [
+        "all",
+        "pe1",
+        "pe2"
+      ],
+      "validations": {
+        "patterns": []
+      }
+    }
+  ]
+}

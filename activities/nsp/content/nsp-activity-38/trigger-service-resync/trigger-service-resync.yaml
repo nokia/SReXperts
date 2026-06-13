@@ -1,0 +1,312 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+version: '2.0'
+
+# Trigger brownfield discovery resync for selected service types and devices via NSP RESTCONF.
+# Inputs: service_type_l3vpn, service_type_elan, service_type_eline, service_type_ies (checkboxes), node_scope, group. Output: result (HTML report only).
+
+trigger-service-resync:
+  description: Trigger brownfield discovery resync for selected service type and nodes; display success or error per service and node.
+  type: direct
+  tags:
+    - SR OS
+    - Services
+    - Brownfield Discovery
+    - sf-network-operation
+
+  vars:
+    target_nodes: []
+    resync_results: []
+    message: null
+    templateName: trigger-service-resync-report
+
+  input:
+    - service_type_l3vpn: true   # checkbox: resync L3VPN (VPRN)
+    - service_type_elan: true   # checkbox: resync ELAN (VPLS)
+    - service_type_eline: false # checkbox: resync E-Line (Epipe)
+    - service_type_ies: false   # checkbox: resync IES
+    - node_scope: 'all'         # all | pe1 | pe2
+    - group: 1                  # workgroup number for node name prefix g<N>-
+
+  output:
+    result: <% $.result %>
+
+  output-on-error:
+    result: '<!DOCTYPE html><html><body><p>An error occurred.</p></body></html>'
+
+  tasks:
+    start:
+      action: std.noop
+      on-complete:
+        - verify_report_template
+
+    verify_report_template:
+      action: nsp.jinja_template
+      input:
+        name: <% $.templateName %>
+        data:
+          config: []
+      on-success:
+        - get_nodes
+      on-error:
+        - report_template_unavailable
+
+    report_template_unavailable:
+      action: nsp.python
+      input:
+        context:
+          templateName: <% $.templateName %>
+        script: |
+          def esc(s):
+            if s is None:
+              return ""
+            return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+          template_name = esc(context.get("templateName") or "")
+          return {"html": """<!DOCTYPE html><html><body><p>Report template '%s' is not available. Publish the Jinja template and try again.</p></body></html>""" % template_name}
+      publish:
+        result: <% task().result.html %>
+      on-success:
+        - done
+
+    get_nodes:
+      action: nsp.https
+      input:
+        url: 'https://<% locate_nsp() %>/restconf/data/nsp-equipment:network/network-element?include-meta=false&fields=ne-id;type;ne-name;ip-address'
+        method: GET
+        contentType: 'application/json'
+        accept: 'application/json'
+      publish:
+        node_detail: <% task().result.content["nsp-equipment:network-element"] %>
+      publish-on-error:
+        message: '<% "Failed to get network elements: " + str(task().result) %>'
+      on-success:
+        - filter_targets
+      on-error:
+        - build_result_error
+
+    filter_targets:
+      action: nsp.python
+      input:
+        context:
+          node_detail: <% $.node_detail %>
+          node_scope: <% $.node_scope %>
+          group: <% $.group %>
+        script: |
+          node_detail = context.get("node_detail") or []
+          if isinstance(node_detail, dict):
+            node_detail = [node_detail]
+          scope = (context.get("node_scope") or "all").lower()
+          group = int(context.get("group") or 1)
+          group_prefix = ("g" + str(group) + "-").lower()
+          targets = []
+          for n in node_detail:
+            ne_id = n.get("ne-id")
+            ne_name = (n.get("ne-name") or "").lower()
+            if not ne_id or not ne_name.startswith(group_prefix):
+              continue
+            if scope == "all" and ("pe1" in ne_name or "pe2" in ne_name):
+              targets.append({"ne-id": ne_id, "ne-name": n.get("ne-name", ne_id), "ip-address": n.get("ip-address")})
+            elif scope == "pe1" and "pe1" in ne_name:
+              targets.append({"ne-id": ne_id, "ne-name": n.get("ne-name", ne_id), "ip-address": n.get("ip-address")})
+            elif scope == "pe2" and "pe2" in ne_name:
+              targets.append({"ne-id": ne_id, "ne-name": n.get("ne-name", ne_id), "ip-address": n.get("ip-address")})
+          return targets
+      publish:
+        target_nodes: <% task().result %>
+      on-success:
+        - no_targets: <% len($.target_nodes) = 0 %>
+        - build_resync_body: <% len($.target_nodes) > 0 %>
+
+    no_targets:
+      action: std.noop
+      publish:
+        message: "No target nodes found for this group and node_scope (expect names like g<N>-pe1, g<N>-pe2)."
+        resync_results: []
+      on-success:
+        - build_result_no_targets
+
+    build_resync_body:
+      action: nsp.python
+      input:
+        context:
+          target_nodes: <% $.target_nodes %>
+          service_type_l3vpn: <% $.service_type_l3vpn %>
+          service_type_elan: <% $.service_type_elan %>
+          service_type_eline: <% $.service_type_eline %>
+          service_type_ies: <% $.service_type_ies %>
+        script: |
+          nodes = context.get("target_nodes") or []
+          # Map checkbox flags to (state_name, conf_name) pairs for sbi-classes
+          type_to_pairs = {
+            "l3vpn": [("vprn", "vprn")],
+            "elan": [("vpls", "vpls")],
+            "eline": [("epipe", "epipe")],
+            "ies": [("ies", "ies")],
+          }
+          selected = []
+          if context.get("service_type_l3vpn"):
+            selected.append("l3vpn")
+          if context.get("service_type_elan"):
+            selected.append("elan")
+          if context.get("service_type_eline"):
+            selected.append("eline")
+          if context.get("service_type_ies"):
+            selected.append("ies")
+          if not selected:
+            selected = ["l3vpn", "elan", "eline", "ies"]
+          pairs = []
+          for st in selected:
+            pairs.extend(type_to_pairs.get(st, []))
+          sbi_classes = []
+          for state_name, conf_name in pairs:
+            sbi_classes.append({"class-id": "nokia-state:/state/service/%s" % state_name})
+            sbi_classes.append({"class-id": "nokia-conf:/configure/service/%s" % conf_name})
+          network_elements = [
+            {
+              "ne-id": n.get("ne-id"),
+              "system-retry": True,
+              "sbi-classes": sbi_classes
+            }
+            for n in nodes if n.get("ne-id")
+          ]
+          body = {
+            "nsp-admin-resync:input": {
+              "plugin-id": "mdm",
+              "network-element": network_elements
+            }
+          }
+          return {"body": body, "selected_types": selected}
+      publish:
+        _resync_body: <% task().result.body %>
+        selected_types: <% task().result.selected_types %>
+      on-success:
+        - trigger_resync
+
+    trigger_resync:
+      action: nsp.https
+      input:
+        url: 'https://<% locate_nsp() %>/restconf/operations/nsp-admin-resync:trigger-resync'
+        method: POST
+        contentType: 'application/json'
+        accept: 'application/json'
+        body: <% $.get("_resync_body") %>
+      publish:
+        _resync_response: <% task().result %>
+      publish-on-error:
+        _resync_response: <% task().result %>
+      on-success:
+        - aggregate_results
+      on-error:
+        - aggregate_results
+
+    aggregate_results:
+      action: nsp.python
+      input:
+        context:
+          target_nodes: <% $.target_nodes %>
+          selected_types: <% $.selected_types %>
+          _resync_response: <% $.get("_resync_response") %>
+        script: |
+          target_nodes = context.get("target_nodes") or []
+          selected = context.get("selected_types") or []
+          service_type = ", ".join(selected) if selected else "all"
+          resp = context.get("_resync_response")
+          results = []
+          # Determine overall success: 2xx and no error in content
+          is_success = False
+          err_msg = ""
+          if resp and isinstance(resp, dict):
+            st = resp.get("status") or resp.get("statusCode")
+            if st is not None and isinstance(st, int) and 200 <= st < 300:
+              is_success = True
+            elif st is not None and (isinstance(st, int) and st >= 400 or st == "error"):
+              err_msg = str(resp.get("content") or resp.get("message") or resp.get("error") or resp)
+          # Build one row per node; API may not return per-node status so we use overall status
+          for node in target_nodes:
+            results.append({
+              "service_type": service_type,
+              "ne_id": node.get("ne-id", ""),
+              "ne_name": node.get("ne-name", node.get("ne-id", "")),
+              "status": "success" if is_success else "error",
+              "error": "" if is_success else err_msg
+            })
+          return results
+      publish:
+        resync_results: <% task().result %>
+      on-success:
+        - set_message
+
+    set_message:
+      action: nsp.python
+      input:
+        context:
+          resync_results: <% $.resync_results %>
+        script: |
+          results = context.get("resync_results") or []
+          ok = sum(1 for r in results if r.get("status") == "success")
+          fail = sum(1 for r in results if r.get("status") == "error")
+          if not results:
+            return "No resync results."
+          return "Resync completed: %d succeeded, %d failed." % (ok, fail)
+      publish:
+        message: <% task().result %>
+      on-success:
+        - prepare_template_data
+
+    prepare_template_data:
+      action: nsp.python
+      input:
+        context:
+          resync_results: <% $.resync_results %>
+        script: |
+          return {"config": context.get("resync_results") or []}
+      publish:
+        setting: <% task().result %>
+      on-success:
+        - prettyPrint
+
+    build_result_no_targets:
+      action: nsp.python
+      input:
+        context:
+          message: <% $.message %>
+          templateName: <% $.templateName %>
+        script: |
+          msg = (context.get("message") or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+          html = """<!DOCTYPE html><html><head><style>body{font-family:NokiaPure,sans-serif;margin:12px;} .headline{color:#183693;font-size:20px;}</style></head><body><p class="headline">Trigger Service Resync</p><p>%s</p></body></html>""" % msg
+          return {"html": html}
+      publish:
+        result: <% task().result.html %>
+      on-success:
+        - done
+
+    build_result_error:
+      action: nsp.python
+      input:
+        context:
+          message: <% $.message %>
+        script: |
+          msg = (context.get("message") or "Unknown error").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+          html = """<!DOCTYPE html><html><head><style>body{font-family:NokiaPure,sans-serif;margin:12px;} .headline{color:#183693;font-size:20px;} .error{color:#C62828;}</style></head><body><p class="headline">Trigger Service Resync</p><p class="error">%s</p></body></html>""" % msg
+          return {"html": html}
+      publish:
+        result: <% task().result.html %>
+      on-success:
+        - done
+
+    prettyPrint:
+      action: nsp.jinja_template
+      input:
+        name: <% $.templateName %>
+        data: <% $.setting %>
+      publish:
+        result: <% task().result.template %>
+      on-success:
+        - done
+      on-error:
+        - report_template_unavailable
+
+    done:
+      action: std.noop

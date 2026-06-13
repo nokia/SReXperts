@@ -1,0 +1,26 @@
+{
+  "script-control": {
+        "script": [
+          {
+            "script-name": "stop-pcap",
+            "location": "cf3:/stop-pcap.txt",
+            "owner": "TiMOS CLI",
+            "admin-state": "enable"
+          }
+        ],
+        "script-policy": [
+          {
+            "admin-state": "enable",
+            "policy-name": "spolicy-stop-pcap",
+            "results": "cf3:/results",
+            "owner": "TiMOS CLI",
+            "max-completed": 10,
+            "script": [
+              {
+                "name": "stop-pcap"
+              }
+            ]
+          }
+        ]
+      }
+    }

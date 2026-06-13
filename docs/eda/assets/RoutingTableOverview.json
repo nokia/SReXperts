@@ -1,0 +1,198 @@
+{
+    "name": "RoutingTableOverview",
+    "displayName": "Routing table overview",
+    "description": "This dashboard gives an overview of the routing table of a virtualized router deployed by EDA",
+    "showNavigationToolbar": true,
+    "lastChanged": "Mon, 13 Apr 2026 01:25:53 GMT",
+    "screens": [
+        {
+            "name": "Dashboard-0",
+            "uuid": "7d9e7e34-87e2-4b0b-8fa9-5a0a82571218",
+            "screenType": "dashboard",
+            "partOfNav": true,
+            "startScreen": true,
+            "type": "screen",
+            "url": "Dashboard-0",
+            "components": [
+                {
+                    "uuid": "5ec47736-396b-445c-a53e-490f376f3813",
+                    "type": "flexRow",
+                    "components": [
+                        {
+                            "id": "dashletDonutChart",
+                            "uuid": "df2e64e7-9c08-4f43-af8e-775dc47670ce",
+                            "name": "",
+                            "type": "dashletDonutChart",
+                            "width": 400,
+                            "height": 400,
+                            "parentFlexType": "row",
+                            "componentConfigurations": [
+                                {
+                                    "apiConfiguration": {
+                                        "api": ".namespace.node.srl.network-instance.route-table.ipv4-unicast.route where (.namespace.node.name = \"${node}\" and .namespace.node.srl.network-instance.name = \"${router}\")",
+                                        "queryType": "eql",
+                                        "requestType": "get"
+                                    },
+                                    "additionalConfiguration": {
+                                        "thickness": 2,
+                                        "title": "Routes per type",
+                                        "donutId": "67f263b4-3f95-4527-89ba-957ea98c2520",
+                                        "children": [
+                                            {
+                                                "label": "bgp-evpn",
+                                                "color": "#00c8ff",
+                                                "criteria": "equal",
+                                                "value": "bgp-evpn",
+                                                "field": "route-type",
+                                                "type": "string",
+                                                "navigationTarget": {
+                                                    "edaRoute": "queryapi",
+                                                    "targetReference": ".namespace.node.srl.network-instance.route-table.ipv4-unicast.route where ((((route-type = \"bgp-evpn\") and (.namespace.node.srl.network-instance.name = \"${router}\")) and (.namespace.node.name = \"${node}\")))"
+                                                }
+                                            },
+                                            {
+                                                "label": "host",
+                                                "color": "#a872fc",
+                                                "criteria": "equal",
+                                                "value": "host",
+                                                "field": "route-type",
+                                                "type": "string",
+                                                "navigationTarget": {
+                                                    "edaRoute": "queryapi",
+                                                    "targetReference": ".namespace.node.srl.network-instance.route-table.ipv4-unicast.route where ((((route-type = \"host\") and (.namespace.node.srl.network-instance.name = \"${router}\")) and (.namespace.node.name = \"${node}\")))"
+                                                }
+                                            },
+                                            {
+                                                "label": "arpnd",
+                                                "color": "#c71e1e",
+                                                "criteria": "equal",
+                                                "value": "arpnd",
+                                                "field": "route-type",
+                                                "type": "string",
+                                                "navigationTarget": {
+                                                    "edaRoute": "queryapi",
+                                                    "targetReference": ".namespace.node.srl.network-instance.route-table.ipv4-unicast.route where ((((route-type = \"arpnd\") and (.namespace.node.srl.network-instance.name = \"${router}\")) and (.namespace.node.name = \"${node}\")))"
+                                                }
+                                            },
+                                            {
+                                                "label": "local",
+                                                "color": "#24d45e",
+                                                "criteria": "equal",
+                                                "value": "local",
+                                                "field": "route-type",
+                                                "type": "string",
+                                                "navigationTarget": {
+                                                    "edaRoute": "queryapi",
+                                                    "targetReference": ".namespace.node.srl.network-instance.route-table.ipv4-unicast.route where ((((route-type = \"local\") and (.namespace.node.srl.network-instance.name = \"${router}\")) and (.namespace.node.name = \"${node}\")))"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": "dashletCount",
+                            "uuid": "cb3232a6-b3b2-4d9f-a0cf-3f4151c803f1",
+                            "name": "",
+                            "type": "dashletCount",
+                            "width": 300,
+                            "height": 400,
+                            "parentFlexType": "row",
+                            "fillWidth": true,
+                            "componentConfiguration": {
+                                "apiConfiguration": {
+                                    "api": ".namespace.node.normal.services_eda_nokia_com.v2.router.statistics fields [sum(ipv4ActiveRoutes) as ipv4, sum(ipv6ActiveRoutes) as ipv6] where (.namespace.node.name = \"${node}\" and .namespace.node.srl.network-instance.name = \"${Router}\")",
+                                    "queryType": "eql",
+                                    "requestType": "get"
+                                },
+                                "additionalConfiguration": {
+                                    "children": [
+                                        {
+                                            "label": "IPv4",
+                                            "color": "#24d45e",
+                                            "criteria": "",
+                                            "value": "",
+                                            "field": "ipv4",
+                                            "type": "string",
+                                            "navigationTarget": {
+                                                "edaRoute": "queryapi",
+                                                "targetReference": ".namespace.node.normal.services_eda_nokia_com.v2.router.statistics fields [sum(ipv4ActiveRoutes) as \"ipv4\", sum(ipv6ActiveRoutes) as \"ipv6\"] where ((ipv4 = \"\"))"
+                                            }
+                                        },
+                                        {
+                                            "label": "IPv6",
+                                            "color": "#ffac0a",
+                                            "criteria": "",
+                                            "value": "",
+                                            "field": "ipv6",
+                                            "type": "string",
+                                            "navigationTarget": {
+                                                "edaRoute": "queryapi",
+                                                "targetReference": ".namespace.node.normal.services_eda_nokia_com.v2.router.statistics fields [sum(ipv4ActiveRoutes) as \"ipv4\", sum(ipv6ActiveRoutes) as \"ipv6\"] where ((ipv6 = \"\"))"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "flexRow",
+                    "uuid": "4055a0be-cb56-4c96-8b0a-469bac5eb90e",
+                    "name": "",
+                    "type": "flexRow",
+                    "flexDirection": "row",
+                    "components": [
+                        {
+                            "id": "dashletDataView",
+                            "uuid": "b2fda2f4-37d2-4cf2-a2f0-50682f7d3fbc",
+                            "name": "",
+                            "type": "dashletDataView",
+                            "width": 300,
+                            "height": 400,
+                            "parentFlexType": "row",
+                            "fillWidth": true,
+                            "componentConfiguration": {
+                                "apiConfiguration": {
+                                    "api": ".namespace.node.srl.network-instance.route-table.ipv4-unicast.route where (.namespace.node.name = \"${node}\" and .namespace.node.srl.network-instance.name = \"${router}\")",
+                                    "queryType": "eql",
+                                    "requestType": "get"
+                                }
+                            },
+                            "showStatusBar": true
+                        }
+                    ],
+                    "verticalAlignment": "start"
+                }
+            ],
+            "queryFilters": [
+                {
+                    "name": "node",
+                    "type": "custom",
+                    "api": {
+                        "api": ".namespace.node",
+                        "queryType": "eql",
+                        "requestType": "get"
+                    },
+                    "apiField": "name",
+                    "id": "df64da5a-530d-4eb9-a962-25ee115682a6"
+                },
+                {
+                    "name": "router",
+                    "type": "custom",
+                    "api": {
+                        "api": ".namespace.resources.cr.services_eda_nokia_com.v2.router",
+                        "queryType": "eql",
+                        "requestType": "get"
+                    },
+                    "apiField": "name",
+                    "id": "1e2c8e06-2f05-4d11-abe4-d0584b916254"
+                }
+            ],
+            "showFilterBar": true
+        }
+    ],
+    "builderVersion": "1.2.0"
+}

@@ -13,22 +13,15 @@ on:
   pull_request:
 
 env:
-  MKDOCS_MATERIAL_VER: 9.6.9-insiders-4.53.16-hellt
+  MKDOCS_MATERIAL_VER: v9.7.5-2
 
 jobs:
   docs-test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - run: docker run -v $(pwd):/docs --entrypoint mkdocs ghcr.io/srexperts/mkdocs-material-insiders:$MKDOCS_MATERIAL_VER build --clean --strict
+      - run: docker run -v $(pwd):/docs --entrypoint mkdocs ghcr.io/eda-labs/mkdocs-material:$MKDOCS_MATERIAL_VER build --clean --strict
 
       - name: Cache htmltest external links
         id: cache-htmltest

@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  MKDOCS_MATERIAL_VER: 9.6.1-insiders-4.53.15-hellt # insiders version
+  MKDOCS_MATERIAL_VER: v9.7.5-2
 
 jobs:
   publish-docs:
@@ -26,4 +26,4 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: docker run --env CI=true -v $(pwd):/docs --entrypoint mkdocs ghcr.io/srexperts/mkdocs-material-insiders:$MKDOCS_MATERIAL_VER gh-deploy --force
+      - run: docker run --env CI=true -v $(pwd):/docs --entrypoint mkdocs ghcr.io/eda-labs/mkdocs-material:$MKDOCS_MATERIAL_VER gh-deploy --force

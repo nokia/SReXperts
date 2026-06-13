@@ -1,0 +1,6 @@
+exit all
+/perform pcap test capture stop
+/edit-config global 
+/configure mirror mirror-dest "test-pcap" admin-state disable
+/configure system cron schedule "cmon_pcap" admin-state disable
+/commit

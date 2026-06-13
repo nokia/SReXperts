@@ -1,0 +1,22 @@
+---
+version: '2.0'
+
+nspWebUI.listElineServices:
+  description: |
+    action: nspWebUI.listElineServices.action
+  base: nsp.https
+  base-input:
+    url: https://restconf-gateway/restconf/operations/nsp-inventory:find
+    body:
+      input:
+        xpath-filter: '/nsp-service:services/service-layer/eline'
+        fields: service-id
+        sort-by:
+          - service-id
+    resultFilter: $.content.get('nsp-inventory:output').data.select({serviceName=>$.get('service-id')})
+    method: POST
+    auth: <% $.token_auth %>    
+  input:
+    - token_auth
+    - formValues: {}
+  output: <% $.content %>

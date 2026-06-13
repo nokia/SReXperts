@@ -1,0 +1,13 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+---
+# Pin versions so `ansible-galaxy collection install -r` resolves on Galaxy.
+# Application collections (e.g. nokia.eda_siteinfo_v1) are not always published on
+# public Galaxy; add them here with a version when available for your EDA release.
+collections:
+  - name: nokia.eda_utils_v1
+    version: ">=1.0.0"
+  - name: nokia.eda_core_v1
+    version: ">=1.0.3"

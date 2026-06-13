@@ -1,0 +1,545 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+version: '2.0'
+
+# One VPRN + one VPLS per group on selected PEs (g<N>-pe1 / g<N>-pe2) via NSP RESTCONF.
+# Options: operation, service_scope (all | vprn_only | vpls_only), node_scope (all | pe1 | pe2), group (workgroup # for unique names/IDs).
+# Optional: mismatched_customer_ids (PE1 vs PE2 use different customer IDs), mismatched_site_names (PE1 vs PE2 use different service names); both may be true.
+
+configure-brownfield-services:
+  description: Configure or remove one VPRN and one VPLS per workgroup on PE1/PE2 (same names/IDs on each node unless mismatched_site_names).
+  type: direct
+  tags:
+    - SR OS
+    - Services
+    - sf-network-operation
+
+  vars:
+    target_nodes: []
+    config_list: []
+    delete_list: []
+    message: null
+    plan_detail: null
+    result_type: null
+    templateName: configure-brownfield-report
+
+  input:
+    - operation: 'configure'   # configure | remove
+    - service_scope: 'all'     # all | vprn_only | vpls_only
+    - node_scope: 'all'        # all | pe1 | pe2
+    - group: 1                 # workgroup number (1, 2, ...) for unique service names and IDs per group
+    - plan: false              # if true, no PATCH/DELETE; output plan_detail only (dry run)
+    - mismatched_customer_ids: false   # if true, PE1 uses customer 1 and PE2 uses customer 2 (per service)
+    - mismatched_site_names: false      # if true, service-name differs per site (e.g. ...-vprn-pe1 vs ...-vprn-pe2)
+
+  output:
+    result: <% $.result %>
+
+  output-on-error:
+    result: '<!DOCTYPE html><html><body><p>An error occurred.</p></body></html>'
+
+  tasks:
+    start:
+      action: std.noop
+      on-complete:
+        - verify_report_template
+
+    verify_report_template:
+      action: nsp.jinja_template
+      input:
+        name: <% $.templateName %>
+        data:
+          overall_message: "Template check"
+          overall_color: "#424242"
+          rows: []
+      on-success:
+        - get_nodes
+      on-error:
+        - report_template_unavailable
+
+    report_template_unavailable:
+      action: nsp.python
+      input:
+        context:
+          templateName: <% $.templateName %>
+        script: |
+          def esc(s):
+            if s is None:
+              return ""
+            return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+          template_name = esc(context.get("templateName") or "")
+          return """<!DOCTYPE html><html><body><p>Report template '%s' is not available. Publish the Jinja template and try again.</p></body></html>""" % template_name
+      publish:
+        result: <% task().result %>
+      on-success:
+        - done
+
+    get_nodes:
+      action: nsp.https
+      input:
+        url: 'https://<% locate_nsp() %>/restconf/data/nsp-equipment:network/network-element?include-meta=false&fields=ne-id;type;ne-name;ip-address'
+        method: GET
+        contentType: 'application/json'
+        accept: 'application/json'
+      publish:
+        node_detail: <% task().result.content["nsp-equipment:network-element"] %>
+      publish-on-error:
+        message: '<% "Failed to get network elements: " + str(task().result) %>'
+        result_type: 'error_fetch_nodes'
+      on-success:
+        - filter_targets
+      on-error:
+        - prepare_report
+
+    filter_targets:
+      action: nsp.python
+      input:
+        context:
+          node_detail: <% $.node_detail %>
+          node_scope: <% $.node_scope %>
+          group: <% $.group %>
+        script: |
+          node_detail = context.get("node_detail") or []
+          if isinstance(node_detail, dict):
+            node_detail = [node_detail]
+          scope = (context.get("node_scope") or "all").lower()
+          group = int(context.get("group") or 1)
+          group_prefix = ("g" + str(group) + "-").lower()
+          targets = []
+          for n in node_detail:
+            ne_id = n.get("ne-id")
+            ne_name = (n.get("ne-name") or "").lower()
+            if not ne_id or not ne_name.startswith(group_prefix):
+              continue
+            if scope == "all" and ("pe1" in ne_name or "pe2" in ne_name):
+              targets.append({"ne-id": ne_id, "ne-name": n.get("ne-name", ne_id), "ip-address": n.get("ip-address")})
+            elif scope == "pe1" and "pe1" in ne_name:
+              targets.append({"ne-id": ne_id, "ne-name": n.get("ne-name", ne_id), "ip-address": n.get("ip-address")})
+            elif scope == "pe2" and "pe2" in ne_name:
+              targets.append({"ne-id": ne_id, "ne-name": n.get("ne-name", ne_id), "ip-address": n.get("ip-address")})
+          return targets
+      publish:
+        target_nodes: <% task().result %>
+      on-success:
+        - no_targets: <% len($.target_nodes) = 0 %>
+        - branch_operation: <% len($.target_nodes) > 0 %>
+
+    no_targets:
+      action: std.noop
+      publish:
+        message: "No target nodes found for this group and node_scope (expect names like g<N>-pe1, g<N>-pe2)."
+        result_type: 'no_targets'
+      on-success:
+        - prepare_report
+
+    branch_operation:
+      action: std.noop
+      on-complete:
+        - build_configs: <% $.operation = "configure" %>
+        - build_delete_list: <% $.operation = "remove" %>
+
+    build_configs:
+      action: nsp.python
+      input:
+        context:
+          target_nodes: <% $.target_nodes %>
+          service_scope: <% $.service_scope %>
+          group: <% $.group %>
+          mismatched_customer_ids: <% $.mismatched_customer_ids %>
+          mismatched_site_names: <% $.mismatched_site_names %>
+        script: |
+          # Build PATCH body per node for VPRN/VPLS. Service names and IDs are unique per group.
+          targets = context.get("target_nodes") or []
+          scope = (context.get("service_scope") or "all").lower()
+          group = int(context.get("group") or 1)
+          g = max(1, group)
+          mismatch_cust = bool(context.get("mismatched_customer_ids"))
+          mismatch_names = bool(context.get("mismatched_site_names"))
+          base = (g - 1) * 100
+          vprn_id = 501 + base
+          vpls_id = 601 + base
+          vprn_name_base = "activity-38-g%d-vprn" % g
+          vpls_name_base = "activity-38-g%d-vpls" % g
+          out = []
+          for node in targets:
+            ne_id = node["ne-id"]
+            ne_name = (node.get("ne-name") or "").lower()
+            ip_addr = node.get("ip-address")
+            rd_base = str(ip_addr or ne_id)
+            parts = str(ip_addr or "").split(".")
+            if len(parts) == 4 and parts[3].isdigit():
+              last_octet = parts[3]
+              loopback_ip = "10." + str(g) + ".0." + last_octet
+            else:
+              loopback_ip = "10." + str(g) + ".0.1"
+            # Prefix for static route must be network address (host bits zero); use .0/24
+            static_net = "172.16." + str(g) + ".0/24"
+            if mismatch_names:
+              if "pe1" in ne_name:
+                vprn_name = vprn_name_base + "-pe1"
+                vpls_name = vpls_name_base + "-pe1"
+              elif "pe2" in ne_name:
+                vprn_name = vprn_name_base + "-pe2"
+                vpls_name = vpls_name_base + "-pe2"
+              else:
+                vprn_name = vprn_name_base
+                vpls_name = vpls_name_base
+            else:
+              vprn_name = vprn_name_base
+              vpls_name = vpls_name_base
+            cust = "2" if (mismatch_cust and "pe2" in ne_name) else "1"
+            service = {}
+            if scope in ("all", "vprn_only"):
+              service["vprn"] = [
+                {
+                  "service-name": vprn_name,
+                  "admin-state": "enable",
+                  "service-id": vprn_id,
+                  "customer": cust,
+                  "bgp-evpn": {"mpls": [{"bgp-instance": 1, "admin-state": "enable", "route-distinguisher": rd_base + ":" + str(vprn_id),
+                    "vrf-target": {"community": "target:" + str(g) + ":501"},
+                    "auto-bind-tunnel": {"resolution": "filter", "resolution-filter": {"sr-isis": True}}}]},
+                  "interface": [{"interface-name": "vprn-pe-ce", "admin-state": "enable", "loopback": True,
+                    "ipv4": {"primary": {"address": loopback_ip, "prefix-length": 32}}}],
+                  "static-routes": {"route": [{"ip-prefix": static_net, "route-type": "unicast",
+                    "blackhole": {"admin-state": "enable", "generate-icmp": True}}]}
+                }
+              ]
+            if scope in ("all", "vpls_only"):
+              rt = "target:" + str(g) + ":601"
+              service["vpls"] = [
+                {"service-name": vpls_name, "service-id": vpls_id, "customer": cust, "admin-state": "enable",
+                 "bgp": [{"bgp-instance": 1, "route-target": {"export": rt, "import": rt}}],
+                 "bgp-ad": {"vpls-id": str(g) + ":601"}}
+              ]
+            body = {"nokia-conf:configure": {"service": service}}
+            out.append({"ne-id": ne_id, "ne-name": node.get("ne-name"), "body": body})
+          return out
+      publish:
+        config_list: <% task().result %>
+      on-success:
+        - plan_configure: <% $.plan %>
+        - apply_config: <% not $.plan %>
+
+    plan_configure:
+      action: std.noop
+      publish:
+        plan_detail:
+          operation: 'configure'
+          nodes: <% $.target_nodes %>
+          service_scope: <% $.service_scope %>
+          group: <% $.group %>
+          mismatched_customer_ids: <% $.mismatched_customer_ids %>
+          mismatched_site_names: <% $.mismatched_site_names %>
+          summary: <% "Would configure " + str(len($.target_nodes)) + " node(s)." %>
+        message: '<% "Plan: would configure " + str(len($.target_nodes)) + " node(s) (service_scope=" + $.service_scope + ", group=" + str($.group) + ", mismatched_customer_ids=" + str($.mismatched_customer_ids) + ", mismatched_site_names=" + str($.mismatched_site_names) + "). No PATCH sent." %>'
+        result_type: 'plan_configure'
+      on-success:
+        - prepare_report
+
+    apply_config:
+      with-items: item in <% $.config_list %>
+      concurrency: 2
+      action: nsp.https
+      input:
+        url: 'https://<% locate_nsp() %>/restconf/data/network-device-mgr:network-devices/network-device=<% $.item["ne-id"] %>/root/nokia-conf:configure'
+        method: PATCH
+        contentType: 'application/yang-data+json'
+        accept: 'application/yang-data+json'
+        body: <% $.item.body %>
+      publish:
+        message: '<% "Configured " + str(len($.config_list)) + " node(s)." %>'
+        result_type: 'success_configure'
+      publish-on-error:
+        message: '<% "PATCH failed for one or more nodes: " + str(task().result) %>'
+        result_type: 'error_configure'
+      on-success:
+        - prepare_report
+      on-error:
+        - prepare_report
+
+    build_delete_list:
+      action: nsp.python
+      input:
+        context:
+          target_nodes: <% $.target_nodes %>
+          service_scope: <% $.service_scope %>
+          group: <% $.group %>
+          mismatched_site_names: <% $.mismatched_site_names %>
+        script: |
+          targets = context.get("target_nodes") or []
+          scope = (context.get("service_scope") or "all").lower()
+          group = int(context.get("group") or 1)
+          g = max(1, group)
+          mismatch_names = bool(context.get("mismatched_site_names"))
+          vprn_base = "activity-38-g%d-vprn" % g
+          vpls_base = "activity-38-g%d-vpls" % g
+          out = []
+          for node in targets:
+            ne_id = node["ne-id"]
+            ne_name = (node.get("ne-name") or "").lower()
+            if mismatch_names:
+              if "pe1" in ne_name:
+                vprn_names = [vprn_base + "-pe1"]
+                vpls_names = [vpls_base + "-pe1"]
+              elif "pe2" in ne_name:
+                vprn_names = [vprn_base + "-pe2"]
+                vpls_names = [vpls_base + "-pe2"]
+              else:
+                vprn_names = [vprn_base]
+                vpls_names = [vpls_base]
+            else:
+              vprn_names = [vprn_base]
+              vpls_names = [vpls_base]
+            if scope in ("all", "vprn_only"):
+              for name in vprn_names:
+                out.append({"ne-id": ne_id, "path": "nokia-conf:configure/service/vprn=" + name})
+            if scope in ("all", "vpls_only"):
+              for name in vpls_names:
+                out.append({"ne-id": ne_id, "path": "nokia-conf:configure/service/vpls=" + name})
+          return out
+      publish:
+        delete_list: <% task().result %>
+      on-success:
+        - plan_remove: <% $.plan %>
+        - do_deletes: <% not $.plan and len($.delete_list) > 0 %>
+        - no_deletes: <% not $.plan and len($.delete_list) = 0 %>
+
+    plan_remove:
+      action: nsp.python
+      input:
+        context:
+          delete_list: <% $.delete_list %>
+          target_nodes: <% $.target_nodes %>
+        script: |
+          delete_list = context.get("delete_list") or []
+          by_node = {}
+          for item in delete_list:
+            ne_id = item.get("ne-id")
+            path = item.get("path", "")
+            if ne_id not in by_node:
+              by_node[ne_id] = []
+            by_node[ne_id].append(path)
+          deletes_per_node = [{"ne-id": ne_id, "paths": paths} for ne_id, paths in by_node.items()]
+          summary = "Would remove %d service(s) from %d node(s)." % (len(delete_list), len(by_node))
+          plan_detail = {
+            "operation": "remove",
+            "nodes": context.get("target_nodes") or [],
+            "deletes_per_node": deletes_per_node,
+            "summary": summary
+          }
+          message = "Plan: " + summary + " No DELETE sent."
+          return {"plan_detail": plan_detail, "message": message}
+      publish:
+        plan_detail: <% task().result.plan_detail %>
+        message: <% task().result.message %>
+        result_type: 'plan_remove'
+      on-success:
+        - prepare_report
+
+    no_deletes:
+      action: std.noop
+      publish:
+        message: "No services to remove for given scope."
+        result_type: 'no_deletes'
+      on-success:
+        - prepare_report
+
+    do_deletes:
+      with-items: item in <% $.delete_list %>
+      concurrency: 4
+      action: nsp.https
+      input:
+        url: 'https://<% locate_nsp() %>/restconf/data/network-device-mgr:network-devices/network-device=<% $.item["ne-id"] %>/root/<% $.item.path %>'
+        method: DELETE
+        accept: 'application/json'
+      publish:
+        message: '<% "Removed services from " + str(len($.target_nodes)) + " node(s)." %>'
+        result_type: 'success_remove'
+      publish-on-error:
+        message: '<% "DELETE failed for one or more services: " + str(task().result) %>'
+        result_type: 'error_remove'
+      on-success:
+        - prepare_report
+      on-error:
+        - prepare_report
+
+    prepare_report:
+      action: nsp.python
+      input:
+        context:
+          message: <% $.message %>
+          result_type: <% $.result_type %>
+          plan_detail: <% $.plan_detail %>
+          target_nodes: <% $.target_nodes %>
+          config_list: <% $.config_list %>
+          delete_list: <% $.delete_list %>
+          operation: <% $.operation %>
+          service_scope: <% $.service_scope %>
+          mismatched_customer_ids: <% $.mismatched_customer_ids %>
+          mismatched_site_names: <% $.mismatched_site_names %>
+        script: |
+          def esc(s):
+            if s is None: return ""
+            return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+
+          ctx = context or {}
+          message = ctx.get("message") or ""
+          result_type = ctx.get("result_type") or "unknown"
+          plan_detail = ctx.get("plan_detail")
+          target_nodes = ctx.get("target_nodes") or []
+          config_list = ctx.get("config_list") or []
+          delete_list = ctx.get("delete_list") or []
+          operation = ctx.get("operation") or ""
+
+          success_create_color = "#2E7D32"
+          success_remove_color = "#1565C0"
+          plan_color = "#E65100"
+          error_color = "#C62828"
+          neutral_color = "#424242"
+
+          overall_message = ""
+          overall_color = neutral_color
+          rows = []
+
+          if result_type == "error_fetch_nodes":
+            overall_message = "<strong>Error</strong>: %s" % esc(message)
+            overall_color = error_color
+            rows.append({"node": "—", "service": "—", "status": "Failure", "error_message": esc(message), "status_class": "status-failure"})
+          elif result_type == "no_targets":
+            overall_message = "<strong>No targets</strong>: %s" % esc(message)
+            overall_color = neutral_color
+            rows.append({"node": "—", "service": "—", "status": "No targets", "error_message": "", "status_class": "status-neutral"})
+          elif result_type == "plan_configure":
+            scope = (ctx.get("service_scope") or "all").lower()
+            num_nodes = len(plan_detail.get("nodes") or [])
+            num_services = num_nodes * 2 if scope == "all" else num_nodes
+            extras = []
+            if ctx.get("mismatched_customer_ids"):
+              extras.append("mismatched customer IDs (PE1=1, PE2=2)")
+            if ctx.get("mismatched_site_names"):
+              extras.append("mismatched site names (-pe1 / -pe2 suffixes)")
+            suffix = ("; " + "; ".join(extras)) if extras else ""
+            overall_message = "<strong>Plan (configure)</strong>: Would configure %d node(s) and %d service(s).%s No PATCH sent." % (num_nodes, num_services, suffix)
+            overall_color = plan_color
+            if plan_detail and plan_detail.get("nodes"):
+              for n in plan_detail["nodes"]:
+                ne_name = n.get("ne-name") or n.get("ne-id") or "?"
+                rows.append({"node": esc(ne_name), "service": "VPRN/VPLS", "status": "Would configure", "error_message": "", "status_class": "status-plan"})
+          elif result_type == "success_configure":
+            num_nodes = len(config_list)
+            for item in config_list:
+              ne_name = item.get("ne-name") or item.get("ne-id") or "?"
+              body = item.get("body") or {}
+              svc = body.get("nokia-conf:configure", {}).get("service") or {}
+              for v in svc.get("vprn") or []:
+                rows.append({"node": esc(ne_name), "service": esc(v.get("service-name", "vprn")), "status": "Success", "error_message": "", "status_class": "status-success"})
+              for v in svc.get("vpls") or []:
+                rows.append({"node": esc(ne_name), "service": esc(v.get("service-name", "vpls")), "status": "Success", "error_message": "", "status_class": "status-success"})
+            num_services = len(rows)
+            overall_message = "<strong>Success (created)</strong>: Configured %d node(s) and %d service(s)." % (num_nodes, num_services)
+            overall_color = success_create_color
+          elif result_type == "error_configure":
+            overall_message = "<strong>Error (configure)</strong>: %s" % esc(message)
+            overall_color = error_color
+            for item in config_list or []:
+              ne_name = item.get("ne-name") or item.get("ne-id") or "?"
+              rows.append({"node": esc(ne_name), "service": "VPRN/VPLS", "status": "Failure", "error_message": esc(message), "status_class": "status-failure"})
+            if not config_list:
+              rows.append({"node": "—", "service": "—", "status": "Failure", "error_message": esc(message), "status_class": "status-failure"})
+          elif result_type == "plan_remove":
+            nodes_by_id = {n.get("ne-id"): (n.get("ne-name") or n.get("ne-id") or "?") for n in (plan_detail.get("nodes") or [])} if plan_detail else {}
+            if plan_detail and plan_detail.get("deletes_per_node"):
+              for d in plan_detail["deletes_per_node"]:
+                ne_id = d.get("ne-id", "?")
+                ne_name = nodes_by_id.get(ne_id, ne_id)
+                paths = d.get("paths", [])
+                for p in paths:
+                  svc_name = p.split("=")[-1] if "=" in p else p.split("/")[-1]
+                  rows.append({"node": esc(str(ne_name)), "service": esc(svc_name), "status": "Would remove", "error_message": "", "status_class": "status-plan"})
+            num_nodes = len(plan_detail.get("deletes_per_node") or [])
+            num_services = len(rows)
+            overall_message = "<strong>Plan (remove)</strong>: Would remove %d service(s) from %d node(s). No DELETE sent." % (num_services, num_nodes)
+            overall_color = plan_color
+          elif result_type == "success_remove":
+            nodes_by_id = {n.get("ne-id"): (n.get("ne-name") or n.get("ne-id") or "?") for n in target_nodes}
+            for item in delete_list or []:
+              ne_id = item.get("ne-id", "?")
+              ne_name = nodes_by_id.get(ne_id, ne_id)
+              path = item.get("path", "")
+              svc_name = path.split("=")[-1] if "=" in path else path.split("/")[-1] if path else "—"
+              rows.append({"node": esc(str(ne_name)), "service": esc(svc_name), "status": "Success", "error_message": "", "status_class": "status-success"})
+            if not delete_list and target_nodes:
+              for n in target_nodes:
+                ne_name = n.get("ne-name") or n.get("ne-id") or "?"
+                rows.append({"node": esc(ne_name), "service": "—", "status": "Success", "error_message": "", "status_class": "status-success"})
+            num_nodes = len(set(item.get("ne-id") for item in (delete_list or []))) or len(target_nodes)
+            num_services = len(delete_list) or len(rows)
+            overall_message = "<strong>Success (removed)</strong>: Removed %d service(s) from %d node(s)." % (num_services, num_nodes)
+            overall_color = success_remove_color
+          elif result_type == "error_remove":
+            overall_message = "<strong>Error (remove)</strong>: %s" % esc(message)
+            overall_color = error_color
+            nodes_by_id = {n.get("ne-id"): (n.get("ne-name") or n.get("ne-id") or "?") for n in target_nodes}
+            for item in delete_list or []:
+              ne_id = item.get("ne-id", "?")
+              ne_name = nodes_by_id.get(ne_id, ne_id)
+              path = item.get("path", "")
+              svc_name = path.split("=")[-1] if "=" in path else path.split("/")[-1] if path else "—"
+              rows.append({"node": esc(str(ne_name)), "service": esc(svc_name), "status": "Failure", "error_message": esc(message), "status_class": "status-failure"})
+            if not delete_list:
+              rows.append({"node": "—", "service": "—", "status": "Failure", "error_message": esc(message), "status_class": "status-failure"})
+          elif result_type == "no_deletes":
+            overall_message = "<strong>No changes</strong>: %s" % esc(message)
+            overall_color = neutral_color
+            rows.append({"node": "—", "service": "—", "status": "No changes", "error_message": "", "status_class": "status-neutral"})
+          else:
+            overall_message = esc(message)
+            overall_color = neutral_color
+            rows.append({"node": "—", "service": "—", "status": "—", "error_message": "", "status_class": "status-neutral"})
+
+          return {"overall_message": overall_message, "overall_color": overall_color, "rows": rows}
+      publish:
+        report_data: <% task().result %>
+      on-success:
+        - render_report
+      on-error:
+        - render_error_report
+
+    render_error_report:
+      action: nsp.python
+      input:
+        context:
+          message: <% task().result %>
+        script: |
+          def esc(s):
+            if s is None: return ""
+            return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+          msg = context.get("message") or ""
+          err_text = esc(msg) if msg else "An unexpected error occurred."
+          return {
+            "overall_message": "<strong>Error</strong>: " + err_text,
+            "overall_color": "#C62828",
+            "rows": [{"node": "—", "service": "—", "status": "Failure", "error_message": err_text, "status_class": "status-failure"}]
+          }
+      publish:
+        report_data: <% task().result %>
+      on-success:
+        - render_report
+
+    render_report:
+      action: nsp.jinja_template
+      input:
+        name: <% $.templateName %>
+        data: <% $.report_data %>
+      publish:
+        result: <% task().result.template %>
+      on-success:
+        - done
+      on-error:
+        - report_template_unavailable
+
+    done:
+      action: std.noop

@@ -1,4 +1,8 @@
 #!/bin/bash
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
 
 # for containers with names clab-srexperts-leaf11 clab-srexperts-leaf12 clab-srexperts-leaf13 clab-srexperts-spine11 clab-srexperts-spine12
 # For containers with names clab-srexperts-leaf11, clab-srexperts-leaf12, clab-srexperts-leaf13, clab-srexperts-spine11, and clab-srexperts-spine12, execute the revert command that removes the EDA configuration and restores the initial state of the DC1 nodes.

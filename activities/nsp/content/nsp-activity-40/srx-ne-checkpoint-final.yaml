@@ -1,0 +1,190 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+---
+version: '2.0'
+
+srx-ne-checkpoint-final:
+  type: direct
+  tags:
+    - LSO
+
+  workflow_meta:
+    title: Takes a checkpoint of the selected object on a MD SROS device
+    author: NOKIA R&D
+    version: '2.0.0'
+    license: 
+    package: LSOM NE Checkpoint
+    deprecated: false
+
+  input:
+    - neId
+    - saveFS: false
+
+  output:
+    lsoInfo: <% $.lsoInfo %>
+    checkpoint: <% $.checkpoint %>
+    saveFS: <% $.saveFS %>
+    filePath: <% $.dirName %>/<% $.timestamp %>
+    neSoftwareVersion: <% $.neSoftwareVersion %>
+    
+  output-on-error:
+    lsoInfo: "Error: <% $.lsoInfo %>"
+    checkpoint: <% $.checkpoint %>
+    filePath: <% $.dirName %>/<% $.timestamp %>
+    neSoftwareVersion: <% $.neSoftwareVersion %>
+    
+  vars:
+    lsoInfo: "Failed"
+    lsoStageError: "Failed"
+    checkpoint: "unknown"
+    filePath: "unknown"
+    neSoftwareVersion: "unknown"
+    dryRun: <% options().dryRun %>
+    stop: "([\\s\\S]*)(\\^*)[\r\n]*(MINOR:)([\\s\\S]*)|(([\\s\\S]*)(\\^*)[\r\n]*(Error:|ERROR:)([\\s\\S]*))"
+   
+  tasks:
+    lsoStageMapping:
+      action: std.noop
+      publish:
+        timestamp: <% regex(":").replace(regex(" ").replace(get_UTC_time(),"-"),".") %>
+        lsoWorkflowStageMapping:
+          ne-checkpoint:
+          - getDeviceInfo
+          - createSRLcheckpoint
+          - createSROScheckpoint
+          - createBackupFolder
+          - transferCheckpoint
+      on-success:
+        - getDeviceInfo
+    
+    getDeviceInfo:
+      action: nsp.https
+      input:
+        method: POST
+        url: https://restconf-gateway/restconf/operations/nsp-inventory:find
+        body: 
+          input:
+            xpath-filter: /nsp-ne-control:ne-control/discovered-ne[ne-id='<% $.neId %>']
+            fields: ne-id;ne-name;version;communication-state;ne-vendor;ne-family
+        resultFilter: $.content.get("nsp-inventory:output").data
+        scriptFilter: |
+          return context[0]
+      publish:
+        dirName: /lsom/checkpoint/<% task().result.content.get("ne-vendor") %>/<% task().result.content.get("ne-family").replace(" ","_") %>/<% task().result.content.get("ne-id") %>
+        neName: <% task().result.content.get("ne-name") %>
+        neId: <% task().result.content.get("ne-id") %>
+        neSoftwareVersion: <% task().result.content.get("version") %>
+        productFamily: <% task().result.content.get("ne-family") %>
+      publish-on-error:
+        lsoInfo: "Failed: fetching node details"
+        lsoStageError: <% task().result %>
+      on-success:
+        - createSRLcheckpoint: <% $.productFamily.indexOf("SRLinux") != -1 %>
+        - createSROScheckpoint: <% $.productFamily.indexOf("7750 SR") != -1 %>
+
+    createSRLcheckpoint:
+      action: nsp.managed_cli
+      input:
+        neId: <% $.neId %>
+        stopOn: <% $.stop %>
+        idleTimeout: 30
+        closeSession: true
+        cmds:
+          - environment cli-engine type basic
+          - echo "Start"
+          - tools system configuration generate-checkpoint name nsp_<% $.timestamp %>
+          - echo "End"
+      publish:
+        sourcePath: /etc/opt/srlinux/checkpoint/checkpoint-0.json
+        checkpoint: checkpoint-0.json
+        extension: json
+      on-success:
+        - createBackupFolder: <% $.saveFS %>
+        - CheckpointSuccess: <% not $.saveFS %>
+      on-error:
+        - CheckpointFailed
+
+    createSROScheckpoint:
+      action: nsp.managed_cli
+      input:
+        neId: <% $.neId %>
+        stopOn: <% $.stop %>
+        idleTimeout: 30
+        closeSession: true
+        cmds:
+          - /!md-cli
+          - configure private
+          - commit
+          - exit
+      publish:
+        sourcePath: cf3:/config.cfg
+        checkpoint: config.cfg
+        extension: cfg
+      on-success:
+        - createBackupFolder: <% $.saveFS %>
+        - CheckpointSuccess: <% not $.saveFS %>
+      on-error:
+        - CheckpointFailed
+
+    createBackupFolder:
+      action: nsp.https
+      input:
+        method: POST
+        url: https://file-service/nsp-file-service-app/rest/api/v1/directory?dirName=<% $.dirName %>/<% $.timestamp %>
+        resultFilter : $.content.data.fileName
+      publish-on-error:
+        lsoStageError: <% task().result %>
+        lsoInfo: "Failed: creating checkpoint directory on file-server"
+      on-success:
+        - transferCheckpoint
+      on-error:
+        - CheckpointFailed
+    
+    transferCheckpoint:
+      action: lso_transferFilesFromNe
+      input:
+        neId: <% $.neId %>
+        sourcePath: <% $.sourcePath %>
+        destinationPath: <% $.dirName %>/<% $.timestamp %>
+        ftUuid: <% $.neId+"-nsp_"+$.timestamp %>
+      publish:
+        lsoInfo: "starting transfering file from node to server"
+      publish-on-error:
+        lsoInfo: "Files transfer from NE to File Server failed.Please check execution progress for details. Possible reasons for failure: FTP policy not assigned or has incorrect properties, file transfer failed due to interim failure, file service not functional, file transfer timeout, etc"
+        lsoStageError: <% task().result.where((isDict($) and $.containsKey('errorType')) or not isDict($)).last() %>
+        stage: "fileTransfer"
+      on-success:
+        - renameCheckpoint
+      on-error:
+        - CheckpointFailed
+    
+    renameCheckpoint:
+      action: nsp.https
+      input:
+        method: POST
+        url: https://file-service/nsp-file-service-app/rest/api/v1/file/rename?sourceFilePath=<% $.dirName %>/<% $.timestamp %>/<% $.checkpoint %>&&targetFilePath=<% $.dirName %>/<% $.timestamp %>/nsp_checkpoint.<% $.extension %>
+      publish-on-error:
+        lsoStageError: <% task().result %>
+        lsoInfo: "Failed: creating checkpoint directory on file-server"
+      on-success:
+        - CheckpointSuccess
+      on-error:
+        - CheckpointFailed
+
+    CheckpointSuccess:
+      join: 0
+      publish:
+        lsoInfo: "Checkpoint Successful"
+      on-complete:
+        - succeed 
+
+    CheckpointFailed:
+      join: 0
+      action: std.fail
+      input:
+        error_data: <% $.lsoInfo %>   
+      publish-on-error:
+        lsoStageError: <% $.lsoStageError %>
+        lsoInfo: <% task().result %> 

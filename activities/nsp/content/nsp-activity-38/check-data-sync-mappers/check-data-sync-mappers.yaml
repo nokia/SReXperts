@@ -1,0 +1,459 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+version: '2.0'
+
+# Check whether NSP data sync mappers (resync classes) are available via get-full-resync-classes RPC.
+# Use this to verify the environment before running trigger-service-resync or brownfield discovery.
+
+check-data-sync-mappers:
+  description: Check if NSP data sync mappers and resync classes are available via get-full-resync-classes RPC.
+  type: direct
+  tags:
+    - SR OS
+    - Services
+    - Brownfield Discovery
+
+  vars:
+    templateName: check-data-sync-mappers-report
+    report_data: null
+    node_detail: []
+    target_nodes: []
+    missing_nodes: []
+    validated_group: null
+
+  input:
+    - group             # required workgroup number; automatically checks g<N>-pe1 and g<N>-pe2 for this workgroup
+
+  output:
+    result: <% $.result %>
+
+  output-on-error:
+    result: '<!DOCTYPE html><html><body><p>An error occurred.</p></body></html>'
+
+  tasks:
+    start:
+      action: std.noop
+      on-complete:
+        - verify_report_template
+
+    verify_report_template:
+      action: nsp.jinja_template
+      input:
+        name: <% $.templateName %>
+        data:
+          overall_message: "Template check"
+          overall_color: "#424242"
+          rows: []
+          show_node_column: true
+      on-success:
+        - validate_group
+      on-error:
+        - report_template_unavailable
+
+    report_template_unavailable:
+      action: nsp.python
+      input:
+        context:
+          templateName: <% $.templateName %>
+        script: |
+          def esc(s):
+            if s is None:
+              return ""
+            return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+          template_name = esc(context.get("templateName") or "")
+          return """<!DOCTYPE html><html><body><p>Report template '%s' is not available. Publish the Jinja template and try again.</p></body></html>""" % template_name
+      publish:
+        result: <% task().result %>
+      on-success:
+        - done
+
+    validate_group:
+      action: nsp.python
+      input:
+        context:
+          group: <% $.group %>
+        script: |
+          raw = context.get("group")
+          if raw in (None, ""):
+            raise Exception("Group is required.")
+          try:
+            group = int(raw)
+          except Exception:
+            raise Exception("Group must be an integer.")
+          if group < 1:
+            raise Exception("Group must be greater than or equal to 1.")
+          return {"group": group}
+      publish:
+        validated_group: <% task().result.get("group") %>
+      on-success:
+        - get_nodes
+      on-error:
+        - build_error_report
+
+    get_nodes:
+      action: nsp.https
+      input:
+        url: 'https://<% locate_nsp() %>/restconf/data/nsp-equipment:network/network-element?include-meta=false&fields=ne-id;type;ne-name;ip-address'
+        method: GET
+        contentType: 'application/json'
+        accept: 'application/json'
+      publish:
+        node_detail: <% task().result.content["nsp-equipment:network-element"] %>
+      publish-on-error:
+        node_detail: []
+        message: '<% "Failed to get network elements: " + str(task().result) %>'
+      on-success:
+        - filter_targets
+      on-error:
+        - build_error_report
+
+    filter_targets:
+      action: nsp.python
+      input:
+        context:
+          node_detail: <% $.node_detail %>
+          group: <% $.validated_group %>
+        script: |
+          node_detail = context.get("node_detail") or []
+          if isinstance(node_detail, dict):
+            node_detail = [node_detail]
+          group = int(context["group"])
+          group_prefix = ("g" + str(group) + "-").lower()
+          expected_names = {
+            "pe1": ("g" + str(group) + "-pe1").lower(),
+            "pe2": ("g" + str(group) + "-pe2").lower(),
+          }
+
+          def normalize_node(node, role):
+            return {
+              "role": role,
+              "ne-id": node.get("ne-id"),
+              "ne-name": node.get("ne-name") or node.get("ne-id") or role,
+              "ip-address": node.get("ip-address"),
+            }
+
+          targets = {}
+          for role, expected_name in expected_names.items():
+            exact_match = None
+            fallback_match = None
+            for node in node_detail:
+              ne_id = node.get("ne-id")
+              ne_name = (node.get("ne-name") or "").lower()
+              if not ne_id or not ne_name.startswith(group_prefix):
+                continue
+              if ne_name == expected_name:
+                exact_match = node
+                break
+              if fallback_match is None and role in ne_name:
+                fallback_match = node
+            chosen = exact_match or fallback_match
+            if chosen:
+              targets[role] = normalize_node(chosen, role)
+
+          ordered_targets = []
+          if "pe1" in targets:
+            ordered_targets.append(targets["pe1"])
+          if "pe2" in targets:
+            ordered_targets.append(targets["pe2"])
+
+          missing_nodes = []
+          for role in ("pe1", "pe2"):
+            if role not in targets:
+              missing_nodes.append(expected_names[role])
+
+          return {
+            "target_nodes": ordered_targets,
+            "target_pe1": targets.get("pe1"),
+            "target_pe2": targets.get("pe2"),
+            "missing_nodes": missing_nodes,
+          }
+      publish:
+        target_nodes: <% task().result.get("target_nodes") %>
+        target_pe1: <% task().result.get("target_pe1") %>
+        target_pe2: <% task().result.get("target_pe2") %>
+        missing_nodes: <% task().result.get("missing_nodes") %>
+      on-success:
+        - no_targets: <% len($.target_nodes) = 0 %>
+        - run_checks: <% len($.target_nodes) > 0 %>
+
+    no_targets:
+      action: nsp.python
+      input:
+        context:
+          group: <% $.validated_group %>
+          missing_nodes: <% $.missing_nodes %>
+        script: |
+          def esc(s):
+            if s is None:
+              return ""
+            return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+          group = context["group"]
+          missing_nodes = context.get("missing_nodes") or [("g" + str(group) + "-pe1"), ("g" + str(group) + "-pe2")]
+          rows = []
+          for node_name in missing_nodes:
+            rows.append({
+              "node": esc(node_name),
+              "service": "Target node lookup",
+              "status": "Missing",
+              "error_message": "No inventory match for this expected workgroup node.",
+              "status_class": "status-plan",
+            })
+          return {
+            "overall_message": "<strong>No target nodes found.</strong> Expected workgroup nodes g<N>-pe1 and g<N>-pe2 in NSP inventory for group %s." % esc(group),
+            "overall_color": "#E65100",
+            "rows": rows,
+            "show_node_column": True,
+          }
+      publish:
+        report_data: <% task().result %>
+      on-success:
+        - render_report
+
+    run_checks:
+      action: std.noop
+      on-complete:
+        - get_full_resync_classes_pe1: <% $.target_pe1 != null %>
+        - get_full_resync_classes_pe2: <% $.target_pe2 != null %>
+
+    get_full_resync_classes_pe1:
+      action: nsp.https
+      input:
+        url: 'https://<% locate_nsp() %>/restconf/operations/nsp-admin-resync:get-full-resync-classes'
+        method: POST
+        contentType: 'application/json'
+        accept: 'application/json'
+        body:
+          nsp-admin-resync:input:
+            plugin-id: mdm
+            ne-id: <% $.target_pe1["ne-id"] %>
+      publish:
+        response_pe1: <% task().result %>
+      publish-on-error:
+        response_pe1: <% task().result %>
+      on-success:
+        - build_report
+      on-error:
+        - build_report
+
+    get_full_resync_classes_pe2:
+      action: nsp.https
+      input:
+        url: 'https://<% locate_nsp() %>/restconf/operations/nsp-admin-resync:get-full-resync-classes'
+        method: POST
+        contentType: 'application/json'
+        accept: 'application/json'
+        body:
+          nsp-admin-resync:input:
+            plugin-id: mdm
+            ne-id: <% $.target_pe2["ne-id"] %>
+      publish:
+        response_pe2: <% task().result %>
+      publish-on-error:
+        response_pe2: <% task().result %>
+      on-success:
+        - build_report
+      on-error:
+        - build_report
+
+    build_report:
+      join: all
+      action: nsp.python
+      input:
+        context:
+          group: <% $.validated_group %>
+          target_pe1: <% $.target_pe1 %>
+          target_pe2: <% $.target_pe2 %>
+          missing_nodes: <% $.missing_nodes %>
+          response_pe1: <% $.get("response_pe1") %>
+          response_pe2: <% $.get("response_pe2") %>
+        script: |
+          def esc(s):
+            if s is None:
+              return ""
+            return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+
+          def node_cell(target):
+            if not target:
+              return "—"
+            nname = (target.get("ne-name") or "").strip()
+            nid = target.get("ne-id")
+            nid_str = str(nid).strip() if nid not in (None, "") else ""
+            if nname and nid_str:
+              return esc(nname) + " <span class=\"status-neutral\">(" + esc(nid_str) + ")</span>"
+            if nname:
+              return esc(nname)
+            return esc(nid_str) if nid_str else "—"
+
+          def parse_classes(resp):
+            data = {"ok": False, "classes": [], "hidden_openconfig": 0, "raw_count": 0, "error": ""}
+            if not resp or not isinstance(resp, dict):
+              data["error"] = "No response"
+              return data
+
+            st = resp.get("status") or resp.get("statusCode")
+            if isinstance(st, int):
+              data["ok"] = 200 <= st < 300
+
+            content = resp.get("content") or resp.get("output") or resp
+            if not data["ok"] and isinstance(content, dict) and (
+              "nsp-admin-resync:output" in content or "nsp-resync-config:output" in content
+            ):
+              data["ok"] = True
+
+            if not data["ok"]:
+              data["error"] = str(resp.get("message") or content or resp)
+              return data
+
+            out = content.get("nsp-admin-resync:output") or content.get("nsp-resync-config:output") or content
+            classes = out.get("sbi-classes") or out.get("sbl-classes") or []
+            if isinstance(classes, dict):
+              classes = classes.get("sbi-class") or classes.get("sbl-class") or list(classes.values())
+            if not isinstance(classes, list):
+              classes = [classes] if classes else []
+
+            filtered = []
+            hidden = 0
+            for cls in classes:
+              if isinstance(cls, dict):
+                class_id = cls.get("class-id") or cls.get("sbi-class") or cls.get("sbl-class") or str(cls)
+              else:
+                class_id = str(cls)
+              if "openconfig" in class_id.lower():
+                hidden += 1
+                continue
+              filtered.append(class_id)
+
+            data["classes"] = filtered
+            data["hidden_openconfig"] = hidden
+            data["raw_count"] = len(classes)
+            return data
+
+          rows = []
+          checked_nodes = 0
+          successful_nodes = 0
+          visible_class_count = 0
+          hidden_openconfig_total = 0
+
+          for target, resp in (
+            (context.get("target_pe1"), context.get("response_pe1")),
+            (context.get("target_pe2"), context.get("response_pe2")),
+          ):
+            if not target:
+              continue
+            checked_nodes += 1
+            parsed = parse_classes(resp)
+            hidden_openconfig_total += parsed["hidden_openconfig"]
+            cell = node_cell(target)
+            if parsed["ok"]:
+              successful_nodes += 1
+              if parsed["classes"]:
+                for class_id in parsed["classes"]:
+                  rows.append({
+                    "node": cell,
+                    "service": "Resync class",
+                    "status": "Available",
+                    "error_message": esc(class_id),
+                    "status_class": "status-success",
+                  })
+                  visible_class_count += 1
+              else:
+                detail = "No non-OpenConfig resync classes returned."
+                if parsed["hidden_openconfig"] > 0:
+                  detail = detail + " Filtered out %d OpenConfig class(es)." % parsed["hidden_openconfig"]
+                elif parsed["raw_count"] == 0:
+                  detail = "RPC succeeded (no class list in response)."
+                rows.append({
+                  "node": cell,
+                  "service": "Resync class",
+                  "status": "Available",
+                  "error_message": esc(detail),
+                  "status_class": "status-success",
+                })
+            else:
+              rows.append({
+                "node": cell,
+                "service": "get-full-resync-classes",
+                "status": "Error",
+                "error_message": esc(parsed["error"])[:300],
+                "status_class": "status-plan",
+              })
+
+          for node_name in (context.get("missing_nodes") or []):
+            rows.append({
+              "node": esc(node_name),
+              "service": "Target node lookup",
+              "status": "Missing",
+              "error_message": "No inventory match for this expected workgroup node.",
+              "status_class": "status-plan",
+            })
+
+          missing_count = len(context.get("missing_nodes") or [])
+          note_parts = []
+          if hidden_openconfig_total > 0:
+            note_parts.append("filtered out %d OpenConfig class(es)" % hidden_openconfig_total)
+          if missing_count > 0:
+            note_parts.append("%d expected node(s) missing from inventory" % missing_count)
+          note_suffix = ""
+          if note_parts:
+            note_suffix = " (" + "; ".join(note_parts) + ")."
+          else:
+            note_suffix = "."
+
+          if checked_nodes > 0 and successful_nodes == checked_nodes and missing_count == 0:
+            overall_message = "<strong>Data sync mappers checked.</strong> Queried %d group node(s) and found %d non-OpenConfig resync class(es)%s" % (checked_nodes, visible_class_count, note_suffix)
+            overall_color = "#2E7D32"
+          elif checked_nodes > 0 and successful_nodes > 0:
+            overall_message = "<strong>Data sync mappers partially checked.</strong> %d of %d node RPC(s) succeeded; found %d non-OpenConfig resync class(es)%s" % (successful_nodes, checked_nodes, visible_class_count, note_suffix)
+            overall_color = "#E65100"
+          elif checked_nodes > 0:
+            overall_message = "<strong>Could not get resync classes.</strong> All node RPCs failed%s" % note_suffix
+            overall_color = "#E65100"
+          else:
+            overall_message = "<strong>No target nodes found.</strong> Expected workgroup nodes g<N>-pe1 and g<N>-pe2 for group %s." % esc(context["group"])
+            overall_color = "#E65100"
+          return {"overall_message": overall_message, "overall_color": overall_color, "rows": rows, "show_node_column": True}
+      publish:
+        report_data: <% task().result %>
+      on-success:
+        - render_report
+      on-error:
+        - build_error_report
+
+    build_error_report:
+      action: nsp.python
+      input:
+        context:
+          message: <% task().result %>
+        script: |
+          def esc(s):
+            if s is None: return ""
+            return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+          msg = context.get("message") or ""
+          err_text = esc(msg) if msg else "An unexpected error occurred."
+          return {
+            "overall_message": "<strong>Error</strong>: " + err_text,
+            "overall_color": "#C62828",
+            "rows": [{"service": "?", "status": "Failure", "error_message": err_text, "status_class": "status-failure"}],
+            "show_node_column": False,
+          }
+      publish:
+        report_data: <% task().result %>
+      on-success:
+        - render_report
+
+    render_report:
+      action: nsp.jinja_template
+      input:
+        name: <% $.templateName %>
+        data: <% $.report_data %>
+      publish:
+        result: <% task().result.template %>
+      on-success:
+        - done
+      on-error:
+        - report_template_unavailable
+
+    done:
+      action: std.noop

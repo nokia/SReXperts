@@ -1,0 +1,23 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+apiVersion: management.eda.nokia.com/v1
+kind: GRPCServer
+metadata:
+  name: srexperts-insecure
+  namespace: eda
+spec:
+  enabled: true
+  routerKind: ManagementRouter
+  router: init-base-mgmt-router
+  services:
+    - GNMI
+    - GNOI
+    - GNSI
+    - GRIBI
+    - NDK
+  port: 57400
+  insecure: true
+  gnmiServer:
+    autoSave: true

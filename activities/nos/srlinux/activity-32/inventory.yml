@@ -1,0 +1,15 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+inventory:
+  path: /home/admin/inventory
+  launch-command: /home/admin/inventory/inventory
+  version-command: /home/admin/inventory/inventory --version
+  failure-action: wait=10
+  config-delivery-format: json
+  yang-modules:
+    names:
+      - inventory
+    source-directories:
+      - /home/admin/inventory/yang

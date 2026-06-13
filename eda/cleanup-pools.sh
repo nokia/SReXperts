@@ -7,12 +7,15 @@
 # Before we deploy the fabric, we need to remove some default allocation pools to keep the UI clean and let attendees create pools as they need them.
 
 kubectl get -n eda indexallocationpool -o name | \
-  grep -v "srexperts-asnpool\|irb-subif-pool\|tunnel-index-pool\|vlan-pool\|lagid-pool" | \
+  grep -v "srexperts-asnpool\|irb-subif-pool\|tunnel-index-pool\|vlan-pool\|lagid-pool\|lag-admin-key-pool" | \
   xargs kubectl delete -n eda
 
 kubectl get -n eda ipallocationpool -o name | \
   grep -v "srexperts" | xargs kubectl delete -n eda
 
-kubectl delete -n eda --all ipinsubnetallocationpool
+# ipv4-mgmt-pool is used by default by the toponodes in cx
+kubectl get -n eda ipinsubnetallocationpool -o name | \
+  grep -v "ipv4-mgmt-pool" | \
+  xargs kubectl delete -n eda
 
 kubectl delete -n eda --all subnetallocationpool

@@ -1,0 +1,252 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+apiVersion: topologies.eda.nokia.com/v1
+kind: NetworkTopology
+metadata:
+  name: my-topology-1774803124304
+  namespace: eda
+spec:
+  operation: Reconcile
+  nodeTemplates:
+    - name: leaf
+      labels:
+        eda.nokia.com/role: leaf
+        eda.nokia.com/security-profile: managed
+        containerlab: managed
+        role: hackathon-infra
+      annotations:
+        topobuilder.eda.labs/name-prefix: g1-leaf
+      nodeProfile: srlinux-ghcr-26.3.1
+      platform: 7220 IXR-D3L
+    - name: spine
+      labels:
+        eda.nokia.com/role: spine
+        eda.nokia.com/security-profile: managed
+        containerlab: managed
+        role: hackathon-infra
+      annotations:
+        topobuilder.eda.labs/name-prefix: g1-spine
+      nodeProfile: srlinux-ghcr-26.3.1
+      platform: 7220 IXR-D5
+  nodes:
+    - name: g1-leaf11
+      template: leaf
+      annotations:
+        topobuilder.eda.labs/x: "285"
+        topobuilder.eda.labs/y: "290"
+    - name: g1-leaf13
+      template: leaf
+      annotations:
+        topobuilder.eda.labs/x: "555"
+        topobuilder.eda.labs/y: "290"
+    - name: g1-leaf12
+      template: leaf
+      annotations:
+        topobuilder.eda.labs/x: "420"
+        topobuilder.eda.labs/y: "290"
+    - name: g1-spine11
+      template: spine
+      annotations:
+        topobuilder.eda.labs/x: "360"
+        topobuilder.eda.labs/y: "50"
+    - name: g1-spine12
+      template: spine
+      annotations:
+        topobuilder.eda.labs/x: "525"
+        topobuilder.eda.labs/y: "50"
+  linkTemplates:
+    - name: isl
+      type: InterSwitch
+      speed: 25G
+      encapType: "Null"
+      labels:
+        eda.nokia.com/role: InterSwitch
+    - name: edge
+      type: Edge
+      encapType: Dot1q
+      labels:
+        eda.nokia.com/role: edge
+    - name: pe-edge
+      type: Edge
+      encapType: "Null"
+      labels:
+        eda.nokia.com/role: pe-edge
+  links:
+    - name: g1-leaf11-g1-spine11-1
+      annotations:
+        topobuilder.eda.labs/edgeId: edge-11
+        topobuilder.eda.labs/memberIndex: "0"
+        topobuilder.eda.labs/srcHandle: bottom
+        topobuilder.eda.labs/dstHandle: top-target
+      endpoints:
+        - local:
+            node: g1-leaf11
+            interface: ethernet-1-31
+          remote:
+            node: g1-spine11
+            interface: ethernet-1-1
+      template: isl
+    - name: g1-leaf11-g1-spine12-1
+      annotations:
+        topobuilder.eda.labs/edgeId: edge-12
+        topobuilder.eda.labs/memberIndex: "0"
+        topobuilder.eda.labs/srcHandle: bottom
+        topobuilder.eda.labs/dstHandle: top-target
+      endpoints:
+        - local:
+            node: g1-leaf11
+            interface: ethernet-1-32
+          remote:
+            node: g1-spine12
+            interface: ethernet-1-1
+      template: isl
+    - name: g1-leaf12-g1-spine11-1
+      annotations:
+        topobuilder.eda.labs/edgeId: edge-13
+        topobuilder.eda.labs/memberIndex: "0"
+        topobuilder.eda.labs/srcHandle: bottom
+        topobuilder.eda.labs/dstHandle: top-target
+      endpoints:
+        - local:
+            node: g1-leaf12
+            interface: ethernet-1-31
+          remote:
+            node: g1-spine11
+            interface: ethernet-1-2
+      template: isl
+    - name: g1-leaf12-g1-spine12-1
+      annotations:
+        topobuilder.eda.labs/edgeId: edge-14
+        topobuilder.eda.labs/memberIndex: "0"
+        topobuilder.eda.labs/srcHandle: bottom
+        topobuilder.eda.labs/dstHandle: top-target
+      endpoints:
+        - local:
+            node: g1-leaf12
+            interface: ethernet-1-32
+          remote:
+            node: g1-spine12
+            interface: ethernet-1-2
+      template: isl
+    - name: g1-leaf13-g1-spine11-1
+      annotations:
+        topobuilder.eda.labs/edgeId: edge-15
+        topobuilder.eda.labs/memberIndex: "0"
+        topobuilder.eda.labs/srcHandle: bottom
+        topobuilder.eda.labs/dstHandle: top-target
+      endpoints:
+        - local:
+            node: g1-leaf13
+            interface: ethernet-1-31
+          remote:
+            node: g1-spine11
+            interface: ethernet-1-3
+      template: isl
+    - name: g1-leaf13-g1-spine12-1
+      annotations:
+        topobuilder.eda.labs/edgeId: edge-16
+        topobuilder.eda.labs/memberIndex: "0"
+        topobuilder.eda.labs/srcHandle: bottom
+        topobuilder.eda.labs/dstHandle: top-target
+      endpoints:
+        - local:
+            node: g1-leaf13
+            interface: ethernet-1-32
+          remote:
+            node: g1-spine12
+            interface: ethernet-1-3
+      template: isl
+
+    # SPINE <-> PE links edge links
+    - name: g1-spine11-pe3-1
+      template: pe-edge
+      endpoints:
+        - local:
+            node: g1-spine11
+            interface: ethernet-1-31
+    - name: g1-spine11-pe2-1
+      template: pe-edge
+      endpoints:
+        - local:
+            node: g1-spine11
+            interface: ethernet-1-32
+    - name: g1-spine12-pe3-1
+      template: pe-edge
+      endpoints:
+        - local:
+            node: g1-spine12
+            interface: ethernet-1-31
+    - name: g1-spine12-pe2-1
+      template: pe-edge
+      endpoints:
+        - local:
+            node: g1-spine12
+            interface: ethernet-1-32
+
+    # LEAF <-> CLIENT links edge links
+    - name: g1-leaf11-client11-1
+      template: edge
+      annotations:
+        topobuilder.eda.labs/edgeId: edge-17
+        topobuilder.eda.labs/memberIndex: "0"
+        topobuilder.eda.labs/srcHandle: top
+        topobuilder.eda.labs/dstHandle: bottom-target
+      endpoints:
+        - local:
+            node: g1-leaf11
+            interface: ethernet-1-1
+          sim:
+            simNode: client11
+            simNodeInterface: eth1
+    - name: g1-leaf13-client11-1
+      template: edge
+      annotations:
+        topobuilder.eda.labs/edgeId: edge-21
+        topobuilder.eda.labs/memberIndex: "0"
+        topobuilder.eda.labs/srcHandle: top
+        topobuilder.eda.labs/dstHandle: bottom-target
+      endpoints:
+        - local:
+            node: g1-leaf13
+            interface: ethernet-1-3
+          sim:
+            simNode: client13
+            simNodeInterface: eth1
+    - name: client12-esi-lag-1
+      endpoints:
+        - local:
+            node: g1-leaf11
+            interface: ethernet-1-2
+          sim:
+            simNode: client12
+            simNodeInterface: eth1
+        - local:
+            node: g1-leaf12
+            interface: ethernet-1-2
+          sim:
+            simNode: client12
+            simNodeInterface: eth2
+        - local:
+            node: g1-leaf13
+            interface: ethernet-1-2
+          sim:
+            simNode: client12
+            simNodeInterface: eth3
+      template: edge
+
+  simulation:
+    simNodeTemplates:
+      - name: testman
+        type: TestMan
+      - name: multitool
+        type: Linux
+        image: ghcr.io/srl-labs/network-multitool:latest
+    simNodes:
+      - name: client11
+        template: multitool
+      - name: client12
+        template: multitool
+      - name: client13
+        template: multitool

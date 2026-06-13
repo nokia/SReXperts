@@ -1,0 +1,212 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+version: '2.0'
+
+execute-approved-splits:
+  description: Execute the approved splitting plan from custom-service-splitting by calling nsp-service-stitch move-sites with a target service name for new services or a target service identifier for existing ones.
+
+  type: direct
+
+  vars:
+    svc_offset: 0
+    svc_total_count: 0
+    existing_service_detail: []
+  input:
+    - list_for_report: []
+
+  output:
+    result: <% $.result %>
+
+  tasks:
+    start:
+      action: std.noop
+      on-complete:
+        - validate-split-plan
+
+    validate-split-plan:
+      action: nsp.python
+      input:
+        context:
+          list_for_report: <% $.list_for_report %>
+        script: |
+          def split_rows(list_for_report):
+              for entry in list_for_report or []:
+                  for items in entry.values():
+                      for item in items:
+                          yield item
+
+          rows = list(split_rows(context.get('list_for_report')))
+
+          grouped = {}
+          conflicts = []
+          for entry in rows:
+              key = entry['target-service-name']
+              if key == 'n/a':
+                  continue
+              val = (str(entry.get('tenant-id', '')), str(entry.get('ne-service-id', '')))
+              if key not in grouped:
+                  grouped[key] = val
+              elif grouped[key] != val and key not in conflicts:
+                  conflicts.append(key)
+          if conflicts:
+              return {'ok': False, 'error_type': 'mismatch', 'error_data': conflicts}
+
+          return {'ok': True, 'error_type': None, 'error_data': None}
+      publish:
+        validation_ok: <% task().result['ok'] %>
+        validation_error_type: <% task().result['error_type'] %>
+        validation_error_data: <% task().result['error_data'] %>
+      on-success:
+        - find-existing-services: <% $.validation_ok %>
+        - fail-task: <% $.validation_error_type = 'mismatch' %>
+
+    find-existing-services:
+      action: nsp.https
+      input:
+        url: 'https://<% locate_nsp() %>/restconf/operations/nsp-inventory:find'
+        method: POST
+        body:
+          input:
+            depth: 2
+            fields: "service-id;name;service-extension:l3vpn-svc;service-extension:elan-svc;custom-ui-extension:l3vpn-svc;custom-ui-extension:elan-svc"
+            offset: <% $.svc_offset %>
+            sort-by: []
+            xpath-filter: "/nsp-service:services/service-layer/elan|/nsp-service:services/service-layer/l3vpn"
+            limit: 100
+        contentType: 'application/json'
+        accept: 'application/json'
+      publish:
+        existing_service_detail: <% $.existing_service_detail.concat(task().result.content["nsp-inventory:output"].data) %>
+        svc_offset: <% task().result.content["nsp-inventory:output"]["end-index"] + 1 %>
+        svc_total_count: <% task().result.content["nsp-inventory:output"]["total-count"] %>
+      publish-on-error:
+        status: <% task().result.status %>
+      on-complete:
+        - find-existing-services: <% $.svc_offset != $.svc_total_count %>
+        - bundle-services: <% $.svc_offset = $.svc_total_count %>
+
+    bundle-services:
+      action: nsp.python
+      input:
+        context:
+          list_for_report: <% $.list_for_report %>
+          existing_service_detail: <% $.existing_service_detail %>
+        script: |
+          def split_rows(list_for_report):
+              for entry in list_for_report or []:
+                  for current_service_id, items in entry.items():
+                      for item in items:
+                          yield current_service_id, item
+
+          def service_state(service):
+              for key in (
+                  'service-extension:elan-svc',
+                  'service-extension:l3vpn-svc',
+              ):
+                  extension = service.get(key)
+                  if isinstance(extension, dict) and extension.get('template-name'):
+                      return 'associated'
+              return 'brownfield'
+
+          existing_targets = {}
+          for service in context.get("existing_service_detail") or []:
+              service_id = service.get("service-id")
+              service_name = service.get("name")
+              target = {
+                  "service-id": str(service_id) if service_id is not None else None,
+                  "name": str(service_name) if service_name is not None else None,
+                  "state": service_state(service),
+              }
+              if service_id is not None:
+                  existing_targets[str(service_id)] = target
+              if service_name is not None and str(service_name) not in existing_targets:
+                  existing_targets[str(service_name)] = target
+
+          bundles = {}
+          associated_targets = []
+
+          for current_service_id, item in split_rows(context.get('list_for_report')):
+              target_service_name = item.get("target-service-name")
+              if target_service_name in ("n/a", None) or target_service_name == current_service_id:
+                  continue
+
+              service_type = item["service-type"]
+              source_path = f"/nsp-service:services/service-layer/{service_type}[service-id='{current_service_id}']/site[site-id='{item['ne-id']}'][name='{item['site-name']}']"
+              existing_target = existing_targets.get(str(target_service_name))
+
+              if existing_target and existing_target["state"] == "associated":
+                  if target_service_name not in associated_targets:
+                      associated_targets.append(target_service_name)
+                  continue
+
+              if existing_target and existing_target.get("service-id"):
+                  target_selector = {
+                      "target-service-identifier": f"/nsp-service:services/service-layer/{service_type}[service-id='{existing_target['service-id']}']"
+                  }
+                  bundle_key = target_selector["target-service-identifier"]
+              else:
+                  target_selector = {
+                      "target-service-name": target_service_name
+                  }
+                  bundle_key = f"name::{target_service_name}"
+
+              if bundle_key not in bundles:
+                  bundles[bundle_key] = {
+                      "target_selector": target_selector,
+                      "source": [],
+                  }
+              if source_path not in bundles[bundle_key]["source"]:
+                  bundles[bundle_key]["source"].append(source_path)
+
+          move_site_requests = []
+          for item in bundles.values():
+              body_input = dict(item['target_selector'])
+              body_input['service-site-identifiers'] = item['source']
+              move_site_requests.append({'body_input': body_input})
+
+          return {
+              'move_site_requests': move_site_requests,
+              'associated_targets': associated_targets
+          }
+      publish:
+        move_site_requests: <% task().result.get('move_site_requests', []) %>
+        associated_targets: <% task().result.get('associated_targets', []) %>
+      on-success:
+        - fail-task-associated-service: <% $.associated_targets and len($.associated_targets) > 0 %>
+        - move-sites: <% $.move_site_requests and len($.move_site_requests) > 0 %>
+        - execution-result-html: <% (not $.associated_targets or len($.associated_targets) = 0) and (not $.move_site_requests or len($.move_site_requests) = 0) %>
+
+    move-sites:
+      with-items: item in <% $.move_site_requests %>
+      concurrency: 5
+      action: nsp.https
+      input:
+        url: 'https://<% locate_nsp() %>/restconf/operations/nsp-service-stitch:move-sites'
+        method: POST
+        body:
+          input: <% $.item.body_input %>
+        contentType: 'application/json'
+        accept: 'application/json'
+      publish:
+        move_sites_status: <% task().result.status %>
+      publish-on-error:
+        move_sites_status: <% task().result.status %>
+      on-complete:
+        - execution-result-html
+
+    execution-result-html:
+      action: std.noop
+      publish:
+        result: <% resolve_jinja(fetch_jinja("service-splitting-report"), {report_state => "executed", list_for_report => $.list_for_report, group_id => "", splitting_algorithm => "", approved => true}) %>
+
+    fail-task-associated-service:
+      action: std.fail
+      input:
+        error_data: "The splitting plan targets existing associated service(s) <% $.associated_targets %>. Stitching is not supported into associated services."
+
+    fail-task:
+      action: std.fail
+      input:
+        error_data: "The splitting plan has mismatch between CustomerID and/or NEServiceID for the following service(s) <% $.validation_error_data %>."

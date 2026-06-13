@@ -1,0 +1,204 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+version: '2.0'
+
+get-encap-type-from-inventory:
+  description: Activity#67 Fetch encap-type from NSP inventory using port lookup with LAG fallback.
+  type: direct
+
+  tags:
+    - Inventory
+    - Actvity#67
+    - SubWorkflow
+
+  workflow_meta:
+    title: Get encap type from inventory
+    author: WFM
+    version: '1.0.0'
+    dependencies:
+      platform:
+        nspOS: ['25.11']
+
+  input:
+    - neId
+    - port
+
+  vars:
+    encapType: ""
+    errorMessage: ""
+    errorDetails: ""
+
+  output:
+    result: <% $.encapType %>
+
+  output-on-error:
+    result: <% $.encapType %>
+
+  tasks:
+    startTask:
+      description: Start encap lookup
+      action: std.noop
+      on-success:
+        - portInventoryFind
+
+    portInventoryFind:
+      description: Query inventory for port hardware-component; extract encap via scriptFilter
+      action: nsp.https
+      input:
+        url: 'https://restconf-gateway/restconf/operations/nsp-inventory:find'
+        method: POST
+        body:
+          input:
+            xpath-filter: "/nsp-equipment:network/network-element[ne-id='<% $.neId %>']/hardware-component/port[name='<% $.port %>']"
+            depth: 3
+            fields: "name;port-details"
+            include-meta: false
+        resultFilter: $
+        scriptFilter: |
+          def get_first_data_item(response_json):
+              if not isinstance(response_json, dict):
+                  return {}
+              output = response_json.get("nsp-inventory:output", {})
+              data = output.get("data", [])
+              if isinstance(data, list) and len(data) > 0 and isinstance(data[0], dict):
+                  return data[0]
+              return {}
+
+          def process_port():
+              r = context
+              status = r.get("status") if isinstance(r, dict) else None
+              content = r.get("content") if isinstance(r, dict) else {}
+              ne_id = "<% $.neId %>"
+              port = "<% $.port %>"
+              if status != 200:
+                  return {
+                      "encapType": "",
+                      "needLag": False,
+                      "portLookupFailed": True,
+                      "failMessage": "Failed to fetch encap-type for port query",
+                      "failDetails": {
+                          "statusCode": status,
+                          "response": str(content),
+                          "node": ne_id,
+                          "port": port,
+                      },
+                  }
+              first_item = get_first_data_item(content if isinstance(content, dict) else {})
+              port_details = first_item.get("port-details", []) if isinstance(first_item, dict) else []
+              encap = ""
+              if isinstance(port_details, list) and len(port_details) > 0 and isinstance(port_details[0], dict):
+                  encap = port_details[0].get("encap-type", "") or ""
+              return {
+                  "encapType": encap,
+                  "needLag": not bool(encap),
+                  "portLookupFailed": False,
+                  "failMessage": "",
+                  "failDetails": {},
+              }
+
+          return process_port()
+      publish:
+        encapType: <% task().result.content.encapType %>
+        needLagLookup: <% task().result.content.needLag %>
+        portLookupFailed: <% task().result.content.portLookupFailed %>
+      publish-on-error:
+        errorMessage: "Failed to fetch port encapsulation type"
+        errorDetails: "<% task().name %>: <% task().result %>"
+      on-success:
+        - failOnPortLookup: <% $.portLookupFailed = true %>
+        - lagInventoryFind: <% $.portLookupFailed = false and $.needLagLookup = true %>
+        - exitWithEncap: <% $.portLookupFailed = false and $.needLagLookup = false %>
+      on-error: 
+        - errorHandler
+
+    failOnPortLookup:
+      description: Port inventory query failed
+      action: std.fail
+      publish-on-error:
+        encapType: ""
+
+    lagInventoryFind:
+      description: Fallback query LAG inventory; extract encap via scriptFilter
+      action: nsp.https
+      input:
+        url: 'https://restconf-gateway/restconf/operations/nsp-inventory:find'
+        method: POST
+        body:
+          input:
+            xpath-filter: "/nsp-equipment:network/network-element[ne-id='<% $.neId %>']/lag[lag-id='<% $.port %>' or name='<% $.port %>']"
+            depth: 3
+            fields: "name;encap-type"
+            include-meta: false
+        resultFilter: $
+        scriptFilter: |
+          def get_first_data_item(response_json):
+              if not isinstance(response_json, dict):
+                  return {}
+              output = response_json.get("nsp-inventory:output", {})
+              data = output.get("data", [])
+              if isinstance(data, list) and len(data) > 0 and isinstance(data[0], dict):
+                  return data[0]
+              return {}
+
+          def process_lag():
+              r = context
+              status = r.get("status") if isinstance(r, dict) else None
+              content = r.get("content") if isinstance(r, dict) else {}
+              ne_id = "<% $.neId %>"
+              port = "<% $.port %>"
+              if status != 200:
+                  return {
+                      "encapType": "",
+                      "lagLookupFailed": True,
+                      "failMessage": "Failed to fetch encap-type for LAG query",
+                      "failDetails": {
+                          "statusCode": status,
+                          "response": str(content),
+                          "node": ne_id,
+                          "port": port,
+                      },
+                  }
+              lag_item = get_first_data_item(content if isinstance(content, dict) else {})
+              encap = ""
+              if isinstance(lag_item, dict):
+                  encap = lag_item.get("encap-type", "") or ""
+              return {
+                  "encapType": encap,
+                  "lagLookupFailed": False,
+                  "failMessage": "",
+                  "failDetails": {},
+              }
+
+          return process_lag()
+      publish:
+        encapType: <% task().result.encapType %>
+        lagLookupFailed: <% task().result.lagLookupFailed %>
+      publish-on-error:
+        errorMessage: "Failed to fetch port encapsulation type"
+        errorDetails: "<% task().name %>: <% task().result %>"
+      on-success:
+        - failOnLagLookup: <% $.lagLookupFailed = true %>
+        - exitWithEncap: <% $.lagLookupFailed = false %>
+      on-error: 
+        - errorHandler
+
+    failOnLagLookup:
+      description: LAG inventory query failed
+      action: std.fail
+      publish-on-error:
+        encapType: ""
+
+    exitWithEncap:
+      description: Encap-type available on $.encapType (may be empty string)
+      action: std.noop
+
+    errorHandler:
+      description: "Failure task"
+      action: std.fail
+      publish-on-error:
+        result:
+          status: 'Failed to fetch encapType of node: <% $.neId %> and port: <% $.port %>'
+          errorMessage: <% $.errorMessage %>
+          errorDetails: <% $.errorDetails %>

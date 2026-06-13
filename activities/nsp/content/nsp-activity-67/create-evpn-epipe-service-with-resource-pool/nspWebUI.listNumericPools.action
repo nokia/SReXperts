@@ -1,0 +1,15 @@
+---
+version: '2.0'
+
+nspWebUI.listNumericPools:
+  description: |
+    action: nspWebUI.listNumericPools.action
+  base: nsp.https
+  base-input:
+    url: 'https://restconf-gateway/restconf/data/nsp-resource-pool:resource-pools/numeric-resource-pools?fields=name;scope'
+    method: GET
+    auth: <% $.token_auth %>      
+  input:
+    - token_auth
+    - formValues: {}
+  output: <% $.content['nsp-resource-pool:numeric-resource-pools'] %>

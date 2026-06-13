@@ -1,7 +1,11 @@
-apiVersion: services.eda.nokia.com/v1
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+apiVersion: services.eda.nokia.com/v2
 kind: BridgeDomain
 metadata:
-  name: macvrf1
+  name: macvrf11
   namespace: eda
   labels:
     role: hackathon-infra
@@ -10,30 +14,11 @@ spec:
   #description: MAC-VRF for connectivity via the GRT of the WAN
   evi: 1
   eviPool: evi-pool
-  exportTarget: target:65000:1
-  importTarget: target:65000:1
-  l2proxyARPND:
-    proxyARP: false
-    proxyND: false
-    tableSize: 250
-    dynamicLearning:
-      enabled: null
-      ageTime: null
-      sendRefresh: null
-    ipDuplication:
-      enabled: null
-      monitoringWindow: null
-      numMoves: null
-      holdDownTime: null
-  macAging: 300
-  macDuplicationDetection:
-    action: StopLearning
-    enabled: false
-    holdDownTime: 9
-    monitoringWindow: 3
-    numMoves: 5
-  tunnelIndexPool: tunnel-index-pool
+  exportTarget: target:65000:11
+  importTarget: target:65000:11
   type: EVPNVXLAN
-  vni: 1
-  vniPool: vni-pool
-  macLimit: null
+  encapOptions:
+    vxlan:
+      tunnelIndexPool: tunnel-index-pool
+      vni: 11
+      vniPool: vni-pool

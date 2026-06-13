@@ -1,0 +1,148 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+
+version: '2.0'
+
+delete-evpn-epipe-service-with-resource-pool:
+  description: Deletes an EVPN-EPIPE service from both nodes, validates the result, then releases the numeric resource back to the pool (same pool reference/owner as at create time).
+
+  type: direct
+
+  tags:
+    - Service Delete
+    - Resource Pool
+    - sf-network-operation
+
+  workflow_meta:
+    title:   Delete EVPN-EPIPE Service with Resource Pool Release
+    author:  WFM
+    version: '1.0.0'
+    dependencies:
+      platform:
+        nspOS: ['25.11']
+
+  input:
+    - serviceName
+    - numericPoolName
+    - numericPoolScope
+
+  vars:
+    status: ""
+    errorMessage: ""
+    errorDetails: ""
+    result: {}
+    epipeServiceTemplate: "EPIPE_SERVICE_01_SITE_SR_01"
+    epipeServiceSiteTemplate: "EPIPE_SITE_SR_01"
+
+  output:
+    result: <% $.result %>
+    status: success
+    
+  output-on-error:
+    result: <% $.result %>
+    status: failed
+
+  tasks:
+    startTask:
+      description: "Starting task"
+      action: std.noop
+      publish:
+        status: 'Workflow execution started'
+      on-success:
+        - verifyPoolPresence
+
+    verifyPoolPresence:
+      action: nsp.https
+      input:
+        url: 'https://restconf-gateway/restconf/data/nsp-resource-pool:resource-pools/numeric-resource-pools=<% $.numericPoolName %>,<% $.numericPoolScope %>'
+        method: GET
+      publish:
+        poolExist: <% switch(task().result.status = 200 => 'yes', task().result.status != 200 => 'no') %>
+      publish-on-error:
+        errorMessage: <% switch(task().result.status = 404 => 'Resource pool not found. Make sure the pool name and scope are correct.', true => 'Failed to get resource pool information') %>
+        errorDetails: "<% task().name %>: <% task().result %>"
+      on-success:
+        - removeService : <% $.poolExist = 'yes' %>
+        - errorHandler: <% $.poolExist != 'yes' %>
+      on-error: 
+        - errorHandler
+
+    removeService:
+      description: Remove service configuration from each node through IBSF service delete
+      action: nsp.https
+      wait-after: 15
+      input:
+        url: 'https://restconf-gateway/restconf/data/nsp-service-site-intent:intent-base/intent=<% $.serviceName %>,<% $.epipeServiceTemplate %>/change-olc-state'
+        method: POST
+        body: {"input":{"target-state":"removed","ignore-blocking-workflow":false}}
+      publish:
+        deleteResponses: <% task().result %>
+      publish-on-error:
+        errorMessage: "Failed to delete service from node"
+        errorDetails: "<% task().name %>: <% task().result %>"
+      on-success:
+        - deleteService
+      on-error:
+        - errorHandler
+
+    deleteService:
+      description: Delete service from IBSF
+      action: nsp.https
+      input:
+        url: 'https://restconf-gateway/restconf/data/nsp-service-site-intent:intent-base/intent=<% $.serviceName %>,<% $.epipeServiceTemplate %>'
+        method: DELETE
+      publish:
+        deleteStatus: <% switch(task().result.status = 200 => 'success', task().result.status = 204 => 'success', true => 'failure') %>
+      publish-on-error:
+        errorMessage: "Failed to delete service from IBSF"
+        errorDetails: "<% task().name %>: <% task().result %>"
+      on-success:
+        - releasePoolValue: <% $.deleteStatus = 'success' %>
+        - errorHandler: <% $.deleteStatus != 'success' %>
+      on-error:
+        - errorHandler
+
+    releasePoolValue:
+      description: Release the numeric value back to the pool (symmetric to obtain-value-from-pool)
+      action: nsp.https
+      input:
+        url: 'https://restconf-gateway/restconf/data/nsp-resource-pool:resource-pools/numeric-resource-pools=<% $.numericPoolName %>,<% $.numericPoolScope %>/release-by-ref'
+        method: POST
+        body:
+          {
+            "nsp-resource-pool:input": {
+                "reference": "<% $.serviceName %>"
+            }
+          }
+      publish:
+        releaseOk: <% switch(task().result.status = 200 => true, task().result.status = 204 => true, true => false) %>
+        errorMessage: <% switch(task().result.status = 200 => '', task().result.status = 204 => '', true => 'Failed to release value to resource pool') %>
+        errorDetails: <% switch(task().result.status = 200 => '', task().result.status = 204 => '', true => task().result) %>
+      publish-on-error:
+        errorMessage: "Failed to release value to resource pool"
+        errorDetails: "<% task().name %>: <% task().result %>"
+      on-success:
+        - exitTask: <% $.releaseOk = true %>
+        - errorHandler: <% $.releaseOk != true %>
+      on-error:
+        - errorHandler
+
+    exitTask:
+      description: "Success task"
+      action: std.noop
+      publish:
+        result:
+          status: 'Successfully deleted service and released resource pool value'
+          errorMessage: ""
+          errorDetails: ""
+
+    errorHandler:
+      description: "Failure task"
+      action: std.fail
+      publish-on-error:
+        result:
+          status: 'Failed to delete service or release resource pool data'
+          errorMessage: <% $.errorMessage %>
+          errorDetails: <% $.errorDetails %>

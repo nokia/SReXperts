@@ -1,91 +1,90 @@
-# Copyright 2025 Nokia
+# Copyright 2026 Nokia
 # Licensed under the BSD 3-Clause License.
 # SPDX-License-Identifier: BSD-3-Clause
 
-site_name: SReXplore 2025
+site_name: Hackathon 2026
 nav:
   - Home: index.md
-  - Network Operating Systems:
+  - Network Operating Systems (NOS):
       - nos/index.md
       - SR OS:
-        - Beginner:
-            - nos/sros/beginner/nos-sros-activity-06.md
-            - nos/sros/beginner/nos-sros-show-latest-commit-activity-14.md
-            - nos/sros/beginner/9-custom-generic-log.md
-            - nos/sros/beginner/43-Grafana-Dashboards.md
-            - nos/sros/beginner/41-ANYsec.md
-        - Intermediate:
-            - nos/sros/intermediate/nos-sros-activity-05.md
-            - nos/sros/intermediate/nos-sros-activity-21.md
-            - nos/sros/intermediate/nos-sros-activity-08.md
-            - nos/sros/intermediate/nos-sros-activity-22.md
-            - nos/sros/intermediate/nos-sros-activity-23.md
-            - nos/sros/intermediate/nos-sros-activity-56.md
-            - nos/sros/intermediate/nos-sros-activity-62.md
-            - nos/sros/intermediate/nos-sros-activity-63.md
-        # - Advanced:
-            # - nos/sros/advanced/index.md
+          - Beginner:
+              - nos/sros/beginner/27-securing-grpc.md
+              - nos/sros/beginner/19-Enable_per_service-PQC_encryption_with_ANYsec.md
+              - nos/sros/beginner/nos-sros-activity-29.md
+              - nos/sros/beginner/57-SROS_remote_logging_with_Syslog_and_Loki.md
+              - nos/sros/beginner/55-SROS_Streaming_Telemetry.md
+          - Intermediate:
+              - nos/sros/intermediate/21-sros-automating-network-operations.md
+              - nos/sros/intermediate/22-Automated_network_configuration_validation.md
+              - nos/sros/intermediate/17-Delay-Optimization_Flex-Algo_SRv6.md
+              - nos/sros/intermediate/82-Delay-Optimization_Flex-Algo_SR-MPLS.md
+              - nos/sros/intermediate/25-override-radius-attributes-subscribers.md
+              - nos/sros/intermediate/18-secure-gRPC-mTLS.md
+              - nos/sros/intermediate/65-Ring-buffer-mirror-pcap.md
+              - nos/sros/intermediate/51-Enable_PQC_link_encryption_with_MACsec.md
+              - nos/sros/intermediate/56-SR_OS_Triggering_backups.md
+          - Advanced:
+              - nos/sros/advanced/33-rov-with-rpki.md
+              - nos/sros/advanced/159-custom-grpcserver-configuration.md
       - SR Linux:
           - Beginner:
-              - nos/srlinux/beginner/nos-srlinux-activity-11.md
-              - nos/srlinux/beginner/nos-srl-gnsi-authz.md
-              - nos/sros/beginner/43-Grafana-Dashboards.md
-              - nos/srlinux/beginner/nos-srl-activity-04.md
-              - nos/srlinux/beginner/b-srl-oc.md
+              - nos/srlinux/beginner/52-SR_Linux_remote_logging_with_Syslog_and_Loki.md
+              - nos/srlinux/beginner/26-sr-linux-realtime-monitoring-via-gnmi.md
+              - nos/srlinux/beginner/20-sr-linux-fund-real-world-tshoot-scen.md
+              - nos/srlinux/beginner/28-introduction-to-srl.md
+              - nos/srlinux/beginner/53-SR_Linux_Streaming_Telemetry.md
           - Intermediate:
-              - nos/srlinux/intermediate/nos-srl-activity-12.md
-              - nos/srlinux/intermediate/19-SRLinux-Custom-CLI.md
-              - nos/srlinux/intermediate/58-programming-snmp-mibs.md
+              - nos/srlinux/intermediate/54-SR_Linux_Triggering_backups.md
           - Advanced:
-              - nos/srlinux/advanced/nos-srlinux-activity-18.md
-              - nos/srlinux/advanced/20-SRLinux-Basic-Agent.md  
+              - nos/srlinux/advanced/32-inventory-ndk-app.md
   - Network Services Platform (NSP):
       - nsp/index.md
       - Beginner:
-          - Acknowledge Alarms: nsp/beginner/60-nsp-alarm-ack.md
-          - Indicator Analytics: nsp/beginner/68-indicator-analytics.md
-          - Baseline Analytics: nsp/beginner/69-nsp-baseline-analytics.md
-          - Inventory Reports: nsp/beginner/70-nsp-inventory-report-using-workflow.md
+          - nsp/beginner/nsp-activity-34.md
+          - nsp/beginner/nsp-activity-67.md
+          - nsp/beginner/nsp-activity-41.md
+          - nsp/beginner/nsp-activity-36.md
+          - nsp/beginner/nsp-activity-38.md
+          - nsp/beginner/nsp-activity-76.md
       - Intermediate:
-          - Infrastructure Configuration: nsp/intermediate/48-nsp-device-specific-infra-config.md
-          - NE Password Audit/Align: nsp/intermediate/66-nsp-ne-password-audit.md
-          - NE Config Snapshot/Rollback: nsp/intermediate/71-nsp-ne-config-snapshot-rollback.md
-          - Access Port Migration: nsp/intermediate/51-nsp-access-port-migration.md
+          - nsp/intermediate/nsp-activity-35.md
+          - nsp/intermediate/nsp-activity-43.md
+          - nsp/intermediate/nsp-activity-39.md
       - Advanced:
-          - Security Baseline Configuration: nsp/advanced/73-nsp-golden-cfg-security.md          
-          - Integrating NSP w/ NetBox: nsp/advanced/57-nsp-netbox.md
-          - Service Migration from TLDP to EVPN: nsp/advanced/72-nsp-tldp-to-evpn-migration.md
+          - nsp/advanced/nsp-activity-40.md
   - Event Driven Automation (EDA):
       - eda/index.md
       - Beginner:
-          - Declarative Intents: eda/beginner/declarative-intents.md
-          - Label-based Selection: eda/beginner/label-based-selection.md
-          - Allocations: eda/beginner/allocations.md
-          - EDA Query Language: eda/beginner/eda-query-language.md
-          - Configlets: eda/beginner/configlets.md
-          - Bridge Domains: eda/beginner/bridge-domains.md
-          - Routers: eda/beginner/routers.md
-          - Virtual Networks: eda/beginner/virtual-networks.md
-          - Notifications: eda/beginner/notifications.md
+          - eda/beginner/bridge-domains.md
+          - eda/beginner/routers.md
+          - eda/beginner/virtual-networks.md
+          - eda/beginner/eda-app-deploy.md
+          - eda/beginner/app-delivery.md
+          - eda/beginner/digital-twin.md
+          - eda/beginner/ask-eda.md
+          - eda/beginner/inventory-collection-ansible.md
+          - eda/beginner/eda-query-language.md
+          - eda/beginner/dashboards.md
       - Intermediate:
-          - Install Your Own EDA: eda/intermediate/install-eda.md
-          - Custom Allocations: eda/intermediate/custom-allocations.md
-          - REST API: eda/intermediate/api.md
+          - eda/intermediate/python-sdk.md
       - Advanced:
-          - Service Automation using Python: eda/advanced/service-automation.md
+          - eda/advanced/intent-app-development.md
   - Supporting tools and plugins:
       - tools/tools-bash-basics.md
       - tools/tools-clab-vscode-plugin.md
+      - tools/tools-packet-capture.md
+      - tools/tools-code-server.md
 
 site_author: Nokia
 site_description: >-
-  SReXperts SReXplore event guidelines
+  SReXperts Hackathon event guidelines
 # Repository
-repo_name: nokia/SReXperts
-repo_url: https://github.com/nokia/SReXperts
+repo_name: srexperts/srx-hackplanning-2026
+repo_url: https://github.com/srexperts/srx-hackplanning-2026
 edit_uri: edit/main/docs/
-site_url: "https://srexplore.srexperts.net/"
-copyright: Copyright &copy; 2021-2025 Nokia
+site_url: "https://hackathon.srexperts.net/"
+copyright: Copyright &copy; 2021-2026 Nokia
 theme:
   name: material
   custom_dir: docs/overrides
@@ -139,6 +138,10 @@ theme:
 
 # Plugins
 plugins:
+  - privacy:
+      assets: false
+      links_attr_map:
+        target: _blank
   - meta
   - glightbox
   - macros:
@@ -152,6 +155,7 @@ plugins:
       module_name: macros/main
   - enumerate-headings:
       increment_across_pages: false
+      start_level: 2
   - blog:
       blog_dir: blog
       post_url_date_format: yyyy
@@ -165,6 +169,7 @@ plugins:
   - minify:
       minify_html: true
   - rss:
+      use_git: false
       match_path: blog/posts/.*
       abstract_chars_count: 5000
       date_from_meta:
@@ -175,7 +180,10 @@ plugins:
         "#__comments"
         #- redirects:
         #redirect_maps:
-
+  - privacy:
+      assets: false
+      links_attr_map:
+        target: _blank
 # Customization
 extra:
   social:
@@ -206,15 +214,14 @@ markdown_extensions:
   - markdown.extensions.meta
   - toc:
       permalink: "#"
-  - pymdownx.arithmatex
   - pymdownx.betterem:
       smart_enable: all
   - pymdownx.caret
   - pymdownx.critic
   - pymdownx.details
   - pymdownx.emoji:
-      emoji_index: !!python/name:material.extensions.emoji.twemoji
-      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji ""
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg ""
   - pymdownx.highlight:
       line_spans: __span
       anchor_linenums: true
@@ -223,8 +230,8 @@ markdown_extensions:
   - pymdownx.keys
   - pymdownx.magiclink:
       repo_url_shorthand: true
-      user: nokia
-      repo: SReXperts
+      user: srexperts
+      repo: srx-hackplanning-2026
   - pymdownx.mark
   - pymdownx.smartsymbols:
       fractions: false
@@ -236,7 +243,7 @@ markdown_extensions:
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
+          format: !!python/name:pymdownx.superfences.fence_code_format ""
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.blocks.tab:
@@ -267,3 +274,5 @@ extra_javascript:
   - javascripts/scroll-tracker.js
   - javascripts/star-rating.js
   - javascripts/heading-buttons.js
+  - javascripts/random-nav.js
+

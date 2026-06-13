@@ -1,0 +1,14 @@
+[project]
+name = "srx-ansible"
+version = "0.1.0"
+description = "Nokia EDA Ansible collections dependencies"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "ansible-core>=2.17",
+    "deepdiff>=8.5.0",
+    "pydantic>=2.11.7",
+    "python-dateutil>=2.9.0.post0",
+    "typing-extensions>=4.7.1",
+    "urllib3>=2.7.0,<3.0.0",
+]

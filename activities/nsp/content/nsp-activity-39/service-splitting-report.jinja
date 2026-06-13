@@ -1,0 +1,219 @@
+name: service-splitting-report
+template: |-
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Service Splitting Report</title>
+    <style>
+      :root {
+        --page-bg: #0f172a;
+        --page-text: #f8fafc;
+        --muted-text: #cbd5e1;
+        --headline: #7cc4ff;
+        --surface-bg: #111827;
+        --surface-elevated: #172033;
+        --surface-border: #334155;
+        --table-head-bg: #243146;
+        --table-row-alt: #0b1220;
+        --surface-shadow: rgba(2, 6, 23, 0.35);
+        --status-success: #6ee7b7;
+        --status-plan: #fdba74;
+        --status-neutral: #cbd5e1;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body.font-nokia-pure-text {
+        font-family: "NokiaPure", sans-serif;
+        margin: 0;
+        padding: 16px;
+        background-color: var(--page-bg);
+        color: var(--page-text);
+      }
+      .headline {
+        color: var(--headline);
+        font-size: 20px;
+        margin: 0 0 16px 0;
+        text-align: center;
+      }
+      .overall-result,
+      .meta,
+      .panel {
+        margin: 0 auto 16px auto;
+        padding: 12px 16px;
+        max-width: 1100px;
+        background-color: var(--surface-elevated);
+        border: 1px solid var(--surface-border);
+        border-radius: 10px;
+        box-shadow: 0 10px 24px var(--surface-shadow);
+      }
+      .overall-result {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .overall-bullet {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        vertical-align: middle;
+        flex-shrink: 0;
+      }
+      .overall-message,
+      .panel p {
+        margin: 0;
+        font-size: 15px;
+        color: var(--muted-text);
+      }
+      .meta {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .meta span {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        border: 1px solid var(--surface-border);
+        border-radius: 999px;
+        background-color: var(--surface-bg);
+        color: var(--page-text);
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .section-title {
+        color: var(--headline);
+        font-size: 16px;
+        margin: 0 0 12px 0;
+        text-align: center;
+      }
+      .main-content {
+        padding: 6px 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      table {
+        width: min(100%, 1100px);
+        font-size: 14px;
+        text-align: left;
+        border-collapse: collapse;
+        background-color: var(--surface-bg);
+        color: var(--page-text);
+        border: 1px solid var(--surface-border);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 10px 24px var(--surface-shadow);
+      }
+      thead {
+        background-color: var(--table-head-bg);
+      }
+      tbody tr:nth-child(even) {
+        background-color: var(--table-row-alt);
+      }
+      th, td {
+        padding: 10px;
+        border: 1px solid var(--surface-border);
+      }
+      th {
+        color: var(--muted-text);
+        font-weight: 600;
+      }
+      td[rowspan] {
+        vertical-align: top;
+        font-weight: 600;
+      }
+      .panel.success p {
+        color: var(--status-success);
+      }
+      .panel.notice p {
+        color: var(--status-plan);
+      }
+      .panel.empty p {
+        color: var(--status-neutral);
+      }
+      strong {
+        color: var(--page-text);
+      }
+    </style>
+  </head>
+  <body class="font-nokia-pure-text">
+    <p class="headline">Service Splitting Report</p>
+    <div class="overall-result">
+      {% if report_state == "executed" %}
+      <span class="overall-bullet" style="background-color: var(--status-success)"></span>
+      <span class="overall-message">The approved splitting plan has been executed.</span>
+      {% else %}
+      <span class="overall-bullet" style="background-color: var(--status-plan)"></span>
+      <span class="overall-message">Suggested splits from the custom algorithm selected.</span>
+      {% endif %}
+    </div>
+    {% if group_id or splitting_algorithm %}
+    <div class="meta">
+      {% if group_id %}<span>Group: {{ group_id }}</span>{% endif %}
+      {% if splitting_algorithm %}<span>Algorithm: {{ splitting_algorithm }}</span>{% endif %}
+    </div>
+    {% endif %}
+    {% if not list_for_report or list_for_report|length == 0 %}
+    <div class="panel empty">
+      <p>No sites to split were found for the selected group and algorithm.</p>
+    </div>
+    {% else %}
+    {% set normalized_algorithm = (splitting_algorithm or '')|lower|replace('_', '-') %}
+    {% set show_customer_id = normalized_algorithm in ['split-by-customer-id', 'split-by-tenant-id'] %}
+    {% set show_site_name = normalized_algorithm == 'split-by-site-name' %}
+    <div class="main-content">
+      <div style="width: min(100%, 1100px);">
+        <p class="section-title">Recommended site moves</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Current Service Name</th>
+              <th>Service Type</th>
+              <th>NE ID</th>
+              <th>NE Name</th>
+              {% if show_customer_id %}<th>Customer ID</th>{% endif %}
+              {% if show_site_name %}<th>Site Name</th>{% endif %}
+              <th>Target Service Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for key in list_for_report %}
+              {% for current_service_id, items in key.items() %}
+                {% for item in items %}
+                <tr>
+                  {% if loop.first %}
+                  <td rowspan="{{ items|length }}">{{ item['service-name'] }}</td>
+                  <td rowspan="{{ items|length }}">{{ item['service-type'] }}</td>
+                  {% endif %}
+                  <td>{{ item['ne-id'] }}</td>
+                  <td>{{ item['ne-name'] }}</td>
+                  {% if show_customer_id %}<td>{{ item['tenant-id'] }}</td>{% endif %}
+                  {% if show_site_name %}<td>{{ item['site-name'] }}</td>{% endif %}
+                  <td>{{ item['target-service-name'] }}</td>
+                </tr>
+                {% endfor %}
+              {% endfor %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% if report_state == "executed" %}
+    <div class="panel success">
+      <p>The approved splitting plan has been executed. Sites were moved with move-sites using target-service-name for new services and target-service-identifier for existing services.</p>
+    </div>
+    {% else %}
+    <div class="panel notice">
+      <p><strong>Review required.</strong> Connect the execution subworkflow and run with approval only after validating these suggested site moves and target service names.</p>
+    </div>
+    {% endif %}
+    {% endif %}
+  </body>
+  </html>
+tags: []

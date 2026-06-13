@@ -1,0 +1,19 @@
+{
+  "admin-state": "enable",
+  "macsec": {
+    "sub-port": [
+      {
+        "admin-state": "enable",
+        "ca-name": "CA_MACSec",
+        "encap-match": {
+          "all-match": true
+        },
+        "max-peers": 5,
+        "sub-port-id": 1
+      }
+    ]
+  },
+  "tunnel-dot1q": false,
+  "tunnel-qinq": false
+}
+

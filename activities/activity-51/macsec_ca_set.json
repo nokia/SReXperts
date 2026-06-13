@@ -1,0 +1,26 @@
+{
+  "admin-state": "enable",
+  "ca-name": "CA_MACSec",
+  "cipher-suite": "gcm-aes-xpn-128",
+  "clear-tag-mode": "none",
+  "description": "MACSec CA",
+  "macsec-encrypt": true,
+  "static-cak": {
+    "active-psk": 1,
+    "mka-hello-interval": "5",
+    "pre-shared-key": [
+      {
+        "cak": "Ij4KFgr52goD5t0sRxnFbxR2LLnlrR5S9Rm2WnxX6T4= hash2",
+        "cak-name": "0123456789ABCDEF0123456789ABCDEF",
+        "encryption-type": "aes-128-cmac",
+        "psk-id": 1
+      },
+      {
+        "cak": "/IwniHt7rQ7/pNhy8BM4lzDOMcq8AXWZ9V9YVJPFq4c= hash2",
+        "cak-name": "123456789ABCDEF0123456789ABCDEF0",
+        "encryption-type": "aes-128-cmac",
+        "psk-id": 2
+      }
+    ]
+  }
+}

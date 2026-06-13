@@ -1,28 +1,33 @@
-# EDA
+# Nokia Event Driven Automation (EDA)
 
-<script type="text/javascript" src="https://viewer.diagrams.net/js/viewer-static.min.js" async></script>
+<script type="text/javascript" src="/javascripts/viewer-static.min.js" async></script>
 
-Event Driven Automation (EDA) is the state of the art automation platform that completes Nokia's Data Center portfolio:
+Nokia Event Driven Automation (EDA) is the state-of-the-art automation platform that completes Nokia's Data Center portfolio:
 
-![portfolio](https://gitlab.com/rdodin/pics/-/wikis/uploads/cad161eb76137f1034e7fbc8c196fdc8/CleanShot_2025-04-18_at_23.53.33_2x.webp)
+-{{image(url="assets/dcf.webp", padding=10, shadow=true)}}-
 
-The design goals behind EDA were lofty and our ambitions were to create an infrastructure automation platform that addresses many challenges seen in the data center networking.
+In the {==configuration management==} domain EDA breaks the status quo of imperative, box-by-box, screen-scraping-dominant configuration process and leverages a declarative and abstracted configuration model. In this model a user declares what services or components they want to get deployed by providing their desired state in the form of an input that abstracts the vendor-specific complexities and implementation details.  
+Using this approach EDA takes care of all the low-level details of how to translate the abstracted intent into device-specific configurations and how to concurrently and reliably orchestrate the deployment across the network devices to ensure a smooth and reliable rollout.  
+EDA's configuration engine is built for performance and safety, being able to validate changes before deployment and to automatically roll them back across the whole network in case of node-level failures.
 
-In the **configuration management** domain EDA breaks the status quo of imperative, box-by-box configuration and leverages declarative and abstracted configuration model. In this mode a user declares what services or components they want to get deployed by providing its desired state in the form of an input that abstracts the complexities and implementation details.
+The state of the art configuration management is not the only variable in the infrastructure automation equation. Being able to accurately track and manage the state of the infrastructure deployed with automation is often more important and challenging.  
+To address the divide between the configuration management and observability/monitoring tools, EDA also takes care of the {==state handling==} for every abstracted configuration intent it deployed.  
+For example, a network-wide service like L3VPN that spans multiple network elements will have its overall aggregate state reliably tracked in real time by EDA and reported back to the user as state information associated with the original intent.  
+Having the state of the system aligned with the configuration inputs is crucial for reliable and consistent operations since the complex task of correlating the state of the individual low-level metrics to the network-wide service parameters is lifted from the operations teams and handled automatically by EDA.
 
-What is more important than the configuration intent - is the state the system is in. EDA takes a unique stance on **state handling** by coupling the configuration intent with its actual state and presenting it to the users. Having the state of the system aligned with the configuration inputs is crucial to operations.
+For {==operations teams==} EDA provides a set of operational dashboards that reflect the real-time state of the configured services and components. The dashboards are driven by EDA's State Engine and its ability to provide the real-time aggregated state and metrics for the abstracted configuration intents. The dashboard designer allows users to create custom dashboards that fit their operational needs.  
+In addition to the dashboards, EDA offers an instant, network-wide view of the running configuration and state via its EDA Query Language (EQL). A query that runs over your whole network and provides instant and live results is an extremely powerful tool for auditing, troubleshooting and state correlation.
 
-For **operations** domain EDA provides a unified, instant network-wide view of the running configuration and state via its EDA Query Language (EQL) capabilities. Having a way to create a query that runs over your whole network and provides instant and live results is table stakes for auditing, troubleshooting and state correlation.
+While the concepts of declarative and abstracted configuration management are not new, in EDA we made sure our users can {==extend and program==} almost every aspect of the platform. Don't agree with how we modeled DC fabric inputs? You have all the instruments to change it or even create your own implementation of it.  
+Besides the ability to develop custom applications for EDA platform, we also provide a rich set of {==API and CLI==} interfaces to interact with the platform programmatically or via command line. Ranging from REST APIs covering all EDA functionalities to integrations with popular DevOps tools like Ansible and Terraform, EDA is built to fit in your existing toolchain.
 
-While the concept of declarative intents or blueprints is not new, in EDA made sure our users can **extend and program** almost every aspect of the platform. Do not agree how we modeled a DC fabric inputs? You have all the instruments to change it or even create your own implementation of it.
+And it would be a miss to keep EDA anchored to Nokia-only devices, that is why we ensured that EDA core is {==multivendor==} and users can leverage EDA superpowers even with other 3rd party devices[^1].
 
-And it would be a miss to keep EDA anchored to Nokia-only devices, that is why we ensured that EDA core is **multivendor** and users can leverage EDA superpowers with other vendors and their devices and APIs[^1].
-
-At this SReXplore event, you get a unique chance to spend a day with EDA by venturing into the exercises meticulously crafted by the EDA team and be the judge of its capabilities.
+At this SReXperts event, you get a unique chance to spend a day with Nokia EDA by venturing into the exercises meticulously crafted by the EDA team and be the judge of its capabilities.
 
 ## How to get through the exercises?
 
-As EDA is likely a new system for you, we recommend you to start from the beginner-level exercises in the order they are presented, unless you feel adventurous and want to hit the ground running.
+As EDA is likely a new system for you, we recommend you start from the beginner-level exercises in the order they are presented, unless you feel adventurous and want to hit the ground running.
 
 When inside a particular exercise, you should complete the tasks in the order they are presented. It might be tempting to skip ahead but a task may have a dependency on the previous step, so do tackle them in order.
 
@@ -32,7 +37,7 @@ When inside a particular exercise, you should complete the tasks in the order th
 
 The lab environment you work on features a DC network topology with EDA already installed and a number of SR Linux datacenter switches already onboarded onto the platform. In particular, EDA manages five switches in total: `leaf11`, `leaf12`, `leaf13`, `spine11`, `spine12`.
 
--{{ diagram(url='srexperts/hackathon-diagrams/main/eda.drawio', title='EDA Managed nodes', page=0, zoom=1.5) }}-
+-{{ diagram(path='assets/eda.drawio', title='EDA Managed nodes', page=0, zoom=1.5) }}-
 
 As you go through the exercise, you might connect to the EDA UI, one of the switches or clients connected to them.
 
@@ -80,7 +85,7 @@ To access the clients you first need to login to the lab server, and then from t
 ssh admin@{client-hostname}
 ```
 
-The switch hostnames are:
+The client hostnames are:
 
 * `clab-srexperts-client11`
 * `clab-srexperts-client12`
@@ -94,89 +99,10 @@ The client's credentials are `admin:multit00l`
 
 ## EDA UI
 
-Most exercises can be completed using EDA's Web UI. As any modern platform, EDA's UI is an API client of the backend API server and uses the same endpoints as any automation system would use, which means that technically every exercise can be solved using any automation interface that consumes EDA API.
+When going through the exercises, you will be using a healthy mix of various EDA interfaces, including EDA UI, CLI, and API interfaces.  
+Like any modern platform, EDA's UI is an API client of the backend API server and uses the same endpoints as any automation system would use, which means that technically every exercise can be solved using any automation interface that consumes EDA API.
 
-Still, for the most part we expect you to follow the lead and use the UI to complete the majority of the tasks. Chances are high that this will be your first time seeing and using the EDA UI, so let us give you a quick introduction.
-
-### Main page
-
-When you log in to the EDA UI you land on the **Main** page, here are the main areas of interest:
-
-![ui-1](https://gitlab.com/rdodin/pics/-/wikis/uploads/756d9cb79ed9deb1e450eccc6e9a1a0e/CleanShot_2025-08-14_at_11.51.59.webp)
-
-:material-numeric-1-circle: The home page features a dashboard that provides some key information about the managed nodes and their interfaces.
-
-:material-numeric-2-circle: The home page has two dashboards to select from. The page picker lets you do this. The picker will be available on other pages as well.
-
-:material-numeric-3-circle: Namespace selector. When you have more than one namespace (`eda` is the default namespace) you will be able to switch between them.
-
-:material-numeric-4-circle: Transaction basket. This is where your uncommitted transactions will be stored. Clicking on the basket icon also lets you do operations on the transactions.
-
-:material-numeric-5-circle: Workflows. This menu icon lists the recently run workflows.
-
-:material-numeric-6-circle: User menu. This is where you can change your password, log out, and access the help and about pages.
-
-:material-numeric-7-circle: Side menu toggle. Expands/collapses the left side menu where all EDA apps and menu items are.
-
-:material-numeric-8-circle: Panel selector. EDA provides two default panels - Main and System Administration. The panels control what apps are visible in the side menu. Users can create their own panels and switch between them based on the use case.
-
-:material-numeric-9-circle: Application icon. Clicking on the icon in the collapsed view opens up the application page.
-
-:material-numeric-10-circle: Application category toggle. Can be used to hide/show the application category.
-
-### App page
-
-When you select an app from the list :material-numeric-1-circle: you get a page that lists all instances of this particular app/resource created. In the screenshot below we selected the Nodes from the menu and get a list of Node resources that EDA manages.
-
-![list-view](https://gitlab.com/rdodin/pics/-/wikis/uploads/4576290b23221c9c2e0dd863d5e1f6e9/CleanShot_2025-05-02_at_20.54.06_2x.png)
-
-The important elements on this view are:
-
-:material-numeric-2-circle: Context menu button. Opens up a menu with commands like edit, duplicate, delete.
-
-:material-numeric-3-circle: Click on this icon to display the status bar for the selected resource.
-
-### Status bar
-
-When the status bar is expanded, it shows the current information about the selected :material-numeric-1-circle: resource.
-
-![status](https://gitlab.com/rdodin/pics/-/wikis/uploads/b3b43d820586634a1151946e78e22d9c/CleanShot_2025-05-02_at_20.58.55_2x.png)
-
-Every bit of the information about the resource will be available in the sidebar, starting with Metadata :material-numeric-2-circle:, then Status :material-numeric-3-circle: and continuing with specification of the selected resource.
-
-### Edit page
-
-Naturally, you will spend quite some time creating and editing resources. When you click **Create** button from the App page listing the resources or double click on the row in the grid, or choose **Edit** from the context menu, you will be presented with an Edit page:
-
-![form](https://gitlab.com/rdodin/pics/-/wikis/uploads/ebe9ef4af3c0a0a3b2e10a6fe58d8418/CleanShot_2025-04-08_at_16.08.45_2x.png)
-
-This form has three main areas (from left to right):
-
-1. Navigation bar, aka Form fields
-2. Form view
-3. YAML view
-
-When editing or creating a resource, you would use either the Form view where every resource field is represented as a form field, or the YAML view where you can edit the resource in YAML format. You can start with a form view and continue in YAML editor, the changes are always synchronized.
-
-At the left bottom of this page you will find two buttons that allow you to either commit the resource straight away, or add it to a transaction basket.
-
-### Transaction basket
-
-The transaction basket allows you to group resources together and commit them as a single transaction in an all-or-nothing fashion. Transactions are the key ingredient in EDA's mission to drive human error to zero.
-
-By adding resources to the transaction basket you can commit them all together or perform a Dry Run to ensure that the changes pass all sorts of validations before touching the network elements.
-
-The workflow below demonstrates how a VLAN resource gets added to the transaction basket, after which a dry run is performed to validate the transaction and then the diffs are browsed to understand the scope of the changes this transaction would result in should we have proceeded with the commit.
-
--{{video(url="https://gitlab.com/rdodin/pics/-/wikis/uploads/078f88bffcf0c8685d144fa4b8d9c71f/CleanShot_2025-05-03_at_00.12.47.mp4")}}-
-
-## Namespace selector
-
-When you first login to EDA as administrator, you have access to all available EDA namespaces. Since in this event you will only work in the default `eda` namespace, you can select it using the namespace selector as shown below:
-
-![ns-select](https://gitlab.com/rdodin/pics/-/wikis/uploads/10f8c7779ea629e14214fb88c1280edb/CleanShot_2025-05-14_at_23.27.05_2x.png)
-
-By switching from All Namespaces to the `eda` namespace the UI will fill in the namespace name in the [Edit Page](#edit-page) when you will create new EDA resources.
+Quite a few exercises can be completed using the UI and chances are high that this will be your first time seeing and using it. Check out the [EDA UI](https://docs.eda.dev/26.4/tour-of-eda/ui/) section of the official documentation to get familiar with the UI and its capabilities.
 
 ## Reset EDA
 
@@ -188,10 +114,20 @@ In such cases you can manually delete conflicting resources, but if you want to 
 bash /opt/srexperts/restore-eda.sh
 ```
 
-This script will immediately revert all changes happened in EDA since you first logged in so you can start fresh.
+This script will immediately revert all changes that happened in EDA since you first logged in so you can start fresh.
 
 ## Where to next?
 
-After this brief introduction to the EDA UI you are ready to start exploring the next generation of network automation by either starting ["The tour of EDA"](./beginner/declarative-intents.md) that we have prepared for you, or venturing into self-paced exploration.
+After this brief introduction you are ready to start exploring the next generation of network automation by either choosing one of the exercises from the left sidebar or venturing into self-paced exploration.
 
-[^1]: Pending vendors' support for YANG and modern management interfaces.
+If you are just getting started with EDA and want to learn the basics of EDA concepts, instead of diving into the automation-focused exercises - check out the official [Tour of EDA for beginners](https://docs.eda.dev/26.4/tour-of-eda/).
+
+<!-- --8<-- [start:ranoutoftime] -->
+/// tip | You can complete any EDA exercise even when the event has ended!
+Don't worry if you ran out of time while completing the activities during the SReXperts Hackathon, this site will remain online and you can deploy Nokia EDA for free on any compute you have available anytime you need.
+
+See [Try EDA](https://docs.eda.dev/26.4/getting-started/try-eda/) for more information.
+///
+<!-- --8<-- [end:ranoutoftime] -->
+
+[^1]: Pending vendors' maturity of YANG models and modern management interfaces.

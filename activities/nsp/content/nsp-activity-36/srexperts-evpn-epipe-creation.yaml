@@ -1,0 +1,659 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+version: '2.0'
+
+srexperts-evpn-epipe-creation:
+  workflow_meta:
+    title: EVPN Epipe Creation
+    author: Asad Arafat
+    email: asad.arafat@nokia.com
+    version: "0.0.2" ## Site-Based Intent Epipe Creation
+    deprecated: false
+    
+  tags:
+    - sf-network-operation
+
+  input:
+    - templateName
+    - targets
+    - siteBasedIntentType: true
+
+  output:
+    result: <% $.result %>
+
+  output-on-error:
+    result: failed
+
+  vars:
+    rcFind: https://<% locate_nsp() %>:8545/restconf/operations/nsp-inventory:find
+    ibsfCreate: https://<% locate_nsp() %>:8545/restconf/data/nsp-service-intent:intent-base
+    ibsfSiteCreate: https://<% locate_nsp() %>:8545/restconf/data/nsp-service-site-intent:intent-base
+    ibsfTunnelCreate: https://<% locate_nsp() %>:8545/restconf/data/nsp-tunnel-intent:intent-base
+
+
+  tasks:
+    getIntentType:
+      action: nsp.https
+      input:
+        method: POST
+        url: <% $.rcFind %>
+        body:
+          input:
+            xpath-filter: /service-template:templates/template[name='<% $.templateName %>']
+            fields: name;description;intent-type;intent-version;state
+        resultFilter: $.content.get("nsp-inventory:output")
+      publish:
+        intentType: <% task().result.content.data.first().get("intent-type") %>
+        intentTypeVersion: <% task().result.content.data.first().get("intent-version") %>
+      on-success:
+        - getCustomerId
+
+    getCustomerId:
+      with-items: item in <% $.targets %>
+      action: nsp.https
+      input:
+        method: POST
+        url: <% $.rcFind %>
+        body:
+          input:
+            xpath-filter: /nsp-customer:customers/customer[name='<% $.item.custName %>']
+            fields: name;id;description
+        resultFilter: $.content.get("nsp-inventory:output")
+      publish:
+        customerIds: <% task().result.content.data.select($.id).flatten() %>
+      on-success:
+        - detectCreateElineServiceMode
+
+    detectCreateElineServiceMode:
+      action: std.noop
+      on-success:
+        - buildCreateElineServiceSiteBasedPayload: <% $.get('siteBasedIntentType') != false %>
+        - createElineService: <% $.get('siteBasedIntentType') = false %>
+
+    buildCreateElineServiceSiteBasedPayload:
+      action: nsp.python
+      input:
+        context: "<% $ %>"
+        script: |
+          ctx = context or {}
+          targets = ctx.get('targets') or []
+          customer_ids = ctx.get('customerIds') or []
+
+          def clone(value):
+              if isinstance(value, dict):
+                  return {key: clone(item) for key, item in value.items()}
+              if isinstance(value, list):
+                  return [clone(item) for item in value]
+              return value
+
+          def normalize_intent_entries(target):
+              if not isinstance(target, dict):
+                  return []
+
+              wrapped_intents = target.get('nsp-service-site-intent:intent')
+              if isinstance(wrapped_intents, list) and wrapped_intents:
+                  return [intent for intent in wrapped_intents if isinstance(intent, dict)]
+
+              return [target]
+
+          def derive_site_template_name(target, service_template_name):
+              if isinstance(target, dict):
+                  site_template_name = target.get('site-template-name') or target.get('siteTemplateName')
+                  if site_template_name:
+                      return site_template_name
+
+              if isinstance(service_template_name, str):
+                  if '_SERVICE_01_' in service_template_name:
+                      return service_template_name.replace('_SERVICE_01_', '_')
+                  if '_SERVICE_' in service_template_name:
+                      return service_template_name.replace('_SERVICE_', '_')
+
+              return service_template_name
+
+          def build_default_service_intent_specific_data(target, customer_id):
+              svc_id = target.get('svcId') if isinstance(target, dict) else None
+              payload = {
+                  'epipe-service:epipe-service': {
+                      'set-site-customer-id': True,
+                      'set-site-description': True,
+                      'admin-state': 'unlocked',
+                      'set-site-admin-state': True,
+                      'set-site-ne-service-id': True
+                  }
+              }
+
+              service_data = payload['epipe-service:epipe-service']
+              if customer_id not in (None, ''):
+                  service_data['customer-id'] = customer_id
+              if svc_id not in (None, ''):
+                  service_data['ne-service-id'] = svc_id
+                  service_data['job-id'] = str(svc_id)
+
+              return payload
+
+          def enrich_service_intent_specific_data(service_data, target, customer_id):
+              payload = clone(service_data) if service_data is not None else None
+              if not isinstance(payload, dict):
+                  payload = build_default_service_intent_specific_data(target, customer_id)
+
+              svc_id = target.get('svcId') if isinstance(target, dict) else None
+
+              for section in payload.values():
+                  if not isinstance(section, dict):
+                      continue
+
+                  if section.get('customer-id') in (None, '') and customer_id not in (None, ''):
+                      section['customer-id'] = customer_id
+
+                  if section.get('ne-service-id') in (None, '') and svc_id not in (None, ''):
+                      section['ne-service-id'] = svc_id
+
+                  if section.get('job-id') in (None, '') and svc_id not in (None, ''):
+                      section['job-id'] = str(svc_id)
+
+              return payload
+
+          def enrich_sites(sites, target, service_name, customer_id):
+              result = []
+              svc_id = target.get('svcId') if isinstance(target, dict) else None
+
+              for site in (sites or []):
+                  next_site = clone(site)
+                  if not isinstance(next_site, dict):
+                      result.append(next_site)
+                      continue
+
+                  if not next_site.get('site-name') and service_name:
+                      next_site['site-name'] = service_name
+
+                  site_intent_data = next_site.get('site-intent-specific-data')
+                  if isinstance(site_intent_data, dict):
+                      for section in site_intent_data.values():
+                          if not isinstance(section, dict):
+                              continue
+
+                          if section.get('customer') in (None, '') and customer_id not in (None, ''):
+                              section['customer'] = customer_id
+
+                          if section.get('service-id') in (None, '') and svc_id not in (None, ''):
+                              section['service-id'] = svc_id
+
+                          bgp_evpn = section.get('bgp-evpn')
+                          if isinstance(bgp_evpn, dict) and bgp_evpn.get('evi') in (None, '') and svc_id not in (None, ''):
+                              bgp_evpn['evi'] = svc_id
+
+                  result.append(next_site)
+
+              return result
+
+          def build_default_site(device_id, port_id, local_name, remote_name, local_eth_tag, remote_eth_tag, site_template_name, service_name, customer_id, svc_id):
+              if not device_id:
+                  return None
+
+              return {
+                  'device-id': device_id,
+                  'site-template-name': site_template_name,
+                  'site-name': service_name,
+                  'site-intent-specific-data': {
+                      'epipe-site-sr:epipe-site-sr': {
+                          'admin-state': 'enable',
+                          'vc-switching': False,
+                          'test': False,
+                          'flexible-cross-connect': False,
+                          'ignore-l2vpn-mtu-mismatch': False,
+                          'load-balancing': {
+                              'per-service-hashing': False,
+                              'lbl-eth-or-ip-l4-teid': False
+                          },
+                          'pbb': {
+                              'force-qtag-forwarding': False,
+                              'local-switch-service-state': 'sap'
+                          },
+                          'service-id': svc_id,
+                          'customer': customer_id,
+                          'bgp-evpn': {
+                              'evi': svc_id,
+                              'local-attachment-circuit': [
+                                  {
+                                      'name': local_name,
+                                      'bgp': 1,
+                                      'vlan-signaled-flexible-cross-connect': False,
+                                      'eth-tag': local_eth_tag
+                                  }
+                              ],
+                              'remote-attachment-circuit': [
+                                  {
+                                      'name': remote_name,
+                                      'bgp': 1,
+                                      'eth-tag': remote_eth_tag
+                                  }
+                              ],
+                              'mpls': [
+                                  {
+                                      'bgp-instance': 1,
+                                      'admin-state': 'enable',
+                                      'control-word': False,
+                                      'ecmp': 1,
+                                      'entropy-label': False,
+                                      'evi-three-byte-auto-rt': False,
+                                      'dynamic-egress-label-limit': False,
+                                      'mh-mode': 'network',
+                                      'hash-label': False,
+                                      'send-tunnel-encap': {
+                                          'mpls': True,
+                                          'mpls-over-udp': False
+                                      },
+                                      'auto-bind-tunnel': {
+                                          'resolution': 'filter',
+                                          'enforce-strict-tunnel-tagging': False,
+                                          'ecmp': 1,
+                                          'enforce-untagged-route': 'none',
+                                          'allow-flex-algo-fallback': False,
+                                          'weighted-ecmp': False,
+                                          'resolution-filter': {
+                                              'bgp': True,
+                                              'ldp': False,
+                                              'rsvp': True,
+                                              'sr-isis': True,
+                                              'sr-ospf': False,
+                                              'sr-te': True,
+                                              'udp': False,
+                                              'mpls-fwd-policy': False,
+                                              'sr-policy': False,
+                                              'rib-api': False,
+                                              'sr-ospf3': False
+                                          }
+                                      },
+                                      'route-next-hop': {
+                                          'system-ipv6': [
+                                              null
+                                          ]
+                                      }
+                                  }
+                              ]
+                          },
+                          'sap': [
+                              {
+                                  'sap-id': str(port_id) + ':' + str(svc_id),
+                                  'admin-state': 'disable',
+                                  'cflowd': False,
+                                  'collect-stats': False,
+                                  'ignore-oper-down': False,
+                                  'ingress': {
+                                      'vlan-manipulation': {
+                                          'outer-tag': 'null',
+                                          'inner-tag': 'null'
+                                      },
+                                      'aggregate-policer': {
+                                          'rate': 'max',
+                                          'burst': 'default',
+                                          'mbs': 'default',
+                                          'algorithm-type': 'trtcm-ds-coupled'
+                                      }
+                                  },
+                                  'egress': {
+                                      'agg-rate': {
+                                          'limit-unused-bandwidth': False,
+                                          'queue-frame-based-accounting': False,
+                                          'cir': '0',
+                                          'burst-limit': 'auto',
+                                          'adaptation-rule': 'closest'
+                                      },
+                                      'qos': {
+                                          'qinq-mark-top-only': False,
+                                          'burst-limit': 'auto',
+                                          'vlan-qos-policy': {
+                                              'port-redirect': False
+                                          }
+                                      },
+                                      'vlan-manipulation': {
+                                          'tag': 'null'
+                                      }
+                                  },
+                                  'lag': {
+                                      'per-link-hash': {
+                                          'class': 1,
+                                          'weight': 1
+                                      }
+                                  },
+                                  'eth-cfm': {
+                                      'collect-lmm-stats': False,
+                                      'ais': False
+                                  },
+                                  'ethernet': {
+                                      'llf': {
+                                          'admin-state': 'disable'
+                                      }
+                                  }
+                              }
+                          ]
+                      }
+                  }
+              }
+
+          def build_default_sites(target, service_name, service_template_name, customer_id):
+              if not isinstance(target, dict):
+                  return []
+
+              svc_id = target.get('svcId')
+              site_template_name = derive_site_template_name(target, service_template_name)
+              sites = []
+
+              site_a = build_default_site(
+                  target.get('siteA'),
+                  target.get('portA'),
+                  'A',
+                  'B',
+                  111,
+                  222,
+                  site_template_name,
+                  service_name,
+                  customer_id,
+                  svc_id
+              )
+              if site_a:
+                  sites.append(site_a)
+
+              site_b = build_default_site(
+                  target.get('siteB'),
+                  target.get('portB'),
+                  'B',
+                  'A',
+                  222,
+                  111,
+                  site_template_name,
+                  service_name,
+                  customer_id,
+                  svc_id
+              )
+              if site_b:
+                  sites.append(site_b)
+
+              return sites
+
+          intents = []
+
+          for index, target in enumerate(targets):
+              target_intents = normalize_intent_entries(target)
+              customer_id = customer_ids[index] if index < len(customer_ids) else (customer_ids[0] if customer_ids else None)
+
+              for intent in target_intents:
+                  raw_sites = intent.get('site') if isinstance(intent.get('site'), list) else (
+                      target.get('site') if isinstance(target, dict) and isinstance(target.get('site'), list) else []
+                  )
+
+                  service_name = (
+                      intent.get('service-name') or
+                      (target.get('service-name') if isinstance(target, dict) else None) or
+                      (target.get('svcName') if isinstance(target, dict) else None) or
+                      ''
+                  )
+                  service_template_name = (
+                      intent.get('service-template-name') or
+                      (target.get('service-template-name') if isinstance(target, dict) else None) or
+                      ctx.get('templateName') or
+                      ''
+                  )
+                  olc_state = intent.get('olc-state') or (target.get('olc-state') if isinstance(target, dict) else None) or 'deployed'
+                  service_data = intent.get('service-intent-specific-data') or (
+                      target.get('service-intent-specific-data') if isinstance(target, dict) else None
+                  )
+                  sites = enrich_sites(raw_sites, target, service_name, customer_id)
+                  if not sites:
+                      sites = build_default_sites(target, service_name, service_template_name, customer_id)
+
+                  intents.append({
+                      'service-name': service_name,
+                      'olc-state': olc_state,
+                      'service-template-name': service_template_name,
+                      'service-intent-specific-data': enrich_service_intent_specific_data(service_data, target, customer_id),
+                      'site': sites
+                  })
+
+          return {
+              'siteBasedIntentRequest': {
+                  'nsp-service-site-intent:intent': intents
+              }
+          }
+      publish:
+        siteBasedIntentRequest: <% task().result.siteBasedIntentRequest %>
+      on-success:
+        - createElineServiceSiteBased
+
+    createElineService:
+      join: all
+      with-items: 
+        - cId in <% $.customerIds %>
+        - item in <% $.targets %>
+      action: nsp.https
+      input:
+        method: POST
+        url: <% $.ibsfCreate %>
+        body:
+          nsp-service-intent:intent:
+            - template-name: <% $.templateName %>
+              intent-type: <% $.intentType %>
+              intent-type-version: <% $.intentTypeVersion %>
+              service-name: <% $.item.svcName %>
+              olc-state: deployed
+              intent-specific-data:
+                evpn-epipe:evpn-epipe:
+                  ne-service-id: <% $.item.svcId %>
+
+                  admin-state: unlocked
+                  site-a:
+                    site-name: epipe-<% $.item.svcId %>-<% $.item.siteA %>
+                    description: Bulk Provisioning using WFM
+                    evi: <% $.item.svcId %>
+                    sap-details:
+                      sap:
+                      - enable-filter: false
+                        cpu-protection: {}
+                        inner-vlan-tag: -1
+                        outer-vlan-tag: <% $.item.svcId %>
+                        port-id: <% $.item.portA %>
+                        description: Endpoint A
+                        admin-state: unlocked
+                        enable-qos: false
+                    mpls:
+                      bgp-instance: {}
+                      auto-bind-tunnel:
+                        resolution-filter:
+                          sr-te: true
+                          rsvp: true
+                        resolution: filter
+                    remote-ac:
+                      eth-tag: 4
+                      name: for-site-B
+                    device-id: <% $.item.siteA %>
+                    multi-homing-site-details:
+                      cpu-protection: {}
+                      inner-vlan-tag: -1
+                      outer-vlan-tag: -1
+                      admin-state: unlocked
+                    mtu: 1600
+                    local-ac:
+                      eth-tag: 3
+                      name: for-site-A
+                  evpn-type: mpls
+                  customer-id: 1
+                  site-b:
+                    site-name: epipe-<% $.item.svcId %>-<% $.item.siteB %>
+                    description: Bulk Provisioning using WFM
+                    evi: <% $.item.svcId %>
+                    sap-details:
+                      sap:
+                      - enable-filter: false
+                        cpu-protection: {}
+                        inner-vlan-tag: -1
+                        outer-vlan-tag: <% $.item.svcId %>
+                        port-id: <% $.item.portB %>
+                        description: Endpoint B
+                        admin-state: unlocked
+                        enable-qos: false
+                    mpls:
+                      bgp-instance: {}
+                      auto-bind-tunnel:
+                        resolution-filter:
+                          sr-te: true
+                          rsvp: true
+                        resolution: filter
+                    remote-ac:
+                      eth-tag: 3
+                      name: for-site-A
+                    device-id: <% $.item.siteB %>
+                    multi-homing-site-details:
+                      cpu-protection: {}
+                      inner-vlan-tag: -1
+                      outer-vlan-tag: -1
+                      admin-state: unlocked
+                    mtu: 1600
+                    local-ac:
+                      eth-tag: 4
+                      name: for-site-B
+      publish:
+        taskId: <% task().id %>
+        createResponse: <% task().result.select($.content.response.data) %>
+      on-success:
+        - captureCreationTime
+
+    createElineServiceSiteBased:
+      action: nsp.https
+      input:
+        method: POST
+        url: <% $.ibsfSiteCreate %>
+        body: <% $.siteBasedIntentRequest %>
+      publish:
+        taskId: <% task().id %>
+        createResponse: <% task().result.content.response.data %>
+      on-success:
+        - captureCreationTime
+
+    captureCreationTime:
+      wait-before: 5
+      action: nsp.https
+      input:
+        method: GET
+        url: <% locate_nsp("Action Executions", "v1") %>/v1/action-execution/task/<% $.taskId %>
+      publish:
+        startTime: <% task().result.content.response.data.first().created_at %>    
+        endTime: <% task().result.content.response.data.first().updated_at %>
+      on-success:
+        - extractTimeDifference
+
+    extractTimeDifference:
+      action: std.javascript
+      input: 
+        context: <% $ %>
+        script: |
+          const t1 = new Date($.endTime);
+          const t2 = new Date($.startTime);
+          diff = t1.getTime() - t2.getTime();
+          diff /= 1000;
+          return diff;
+      publish:
+        execTime: <% task().result %>
+      on-success:
+        - captureServiceState
+
+    captureServiceState:
+      with-items: item in <% $.targets %>
+      action: nsp.https
+      input:
+        method: POST
+        url: <% $.rcFind %>
+        body:
+          input:
+            xpath-filter: /nsp-service:services/service-layer/eline[service-id='<% $.item.svcName %>']
+        resultFilter: >-
+          $.content.get("nsp-inventory:output").data.select({
+          svcName => $.name, 
+          svcId => $.get("ne-service-id"), 
+          slcState => $.get("service-extension:eline-svc").get("slc-state"), 
+          misaligned => $.get("service-extension:eline-svc").misaligned})
+      publish:
+        serviceStateRaw: <% task().result %>
+      on-success:
+        - renderServiceState
+
+    renderServiceState:
+      action: nsp.python
+      input:
+        context: "<% $ %>"
+        script: |
+          import html as html_lib
+
+          ctx = context or {}
+          raw = ctx.get('serviceStateRaw')
+          exec_time = ctx.get('execTime')
+
+          def append_items(items, value):
+              if value is None:
+                  return
+              if isinstance(value, list):
+                  for item in value:
+                      append_items(items, item)
+                  return
+              if isinstance(value, dict):
+                  if 'svcName' in value or 'svcId' in value or 'slcState' in value or 'misaligned' in value:
+                      items.append({
+                          'svcId': value.get('svcId', ''),
+                          'svcName': value.get('svcName', ''),
+                          'slcState': value.get('slcState', ''),
+                          'misaligned': value.get('misaligned', '')
+                      })
+                      return
+                  if 'content' in value:
+                      append_items(items, value.get('content'))
+                      return
+
+          items = []
+          append_items(items, raw)
+
+          rows = []
+          for item in items:
+              rows.append(
+                  '<tr>'
+                  '<td>' + html_lib.escape(str(item.get('svcId', ''))) + '</td>'
+                  '<td>' + html_lib.escape(str(item.get('svcName', ''))) + '</td>'
+                  '<td>' + html_lib.escape(str(item.get('slcState', ''))) + '</td>'
+                  '<td>' + html_lib.escape(str(item.get('misaligned', ''))) + '</td>'
+                  '</tr>'
+              )
+
+          html = """<!DOCTYPE html>
+          <html>
+            <head>
+              <style>
+                table {font-family: NokiaPure, sans-serif;border-collapse: collapse;width: 100%;}
+                td, th {border: 1px solid #dddddd;text-align: left;padding: 8px;}
+                tr:nth-child(even) {background-color: #dddddd;}
+                lime {margin-left: 19px;height: 12px;width: 12px;background-color: lime;border-radius: 50%;display: inline-block;}
+                red {margin-left: 19px;height: 12px;width: 12px;background-color: red;border-radius: 50%;display: inline-block;}
+              </style>
+            </head>
+            <body>
+              <br/><span style="font-size: 1em; font-weight: 600; margin:10px; color:#183693 ;font-family: NokiaPure, sans-serif;">Service State</span><br/><br/>
+              <div style="padding-right: 10px;">
+                <table>
+                  <tr>
+                    <th>Service ID</th>
+                    <th>Service Name</th>
+                    <th>SLC State</th>
+                    <th>Misaligned</th>
+                  </tr>
+                  __ROWS__
+                  <tr><td colspan="4">Overall Service Creation Time: __EXEC_TIME__ sec(s)</td></tr>
+                </table>
+              </div>
+            </body>
+          </html>"""
+
+          html = html.replace('__ROWS__', ''.join(rows))
+          html = html.replace('__EXEC_TIME__', html_lib.escape(str(exec_time if exec_time is not None else '')))
+
+          return html
+      publish:
+        result: <% task().result %>

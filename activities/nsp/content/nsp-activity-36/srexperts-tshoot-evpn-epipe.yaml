@@ -1,0 +1,351 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+---
+version: '2.0'
+
+srexperts-tshoot-evpn-epipe:
+  type: direct
+
+  tags:
+    - Object-Troubleshooting
+    - SERVICE
+    - EVPN-ELINE
+
+  workflow_meta:
+    title: Object Troubleshooting - EVPN ELINE
+    author: Asad Arafat - asad.arafat@nokia.com
+    version: 1.0.0
+    deprecated: false
+
+  description: |
+    Collects EVPN ELINE (Epipe) troubleshooting outputs for a point-to-point service.
+    Inputs:
+      - targetObject (service name)
+
+  input:
+    - targetObject
+
+  vars:
+    concurrency: 2
+
+  output:
+    html: <% $.get('html') or '' %>
+
+  tasks:
+    get_object_details:
+      action: nsp.https
+      input:
+        url: "https://network-supervision/ServiceSupervision/rest/api/v1/nspServices/services/<% $.targetObject %>/sites"
+        method: GET
+        contentType: "application/json"
+        accept: "application/json"
+        cert: "/opt/nsp/os/ssl/certs/nsp/nsp.pem"
+      publish:
+        service_sites_result: <% task().result %>
+      publish-on-error:
+        service_sites_result: <% task().result %>
+      on-complete:
+        - get_ne_inventory
+
+    get_ne_inventory:
+      action: nsp.https
+      input:
+        method: POST
+        url: "https://restconf-gateway/restconf/operations/nsp-inventory:find"
+        body: |
+          {
+            "nsp-inventory:input" : {
+                    "xpath-filter": "/nsp-equipment:network/network-element",
+                    "sort-by": ["ne-name"],
+                    "fields": "ne-name;ne-id;ip-address"
+                  }
+          }
+      publish:
+        ne_inventory_raw: <% task().result %>
+      on-complete:
+        - build_endpoint_nodes
+
+    build_endpoint_nodes:
+      action: nsp.python
+      input:
+        context: "<% $ %>"
+        script: |
+          ctx = context or {}
+          svc_raw = (ctx.get('service_sites_result') or {})
+          svc_items = (((svc_raw.get('content') or {}).get('response') or {}).get('data') or [])
+
+          def normalize(val):
+            if val is None:
+              return ''
+            return str(val).strip()
+
+          def first_service_name(items):
+            for item in (items or []):
+              name = normalize(item.get('name') or item.get('service-name') or item.get('serviceName'))
+              if name:
+                return name
+            return ''
+
+          def site_id_to_ip(site_id):
+            s = normalize(site_id)
+            if s.startswith('::'):
+              s = s[2:]
+            if ':' in s and s.replace(':', '').isdigit():
+              parts = [p for p in s.split(':') if p != '']
+              return '.'.join(parts)
+            return s
+
+          service_name_derived = first_service_name(svc_items) or normalize(ctx.get('targetObject'))
+
+          endpoints = []
+          site_id_map = {}
+          for item in (svc_items or []):
+            site_id = normalize(item.get('id') or item.get('site-id') or item.get('siteId'))
+            if not site_id:
+              continue
+            ep_ip = site_id_to_ip(site_id)
+            endpoints.append(ep_ip)
+            site_id_map[ep_ip] = site_id
+
+          inv_raw = (ctx.get('ne_inventory_raw') or {})
+          inv_items = (((inv_raw.get('content') or {}).get('nsp-inventory:output') or {}).get('data') or [])
+
+          ip_to_ne = {}
+          name_to_ne = {}
+          for item in (inv_items or []):
+            ne_id = item.get('ne-id')
+            ne_name = item.get('ne-name')
+            ip_addr = item.get('ip-address')
+            if ne_id is None:
+              continue
+            ne_id = str(ne_id)
+            if ne_name:
+              name_to_ne[str(ne_name)] = ne_id
+            if ip_addr:
+              ip_to_ne[str(ip_addr)] = ne_id
+
+          # For P2P, derive peer IP as the other endpoint when two are provided.
+          endpoint_nodes = []
+          for idx, ep in enumerate(endpoints):
+            ep_norm = normalize(ep)
+            if not ep_norm:
+              continue
+            ne_id = site_id_map.get(ep_norm) or ip_to_ne.get(ep_norm) or name_to_ne.get(ep_norm) or ep_norm
+            peer_ip = ''
+            if len(endpoints) == 2:
+              peer_ip = normalize(endpoints[1 - idx])
+            endpoint_nodes.append({
+              'endpoint': ep_norm,
+              'peer_ip': peer_ip,
+              'ne_id': ne_id,
+              'commands': [
+                'show service id "' + service_name_derived + '" base',
+                'show service id "' + service_name_derived + '" bgp-evpn',
+                'show router bgp routes evpn auto-disc next-hop ' + peer_ip
+              ]
+            })
+
+          return {
+            'service_name_derived': service_name_derived,
+            'endpoint_nodes': endpoint_nodes
+          }
+      publish:
+        service_name_derived: <% task().result.service_name_derived %>
+        endpoint_nodes: <% task().result.endpoint_nodes %>
+      on-success:
+        - run_cli_commands
+
+    run_cli_commands:
+      with-items: node in <% $.endpoint_nodes %>
+      concurrency: <% $.concurrency %>
+      action: nsp.mdm_cli
+      input:
+        neId: <% $.node.ne_id %>
+        cmds: <% $.node.commands %>
+      publish:
+        cli_results_raw: <% task().result %>
+      publish-on-error:
+        cli_results_raw: <% task().result %>
+      on-success:
+        - render_cli_html
+      on-error:
+        - render_cli_html
+
+    render_cli_html:
+      action: nsp.python
+      input:
+        context: "<% $ %>"
+        script: |
+          import html as html_lib
+          import re
+          ctx = context or {}
+          nodes = ctx.get('endpoint_nodes') or []
+          raw = ctx.get('cli_results_raw')
+          ansi_re = re.compile(r'\x1b\[[0-?]*[ -/]*[@-~]')
+          md_guard_token = '__MD_GUARD_6b9d3e5b__'
+          md_guard_html = '<span class="md-guard" style="display:none">// </span>'
+
+          def clean_output(text):
+            if text is None:
+              return ''
+            text = str(text).replace('\r\n', '\n').replace('\r', '\n')
+            text = ansi_re.sub('', text)
+            text = text.expandtabs(8)
+            text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', text)
+            return text
+
+          def prefix_lines(text, prefix):
+            if text is None:
+              return ''
+            return '\n'.join([prefix + line for line in str(text).split('\n')])
+          if isinstance(raw, list):
+            raw_list = raw
+          elif isinstance(raw, dict):
+            raw_list = [raw]
+          else:
+            raw_list = []
+
+          results = []
+          for idx, node in enumerate(nodes):
+            resp = raw_list[idx] if idx < len(raw_list) else {}
+            responses = resp.get('responses') if isinstance(resp, dict) else None
+            if responses is None:
+              responses = []
+            if isinstance(responses, str):
+              responses = [responses]
+            if not isinstance(responses, list):
+              responses = []
+
+            cmd_outputs = []
+            cmds = node.get('commands') or []
+            for c_idx, cmd in enumerate(cmds):
+              output = responses[c_idx] if c_idx < len(responses) else ''
+              output = prefix_lines(clean_output(output), md_guard_token)
+              cmd_outputs.append({'cmd': cmd, 'output': output})
+
+            results.append({
+              'endpoint': node.get('endpoint'),
+              'peer_ip': node.get('peer_ip'),
+              'ne_id': node.get('ne_id'),
+              'commands': cmd_outputs
+            })
+
+          service_name = ctx.get('service_name_derived') or ctx.get('targetObject') or ''
+
+          def h(val):
+            return html_lib.escape(str(val))
+
+          def h_guarded(val):
+            return h(val).replace(md_guard_token, md_guard_html)
+
+          def comment_block(cmd):
+            cmd_norm = (cmd or '').strip()
+            lines = []
+            if cmd_norm.startswith('show service id "') and cmd_norm.endswith(' base'):
+              lines = [
+                ' ',
+                'What this shows',
+                ' ',
+                'Basic Epipe service state and SAP attachment points.',
+                'Healthy signs:',
+                '- Admin State: Up and Oper State: Up (service is ready).',
+                '- SAP row shows Adm=Up and Opr=Up (attachment circuit is healthy).',
+                ' '
+              ]
+            elif cmd_norm.startswith('show service id "') and cmd_norm.endswith(' bgp-evpn'):
+              lines = [
+                ' ',
+                'What this shows',
+                ' ',
+                'EVPN instance state for this service (control-plane view).',
+                ' '
+              ]
+            elif cmd_norm.startswith('show router bgp routes evpn auto-disc next-hop '):
+              lines = [
+                ' ',
+                'What this shows',
+                ' ',
+                'EVPN auto-discovery routes learned from the peer (BGP EVPN control plane).',
+                'Healthy signs:',
+                '- At least one route in the list (Routes: > 0).',
+                '- Valid/best flags like "*>".',
+                ' '
+              ]
+            if not lines:
+              return ''
+            return '\n'.join(['### ' + line for line in lines])
+
+          site_blocks = []
+          for idx, site in enumerate(results):
+            endpoint = site.get('endpoint') or ''
+            peer_ip = site.get('peer_ip') or ''
+            ne_id = site.get('ne_id') or ''
+            site_title = 'Endpoint {0} (peer {1}) - NE {2}'.format(endpoint, peer_ip, ne_id)
+            cmd_blocks = []
+            for c in (site.get('commands') or []):
+              cmd = c.get('cmd') or ''
+              output = c.get('output') or ''
+              comment = prefix_lines(comment_block(cmd), md_guard_token)
+              if comment:
+                if output:
+                  output = comment + '\n' + output
+                else:
+                  output = comment
+              cmd_blocks.append(
+                (
+                  '<details class="cmd">'
+                  '<summary><code>{0}</code></summary>'
+                  '<pre class="cli-output">{1}</pre>'
+                  '</details>'
+                ).format(
+                  h(cmd),
+                  h_guarded(output)
+                )
+              )
+            site_blocks.append(
+              (
+                '<details class="site" open>'
+                '<summary>{0}</summary>'
+                '<div class="cmds">{1}</div>'
+                '</details>'
+              ).format(h(site_title), ''.join(cmd_blocks))
+            )
+
+          html = """<!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8" />
+            <title>EVPN ELINE Troubleshooting</title>
+            <style>
+              body { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; font-size: 14px; line-height: 1.0; margin: 16px; }
+              .page { width: 100%; padding: 0 32px 0 32px; box-sizing: border-box; }
+              h2 { font-size: 14px; margin: 0 0 6px 0; }
+              .meta { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+              details { border: 1px solid; border-radius: 6px; margin-bottom: 10px; }
+              details.site > summary { padding: 10px 12px; font-weight: 400; }
+              details.cmd > summary { padding: 10px 12px; font-weight: 400; font-size: 12px; }
+              .cmds { padding: 10px 12px 10px 10px; }
+              pre { font-family: "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace; font-size: 12px; font-weight: 400; font-style: normal; font-variant-ligatures: none; font-synthesis: none; line-height: 1.0; border-radius: 6px; }
+              .cli-output { margin: 0 10px 10px 10px; padding: 10px 12px; box-sizing: border-box; border: 0px solid; white-space: pre; overflow-x: auto; }
+              .md-guard { display: none; }
+              pre * { font-family: inherit; font-size: inherit; font-weight: inherit; font-style: inherit; }
+              code { font-family: "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace; font-size: 12px; }
+            </style>
+          </head>
+          <body>
+            <div class="page">
+              <h2>EVPN ELINE Troubleshooting</h2>
+              <div class="meta">Service Name: __SERVICE_NAME__</div>
+              __SITE_BLOCKS__
+            </div>
+          </body>
+          </html>"""
+
+          html = html.replace('__SERVICE_NAME__', h(service_name))
+          html = html.replace('__SITE_BLOCKS__', ''.join(site_blocks) if site_blocks else '<div>No results available.</div>')
+
+          return {'html': html}
+      publish:
+        html: <% task().result.html %>

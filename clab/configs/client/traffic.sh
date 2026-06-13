@@ -8,7 +8,7 @@ set -eu
 
 action=
 dst=
-validclients="all client01 client02 client03 client04 client11 client12 client13 client21"
+validclients="all client01 client02 client03 client04 client11 client12 client13 client21 client22 client23"
 validsuffix=".grt .vprn.dci"
 hostname=$(/bin/hostname)
 

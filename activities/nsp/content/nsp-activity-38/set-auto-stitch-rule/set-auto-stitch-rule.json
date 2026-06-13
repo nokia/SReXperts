@@ -1,0 +1,496 @@
+{
+  "type": "object",
+  "properties": [
+    {
+      "name": "operation",
+      "title": "Prepopulate",
+      "columnSpan": 2,
+      "newRow": true,
+      "type": "leafref",
+      "displayKey": "operation",
+      "componentProps": {
+        "isObject": true
+      },
+      "suggest": {
+        "action": "get-auto-stitch-algo"
+      },
+      "properties": [
+        {
+          "name": "operation",
+          "type": "string",
+          "title": "Operation"
+        }
+      ],
+      "setFieldValues": [
+        {
+          "name": "eline-admin-state",
+          "value": "elineAdminState"
+        },
+        {
+          "name": "eline-service-name",
+          "value": "elineServiceName"
+        },
+        {
+          "name": "eline-vcid",
+          "value": "elineVcid"
+        },
+        {
+          "name": "eline-local",
+          "value": "elineLocal"
+        },
+        {
+          "name": "eline-evi",
+          "value": "elineEvi"
+        },
+        {
+          "name": "eline-route-target",
+          "value": "elineRouteTarget"
+        },
+        {
+          "name": "elan-admin-state",
+          "value": "elanAdminState"
+        },
+        {
+          "name": "elan-service-name",
+          "value": "elanServiceName"
+        },
+        {
+          "name": "elan-vcid",
+          "value": "elanVcid"
+        },
+        {
+          "name": "elan-evi",
+          "value": "elanEvi"
+        },
+        {
+          "name": "elan-route-target",
+          "value": "elanRouteTarget"
+        },
+        {
+          "name": "l3vpn-admin-state",
+          "value": "l3vpnAdminState"
+        },
+        {
+          "name": "l3vpn-service-name",
+          "value": "l3vpnServiceName"
+        },
+        {
+          "name": "l3vpn-route-target",
+          "value": "l3vpnRouteTarget"
+        },
+        {
+          "name": "ies-admin-state",
+          "value": "iesAdminState"
+        },
+        {
+          "name": "ies-service-name",
+          "value": "iesServiceName"
+        }
+      ]
+    },
+    {
+      "name": "eline-group",
+      "type": "propertyGroup",
+      "title": "ELINE",
+      "newRow": true
+    },
+    {
+      "name": "eline-admin-state",
+      "title": "Admin State",
+      "propertyGroup": "eline-group",
+      "newRow": true,
+      "columnSpan": 1,
+      "required": true,
+      "type": "choice",
+      "default": "unlocked",
+      "cases": [
+        {
+          "name": "locked",
+          "value": "locked",
+          "label": "locked"
+        },
+        {
+          "name": "unlocked",
+          "value": "unlocked",
+          "label": "unlocked"
+        }
+      ]
+    },
+    {
+      "name": "eline-algo-group",
+      "type": "propertyGroup",
+      "propertyGroup": "eline-group",
+      "title": "Algorithms",
+      "newRow": true
+    },
+    {
+      "name": "eline-service-name",
+      "title": "Service Name",
+      "propertyGroup": "eline-algo-group",
+      "newRow": true,
+      "columnSpan": 1,
+      "required": true,
+      "type": "choice",
+      "default": "unlocked",
+      "cases": [
+        {
+          "name": "locked",
+          "value": "locked",
+          "label": "locked"
+        },
+        {
+          "name": "unlocked",
+          "value": "unlocked",
+          "label": "unlocked"
+        }
+      ]
+    },
+    {
+      "name": "eline-vcid",
+      "title": "VC ID",
+      "propertyGroup": "eline-algo-group",
+      "newRow": false,
+      "columnSpan": 1,
+      "required": true,
+      "type": "choice",
+      "default": "locked",
+      "cases": [
+        {
+          "name": "locked",
+          "value": "locked",
+          "label": "locked"
+        },
+        {
+          "name": "unlocked",
+          "value": "unlocked",
+          "label": "unlocked"
+        }
+      ]
+    },
+    {
+      "name": "eline-local",
+      "title": "Local",
+      "propertyGroup": "eline-algo-group",
+      "newRow": true,
+      "columnSpan": 1,
+      "required": true,
+      "type": "choice",
+      "default": "locked",
+      "cases": [
+        {
+          "name": "locked",
+          "value": "locked",
+          "label": "locked"
+        },
+        {
+          "name": "unlocked",
+          "value": "unlocked",
+          "label": "unlocked"
+        }
+      ]
+    },
+    {
+      "name": "eline-evi",
+      "title": "EVI",
+      "propertyGroup": "eline-algo-group",
+      "newRow": false,
+      "columnSpan": 1,
+      "required": true,
+      "type": "choice",
+      "default": "locked",
+      "cases": [
+        {
+          "name": "locked",
+          "value": "locked",
+          "label": "locked"
+        },
+        {
+          "name": "unlocked",
+          "value": "unlocked",
+          "label": "unlocked"
+        }
+      ]
+    },
+    {
+      "name": "eline-route-target",
+      "title": "Route Target",
+      "propertyGroup": "eline-algo-group",
+      "newRow": true,
+      "columnSpan": 1,
+      "required": true,
+      "type": "choice",
+      "default": "locked",
+      "cases": [
+        {
+          "name": "locked",
+          "value": "locked",
+          "label": "locked"
+        },
+        {
+          "name": "unlocked",
+          "value": "unlocked",
+          "label": "unlocked"
+        }
+      ]
+    },
+    {
+      "name": "elan-group",
+      "type": "propertyGroup",
+      "title": "ELAN",
+      "newRow": true
+    },
+    {
+      "name": "elan-admin-state",
+      "title": "Admin State",
+      "propertyGroup": "elan-group",
+      "newRow": true,
+      "columnSpan": 1,
+      "required": true,
+      "type": "choice",
+      "default": "unlocked",
+      "cases": [
+        {
+          "name": "locked",
+          "value": "locked",
+          "label": "locked"
+        },
+        {
+          "name": "unlocked",
+          "value": "unlocked",
+          "label": "unlocked"
+        }
+      ]
+    },
+    {
+      "name": "elan-algo-group",
+      "type": "propertyGroup",
+      "propertyGroup": "elan-group",
+      "title": "Algorithms",
+      "newRow": true
+    },
+    {
+      "name": "elan-service-name",
+      "title": "Service Name",
+      "propertyGroup": "elan-algo-group",
+      "newRow": true,
+      "columnSpan": 1,
+      "required": true,
+      "type": "choice",
+      "default": "unlocked",
+      "cases": [
+        {
+          "name": "locked",
+          "value": "locked",
+          "label": "locked"
+        },
+        {
+          "name": "unlocked",
+          "value": "unlocked",
+          "label": "unlocked"
+        }
+      ]
+    },
+    {
+      "name": "elan-vcid",
+      "title": "VC ID",
+      "propertyGroup": "elan-algo-group",
+      "newRow": false,
+      "columnSpan": 1,
+      "required": true,
+      "type": "choice",
+      "default": "locked",
+      "cases": [
+        {
+          "name": "locked",
+          "value": "locked",
+          "label": "locked"
+        },
+        {
+          "name": "unlocked",
+          "value": "unlocked",
+          "label": "unlocked"
+        }
+      ]
+    },
+    {
+      "name": "elan-evi",
+      "title": "EVI",
+      "propertyGroup": "elan-algo-group",
+      "newRow": true,
+      "columnSpan": 1,
+      "required": true,
+      "type": "choice",
+      "default": "locked",
+      "cases": [
+        {
+          "name": "locked",
+          "value": "locked",
+          "label": "locked"
+        },
+        {
+          "name": "unlocked",
+          "value": "unlocked",
+          "label": "unlocked"
+        }
+      ]
+    },
+    {
+      "name": "elan-route-target",
+      "title": "Route Target",
+      "propertyGroup": "elan-algo-group",
+      "newRow": false,
+      "columnSpan": 1,
+      "required": true,
+      "type": "choice",
+      "default": "locked",
+      "cases": [
+        {
+          "name": "locked",
+          "value": "locked",
+          "label": "locked"
+        },
+        {
+          "name": "unlocked",
+          "value": "unlocked",
+          "label": "unlocked"
+        }
+      ]
+    },
+    {
+      "name": "l3vpn-group",
+      "type": "propertyGroup",
+      "title": "L3VPN",
+      "newRow": true
+    },
+    {
+      "name": "l3vpn-admin-state",
+      "title": "Admin State",
+      "propertyGroup": "l3vpn-group",
+      "newRow": true,
+      "columnSpan": 1,
+      "required": true,
+      "type": "choice",
+      "default": "unlocked",
+      "cases": [
+        {
+          "name": "locked",
+          "value": "locked",
+          "label": "locked"
+        },
+        {
+          "name": "unlocked",
+          "value": "unlocked",
+          "label": "unlocked"
+        }
+      ]
+    },
+    {
+      "name": "l3vpn-algo-group",
+      "type": "propertyGroup",
+      "propertyGroup": "l3vpn-group",
+      "title": "Algorithms",
+      "newRow": true
+    },
+    {
+      "name": "l3vpn-service-name",
+      "title": "Service Name",
+      "propertyGroup": "l3vpn-algo-group",
+      "newRow": true,
+      "columnSpan": 1,
+      "required": true,
+      "type": "choice",
+      "default": "unlocked",
+      "cases": [
+        {
+          "name": "locked",
+          "value": "locked",
+          "label": "locked"
+        },
+        {
+          "name": "unlocked",
+          "value": "unlocked",
+          "label": "unlocked"
+        }
+      ]
+    },
+    {
+      "name": "l3vpn-route-target",
+      "title": "Route Target",
+      "propertyGroup": "l3vpn-algo-group",
+      "newRow": false,
+      "columnSpan": 1,
+      "required": true,
+      "type": "choice",
+      "default": "locked",
+      "cases": [
+        {
+          "name": "locked",
+          "value": "locked",
+          "label": "locked"
+        },
+        {
+          "name": "unlocked",
+          "value": "unlocked",
+          "label": "unlocked"
+        }
+      ]
+    },
+    {
+      "name": "ies-group",
+      "type": "propertyGroup",
+      "title": "IES",
+      "newRow": true
+    },
+    {
+      "name": "ies-admin-state",
+      "title": "Admin State",
+      "propertyGroup": "ies-group",
+      "newRow": true,
+      "columnSpan": 1,
+      "required": true,
+      "type": "choice",
+      "default": "unlocked",
+      "cases": [
+        {
+          "name": "locked",
+          "value": "locked",
+          "label": "locked"
+        },
+        {
+          "name": "unlocked",
+          "value": "unlocked",
+          "label": "unlocked"
+        }
+      ]
+    },
+    {
+      "name": "ies-algo-group",
+      "type": "propertyGroup",
+      "propertyGroup": "ies-group",
+      "title": "Algorithms",
+      "newRow": true
+    },
+    {
+      "name": "ies-service-name",
+      "title": "Service Name",
+      "propertyGroup": "ies-algo-group",
+      "newRow": true,
+      "columnSpan": 1,
+      "required": true,
+      "type": "choice",
+      "default": "unlocked",
+      "cases": [
+        {
+          "name": "locked",
+          "value": "locked",
+          "label": "locked"
+        },
+        {
+          "name": "unlocked",
+          "value": "unlocked",
+          "label": "unlocked"
+        }
+      ]
+    }
+  ]
+}

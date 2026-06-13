@@ -9,25 +9,15 @@ tags:
 
 # VS Code Containerlab Extension
 
-|                               |                                               |
-| ----------------------------- | --------------------------------------------- |
-| **Activity name**             | VS Code Containerlab extension                 |
-| **Activity ID**               | 44                                            |                                                    
-| **Short Description**         | Learn how to use the Containerlab extension for VS Code to improve your lab workflow. |
-| **Difficulty**                | Beginner                                      |
-| **Tools used**                | [Visual Studio Code](https://code.visualstudio.com/)    |
-| **References**                | [VS Code containerlab Extension](https://marketplace.visualstudio.com/items?itemName=srl-labs.vscode-containerlab)<br/>[Containerlab VS Code documentation](https://containerlab.dev/manual/vsc-extension/)<br/>    |
-
-
-The **VS Code Containerlab Extension** enhances the Containerlab user experience. Taking advantage of powerful text editing functionality and the extensibility of [Visual Studio Code](https://code.visualstudio.com/), the extension provides an easy way to manage the entire lifecycle of your labs.
+The [**VS Code Containerlab Extension**](https://marketplace.visualstudio.com/items?itemName=srl-labs.vscode-containerlab) enhances the Containerlab user experience. Taking advantage of powerful text editing functionality and the extensibility of [Visual Studio Code](https://code.visualstudio.com/), the extension provides an easy way to manage the entire lifecycle of your labs. Comprehensive online [documentation](https://containerlab.dev/manual/vsc-extension/) is available should this page leave you craving more information.
 
 ## Objective
 
-This activity will walk you through the entire process of installation and usage of key features of the extension such as topology creation, lab management and packet capture.
+This page will walk you through the entire process of installation and usage of key features of the extension such as topology creation, lab management and packet capture.
 
 ## Key features
 
-First let's go over some key functionality of what makes the extension so good. We will learn more about each component later.
+First, let's go over some key functionality of what makes the extension so good. We will learn more about each component later.
 
 You can view a [video walkthrough](https://www.youtube.com/watch?v=NIw1PbfCyQ4) which shows some basic usage of the extension.
 
@@ -37,7 +27,7 @@ When opening the Containerlab extension, you will notice there are three distinc
 
 - [Running labs](#running-labs)
 - [Undeployed local labs](#undeployed-local-labs)
-- [Help & feedback](#help--feedback)
+- [Help & feedback](#help-feedback)
 
 
 /// note
@@ -52,7 +42,7 @@ The running labs panel will display all deployed containerlabs on the system.
 
 You can expand the running lab to view the individual containers which belong to the lab, and interact with them (ie. telnet, SSH, start/stop etc.)
 
-You can expand each container to view it's interfaces, set link impairments and perform packet captures.
+You can expand each container to view its interfaces, set link impairments and perform packet captures.
 
 #### Undeployed local labs
 
@@ -84,7 +74,7 @@ The extension further improves on this by integrating Wireshark directly into yo
 
 ### Link impairments
 
-In Containerlab you are able to set link impairments for your labs. The impairments are delay, jitter, corruption and packet loss. 
+In Containerlab you are able to set link impairments for your labs. The impairments are delay, jitter, corruption and packet loss.
 
 The extension simplifies the method of managing these impairments by providing a page to manage all impairments for a nodes' interface(s); or quickly setting an impairment on an interface via the interface element in the running labs tree.
 
@@ -95,7 +85,7 @@ The extension simplifies the method of managing these impairments by providing a
 It's now time to give the extension a test-drive.
 
 We will first do some basic setup to get the extension up and running.
-    
+
 ### Connect to Containerlab host
 
 If you are using Visual Studio code on your own machine, you must connect to the lab environment using the Remote SSH functionality in VS Code, as this is where Containerlab is running.
@@ -105,14 +95,14 @@ If you are using Visual Studio code on your own machine, you must connect to the
 
 !!!info
     If you are unable to install Visual Studio Code on your laptop. You can use the code-server instance for a browser-based Visual Studio Code instance.
-    
+
     Simply navigate to `<Group ID>.srexperts.net` in your browser to access the code-server. You can skip the next installation step if using this method.
 
 ### Installation of the extension
 
 If you are running VS Code locally on your laptop you can navigate to [containerlab.dev/vscode](https://containerlab.dev/vscode) in your browser, this will provide a prompt to open VS Code to the store extension page.
 
-You can also navigate to the extensions tab inside of VS Code and serach for 'Containerlab':
+You can also navigate to the extensions tab inside of VS Code and search for 'Containerlab':
 
 ![Containerlab extension installation](../images/tools-clab-vscode-plugin/install-ext-steps.png)
 
@@ -120,9 +110,9 @@ After installation, you should see a new 'Welcome to Containerlab' page appear.
 
 /// admonition | Containerlab installation
     type: tip
-The extension will also detect if Containerlab is installed on your system, if it's not found you will get a prompt in the bottom right to **Install Containerlab**. 
+The extension will also detect if Containerlab is installed on your system, if it's not found you will get a prompt in the bottom right to **Install Containerlab**.
 
-Hit **Install Containerlab**, tada! as easy as that Containerlab (and it's depedencies) are now installed and ready to go on your system.
+Hit **Install Containerlab**, ta-da! As easy as that Containerlab (and it's dependencies) are now installed and ready to go on your system.
 ///
 
 Let's also create a directory we will work out of.
@@ -131,7 +121,7 @@ Let's also create a directory we will work out of.
 mkdir ~/srx25
 ```
 
-Enter that folder in VS Code by navigating to the file menu (top left), and select 'Open Folder', and open the folder that was just created.
+Open that folder in VS Code by navigating to the file menu (top left), and selecting 'Open Folder'.
 
 ### Graphical topology creation
 
@@ -165,7 +155,7 @@ After getting some usage with the TopoViewer, stick to a basic two-nodes SRL top
 
 Now that we have created a topology, lets use the extension to manage the lab lifecycle.
 
-In the lab explorer, you should notice the lab we have created under the 'Undeployed local labs' tab. You can deploy the lab either of below methods:
+In the lab explorer, you should notice the lab we have created under the 'Undeployed local labs' tab. You can deploy the lab using either of the following methods:
 
 - Use the Deploy (:fontawesome-solid-play:) button on the floating panel in TopoViewer.
 
@@ -179,25 +169,25 @@ In the lab explorer, you should notice the lab we have created under the 'Undepl
 
     ![Deploy via YAML editor](../images/tools-clab-vscode-plugin/11-editor_quick_deploy.png)
 
-When the lab deployment starts, a small box will show on the *bottom right* to notify us that the lab is in the process of deploying. 
+When the lab deployment starts, a small box will show on the *bottom right* to notify us that the lab is in the process of deploying.
 
 We can click the **View Logs** button of this box to open the **Output** panel and watch all logging and backend command execution.
 
 Looking back at the tree view, you should be able to see the icon colour of the lab change to a &nbsp;:green_circle:&nbsp; when the lab is up and running.
 
-You should also notice that the TopoViewer has now changed into viewer mode, editing functionality is no longer available, and the mode inidicator below the TopoViewer text in the navbar says 'Viewer'.
+You should also notice that the TopoViewer has now changed into viewer mode, editing functionality is no longer available, and the mode indicator below the TopoViewer text in the navbar says 'Viewer'.
 
-With the lab running, you can expand the lab in the tree view and drill all the way down to per-node interface level. 
+With the lab running, you can expand the lab in the tree view and drill all the way down to per-node interface level.
 
 By hovering on the lab, containers or interfaces you can see a small tooltip which displays some key info, such as node name, image, kind, IP address or interface MAC addresses and MTU.
-  
+
 ![Screenshot of VS Code after lab deployment](../images/tools-clab-vscode-plugin/12-post_deploy_screenshot.png)
 
 We can also inspect the lab in the tabular format you may be used to from the Containerlab CLI. This is a great way to quickly take a look at all information of the lab.
 
 Simply right click on the lab name then click **Inspect Lab**.
 
-There is a search box to aide in filtering if your topology has many nodes.
+There is a search box to aid in filtering if your topology has many nodes.
 
 ![inspect-clab](../images/tools-clab-vscode-plugin/13-inspect_webivew.png)
 
@@ -221,13 +211,13 @@ If you right click on the lab node in the tree, you can SSH to all nodes in your
 
 #### Using TopoViewer
 
-Since we have deployed the lab, TopoViewer has detected our lab is running and accordingly switched to view mode. This means the radial menu when you right click on a node has changed. 
+Since we have deployed the lab, TopoViewer has detected our lab is running and accordingly switched to view mode. This means the radial menu when you right click on a node has changed.
 
 With this context-aware radial menu, you can:
 
 - SSH to the node.
 - Drop into the node's container shell.
-- View the nodes's container logs.
+- View the node's container logs.
 - View node properties.
 
 Try it out, and connect to the nodes in your topology.
@@ -238,14 +228,14 @@ Let's take a look at some of the enhanced graphing functionality the extension p
 
 #### TopoViewer enhanced visualization
 
-With TopoViewer, there are extra functions to aid in the visualization of your lab topology. 
+With TopoViewer, there are extra functions to aid in the visualization of your lab topology.
 
 In the floating panel there is the :fontawesome-solid-layer-group: Add Group, and :fontawesome-solid-font: Add Text buttons.
 
 These allow you to enhance the topology diagram to make your topology truly beautiful.
 
 /// tip
-In the top right of the TopoViwer navbar, there is a :fontawesome-solid-camera: icon. This will export the TopoViewer canvas to an SVG file, effectively exporting an image of your topology to make sharing easy.
+In the top right of the TopoViewer navbar, there is a :fontawesome-solid-camera: icon. This will export the TopoViewer canvas to an SVG file, effectively exporting an image of your topology to make sharing easy.
 ///
 
 #### draw.io
@@ -278,7 +268,7 @@ Let's first configure the interfaces on our two SRL nodes. We need to bring them
 
 1. Connect via SSH to both nodes. The default password is `NokiaSrl1!`
 
-2. Configure the `ethernet-1/1` interfaces of each of the nodes. 
+2. Configure the `ethernet-1/1` interfaces of each of the nodes.
 
     Don't worry if you're unfamiliar with the SR Linux CLI, refer to the configuration sample below.
 
@@ -289,7 +279,7 @@ Let's first configure the interfaces on our two SRL nodes. We need to bring them
     / interface ethernet-1/1 admin-state enable
     / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable
     / interface ethernet-1/1 subinterface 0 ipv4 address 10.1.2.1/30
-    / network-instance default type default 
+    / network-instance default type default
     / network-instance default admin-state enable
     / network-instance default interface ethernet-1/1.0
     A:srl1# commit now
@@ -303,7 +293,7 @@ Let's first configure the interfaces on our two SRL nodes. We need to bring them
     / interface ethernet-1/1 admin-state enable
     / interface ethernet-1/1 subinterface 0 ipv4 admin-state enable
     / interface ethernet-1/1 subinterface 0 ipv4 address 10.1.2.2/30
-    / network-instance default type default 
+    / network-instance default type default
     / network-instance default admin-state enable
     / network-instance default interface ethernet-1/1.0
     A:srl2# commit now
@@ -336,7 +326,7 @@ Go back to the tree view, expand the lab and container nodes so that you can see
 
 Upon clicking it, you should notice Wireshark has now opened in a tab in your VS Code window.
 
-If you inititate another ping, you should see the ICMP packets on the link.
+If you initiate another ping, you should see the ICMP packets on the link.
 
 /// admonition | How does this work?
     type: question

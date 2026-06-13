@@ -1,0 +1,12 @@
+version: "2.0"
+
+get-auto-stitch-algo:
+  description: Get Auto Stitch Algorithm
+  base: nsp.https
+  base-input:
+    url: https://restconf-gateway/restconf/data/nsp-service-stitch:nsp-service-auto-stitch-configs/nsp-service-auto-stitch-config?include-meta=false
+    resultFilter: $.content.get("nsp-service-stitch:nsp-service-auto-stitch-config").groupBy($.get("service-type")).toDict($.first(), $.last().select({adminState => $.get("admin-state"), algo => $.get("algorithm-config").groupBy($.get("algorithm")).toDict($.first(), $.last().first().get("admin-state"))}).first())
+  input:
+    - formValues: ""
+    - token_auth
+  output: <% [{operation => "Current state", elineAdminState => $.content.eline.adminState, elineServiceName => $.content.eline.algo.get("service-name"), elineVcid => $.content.eline.algo.vcid, elineLocal => $.content.eline.algo.local, elineEvi => $.content.eline.algo.evi, elineRouteTarget => $.content.eline.algo.get("route-target"), elanAdminState => $.content.elan.adminState, elanServiceName => $.content.elan.algo.get("service-name"), elanVcid => $.content.elan.algo.vcid, elanEvi => $.content.elan.algo.evi, elanRouteTarget => $.content.elan.algo.get("route-target"), l3vpnAdminState => $.content.l3vpn.adminState, l3vpnServiceName => $.content.l3vpn.algo.get("service-name"), l3vpnRouteTarget => $.content.l3vpn.algo.get("route-target"), iesAdminState => $.content.ies.adminState, iesServiceName => $.content.ies.algo.get("service-name")}, {operation => "Preset to service name", elineAdminState => "unlocked", elineServiceName => "unlocked", elineVcid => "locked", elineLocal => "locked", elineEvi => "locked", elineRouteTarget => "locked", elanAdminState => "unlocked", elanServiceName => "unlocked", elanVcid => "locked", elanEvi => "locked", elanRouteTarget => "locked", l3vpnAdminState => "unlocked", l3vpnServiceName => "unlocked", l3vpnRouteTarget => "locked", iesAdminState => "unlocked", iesServiceName => "unlocked"}, {operation => "Reset all to locked", elineAdminState => "locked", elineServiceName => "locked", elineVcid => "locked", elineLocal => "locked", elineEvi => "locked", elineRouteTarget => "locked", elanAdminState => "locked", elanServiceName => "locked", elanVcid => "locked", elanEvi => "locked", elanRouteTarget => "locked", l3vpnAdminState => "locked", l3vpnServiceName => "locked", l3vpnRouteTarget => "locked", iesAdminState => "locked", iesServiceName => "locked"}] %>

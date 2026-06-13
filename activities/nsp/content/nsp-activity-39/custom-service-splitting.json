@@ -1,0 +1,46 @@
+{
+    "type": "object",
+    "properties": [
+        {
+            "name": "group-id",
+            "title": "Group ID",
+            "description": "Enter your assigned group value, for example group3.",
+            "columnSpan": 2,
+            "newRow": true,
+            "readOnly": false,
+            "required": true,
+            "type": "string",
+            "default": ""
+        },
+        {
+            "name": "splitting-algorithm",
+            "title": "Splitting Algorithm",
+            "description": "Choose the built-in recommendation algorithm to use.",
+            "columnSpan": 2,
+            "newRow": false,
+            "readOnly": false,
+            "required": true,
+            "type": "string",
+            "default": "split-by-customer-id",
+            "enum": [
+                "split-by-customer-id",
+                "split-by-site-name"
+            ],
+            "enumNames": [
+                "split-by-customer-id",
+                "split-by-site-name"
+            ]
+        },
+        {
+            "name": "approved",
+            "title": "Approve Changes",
+            "description": "Confirm that the suggested changes are approved for execution.",
+            "columnSpan": 2,
+            "newRow": false,
+            "readOnly": false,
+            "required": false,
+            "type": "boolean",
+            "default": false
+        }
+    ]
+}

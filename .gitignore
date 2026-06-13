@@ -168,6 +168,7 @@ cython_debug/
 
 # ignore syslog messages changes
 **/config/syslog/log/messages
+clab/config/syslog/log/messages
 
 # ignore yml backup files
 **/*.y*ml.bak
@@ -201,3 +202,9 @@ srlinux-getting-started
 venv/
 **/venv
 **/.venv
+*.bkp
+
+eda/.ansible
+
+# ignore private data
+**/private

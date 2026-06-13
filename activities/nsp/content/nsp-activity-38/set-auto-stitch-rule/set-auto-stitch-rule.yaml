@@ -1,0 +1,139 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+version: '2.0'
+
+set-auto-stitch-rule:
+  workflow_meta:
+    title: Set Auto Stitch Rule
+    author: Siva Sivakumar
+    email: siva.sivakumar@nokia.com
+    version: "1.0.0"
+    deprecated: false
+
+  #tags:
+  #  - sf-network-operation
+  
+  input:
+    - operation
+    - eline-admin-state: unlocked
+    - eline-service-name: unlocked
+    - eline-vcid: locked
+    - eline-local: locked
+    - eline-evi: locked
+    - eline-route-target: locked
+    - elan-admin-state: unlocked
+    - elan-service-name: unlocked
+    - elan-vcid: locked
+    - elan-evi: locked
+    - elan-route-target: locked
+    - l3vpn-admin-state: unlocked
+    - l3vpn-service-name: unlocked
+    - l3vpn-route-target: locked
+    - ies-admin-state: unlocked
+    - ies-service-name: unlocked
+
+  output:
+    result: <% $.result %>
+
+  output-on-error:
+    status: failed
+    message: Check flow for more details
+
+  vars:
+    valid-service-types: 
+      - eline
+      - elan
+      - l3vpn
+      - ies
+
+  tasks:
+    elineConfig:
+      action: std.echo
+      input:
+        output:
+          service-type: eline
+          admin-state: <% $.get("eline-admin-state") %>
+          algorithm-config:
+            - algorithm: service-name
+              admin-state: <% $.get("eline-service-name") %>
+            - algorithm: vcid
+              admin-state: <% $.get("eline-vcid") %>
+            - algorithm: local
+              admin-state: <% $.get("eline-local") %>
+            - algorithm: evi
+              admin-state: <% $.get("eline-evi") %>
+            - algorithm: route-target
+              admin-state: <% $.get("eline-route-target") %>
+      publish:
+        eline: <% task().result %>
+      on-success:
+        - updateStitchRule
+
+    elanConfig:
+      action: std.echo
+      input:
+        output:
+          service-type: elan
+          admin-state: <% $.get("elan-admin-state") %>
+          algorithm-config:
+            - algorithm: service-name
+              admin-state: <% $.get("elan-service-name") %>
+            - algorithm: vcid
+              admin-state: <% $.get("elan-vcid") %>
+            - algorithm: evi
+              admin-state: <% $.get("elan-evi") %>
+            - algorithm: route-target
+              admin-state: <% $.get("elan-route-target") %>
+      publish:
+        elan: <% task().result %>
+      on-success:
+        - updateStitchRule
+
+    l3vpnConfig:
+      action: std.echo
+      input:
+        output:
+          service-type: l3vpn
+          admin-state: <% $.get("l3vpn-admin-state") %>
+          algorithm-config:
+            - algorithm: service-name
+              admin-state: <% $.get("l3vpn-service-name") %>
+            - algorithm: route-target
+              admin-state: <% $.get("l3vpn-route-target") %>
+      publish:
+        l3vpn: <% task().result %>
+      on-success:
+        - updateStitchRule
+
+    iesConfig:
+      action: std.echo
+      input:
+        output:
+          service-type: ies
+          admin-state: <% $.get("ies-admin-state") %>
+          algorithm-config:
+            - algorithm: service-name
+              admin-state: <% $.get("ies-service-name") %>
+      publish:
+        ies: <% task().result %>
+      on-success:
+        - updateStitchRule
+
+    updateStitchRule:
+      join: all
+      with-items: entry in <% $.get("valid-service-types") %>
+      action: nsp.https
+      input: 
+        method: PUT
+        url: https://restconf-gateway/restconf/data/nsp-service-stitch:nsp-service-auto-stitch-configs/nsp-service-auto-stitch-config=<% $.entry %>
+        body:
+          nsp-service-stitch:nsp-service-auto-stitch-config: [ <% $.get($.entry) %> ]
+      on-success:
+        - getAutoStitchSetting
+    
+    getAutoStitchSetting:
+      workflow: get-auto-stitch-setting
+      publish:
+        result: <% task().result.result %>

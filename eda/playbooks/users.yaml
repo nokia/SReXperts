@@ -1,0 +1,100 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+- name: Create Users
+  hosts: all
+  gather_facts: false
+  vars:
+    eda_extra_admin_user_count: 2
+    eda_extra_admin_user_suffix_start: 2
+    eda_extra_admin_user_prefix: admin
+
+  tasks:
+    - name: Build extra admin users list from count
+      ansible.builtin.set_fact:
+        # programming in jinja is god awful
+        eda_extra_admin_users: >-
+          {% set ns = namespace(users=[]) -%} {% set _start =
+          eda_extra_admin_user_suffix_start | int -%} {% set _end = _start +
+          (eda_extra_admin_user_count | int) -%} {% for n in range(_start, _end)
+          -%} {% set _ = ns.users.append({'username':
+          eda_extra_admin_user_prefix ~ (n | string)}) -%} {% endfor -%} {{
+          ns.users }}
+
+    - name: Get client secret
+      nokia.eda_utils_v1.get_client_secret:
+        baseUrl: "{{ eda_api_url }}"
+        tlsSkipVerify: "{{ tls_skip_verify }}"
+        keycloakAdminUsername: admin
+        keycloakAdminPassword: "{{ eda_password }}"
+      register: client_secret
+
+    - name: Fetch EDA access token
+      nokia.eda_utils_v1.get_token:
+        baseUrl: "{{ eda_api_url }}"
+        tlsSkipVerify: "{{ tls_skip_verify }}"
+        clientSecret: "{{ client_secret.result[0].secret }}"
+        username: "{{ eda_username }}"
+        password: "{{ eda_password }}"
+      register: token
+
+    - name: Get system-admin group
+      nokia.eda_core_v1.admin.groups.groups:
+        baseUrl: "{{ eda_api_url }}"
+        tlsSkipVerify: "{{ tls_skip_verify }}"
+        authToken: "Bearer {{ token.result.access_token }}"
+        name: system-administrator
+        state: query
+      register: system_admin_group
+
+    - name: print system-administrator group id
+      ansible.builtin.debug:
+        var: system_admin_group.result[0].uuid
+
+    - name: Create users
+      nokia.eda_core_v1.admin.users.users:
+        baseUrl: "{{ eda_api_url }}"
+        tlsSkipVerify: "{{ tls_skip_verify }}"
+        authToken: "Bearer {{ token.result.access_token }}"
+        username: "{{ item.username }}"
+        firstName: "{{ item.firstName | default(item.username) }}"
+        lastName: "{{ item.lastName | default(item.username) }}"
+        email: "{{ item.email | default(item.username + '@admin.com') }}"
+        enabled: true
+        state: present
+      loop: "{{ eda_extra_admin_users }}"
+      loop_control:
+        label: "{{ item.username }}"
+      register: user_create
+
+    - name: print user create responses
+      ansible.builtin.debug:
+        var: user_create
+
+    - name: Reset password for onboarded users
+      nokia.eda_core_v1.admin.users.resetpassword:
+        baseUrl: "{{ eda_api_url }}"
+        tlsSkipVerify: "{{ tls_skip_verify }}"
+        authToken: "Bearer {{ token.result.access_token }}"
+        uuid: "{{ item.result.uuid }}"
+        temporary: false
+        value: "{{ eda_password }}"
+      loop: "{{ user_create.results }}"
+      loop_control:
+        label: "{{ item.item.username }}"
+      when: item.result.uuid is defined
+
+    - name: Add onboarded users to system-administrator group
+      nokia.eda_core_v1.admin.users.groups:
+        baseUrl: "{{ eda_api_url }}"
+        tlsSkipVerify: "{{ tls_skip_verify }}"
+        authToken: "Bearer {{ token.result.access_token }}"
+        uuid: "{{ item.result.uuid }}"
+        request_body:
+          - "{{ system_admin_group.result[0].uuid }}"
+        state: present
+      loop: "{{ user_create.results }}"
+      loop_control:
+        label: "{{ item.item.username }}"
+      when: item.result.uuid is defined

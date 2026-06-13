@@ -1,0 +1,17 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+apiVersion: siteinfo.eda.nokia.com/v1
+kind: DNSClient
+metadata:
+  name: srexperts-dns
+  namespace: eda
+spec:
+  routerKind: DefaultRouter
+  routerSelectors:
+    - role = hackathon-infra
+  servers:
+    - 10.64.13.150
+  searchList:
+    - grt

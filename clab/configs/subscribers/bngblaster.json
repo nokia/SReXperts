@@ -1,0 +1,117 @@
+{
+    "interfaces": {
+        "qdisc-bypass": false,
+        "mac-modifier": 0,
+        "access": [
+            {
+                "__comment__": "static user",
+                "interface": "eth1",
+                "type": "ipoe",
+                "session-group-id": 1,
+                "icmp-client-group-id": 1,
+                "vlan-mode": "1:1",
+                "outer-vlan-min": 10,
+                "outer-vlan-max": 10,
+                "agent-circuit-id": "agg1-e1/1:{outer-vlan}",
+                "session-limit": 1
+
+            },
+            {
+                "__comment__": "static user",
+                "interface": "eth2",
+                "type": "pppoe",
+                "session-group-id": 2,
+                "icmp-client-group-id": 1,
+                "vlan-mode": "1:1",
+                "outer-vlan-min": 11,
+                "outer-vlan-max": 11,
+                "agent-circuit-id": "agg1-e1/2:{outer-vlan}",
+                "session-limit": 1
+            },
+            {
+                "__comment__": "static user",
+                "interface": "eth3",
+                "type": "ipoe",
+                "session-group-id": 3,
+                "icmp-client-group-id": 1,
+                "vlan-mode": "1:1",
+                "outer-vlan-min": 12,
+                "outer-vlan-max": 12,
+                "agent-circuit-id": "agg1-e1/3:{outer-vlan}",
+                "session-limit": 1
+            },
+            {
+                "__comment__": "2 dynamic ipoe users",
+                "interface": "eth1",
+                "type": "ipoe",
+                "session-group-id": 1,
+                "icmp-client-group-id": 1,
+                "vlan-mode": "1:1",
+                "outer-vlan-min": 100,
+                "outer-vlan-max": 101,
+                "agent-circuit-id": "agg1-e1/1:{outer-vlan}"
+            },
+            {
+                "__comment__": "2 dynamic pppoe users (vlan101 overlap with dynamic ipoe, so this user gets both pppoe+ipoe)",
+                "interface": "eth2",
+                "type": "pppoe",
+                "session-group-id": 2,
+                "icmp-client-group-id": 1,
+                "vlan-mode": "1:1",
+                "outer-vlan-min": 101,
+                "outer-vlan-max": 102,
+                "agent-circuit-id": "agg1-e1/2:{outer-vlan}"
+            }
+        ]
+    },
+    "access-line": {
+        "agent-remote-id": "session{session-global}"
+    },
+    "dhcp": {
+        "enable": true,
+        "release-retry": 1,
+        "access-line": true
+    },
+    "dhcpv6": {
+        "enable": true,
+        "ia-pd": true,
+        "ia-na": true,
+        "access-line": true,
+        "ldra": true
+    },
+    "sessions": {
+        "count": 7,
+        "reconnect": true,
+        "start-rate": 3,
+        "stop-rate": 3
+    },
+    "ipoe": {
+        "ipv6": true,
+        "ipv4": true,
+        "arp-interval": 60
+    },
+    "pppoe": {
+        "session-time": 0,
+        "reconnect": true
+    },
+    "ppp": {
+        "authentication": {
+            "username": "user-vlan{outer-vlan}",
+            "password": "pe4-customer"
+        },
+        "lcp": {},
+        "ip6cp": {
+            "enable": true
+        },
+        "ipcp": {
+            "enable": true
+        }
+    },
+    "icmp-client": [
+        {
+            "icmp-client-group-id": 1,
+            "destination-address": "10.46.1.13",
+            "interval": 5
+        }
+    ]
+}

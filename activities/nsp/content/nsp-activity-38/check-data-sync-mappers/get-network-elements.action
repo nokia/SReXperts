@@ -1,0 +1,19 @@
+version: "2.0"
+
+get-network-elements:
+  description: List network elements for check-data-sync-mappers NE pick list (RESTCONF inventory)
+  base: nsp.https
+  base-input:
+    method: POST
+    url: https://<% locate_nsp() %>/restconf/operations/nsp-inventory:find
+    body:
+      input:
+        xpath-filter: /nsp-equipment:network/network-element
+        fields: ne-name;ne-id;ip-address;type
+        sort-by: ["ne-id"]
+    resultFilter: $.content.get("nsp-inventory:output")
+  input:
+    - formValues: ""
+    - token_auth
+  # Must match leafref "properties" names in check-data-sync-mappers.json (neId / neName).
+  output: <% $.content.data.select({neId => $.get("ne-id"), neName => $.get("ne-name")}) %>

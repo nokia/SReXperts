@@ -1,0 +1,78 @@
+# Copyright 2026 Nokia
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+version: '2.0'
+
+get-auto-stitch-setting:
+  workflow_meta:
+    title: Get Auto Stitch Setting
+    author: Siva Sivakumar
+    email: siva.sivakumar@nokia.com
+    version: "1.0.0"
+    deprecated: false
+
+  tags:
+    - sf-network-operation
+
+  output:
+    result: <% $.result %>
+
+  output-on-error:
+    result: <% $.runtimeError %>
+    status: failed
+
+  vars:
+    templateName: auto-stitch-setting
+
+  tasks:
+    start:
+      action: std.noop
+      on-complete:
+        - verify_report_template
+
+    verify_report_template:
+      action: nsp.jinja_template
+      input:
+        name: <% $.templateName %>
+        data:
+          config: []
+      on-success:
+        - getAutoStitchConfig
+      on-error:
+        - report_template_unavailable
+
+    report_template_unavailable:
+      action: nsp.python
+      input:
+        context:
+          templateName: <% $.templateName %>
+        script: |
+          def esc(s):
+            if s is None:
+              return ""
+            return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+          template_name = esc(context.get("templateName") or "")
+          return """<!DOCTYPE html><html><body><p>Report template '%s' is not available. Publish the Jinja template and try again.</p></body></html>""" % template_name
+      publish:
+        result: <% task().result %>
+
+    getAutoStitchConfig:
+      action: nsp.https
+      input:
+        url: https://restconf-gateway/restconf/data/nsp-service-stitch:nsp-service-auto-stitch-configs/nsp-service-auto-stitch-config?include-meta=false
+        resultFilter: $.content.get("nsp-service-stitch:nsp-service-auto-stitch-config")
+      publish:
+        setting: <% {config => task().result.content} %>
+      on-success:
+        - prettyPrint
+
+    prettyPrint:
+      action: nsp.jinja_template
+      input:
+        name: <% $.templateName %>
+        data: <% $.setting %>
+      publish:
+        result: <% task().result.template %>
+      on-error:
+        - report_template_unavailable

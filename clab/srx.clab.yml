@@ -17,8 +17,7 @@ topology:
       password: ${EVENT_PASSWORD}
   kinds:
     nokia_srsim:
-      #image: vr-sros:25.3.R1
-      image: registry.srlinux.dev/pub/nokia_srsim:26.3.R1
+      image: nokia_srsim:26.3.R1
       license: /opt/srexperts/sros.license
       startup-config: configs/sros/__clabNodeName__.partial.cfg
       entrypoint: "/hackathon-entrypoint.sh"

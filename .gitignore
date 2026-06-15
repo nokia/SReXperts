@@ -177,7 +177,6 @@ clab/config/syslog/log/messages
 **/sros/*.partial.cfg
 **/srl/spine1*.cfg
 **/srl/leaf1*.cfg
-**/srl/leaf2*.cfg
 **/srl/agg1.cfg
 **/srl/ixp1.cfg
 **/srl/peering2.cfg

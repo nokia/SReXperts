@@ -113,6 +113,7 @@ Execute the following command to apply the missing configurations.
 Note that the file is under the hackathon repository folder `SReXperts`.  Ensure you execute the correct path or adjust the command if needed.
 ```bash
 cd ~/SReXperts/activities/activity-19/ && \
+sed -e "s@{{ getenv \"INSTANCE_ID\" }}@$INSTANCE_ID@g" -i pe2_anysec_set.json \
 gnmic -a clab-srexperts-pe2 -u admin -p $EVENT_PASSWORD --insecure set \
     --request-file pe2_anysec_set.json
 # For debug you may use the flags `--print-request` or `--debug`.

@@ -1,5 +1,15 @@
 # How to run this lab on your own environment?
 
+## Linux bridges
+
+Some topology links require the following linux bridges. Make sure to have them created them before running `clab`.
+```bash
+sudo ip link add pe1-p1 type bridge group_fwd_mask 0xFFF8
+sudo ip link add pe2-p1 type bridge group_fwd_mask 0xFFF8
+sudo ip link add pe1-p2 type bridge group_fwd_mask 0xFFF8
+sudo ip link add pe2-p2 type bridge group_fwd_mask 0xFFF8
+```
+
 ## Environment variables
 
 This is a templated lab and relies on a number of environment variables to be exposed in your shell.
@@ -18,9 +28,12 @@ export NOKIA_UID=$(id -u)
 export NOKIA_GID=$(getent group docker | cut -d: -f3)
 ```
 
-once these variables are exposed, one can run this lab by executing:
-(assuming this repo has been checked out in $HOME/SReXperts)
+## Run
+
+Once linux bridges and environment variables are created, you can run this lab by executing:   
 
 ``` bash
-CLAB_LABDIR_BASE=$HOME sudo -E clab deploy -t $HOME/SReXperts/clab/srx.clab.yml --reconfigure
+sudo -E clab deploy -t $HOME/SReXperts/clab/srx.clab.yml --reconfigure
 ```
+(assuming this repo has been checked out in $HOME/SReXperts) 
+

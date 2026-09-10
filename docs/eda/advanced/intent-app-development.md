@@ -1326,13 +1326,18 @@ class SrlBaseStateHandler:
             log_msg(f"No target nodes found for EventHandlerState CR: {cr_obj.metadata.name}")
             return
 
-        instance_name = cr_obj.metadata.name
+        # Config intent names the derived state CR "event-handler-state-<parent>".
+        # The YANG instance and the parent EventHandler CR are both <parent>
+        # (e.g. "oper-group"), so strip the prefix when present.
+        _prefix = "event-handler-state-"
+        name = cr_obj.metadata.name
+        instance_name = name[len(_prefix) :] if name.startswith(_prefix) else name
 
         # Build the per-node detail list. One entry per target node.
         node_status_list: list[eventhandler.EventHandlerNodeStatus] = []
         for node in nodes:
             entry = self._collect_node_status(node, instance_name)
-            log_msg(f"[state] {node} -> {entry}")
+            log_msg(f"[state] {node} -> {entry.to_input()}")
             node_status_list.append(entry)
 
         # Compute aggregates across all nodes. These become the top-level
@@ -1355,7 +1360,7 @@ class SrlBaseStateHandler:
         # Keys must match the JSON tags from EventHandlerStatus.
         event_handler = eventhandler.EventHandler(
             metadata=eventhandler.Metadata(
-                name=cr_obj.metadata.name,
+                name=instance_name,
                 namespace=cr_obj.metadata.namespace,
             ),
             status=eventhandler.EventHandlerStatus(
@@ -1438,7 +1443,6 @@ class SrlBaseStateHandler:
                     pass
 
         return entry
-
 ```
 
 ##### Debugging the State engine

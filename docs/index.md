@@ -415,7 +415,9 @@ The dns hostname is composed out of the client name and a domain suffix.
 | clab-srexperts-client11 | client11 | .grt | .vprn.dci |
 | clab-srexperts-client12 | client12 | .grt | .vprn.dci |
 | clab-srexperts-client13 | client13 | .grt | .vprn.dci |
-| clab-srexperts-client14 | client21 | .grt | .vprn.dci |
+| clab-srexperts-client21 | client21 | .grt | .vprn.dci |
+| clab-srexperts-client22 | client22 | .grt | .vprn.dci |
+| clab-srexperts-client23 | client23 | .grt | .vprn.dci |
 
 For example, if you'd like to start a unidirectional traffic flow from `client11` to `client21` in the global routing table:
 

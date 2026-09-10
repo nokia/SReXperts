@@ -88,7 +88,8 @@ The application you developed should now be available to install in the EDA App 
 
 Back to our task at hand: we want to install, deploy and use the [SR Linux Front Panel application][srl-frontpanel] on all of our data center switches. This application has already been written and its container image and the manifest are both published to the respective container registry and Git repository. All you need to do is to add the custom catalog and install the application.
 
-> The activity will be performed inside of EDA, you will not need any external tools!
+> The activity will be performed inside of EDA, you will not need any external tools!  
+> You may use your hackathon instance bash for `kubectl` validations and the leaves and spines CLI to test the SR Linux Front Panel app.
 
 ### Task 1.1: Adding the Custom Catalog
 
@@ -154,13 +155,19 @@ You can use what you learned from the dry run transaction earlier.
 We can use the create workflow EDA UI to list the available workflows - the "Install SR Linux Frontpanel Plugin" workflow will be available.
 
 You can also check whether the Workflow Definition was actually loaded by using `kubectl`. Simply list all WorkflowDefinition resources in the EDA system namespace:
-
+/// tab | Command
+```
+kubectl get WorkflowDefinitions -n eda-system
+```
+///
+/// tab | Output
 ```
 $ kubectl get WorkflowDefinitions -n eda-system
 ...
 installsrlfrontpanel                 ghcr.io/eda-labs/srl-frontpanel@sha256:0f55857866b121505c258254fd86125d0f1bd645ee16d9f5c08a7c9cbefb893d   7m17s
 ...
 ```
+///
 
 Note that `WorkflowDefinitions` is case-insensitive - it was only formatted this way for easier readability.
 ///
@@ -169,7 +176,7 @@ With this, we have successfully installed this custom workflow onto our EDA clus
 
 ### Task 2.1: Rolling out the app using the Front Panel Plugin Installation workflow
 
-In System -> Workflows, create a new workflow for deploying the SR Linux Front Panel app! There are no knobs to tweak or any further configuration needed.
+In Main -> System -> Workflows, create a new workflow for deploying the SR Linux Front Panel app! There are no knobs to tweak or any further configuration needed.
 
 Within seconds, the workflow will finish and you will see the Workflow Results. Seasoned EDA users will immediately spot a difference when running a Workflow compared to say, making a change to an Intent - *why do you think there was no option to perform a Dry Run first?*
 
@@ -184,7 +191,12 @@ However, if Workflows perform operations inside EDA, they **will** generate tran
 
 In the Workflow Results, you will see that the workflow went through three phases - initialization, retrieving nodes, and pushing the files. You will also see the status of these listed both in the YAML below, and in the visual representation of the Workflow stage flow graph.  
 *There is a way to find out what nodes the files were pushed to, and what files were pushed to what paths, but it's not here - can you find it?*  
-Hint: The "title" bar holds more than what meets the eye.
+
+/// details | Hint
+    type: info
+
+The "title" bar holds more than what meets the eye.
+///
 
 /// details | Workflow Run Details
 
@@ -207,14 +219,23 @@ ssh admin@clab-srexperts-leaf11
 
 ///
 
-The Front Panel application's CLI plugin has created a new command for you to use: `show platform front-panel`.
+The Front Panel application's CLI plugin has created a new command for you to use:  
 
-You might see an empty output (other than a URL) - this is due to the fact the application is using an advanced terminal feature called inline images, you did not install the app wrong!  
+/// tab | New CLI front-panel command
+```
+show platform front-panel
+```
+///
+
+!!! warning
+    You might see an empty output (other than a URL) - this is due to the fact the application is using an advanced terminal feature called inline images, you did not install the app wrong!  
 
 - If you are using the VS Code editor as your terminal, you can enable this feature by going into Settings (gear icon on bottom left of the IDE) and searching for "terminal image". You will need to toggle this checkbox to enable the feature, and to start a new terminal window (Terminal -> New Terminal).
 - If you are using your own terminal application, it likely does not support inline images. If that is the case, please consider using the built-in terminal in the VS Code editor for this task.
 
 Note that we include the URL of the front panel of your switch - so you don't have to pixel peep in your terminal, but rather you can view a high-resolution picture of the switch in your browser.
+
+-{{image(url='./../../../../../images/eda/front-panel/front-panel.jpg', title='Front panel CLI output') }}-
 
 Now, if you see the front panel of your switch in all its glory on your CLI, **you have successfully rolled out the custom app with EDA and made use of it!**  
 
@@ -244,7 +265,8 @@ $ ssh linuxadmin@d2l
 
 ///
 
-Running the app is just a matter of executing it like any other Linux binary: `./frontpanel`. *What do you see as an output? Can you figure out what sort of parameters this app has?*
+Running the app is just a matter of executing it like any other Linux binary: `./frontpanel`.  
+*What do you see as an output? Can you figure out what sort of parameters this app has?*
 
 /// details | Front panel app parameters
 
@@ -274,25 +296,41 @@ Usage of ./frontpanel:
 
 ///
 
-The `image` parameter, as mentioned in the bare run, requires an input string, the model name of the switch. Try to view the front panel of one of the SXR models, with port labels showing!  
-Hint: The complete model name is required. Don't forget to put it between quotes.
+The `image` parameter, as mentioned in the bare run, requires an input string, the model name of the switch. Try to view the front panel of another models such as the `7220 IXR-D1` or `7220 IXR-D5` models, with port labels showing!  
 
-/// details | SXR Front Panel
+/// details | Info
+    type: info
 
+The complete model name is required. Don't forget to put it between quotes.  
+Note that not all models are supported. Refer to the [srl-frontpanel repo](https://github.com/srl-labs/frontpanel-cli-plugin) for the list of supported models.
+///
+
+/// details | IXR-D1 and IXR-D5 Front Panel
+
+Enter the following commands to view the `7220 IXR-D1` and `7220 IXR-D5` models.
+/// tab | Bash front-panel `7220 IXR-D1` command
 ```
-admin@clab-srexperts-leaf11:~$ ./frontpanel -image "7730 SXR-1x-44S" -port-labels
-Error: --image flag is required
-
+./frontpanel -image "7220 IXR-D1" -port-labels
 ```
+///
+/// tab | Bash front-panel `7220 IXR-D5` command
+```
+./frontpanel -image "7220 IXR-D5" -port-labels
+```
+///
 
-The app is missing the --image flag, which is mandatory.
+Just like the CLI plugin, the rendered front panel is an inline image (the URL is not shown here), so you will only see it in a terminal that supports inline images.  
 
-Just like the CLI plugin, the rendered front panel is an inline image (accompanied by a URL), so you will only see it in a terminal that supports inline images.
+
+-{{image(url='./../../../../../images/eda/front-panel/front-panel_D1_D5.jpg', title='Front panel for D1 and D5 models') }}-
 
 ///
 
 For the final challenge of this task: use the front panel app to display the front panel of a switch with ports ethernet-1/2 up and ethernet-1/4 down!  
-Hint: The help output will be very helpful here.
+
+!!! tip
+    The help output will be very helpful here.
+
 
 /// details | Customized Front Panel output
 
@@ -300,9 +338,13 @@ We can figure out how the port states are passed to the binary by looking at the
 
 To avoid issues with quotes, we will use single quotes to enclose the JSON string, and double quotes inside the JSON.
 
+/// tab | Customized Front Panel output command
 ```
-admin@clab-srexperts-leaf11:~$ ./frontpanel -image  "7220 IXR-D2L" -port-labels -port-states-json '{"ethernet-1/2":"up", "ethernet-1/4":"down"}'
+./frontpanel -image  "7220 IXR-D2L" -port-labels -port-states-json '{"ethernet-1/2":"up", "ethernet-1/4":"down"}'
 ```
+///
+
+-{{image(url='./../../../../../images/eda/front-panel/front-panel_port_up_down.jpg', title='Front panel showing ports up and down') }}-
 
 ///
 

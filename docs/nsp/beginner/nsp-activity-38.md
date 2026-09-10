@@ -104,7 +104,7 @@ From **NE Session**, connect to **PE1** and **PE2** and run `show service servic
 
 ### Verify service discovery in NSP
 
-1. Open **Service Fulfillment** and select the **Services** view from the dropdown (if it is not already selected).
+1. Open **Service Management** and select the **Services** view from the dropdown (if it is not already selected).
 2. Search by **Service Name** (for example `activity-38-g1-vprn`, `activity-38-g1-vpls`) or **Service-ID** (for example `501`, `601` for group 1).
 3. You should see **one L3VPN (VPRN)** and **one L2VPN (VPLS)** with the expected names/IDs, each reflecting both PEs (two sites) after stitching.
 

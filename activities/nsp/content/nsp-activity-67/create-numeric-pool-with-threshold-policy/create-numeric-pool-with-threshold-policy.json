@@ -43,7 +43,7 @@
       "readOnly": false,
       "required": true,
       "type": "integer",
-      "default": 1
+      "default": 2
     },
     {
       "name": "maxValue",

@@ -40,12 +40,55 @@ custom-service-splitting:
       publish:
         reportTemplate: <% fetch_jinja('service-splitting-report') %>
       on-success:
+        - build_find_filter
+
+    build_find_filter:
+      action: nsp.python
+      input:
+        context:
+          group_id: <% $['group-id'] %>
+        script: |
+          raw = str(context.get("group_id") or "").strip().lower()
+          unfiltered_svc = "/nsp-service:services/service-layer/elan|/nsp-service:services/service-layer/l3vpn"
+          unfiltered_ne = "/nsp-equipment:network/network-element"
+          if not raw:
+            return {
+              "service_xpath_filter": unfiltered_svc,
+              "xpath_filter": unfiltered_ne,
+            }
+          suffix = raw
+          if raw.startswith("group"):
+            suffix = raw.replace("group", "", 1).strip("-_ ")
+          elif raw.startswith("g"):
+            suffix = raw[1:].strip("-_ ")
+          if not suffix:
+            return {
+              "service_xpath_filter": unfiltered_svc,
+              "xpath_filter": unfiltered_ne,
+            }
+          g = "g" + suffix
+          # Brownfield names are activity-38-g<N>-vprn/vpls; NE names are g<N>-pe1/pe2.
+          svc_pred = (
+            "contains('name', '%s-') or contains('service-id', '%s-') or contains('description', '%s-')"
+            % (g, g, g)
+          )
+          return {
+            "service_xpath_filter": (
+              "/nsp-service:services/service-layer/elan[%s]|/nsp-service:services/service-layer/l3vpn[%s]"
+              % (svc_pred, svc_pred)
+            ),
+            "xpath_filter": "/nsp-equipment:network/network-element[contains('ne-name', '%s-')]" % g,
+          }
+      publish:
+        service_xpath_filter: <% task().result['service_xpath_filter'] %>
+        xpath_filter: <% task().result['xpath_filter'] %>
+      on-success:
         - find-service
 
     find-service:
       action: nsp.https
       input:
-        url: 'https://<% locate_nsp() %>/restconf/operations/nsp-inventory:find'
+        url: 'https://restconf-gateway/restconf/operations/nsp-inventory:find'
         method: POST
         body:
           input:
@@ -53,8 +96,9 @@ custom-service-splitting:
             fields: "name;description;tenant;service-id;service-extension:l3vpn-svc;service-extension:elan-svc;site(name;site-id;description;ipservice-site-detail;service-extension:l3vpn-site;service-extension:elan-site)"
             offset: <% $.svc_offset %>
             sort-by: []
-            xpath-filter: "/nsp-service:services/service-layer/elan|/nsp-service:services/service-layer/l3vpn"
+            xpath-filter: <% $.service_xpath_filter %>
             limit: 100
+            include-meta: true
         contentType: 'application/json'
         accept: 'application/json'
       publish:
@@ -70,12 +114,18 @@ custom-service-splitting:
     get-node:
       action: nsp.https
       input:
-        url: 'https://<% locate_nsp() %>/restconf/data/nsp-equipment:network/network-element?include-meta=false&fields=ne-id;ne-name;product'
-        method: GET
+        url: 'https://restconf-gateway/restconf/operations/nsp-inventory:find'
+        method: POST
         contentType: 'application/json'
         accept: 'application/json'
+        body:
+          input:
+            xpath-filter: <% $.xpath_filter %>
+            depth: "2"
+            fields: "ne-id;ne-name;product"
+            include-meta: false
       publish:
-        node_detail: <% task().result.content["nsp-equipment:network-element"] %>
+        node_detail: <% task().result.content["nsp-inventory:output"].data %>
       publish-on-error:
         status: <% task().result.status %>
       on-success:
@@ -94,50 +144,16 @@ custom-service-splitting:
                   return ''
               return str(v).lower()
 
-          def _group_suffix(raw_group_id):
-              group = str(raw_group_id or '').strip().lower()
-              if not group:
-                  return ''
-
-              suffix = group
-              if group.startswith('group'):
-                  suffix = group.replace('group', '', 1).strip('-_ ')
-              elif group.startswith('g'):
-                  suffix = group[1:].strip('-_ ')
-              return suffix or group
-
-          def _node_group_suffix(raw_node_name):
-              node_name = str(raw_node_name or '').strip().lower()
-              if not node_name:
-                  return ''
-
-              if node_name.startswith('group'):
-                  remainder = node_name.replace('group', '', 1).lstrip('-_ ')
-              elif node_name.startswith('g'):
-                  remainder = node_name[1:]
-              else:
-                  return ''
-
-              suffix = []
-              for ch in remainder:
-                  if ch.isdigit():
-                      suffix.append(ch)
-                  else:
-                      break
-
-              return ''.join(suffix)
-
-          group_suffix = _group_suffix(context.get('group_id'))
+          node_detail = context.get('node_detail') or []
+          if isinstance(node_detail, dict):
+              node_detail = [node_detail]
           nodes = []
-          for item in context.get('node_detail') or []:
+          for item in node_detail:
               ne_id = item.get('ne-id')
               if not ne_id:
                   continue
               hint = _srl_hint(item)
               if 'srl' in hint or 'srlinux' in hint:
-                  continue
-              node_group_suffix = _node_group_suffix(item.get('ne-name'))
-              if group_suffix and node_group_suffix != group_suffix:
                   continue
               nodes.append({
                   'ne_id': ne_id,
@@ -154,7 +170,7 @@ custom-service-splitting:
       with-items: item in <% $.nodes_for_customer_info %>
       action: nsp.https
       input:
-        url: 'https://<% locate_nsp() %>/restconf/data/network-device-mgr:network-devices/network-device=<% $.item.ne_id %>/root/nokia-conf:/configure/service/customer?with-defaults=report-all'
+        url: 'https://restconf-gateway/restconf/data/network-device-mgr:network-devices/network-device=<% $.item.ne_id %>/root/nokia-conf:/configure/service/customer?with-defaults=report-all'
         method: GET
         contentType: 'application/json'
         accept: 'application/json'
@@ -326,6 +342,8 @@ custom-service-splitting:
               return algorithms.get(normalized, split_by_customer_id)
 
           node_detail = context.get('node_detail') or []
+          if isinstance(node_detail, dict):
+              node_detail = [node_detail]
           service_id_detail = context.get('service_id_detail') or []
           brownfield_services = context.get('brownfield_services') or []
           split_algorithm = selected_algorithm(context.get('splitting_algorithm'))

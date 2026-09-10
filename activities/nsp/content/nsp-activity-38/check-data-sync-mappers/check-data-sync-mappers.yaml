@@ -88,19 +88,40 @@ check-data-sync-mappers:
       publish:
         validated_group: <% task().result.get("group") %>
       on-success:
-        - get_nodes
+        - build_find_filter
       on-error:
         - build_error_report
+
+    build_find_filter:
+      action: nsp.python
+      input:
+        context:
+          group: <% $.validated_group %>
+        script: |
+          group = int(context.get("group") or 1)
+          g = "g%d" % group
+          pred = "contains('ne-name', '%s-pe1') or contains('ne-name', '%s-pe2')" % (g, g)
+          return "/nsp-equipment:network/network-element[%s]" % pred
+      publish:
+        xpath_filter: <% task().result %>
+      on-success:
+        - get_nodes
 
     get_nodes:
       action: nsp.https
       input:
-        url: 'https://<% locate_nsp() %>/restconf/data/nsp-equipment:network/network-element?include-meta=false&fields=ne-id;type;ne-name;ip-address'
-        method: GET
+        url: 'https://restconf-gateway/restconf/operations/nsp-inventory:find'
+        method: POST
         contentType: 'application/json'
         accept: 'application/json'
+        body:
+          input:
+            xpath-filter: <% $.xpath_filter %>
+            depth: "2"
+            fields: "ne-id;type;ne-name;ip-address"
+            include-meta: false
       publish:
-        node_detail: <% task().result.content["nsp-equipment:network-element"] %>
+        node_detail: <% task().result.content["nsp-inventory:output"].data %>
       publish-on-error:
         node_detail: []
         message: '<% "Failed to get network elements: " + str(task().result) %>'
@@ -220,7 +241,7 @@ check-data-sync-mappers:
     get_full_resync_classes_pe1:
       action: nsp.https
       input:
-        url: 'https://<% locate_nsp() %>/restconf/operations/nsp-admin-resync:get-full-resync-classes'
+        url: 'https://restconf-gateway/restconf/operations/nsp-admin-resync:get-full-resync-classes'
         method: POST
         contentType: 'application/json'
         accept: 'application/json'
@@ -240,7 +261,7 @@ check-data-sync-mappers:
     get_full_resync_classes_pe2:
       action: nsp.https
       input:
-        url: 'https://<% locate_nsp() %>/restconf/operations/nsp-admin-resync:get-full-resync-classes'
+        url: 'https://restconf-gateway/restconf/operations/nsp-admin-resync:get-full-resync-classes'
         method: POST
         contentType: 'application/json'
         accept: 'application/json'

@@ -134,7 +134,7 @@ In this activity it may be used to observe if the `gnmic` calls are in cleartext
 
 You have several packet capture options:
 
-* The recommended one is to use EdgeShark WEB UI directly with the URL: `http://${INSTANCE_ID}.srexperts.net:5001`
+* The recommended one is to use EdgeShark Web UI directly with the URL: `http://${INSTANCE_ID}.srexperts.net:5001`
 * You may also use EdgeShark from your VSCode with the ContainerLab plugin, by selecting a node interface in the ContainerLab explorer menu
 * Other options are TCPDump or TShark
 
@@ -147,20 +147,23 @@ You may capture :material-router: PE1 interface `eth0`, you will only see ingres
 
 /// details | Capture both directions
     type: info
-You don't need to, but if you want to see both directions, and since you are sending `gnmic` calls from your hackathon instance, you could capture traffic on the docker bridge used for the topology network and apply the '`http2.headers.path contains "Capabilities"`' filter.
-The easiest way is to use EdgeShark WEB UI and follow the :material-router: PE1 interface `eth0` link to the bridge interface you want to capture.
+You don't need to, but if you want to see both directions, and since you are sending `gnmic` calls from your hackathon instance, you could capture traffic on the docker bridge used for the topology network and apply a filter that shows you only your gRPC call.
 
-You may also find the bridge ID with the `docker network ls` command.
+One way of accomplishing this uses the EdgeShark Web UI. You can use it to capture traffic on the `eth0` interface of :material-router: PE1 that connects it to the management network, or you could capture traffic from the management bridge directly.
+
+To find the dynamically generated name of the management network bridge you can use the `docker network ls` command.
+
 /// tab | docker network ls
 ```bash {.no-copy}
-bash# docker network ls | grep srexperts
-19b05b1a5a4f   srexperts          bridge    local
+bash# docker network ls | awk 'NR==1 || /srexperts/'
+NETWORK ID     NAME               DRIVER    SCOPE
+477b78cebf20   srexperts          bridge    local
 ```
 Note that the bridge name has the `br-` prefixed to the Network ID.
 ```bash {.no-copy}
-bash# ip link show type bridge br-3bf86e1ec057
-11673: br-3bf86e1ec057: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default
-    link/ether f2:4a:42:4f:52:4a brd ff:ff:ff:ff:ff:ff
+bash# ip link show type bridge br-477b78cebf20
+8: br-477b78cebf20: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default
+    link/ether 22:8b:4c:c6:d2:7b brd ff:ff:ff:ff:ff:ff
 ```
 ///
 
@@ -192,6 +195,8 @@ cd ~/mtls-activity/
 ```
 ///
 
+!!! tip "One more thing..."
+    As a general best practice and to be future-proof, the example solution provided in this activity uses a maximum certificate lifetime that is less than 47 days. This limit is scheduled to become mandatory for publicly trusted TLS certificates starting in March 2029. While this requirement does not apply to the certificates used in this activity, adopting shorter certificate lifetimes helps align with emerging industry practices and encourages regular certificate rotation.
 
 #### Creating a self-signed Certificate Authority
 Any certificate generation essentially involves generating a Certificate Signing Request (CSR), a private key to go with your certificate and the signing of the certificate by a CA. For this activity, the CA you use will be self-signed: the key represented by the CA certificate is the same key used to sign the certificate. You will go on to use this CA to sign other certificates that are not self-signed. The self-signed CA will be used as a trusted authority while certificates signed by that CA will be used by your gRPC client and servers.
@@ -200,7 +205,7 @@ Many online resources are available about generating certificates using `openssl
 
 Before proceeding, ensure your generated CA certificate file shows that is indeed suitable for use as a CA, using `openssl`. You can check this on your group's hackathon instance as follows:
 
-/// tab | Generate the CA certificate file
+/// tab | Validate the CA certificate file
 ``` bash
 openssl x509 -in ca.pem -text -noout; openssl verify -CAfile ca.pem ca.pem
 ```
@@ -278,6 +283,56 @@ ca.pem: OK
 
 Next up you'll have to generate Certificate Signing Requests (CSR) for the gRPC client and server that are signed by the CA generated in the previous step. Ensure that both the client and server certificates include the relevant IP and DNS information as a Subject Alternative Name (SAN) to ensure they will be considered valid. A certificate that doesn't contain that information will be considered invalid and unusable.
 
+You may notice that some of the `openssl` commands present you with a number of prompts. The responses provided are used to compile the certificate's Distinguished Name (DN), which contains identity information. You may also be prompted for an e-mail address, which may be embedded in the certificate as metadata, or a password to secure the associated private key file. In this activity the answers provided to these prompts are irrelevant and can be left as defaults.
+
+??? tip "Non-interactive `openssl`"
+    To pre-answer the prompts and avoid having to go through them interactively, you can add the following flag to your `openssl` commands when generating CSR:
+    /// tab | Additional flag
+    ```
+    -subj "/O=Nokia/OU=SReXperts/CN=pe1"
+    ```
+    ///
+    /// tab | Interactive `openssl`
+    ```bash {.no-copy}
+    $ openssl req -new -newkey rsa:2048 -keyout server.key -out server.csr -nodes \
+        -addext "subjectAltName=DNS:pe1,DNS:clab-srexperts-pe1,IP:10.128.${INSTANCE_ID}.21"
+    ....+++++++++++++++++++++++++++++++++++++++*........+.+..+...+....+++++++++++++++++++++++++++++++++++++++*.+.....++++++
+    .....+.........+.........+...+..........+.........+.....+.........+......+....+++++++++++++++++++++++++++++++++++++++*...+...+.......+.....+....+++++++++++++++++++++++++++++++++++++++*.............+.......+..+..................+...+.+......+...+.....+....+......+....................+.+...+...........+.+.........+......+........+.+...........+...+...+...++++++
+    -----
+    You are about to be asked to enter information that will be incorporated
+    into your certificate request.
+    What you are about to enter is what is called a Distinguished Name or a DN.
+    There are quite a few fields but you can leave some blank
+    For some fields there will be a default value,
+    If you enter '.', the field will be left blank.
+    -----
+    Country Name (2 letter code) [AU]:
+    State or Province Name (full name) [Some-State]:
+    Locality Name (eg, city) []:
+    Organization Name (eg, company) [Internet Widgits Pty Ltd]:
+    Organizational Unit Name (eg, section) []:
+    Common Name (e.g. server FQDN or YOUR name) []:
+    Email Address []:
+
+    Please enter the following 'extra' attributes
+    to be sent with your certificate request
+    A challenge password []:
+    An optional company name []:
+    $
+    ```
+    ///
+    /// tab | Non-interactive `openssl`
+    ```bash {.no-copy}
+    $ openssl req -new -newkey rsa:2048 -keyout server.key -out server.csr -nodes \
+        -addext "subjectAltName=DNS:pe1,DNS:clab-srexperts-pe1,IP:10.128.${INSTANCE_ID}.21" \
+        -subj "/O=Nokia/OU=SReXperts/CN=pe1"
+    ....+....+..+..........+........+..........+++++++++++++++++++++++++++++++++++++++*.....+++++++++++++++++++++++++++++++++++++++*...+.................+............+......+......+.+..+......+.+.....+......+....+....................+...+.+..+.........+..........+...+...+..+............+.+..............+......+....+.....................+...+..+...+......+...+.+.........+..+......+....+...+...........+.......+.................+......+....+...+....................+.......+..+..........+...+......+..+...+.......+............+...+...+......+.....+....+..+.......+..+.+..+...+.......+...............+.................+....+......+...+........+.......+..+.+...............+..+.....................+.+.....+.+............+...+..............+...+.+..+...+.......+........+.+...............+.........+.....+.......+.....+.........+....+..+.......+...+...+.........+..+...+..........+.....+.+..+...+.+........+.......+.....++++++
+    ....+..+++++++++++++++++++++++++++++++++++++++*.........+...+.+.....+......+++++++++++++++++++++++++++++++++++++++*.+...+....+...+...+...........+...+.+......+...+...........+.......+..+...+...+.......+...+......+......+..+.+......+...........+....+...+..+......+...+....+.....+.+..+.......+..+......+...+.+..................+...........+.......+...+..+...+................+...+...+...+...........+.+.........+.....+.........+.+........+................+.....+......+......+.......+..+.........+.+......+.....+.......+...+.....+.......+..++++++
+    -----
+    $
+    ```
+    ///
+
 For your client, add only the IP addresses it will use to reach your nodes in the containerlab network. This IP address includes your instance identifier and will be of the form `10.128.${INSTANCE_ID}.1`.
 
 For your server, as you will start with :material-router: PE1, add the hostname and BOF IP Address. These values should look like `g${INSTANCE_ID}_pe1` and `10.128.${INSTANCE_ID}.21` respectively.
@@ -332,8 +387,9 @@ openssl req -new -newkey rsa:2048 -keyout server.key -out server.csr -nodes -add
 ```bash
 openssl x509 -req -in server.csr -CA ca.pem -CAkey ca.key -CAcreateserial -out server.pem -copy_extensions copy
 ```
-Validate the new certificate
+Validate the contents of the new certificate and confirm it was signed succesfully:
 ```bash
+openssl x509 -in server.pem -text -noout
 openssl verify -CAfile ca.pem server.pem
 ```
 ///
@@ -347,8 +403,9 @@ openssl req -new -newkey rsa:2048 -keyout client.key -out client.csr -nodes -add
 ```bash
 openssl x509 -req -in client.csr -CA ca.pem -CAkey ca.key -CAcreateserial -out client.pem -copy_extensions copy
 ```
-Validate the new certificate
+Validate the contents of the new certificate and confirm it was signed succesfully:
 ```bash
+openssl x509 -in client.pem -text -noout
 openssl verify -CAfile ca.pem client.pem
 ```
 
@@ -385,11 +442,25 @@ Verify that the TLS profiles are operationally up by looking at the `state` in t
     type: example
 
 /// tab | Commands
+
+/// tab | Using `state`
 ``` text
 info /state system security tls
 ```
 ///
+/// tab | Using `show`
+``` text
+/show system security tls server-tls-profile "grpc_tls_profile"
+/show system security tls cert-profile "grpc_cert_profile"
+/show system security tls server-tls-profile "grpc_tls_profile" association
+```
+///
+
+///
 /// tab | Expected output
+
+
+/// tab | Using `state`
 ``` text {.no-copy}
 2026-05-08T12:37:50.63+00:00
 [/]
@@ -407,6 +478,52 @@ A:admin@g3-pe1# info /state system security tls
     }
 ```
 ///
+
+/// tab | Using `show`
+``` text {.no-copy}
+2026-05-08T12:42:11.01+00:00
+[/]
+A:admin@g3-pe1# /show system security tls server-tls-profile "grpc_tls_profile"
+
+===============================================================================
+Server Profile Entry "grpc_tls_profile"
+===============================================================================
+Cipher List Name             : grpc_cipher_list
+Certificate Profile Name     : grpc_cert_profile
+Trust Anchor Profile Name    : (Not Specified)
+CN-List Name                 : (Not Specified)
+===============================================================================
+
+2026-05-08T12:42:15.46+00:00
+[/]
+A:admin@g3-pe1# /show system security tls cert-profile "grpc_cert_profile"
+
+===============================================================================
+Certificate Profile Entry "grpc_cert_profile"
+===============================================================================
+Id  Certificate File Name     Key File Name             Status Flags
+-------------------------------------------------------------------------------
+1   server.pem                server.key
+===============================================================================
+
+2026-05-08T12:42:15.47+00:00
+[/]
+A:admin@g3-pe1# /show system security tls server-tls-profile "grpc_tls_profile" association
+
+===============================================================================
+Applications using server-tls-profile "grpc_tls_profile"
+===============================================================================
+Application
+-------------------------------------------------------------------------------
+grpc
+-------------------------------------------------------------------------------
+Number of Applications: 1
+===============================================================================
+```
+///
+
+///
+
 ///
 
 #### Switch from unsecure to secure gRPC
@@ -508,20 +625,31 @@ admin system security pki import type certificate format pem input-url cf3:/serv
 
 ### Upgrade from TLS to mTLS
 
-Throughout the previous tasks you have secured gRPC for the :material-router: PE1 node. Conceptually that means that a client using the gRPC server receives confirmation from your CA that it is indeed interacting with :material-router: PE1. The traffic is also encrypted and can no longer be intercepted by anyone listening on the wire. You may execute a new packet capture, as you did before, to see this in action (refer to the tools guide <a href="../../../../tools/tools-packet-capture/" target="_blank" rel="noopener noreferrer">Containerlab Capture traffic </a> for the packet capture options).
+Throughout the previous tasks you have secured gRPC for the :material-router: PE1 node. Conceptually that means that a client using the gRPC server can verify that it is indeed interacting with :material-router: PE1. This verification is performed locally on your client using the server's presented certificate and the trusted CA certificate. The CA is not contacted during this process, as it established trust beforehand by distributing its certificate and signing the server's certificate.
 
-In turn, :material-router: PE1 is now providing gRPC services to any client bold enough to attempt it, provided they attempt to set up a secured connection. This does not fit into your Zero Trust approach. You will address this in this section, as you will make sure that any client must prove its own identity.
+Additionally, your gRPC traffic is now encrypted and can no longer be intercepted by anyone listening on the wire. You may execute a new packet capture, as you did before, to see this in action (refer to the text above or the tools guide <a href="../../../../tools/tools-packet-capture/" target="_blank" rel="noopener noreferrer">Containerlab Capture traffic </a> for the packet capture options).
 
-This involves similar steps as you have done in the previous section. If the server is to verify certificates provided by its clients it must also have a CA to refer to. To that end, to set up mTLS, you will have to upload and import your CA's public certificate as you have done previously with the server's certificate. Note that the CA key is not needed by the router and should remain secret.
+In turn, :material-router: PE1 is now providing gRPC services to any client bold enough to attempt it, provided they attempt to set up a secured connection. This does not fit into your Zero Trust approach: any client can still connect to the router's gRPC server. You will address that in this section, as you will make sure that any client must prove its own identity.
 
-After that you will have to configure a `trust-anchor-profile` and use it to authenticate clients in your `server-tls-profile`. You may be able to use what you did previously here, and the [System Management Guide](https://documentation.nokia.com/sr/26-3/7x50-shared/system-management/transport-layer-security.html#ai9exj5ygs) may also provide guidance.
+!!! note "Protocol level access control"
+    While not used in this activity, SR OS provides [multiple mechanisms](https://documentation.nokia.com/sr/26-3/7750-sr/books/peering-quick-reference/configuring-system-and-routing-security.html) for restricting client access based on source IP address, including Management Access Filters (MAF), Control Processor Module (CPM) filters, and interface ACLs. These controls can be used to limit management and control-plane access to trusted hosts and networks.
+
+This involves steps similar to those in the previous section. For the server to verify certificates presented by its clients, it must also trust the issuing CA. To enable mTLS, you must therefore upload and import your CA's public certificate, just as you previously did for the server's certificate. Note that client and server certificates do not need to be signed by the same CA; different CAs can be used as long as the appropriate trust relationships have been established. Keep in mind that the CA's private key is never required by either the router or the client and must remain secret.
+
+!!! tip "Certificate validation in SR OS"
+    In this activity you set up mTLS without explicitly validating the identity information in the certificate presented by your client. You could take things a step further by configuring SR OS to validate the Common Name (CN) attribute of client certificates. While outside the scope of this activity, the [documentation](https://documentation.nokia.com/sr/26-3/7x50-shared/system-management/transport-layer-security.html#ai9exgsuai) provides pointers on how you might do this.
+
+After you upload and import your CA certificate, you will have to configure a `trust-anchor-profile` and use it to authenticate clients in your `server-tls-profile`. You may be able to use what you did previously here, and the [System Management Guide](https://documentation.nokia.com/sr/26-3/7x50-shared/system-management/transport-layer-security.html#ai9exj5ygs) may also provide guidance.
 
 !!! warning "Certificate Revocation Lists (CRL)"
-    By default, SR OS considers end-entity (EE) certificates whose revocation status cannot be determined (for example, due to a missing, expired, or corrupt CRL) as `revoked`. You may encounter this problem in this section of the activity. You can either create and add a valid CRL to the CA profile configuration, or reconfigure the default behavior so that certificates with an undetermined revocation status are treated as good (`not revoked`) using the command below.
+    By default, SR OS considers end-entity (EE) certificates whose revocation status cannot be determined (for example, due to a missing, expired, or corrupt CRL) as `revoked`. Certificates may be revoked if there is any suspicion that the associated private key has been compromised, if trust in the certificate holder has changed, or for a variety of other administrative and operational reasons.
+
+    You may encounter problems related to this default behavior in this section of the activity. To address them, you can either create and add a valid CRL to the CA profile configuration, or, for the purposes of this activity, reconfigure SR OS to treat certificates with an undetermined revocation status as valid (`not revoked`). The command below configures this behavior.
 
     ```text
     /configure system security tls server-tls-profile "grpc_tls_profile" status-verify default-result good
     ```
+
     Note: Setting `default-result good` overrides the EE certificate revocation check for the TLS server profile, meaning the router will return a "good" revocation status for EE certificates even when their actual status cannot be verified. This should only be used when there is a legitimate reason to bypass the revocation check (for example, during a temporary network issue affecting CRL retrieval).
 
 Once you're done, look in the router's `state` to confirm everything is operationally up and then try the `gnmic` commands you used before. You should find a need to specify the client certificates you generated previously. Before continuing, make sure the only way to get a response to your `gnmic` commands from :material-router: PE1 is when you specify a `--tls-ca` (to trust the server), `--tls-key` and `--tls-key` (to satisfy the server).

@@ -90,34 +90,58 @@ Not all LSPs may have explicit paths configured. Dynamic LSPs rely on RSVP-TE or
 
 ### Query LSP Data via REST API
 
-NSP exposes LSP operational data through its REST API. Let's query it directly.
+NSP exposes LSP operational data through its Path Control REST API. Use **Postman** or the **NSP API documentation** at `https://{{server}}/sdn/doc` to explore and run requests interactively — the response is easier to navigate than raw `curl` output.
 
-Authenticate against the NSP API using `curl`:
+/// note
+The API documentation page (`/sdn/doc`) is the NSP **API Explorer**: browse the Path Control endpoints, inspect request/response schemas, and try calls from your browser.
+///
+
+#### Step 1 — Authenticate
+
+In Postman (or `curl`), obtain a bearer token using the credentials from the warning box above:
 
 /// note | Example: Authenticate and get a token
-```bash
-curl -k -X POST https://{{server}}/rest-gateway/rest/api/v1/auth/token \
-  -H "Content-Type: application/json" \
-  --user "pathcontrol:$EVENT_PASSWORD" \
-  -d ‘{"grant_type": "client_credentials"}’
-```
-Save the returned token — you will need it for all subsequent requests.
+
+=== "Linux / macOS"
+    ```bash
+    curl -k -X POST https://{{server}}/rest-gateway/rest/api/v1/auth/token \
+      -H "Content-Type: application/json" \
+      --user "pathcontrol:$EVENT_PASSWORD" \
+      -d '{"grant_type": "client_credentials"}'
+    ```
+
+=== "Windows (PowerShell)"
+    ```powershell
+    curl.exe -k -X POST https://{{server}}/rest-gateway/rest/api/v1/auth/token `
+      -H "Content-Type: application/json" `
+      --user "pathcontrol:$EVENT_PASSWORD" `
+      -d '{\"grant_type\": \"client_credentials\"}'
+    ```
+
+Save the returned `access_token` as you will need it for all subsequent requests.
 ///
 
-Query the list of LSPs using the NSP REST API. Use **Postman** or the NSP WebUI API explorer rather than `curl` for this step, as the response is easier to navigate interactively.
+#### Step 2 — Query SR-TE LSP paths
 
-/// details | Retrieve LSP list (hint)
+/// details | Retrieve SR-TE LSP paths (hint)
    type:hint
 
-```bash
-curl -X GET "https://{{server}}/sdn/api/v4/mpls/lsps"
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -H "Accept: application/json"
-```
-///
+=== "Linux / macOS"
+    ```bash
+    curl -k -X GET "https://{{server}}/sdn/api/v4/mpls/lsp-paths" \
+      -H "Authorization: Bearer YOUR_TOKEN" \
+      -H "Accept: application/json"
+    ```
+
+=== "Windows (PowerShell)"
+    ```powershell
+    curl.exe -k -X GET "https://{{server}}/sdn/api/v4/mpls/lsp-paths" `
+      -H "Authorization: Bearer YOUR_TOKEN" `
+      -H "Accept: application/json"
+    ```
 ///
 
-Explore the response structure and look for:
+Explore the response and look for:
 
 - LSP name and identifier
 - Ingress and egress node
@@ -126,7 +150,7 @@ Explore the response structure and look for:
 
 ### Create a Path Profile in NSP
 
-Navigate to **Path Control** → **Path Profiles** (dropdown), then **New Profile** (top right).
+Navigate to **Path Control** → **Path Profiles** (dropdown), then click the **+** button in the top right (tooltip: **Create Policy**).
 
 Configure the Path Profile using the parameters below. Not all fields are mandatory. Focus on the highlighted ones for this activity.
 
@@ -135,18 +159,20 @@ Configure the Path Profile using the parameters below. Not all fields are mandat
 | **Reserved Profile ID** | Whether this profile assumes the role of the default path profile policy | Leave unchecked |
 | **Name** | Name of the path profile policy | `hackathon-path-profile-groupXX` |
 | **Profile ID** | Identifier used to associate this profile with LSP path computation | Choose a unique integer (e.g., `100`) |
-| **Bidirectional** | Bidirectional mode for path computation, if any | `None` |
-| **Disjoint** | Disjoint mode for path computation, if any | `None` |
-| **Optimize on (Objective)** | Primary goal when identifying paths | `TE Metric` |
-| **Bandwidth Strategy** | Strategy for bandwidth collection | `Local` |
-| **Explicit Route Strategy** | Explicit route strategy for the service | `Strict` |
-| **Control Route Strategy** | Strategy used when rerouting a path | `Reoptimize` |
-| **SID Protection Strategy** | Extent of SID protection when routing | `None` |
+| **Description** | Optional free-text description of the path profile | Leave empty |
+| **Bi-directional** | Bidirectional mode for path computation, if any | `No` |
+| **Disjoint** | Disjoint mode for path computation, if any | `No` |
+| **Optimize On (Objective)** | Primary goal when identifying paths | `TE Metric` |
+| **Bandwidth Strategy** | Strategy for bandwidth collection | `Standard` |
+| **Keep Bandwidth Reservation on Failure** | Whether to keep bandwidth reserved when the LSP fails | Leave unchecked |
+| **Explicit Route Strategy** | Explicit route strategy for the service | `Standard` |
+| **Control Route Strategy** | Strategy used when rerouting a path | `Standard` |
+| **SID Protection Strategy** | Extent of SID protection when routing | `Standard (Protected Preferred)` |
 | **Max Hops (Span)** | Maximum number of hops (nodes) to consider | `10` |
 | **Max Cost** | Maximum IGP link metric sum to consider | Leave default |
 | **Max TE Metric** | Maximum TE metric sum to consider | Leave default |
 | **Max Latency (microseconds)** | Maximum latency to consider | Leave default |
-| **Latency Threshold** | When to re-signal an LSP optimized on latency | Leave default |
+| **Latency Threshold (microseconds)** | When to re-signal an LSP optimized on latency | Leave default |
 | **Exclude Route Objects** | Nodes to exclude from the path, if possible | Leave empty |
 | **Include Route Objects** | Nodes to include in the path, if possible | Leave empty |
 

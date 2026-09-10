@@ -64,9 +64,27 @@ delete-evpn-epipe-service-with-resource-pool:
         errorMessage: <% switch(task().result.status = 404 => 'Resource pool not found. Make sure the pool name and scope are correct.', true => 'Failed to get resource pool information') %>
         errorDetails: "<% task().name %>: <% task().result %>"
       on-success:
-        - removeService : <% $.poolExist = 'yes' %>
+        - getServiceStatus : <% $.poolExist = 'yes' %>
         - errorHandler: <% $.poolExist != 'yes' %>
       on-error: 
+        - errorHandler
+
+    getServiceStatus:
+      description: Get service status from IBSF
+      action: nsp.https
+      input:
+        url: 'https://restconf-gateway/restconf/data/nsp-service:services/service-layer/eline=<% $.serviceName %>/service-extension:eline-svc?fields=slc-state;misaligned'
+        method: GET
+        resultFilter: $.content["service-extension:eline-svc"]
+      publish:
+        slcState: <% task().result.content["slc-state"] %>
+      publish-on-error:
+        errorMessage: "Failed to get service status from IBSF"
+        errorDetails: "<% task().name %>: <% task().result %>"
+      on-success:
+        - removeService : <% $.slcState = 'deployed' %>
+        - deleteService: <% $.slcState != 'deployed' %>
+      on-error:
         - errorHandler
 
     removeService:

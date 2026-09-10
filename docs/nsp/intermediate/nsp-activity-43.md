@@ -100,14 +100,13 @@ For this activity, also enable:
 - **Enable notifications and notification counters**
   > so NSP publishes collected data to the Kafka stream
 
-- **Specify a custom notification topic**
-    - `ns-eg-tel-grafana-{groupId}-{counter}`
-      > so Telegraf can consume the collected data
-      > use only **1** or **2** as the counter value
+- **Specify a custom notification topic** 
+    - use `ns-eg-tel-grafana-{groupId}-1` for your first subscription and `ns-eg-tel-grafana-{groupId}-2` if you create a second. Replace `{groupId}` with your assigned group number.
+      > Your Telegraf instance only listens on those exact topic names. A typo or wrong counter means no data arrives in Grafana.
 
 The Telegraf instance is preconfigured to consume Kafka topics in NSP that follow the pattern above. Because each group has its own Telegraf instance, only that group's data is consumed and written to the Prometheus database.
 
-#### Verify data collection with NSP (optional)
+### Verify data collection with NSP (optional)
 
 In the subscription list, open the **context menu** (three dots on the right) for your subscription and choose **Open in Data Collection and Analysis Visualizations**.
 
@@ -119,7 +118,7 @@ One visualization definition in NSP can show **at most 10** charts. Keep the obj
 
 When you are satisfied that NSP is collecting data, move on to Grafana. Connecting NSP to Grafana is not part of this exercise (the lab has already done it). For background, see Nokia’s tutorial on [integrating a customer-provided Grafana instance with NSP data sources](https://network.developer.nokia.com/tutorials/integrating-customer-provided-grafana-instance-with-nsp-data-sources/).
 
-#### Verify data collection with Prometheus (optional)
+### Verify data collection with Prometheus (optional)
 
 The Prometheus Web UI is also exposed in this setup. You can use the metrics explorer in Prometheus to check which series are available.
 
@@ -171,7 +170,7 @@ Full NSP telemetry subscription definition:
 {
   "subscription": [
     {
-      "name": "CPU_Memory_Util",
+      "name": "cpu-memory-util-1",
       "description": "",
       "filter": "/nsp-equipment:network/network-element[containsIgnoreCase('ne-name','g1') and product='7750 SR']",
       "type": "telemetry:/base/system-info/system",

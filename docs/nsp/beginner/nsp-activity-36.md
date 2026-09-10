@@ -81,6 +81,12 @@ Let’s assume the following conditions are already true:
 - the affected service uses two PE endpoints, `PE1` and `PE2`, with attachment circuits toward `client1` and `client2`
 - you have access to NSP Service Management and Object Troubleshooting views
 
+/// note
+
+For the sake of understanding the activity use the **NE Session** available in NSP to change config on the NE.
+
+///
+
 ### Identify the Problem from NSP First
 
 Open the pre-created EVPN ELINE service in **Object Troubleshooting**. In this network, names follow `epipe-<NE Service ID>` (for example `epipe-1711` when the service ID is `1711`). On the **Troubleshooting Summary Board**, review EVPN ELINE health and determine which site is unhealthy before you collect any CLI output.
@@ -89,7 +95,7 @@ The **operational advantage** here is that NSP shrinks the problem space right a
 
 /// details | Solution (use only if you get stuck)
     type: success
-    -{{video(url="https://gitlab.com/-/project/69754954//uploads/969fdd14b7c5edf984d41ca699d81bdb/Identify_the_Problem_from_NSP_First.mp4")}}-
+    -{{video(url="https://gitlab.com/-/project/69754954///uploads/8ee35b40b26a832bb591db6b5b12d3a4/service-troubleshooting-01.mp4")}}-
 ///
 
 ### Run Service Troubleshooting Workflow
@@ -100,7 +106,7 @@ NSP does not replace the underlying analysis model. It **automates** the familia
 
 /// details | Solution (use only if you get stuck)
     type: success
-    -{{video(url="https://gitlab.com/-/project/69754954//uploads/1c3e88269e35ba26539144ac4c90f208/Run_Service_Troubleshooting_Workflow.mp4")}}-
+    -{{video(url="https://gitlab.com/-/project/69754954//uploads/31b75106e5930b1df02635b8ea787512/service-troubleshooting-02.mp4")}}-
 ///
 
 ### Remediate the Service
@@ -109,7 +115,7 @@ After you accept the root cause, restore the **admin-state** of the unhealthy si
 
 /// details | Solution (use only if you get stuck)
     type: success
-    -{{video(url="https://gitlab.com/-/project/69754954//uploads/d48a2be1469f1278cb8e7a7bf835f83b/Remediate_the_Service_in_Service_Management.mp4")}}-
+    -{{video(url="https://gitlab.com/-/project/69754954//uploads/83111d6b4d89659f26fe54fd9f6a8f50/service-troubleshooting-03.mp4")}}-
 ///
 
 /// details | Why NSP improves Service Troubleshooting?

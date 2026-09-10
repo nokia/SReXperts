@@ -67,6 +67,10 @@ Work **top to bottom**. Later challenges assume the earlier ones succeeded. Trea
 
 ![create-numeric-pool-with-threshold-policy form](../../images/nsp-activity-67/create-numeric-pool-with-threshold-policy-form.png){: style="max-width: 300px; height: auto; display: block; margin-left: auto; margin-right: auto; border-radius: 10px;"}
 
+/// note
+Pool values are used for both the NE service ID and router VLAN. The minimum supported value is **2**; value **1** is reserved for lab router configuration. When reusing routers, set a unique minimum and maximum range to avoid conflicts.
+///
+
 /// details | How would you verify in Resource Management?
     type: question
 From **Resource Management**, open **Numeric pools** and **Threshold policies**. Confirm the pool appears, scope matches your group, and the threshold policy is attached. Capture pool name, scope, and utilization (or total vs. used) before moving on.

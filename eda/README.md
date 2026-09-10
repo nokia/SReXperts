@@ -4,11 +4,11 @@ Note: these commands are for documentation purposes only, everything has been pr
 
 ## Clone playground
 
-The playground dir needs to be present on the target system
+The EDA playground directory needs to be present on the target system. Clone it from repo and change the current working directory to prepare for the next steps.
 
 ```shell
-git clone https://github.com/nokia-eda/playground.git
-cd playground
+git clone https://github.com/nokia-eda/playground.git eda-playground
+cd eda-playground
 ```
 
 ## Ensure sysctls are raised
@@ -75,19 +75,15 @@ alias edactl='kubectl -n eda-system exec -it $(kubectl -n eda-system get pods \
 
 ## Deploy containerlab topo
 
-Note, that currently the client nodes require the bonding kernel to be loaded to support the bond interfaces:
+If not done yet, deploy the clab topology. Refer to [CLAB deployment instructions](../clab/README.md)
 
-```bash
-sudo modprobe bonding mmiimon=100 mode=802.3ad lacp_rate=fast
-```
-
-The clab topology make use of the following env vars, make sure they are set in your env:
+Make sure the following environment variables are set in your shell environment:
 
 - INSTANCE_ID
 - EVENT_PASSWORD
 - NOKIA_UID
 - NOKIA_GID
-- SSH_PUBLIC_KEY (your public key that you want to use in your Node User)
+- SSH_PUBLIC_KEY (your public key that you want to use in your managed nodes admin user)
 
 SSH public key can be set to the available pub key in users home dir for local testing:
 
@@ -105,28 +101,20 @@ echo "NOKIA_GID: $NOKIA_GID"
 echo "SSH_PUBLIC_KEY: $SSH_PUBLIC_KEY"
 ```
 
-The topology also needs to linux bridges to be create, created them using ip link:
-
-```bash
-sudo ip link add pe1-p1 type bridge
-sudo ip link add pe2-p1 type bridge
-```
-
-Proceed with deploying the topology:
-
-```bash
-containerlab deploy -c -t ./clab
-```
-
 ## Deploy EDA
 
+Optionally pre-set the EDA admin user password to $EVENT_PASSWORD (otherwise, default password will be "admin")
+```shell
+echo "  SECRET_EDA_ADMIN_PASSWORD: $(echo -n $EVENT_PASSWORD | base64)"  >> configs/kpt-setters.yaml
+```
+Deploy
 ```shell
 SIMULATE=false make try-eda
 ```
 
 ## Add EDA License
 
-Put the [EDA license](https://gitlabe2.ext.net.nokia.com/sr/eda/license/-/blob/main/eda-non-prod-license.yaml?ref_type=heads) in `/opt/srexperts`
+Put the EDA license in `/opt/srexperts`
 
 Apply the license after EDA is deployed:
 
@@ -134,21 +122,19 @@ Apply the license after EDA is deployed:
 kubectl apply -f /opt/srexperts/eda-non-prod-license.yaml
 ```
 
-## Store EDA last transaction hash
-
-To enable users to revert to an initial state the EDA was deployed, we need to store the last transaction and its hash after we deployed EDA.
-
-Execute `bash eda/record-init-tx.sh` script that will store the `TX_ID TX_HASH` pair in the `/opt/srexperts/eda-init-tx` file. This file then can be used to revert EDA to this transaction.
-
 ## Accessing EDA UI
 
 EDA UI is automatically exposed when `make try-eda` finishes. No additional steps required to access the UI. It is exposed over HTTPS, port 9443.
 
-## Onboard SRX Topology
+## Onboard SRX Topology DC1 nodes
 
-As the DC nodes run in clab next to the EDA deployment, we need to onboard them to the EDA cluster.
+As the DC1 nodes (`leaf11`,`leaf12`,`leaf13`,`spine11`,`spine12`) run in clab next to the EDA deployment, we need to onboard them to the EDA cluster.
 
-Start with substituting env vars in the the topo onboard files and run:
+Navigate to `SReXperts` repo root directory.
+```bash
+cd ../SReXperts
+```
+Start with substituting env vars in the the topo onboard files by running:
 
 ```shell
 docker run --rm -e \
@@ -169,7 +155,7 @@ kubectl apply -f $(pwd)/eda/topo-onboard/clab
 Before we deploy the fabric, we need to remove some default allocation pools to keep the UI clean and let attendees create pools as they need them.
 
 ```shell
-# assuming you are in the repo root
+# assuming you are in the SReXperts repo root
 bash ./eda/cleanup-pools.sh
 ```
 
@@ -191,6 +177,8 @@ and apply them:
 kubectl apply -f $(pwd)/eda/fabric
 ```
 
+The 5 nodes should now be synced on EDA. Try login to the EDA GUI and check it out!
+
 ## Extract the kubeconfig
 
 (TBD if we need it, since the kind cluster will originally have only 127.0.0.1 as the k8s API)
@@ -201,6 +189,12 @@ Extract the kubeconfig for the kind cluster running EDA:
 mkdir ~/.kube
 /home/nokia/eda/playground/tools/kind-v0.24.0 get kubeconfig --name eda-demo > ~/.kube/eda.kubeconfig
 ```
+
+## Store EDA last transaction hash
+
+To enable users to revert to an initial state the EDA was deployed, we need to store the last transaction and its hash after we deployed EDA.
+
+Execute `bash eda/record-init-tx.sh` script that will store the `TX_ID TX_HASH` pair in the `/opt/srexperts/eda-init-tx` file. This file then can be used to revert EDA to this transaction.
 
 ## Restore script
 

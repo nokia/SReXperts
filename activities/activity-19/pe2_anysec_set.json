@@ -12,7 +12,7 @@
               {
                 "admin-state": "enable",
                 "igp-instance-id": 0,
-                "local-address": "10.46.{{ getenv "INSTANCE_ID" }}.22",
+                "local-address": "10.46."INSTANCE_ID".22",
                 "policy-name": "STP_All",
                 "protocol": "sr-isis",
                 "rx-must-be-encrypted": false
@@ -29,7 +29,7 @@
                 "peer": [
                   {
                     "admin-state": "enable",
-                    "peer-ip-address": "10.46.{{ getenv "INSTANCE_ID" }}.23"
+                    "peer-ip-address": "10.46."INSTANCE_ID".23"
                   }
                 ],
                 "security-termination-policy": "STP_All"
@@ -42,7 +42,7 @@
                 "peer": [
                   {
                     "admin-state": "enable",
-                    "peer-ip-address": "10.46.{{ getenv "INSTANCE_ID" }}.23"
+                    "peer-ip-address": "10.46."INSTANCE_ID".23"
                   }
                 ],
                 "security-termination-policy": "STP_All"

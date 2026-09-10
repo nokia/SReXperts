@@ -240,8 +240,11 @@ create-evpn-epipe-service-with-resource-pool:
         }
         resultFilter: $.content["nsp-inventory:output"]["data"][0]["service-extension:eline-svc"]
       publish:
-        deploymentStatus: <% task().result.content["deployer-details"]["overall-deployer-state"] %>
-        deployLogs: <% task().result.content["slc-details"]["logs"] %>
+        deploymentStatus: <% task().result.content.get("deployer-details", {}).get("overall-deployer-state", null) %>
+        slcState: <% task().result.content.get("slc-state", null) %>
+        deployLogs: <% task().result.content.get("deployer-details", {}).get("logs", []) or task().result.content.get("slc-details", {}).get("logs", []) %>
+        errorMessage: <% switch(task().result.content.get("slc-state", null) != "deployed" => 'Got an error in IBSF while deploying service to node', true => '') %>
+        errorDetails: <% switch(task().result.content.get("slc-state", null) != "deployed" => task().result.content.get("slc-details", {}).get("logs", []), true => '') %>
       publish-on-error:
         errorMessage: "Failed to get service deployment status"
         errorDetails: "<% task().name %>: <% task().result %>"

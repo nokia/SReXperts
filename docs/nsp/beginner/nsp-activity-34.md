@@ -49,23 +49,37 @@ It is tempting to skip ahead, but tasks may require you to have completed previo
 
 ### Creating a new intent type version
 
+
 Before configuring the view, each user must create a unique version of the intent type based on their group number.
 
-1. In the **Intent Manager**, locate the **epipe-site-sr** intent type and select **Export**.
-2. To **Modify Metadata**, unzip the exported folder locally. Open the `meta-info.json` file and change the version number (on line 3) to match your assigned group number.
-3. Now **Repackage** or compress the contents of the folder into zip format.
-4. Return to the **Intent Manager** and from the **Import** option at the top right, import the newly zipped folder to create your group-specific version.
+1. Navigate to **Workflow Manager**.
+2. Search for the workflow **`createIntentTypeVersion`** and double-click it to open its dashboard.
+3. Click the **Execute** button in the upper-right corner of the dashboard (the icon resembles a **Play** symbol).
+4. In the execution form:
+   * Select the intent type from the list. For this activity, we use **`epipe-site-sr`** only as an example, you can use a different service intent type.
+   * Enter a **Version Number** matching your assigned group number.
 
-/// details | Are you repackaging to zip on a Mac?
-    type: question
+    /// note
+    It may take some time for the UI to populate the list of available intent types. If the list appears empty, wait a few moments for the page to finish rendering.
+    ///
 
-Compressing to create an `Archive.zip` adds a `__MACOSX` folder and sometimes a `.DS_Store` file. These system files interupts the import into the workflow system. So to remove it, run the following command in the terminal:
-```
-zip -d Archive.zip  __MACOSX/\*
-zip -d Archive.zip '*.DS_Store'
-```
+5. Click **Execute** to start the workflow.
+6. To monitor the progress, open the dropdown menu and select **Executions**. Verify that the workflow completes successfully.
+7. After the execution has completed, navigate to **Intent Manager** and search for the newly created version of the **`epipe-site-sr`** intent type using your assigned version number.
 
+/// note
+Make sure to use the correct Intent Type, i.e. the one that was just created with the version number corresponding to your group number
+
+Also, the newly created intent type would most probably be in **Draft** state, therefore it must be changed to **Released** before it can be used in the remaining tasks.
+
+1. Click the **⋮** (three dots) menu for the intent type.
+2. Select **Edit**.
+3. Change the **Lifecycle State** from **Draft** to **Released**.
+4. Click **Update** in the bottom-right corner to save the change.
 ///
+
+Once these steps are complete, proceed to the next exercise.
+
 
 ### Create a new view
 

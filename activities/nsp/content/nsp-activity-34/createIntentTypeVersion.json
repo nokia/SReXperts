@@ -1,0 +1,53 @@
+{
+  "type": "object",
+  "properties": [
+    {
+      "name": "sourceIntentType",
+      "title": "Source Intent Type",
+      "description": "Select the intent type and version to copy from",
+      "columnSpan": 4,
+      "newRow": true,
+      "readOnly": false,
+      "required": true,
+      "type": "leafref",
+      "displayKey": "name",
+      "suggest": {
+        "action": "nspWebUI.intentTypeListWithDetails"
+      },
+      "component": {
+        "input": "picker"
+      },
+      "componentProps": {
+        "isObject": true,
+        "isPagination": true,
+        "paginationProps": {
+          "pageLabel": "Page"
+        }
+      },
+      "properties": [
+        {
+          "floatingFilter": true,
+          "name": "name",
+          "title": "Intent Type",
+          "type": "string"
+        },
+        {
+          "floatingFilter": true,
+          "name": "version",
+          "title": "Version",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "name": "targetVersion",
+      "title": "Target Version",
+      "description": "New version number to create (must not already exist). Access will be granted to all user groups.",
+      "columnSpan": 4,
+      "newRow": true,
+      "readOnly": false,
+      "required": true,
+      "type": "number"
+    }
+  ]
+}

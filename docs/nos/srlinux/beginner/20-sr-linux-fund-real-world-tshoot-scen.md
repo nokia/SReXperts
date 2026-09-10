@@ -53,6 +53,55 @@ If you feel confident, let’s get started. If not, we recommend completing the 
 
 **It is tempting to skip ahead but tasks may require you to have completed previous tasks before tackling them.**
 
+### Configure loopback IP
+
+Before starting the troubleshooting part, configure the `1.1.1.1` IP as a `loopback` IP on :material-router: pe1 and :material-router: pe4. This IP will be considered as the DNS IP that is not reachable for this exercise.
+
+/// details | Recomendation: Loopback configuration
+    type: solution 
+/// tab | Loopback configuration (repeat in both :material-router: pe1 and :material-router: pe4)
+
+``` bash
+A:admin@g2-pe1# edit-config global
+INFO: CLI #2054: Entering global configuration mode
+INFO: CLI #2075: Other global configuration sessions are active
+
+2026-03-25T15:13:51.89+00:00
+(gl)[/]
+A:admin@g2-pe1# /configure router "Base" interface "loopback_test" admin-state enable loopback ipv4 primary address 1.1.1.1 prefix-length 32
+
+2026-03-25T15:14:34.45+00:00
+*(gl)[/]
+A:admin@g2-pe1# compare
+    configure {
+        router "Base" {
++           interface "loopback_test" {
++               admin-state enable
++               loopback
++               ipv4 {
++                   primary {
++                       address 1.1.1.1
++                       prefix-length 32
++                   }
++               }
++           }
+        }
+    }
+
+2026-03-25T15:14:36.89+00:00
+*(gl)[/]
+A:admin@g2-pe1# commit
+
+2026-03-25T15:14:39.38+00:00
+(gl)[/]
+A:admin@g2-pe1#
+
+```
+///
+
+///
+
+
 ### Configuration checkpoint
 /// admonition | Warning
     type: warning
@@ -435,57 +484,7 @@ Now that you understand the current network state, you should be able to determi
 
 The next step is to think about how to restore connectivity. There are multiple possible solutions, so choose the one that best fits what you observe in the network.
 
-
-/// admonition
-    type: tip
-Consider that the DNS server is not reachable via ICMP. To properly validate that your network is forwarding traffic in the correct direction, it is recommended to configure a loopback interface on :material-router: pe1 or :material-router: pe4 using the IP address 1.1.1.1. This allows you to test and confirm that your solution is working as expected, ensuring that your leaf and spine switches are forwarding DNS requests to the PE layer of your DC.
-///
-
-/// details | Recomendation: Loopback configuration
-    type: solution 
-/// tab | Loopback configuration (repeat in both :material-router: pe1 and :material-router: pe4)
-
-``` bash
-A:admin@g2-pe1# edit-config global
-INFO: CLI #2054: Entering global configuration mode
-INFO: CLI #2075: Other global configuration sessions are active
-
-2026-03-25T15:13:51.89+00:00
-(gl)[/]
-A:admin@g2-pe1# /configure router "Base" interface "loopback_test" admin-state enable loopback ipv4 primary address 1.1.1.1 prefix-length 32
-
-2026-03-25T15:14:34.45+00:00
-*(gl)[/]
-A:admin@g2-pe1# compare
-    configure {
-        router "Base" {
-+           interface "loopback_test" {
-+               admin-state enable
-+               loopback
-+               ipv4 {
-+                   primary {
-+                       address 1.1.1.1
-+                       prefix-length 32
-+                   }
-+               }
-+           }
-        }
-    }
-
-2026-03-25T15:14:36.89+00:00
-*(gl)[/]
-A:admin@g2-pe1# commit
-
-2026-03-25T15:14:39.38+00:00
-(gl)[/]
-A:admin@g2-pe1#
-
-```
-///
-
-///
-
-Even after configuring it, you will see, just as reported at the beginning of your shift, that there is still no connectivity.
+Verify that there is no connectivity to the DNS IP.
 
 /// details | Output: Try to ping 1.1.1.1
     type: example 

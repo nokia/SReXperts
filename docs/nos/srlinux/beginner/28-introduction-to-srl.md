@@ -70,19 +70,24 @@ It is tempting to skip ahead but tasks may require you to have completed previou
 By default, the SR Linux CLI features a two-line prompt:
 
 - Line 1: Shows the current CLI mode (`running`, `candidate`, `show`, `state`) and the current context in `[  ]`.
-- Line 2: Shows the CPM you are connected to, the username and the hostname (e.g., `A:admin@g1-leaf21#`).
+- Line 2: Shows the CPM you are connected to, the username and the hostname (e.g., `A:admin@gX-leaf21#`).
 
 ``` srl
 --{ running }--[  ]--
-A:admin@g1-leaf21#
+A:admin@gX-leaf21#
 ```
 
 ``` srl
 --{ * candidate shared default }--[ network-instance default protocols bgp ]--
-A:admin@g1-leaf21#
+A:admin@gX-leaf21#
 ```
 
 The `*` prefix on the mode indicator means there are uncommitted changes in the candidate datastore.
+
+/// admonition | Group ID
+    type: warning
+The shell and config examples use a generic group ID `X`. Replace it with your actual Group ID throughout the activity. The Group ID appears in things like node names and IP addresses.
+///
 
 **CLI Modes**
 
@@ -101,9 +106,9 @@ The `*` prefix on the mode indicator means there are uncommitted changes in the 
     ??? example "Observe the prompt"
         ```srl
         --{ + running }--[  ]--
-        A:admin@g1-leaf21# show version
+        A:admin@gX-leaf21# show version
         -------------------------------------------------------------------------
-        Hostname             : g1-leaf21
+        Hostname             : gX-leaf21
         Chassis Type         : 7220 IXR-D3L
         Part Number          : Sim Part No.
         Serial Number        : Sim Serial No.
@@ -123,10 +128,10 @@ The `*` prefix on the mode indicator means there are uncommitted changes in the 
     ??? example "Configuration mode"
         ``` srl
         --{ running }--[  ]--
-        A:admin@g1-leaf21# enter candidate
+        A:admin@gX-leaf21# enter candidate
 
         --{ candidate shared default }--[  ]--
-        A:admin@g1-leaf21#
+        A:admin@gX-leaf21#
         ```
 
 3. Navigate to the BGP context: `network-instance default protocols bgp`
@@ -134,10 +139,10 @@ The `*` prefix on the mode indicator means there are uncommitted changes in the 
     ??? example "YANG navigation"
         ``` srl
         --{ running }--[  ]--
-        A:admin@g1-leaf21# network-instance default protocols bgp
+        A:admin@gX-leaf21# network-instance default protocols bgp
 
         --{ candidate shared default }--[ network-instance default protocols bgp ]--
-        A:admin@g1-leaf21#
+        A:admin@gX-leaf21#
         ```
 
 4. Use the `tree` command to explore the command tree under the current context.
@@ -157,11 +162,11 @@ The `*` prefix on the mode indicator means there are uncommitted changes in the 
     ??? example "Config inspection"
         ``` srl
         --{ running }--[  ]--
-        A:admin@g1-leaf21# network-instance default protocols bgp
+        A:admin@gX-leaf21# network-instance default protocols bgp
 
 
         --{ running }--[ network-instance default protocols bgp ]--
-        A:admin@g1-leaf21# info autonomous-system
+        A:admin@gX-leaf21# info autonomous-system
             autonomous-system 4200002001
 
         ```
@@ -171,11 +176,11 @@ The `*` prefix on the mode indicator means there are uncommitted changes in the 
     ??? example "Enter state mode"
         ``` srl
         --{ + running }--[  ]--
-        A:admin@g1-leaf21# enter state
+        A:admin@gX-leaf21# enter state
 
 
         --{ + state }--[  ]--
-        A:admin@g1-leaf21# info interface ethernet-1/1 oper-state
+        A:admin@gX-leaf21# info interface ethernet-1/1 oper-state
             oper-state up
         ```
 
@@ -183,7 +188,7 @@ The `*` prefix on the mode indicator means there are uncommitted changes in the 
     Instead of entering a specific CLI mode, you can also pull information from a specific datastore using the `from` keyword:
     ```srl
     --{ + running }--[  ]--
-    A:admin@g1-leaf21# info from state interface ethernet-1/1 oper-state
+    A:admin@gX-leaf21# info from state interface ethernet-1/1 oper-state
         oper-state up
     ```
     ///
@@ -225,13 +230,13 @@ In this task, BGP is already configured and running on all SR Linux nodes. Your 
         === "Expected output"
             ``` srl
             --{ running }--[  ]--
-            A:admin@g1-leaf21# enter candidate
+            A:admin@gX-leaf21# enter candidate
 
             --{ candidate shared default }--[  ]--
-            A:admin@g1-leaf21# network-instance default protocols bgp
+            A:admin@gX-leaf21# network-instance default protocols bgp
 
             --{ candidate shared default }--[ network-instance default protocols bgp ]--
-            A:admin@g1-leaf21#
+            A:admin@gX-leaf21#
             ```
 
     Use `info` to display the current candidate configuration from this context.
@@ -245,9 +250,9 @@ In this task, BGP is already configured and running on all SR Linux nodes. Your 
         === "Expected output"
             ``` srl
             --{ + candidate shared default }--[ network-instance default protocols bgp ]--
-            A:admin@g1-leaf21# info
+            A:admin@gX-leaf21# info
                 autonomous-system 4200002001
-                router-id 10.46.1.43
+                router-id 10.46.X.43
                 dynamic-neighbors {
                     interface ethernet-1/31.0 {
                         peer-group spine
@@ -332,7 +337,7 @@ In this task, BGP is already configured and running on all SR Linux nodes. Your 
                         minimum-advertisement-interval 1
                     }
                     transport {
-                        local-address 10.46.1.43
+                        local-address 10.46.X.43
                     }
                 }
                 group spine {
@@ -340,7 +345,7 @@ In this task, BGP is already configured and running on all SR Linux nodes. Your 
                         local
                     ]
                 }
-                neighbor fd00:fde8::1:13 {
+                neighbor fd00:fde8::X:13 {
                     peer-group iBGP-DC
                 }
             ```
@@ -359,7 +364,7 @@ In this task, BGP is already configured and running on all SR Linux nodes. Your 
         === "Expected output"
             ``` srl
             --{ candidate shared default }--[ network-instance default protocols bgp ]--
-            A:admin@g1-leaf21# diff
+            A:admin@gX-leaf21# diff
             ```
     No output from `diff` means the candidate and running configurations are identical, a clean starting point.
 
@@ -369,13 +374,15 @@ In this task, BGP is already configured and running on all SR Linux nodes. Your 
     
     Use `diff` to review your staged changes before committing.
 
+    /// warning Replace the `X` with your `instance_ID` ///
+
     ??? example "modify configuration"
         === "Commands"
             ```
-            neighbor fd00:fde8::1:13 description "iBGP-DC overlay peer to vRR"
+            neighbor fd00:fde8::X:13 description "iBGP-DC overlay peer to vRR"
             ```
             ```
-            neighbor fd00:fde8::1:13 local-preference 170
+            neighbor fd00:fde8::X:13 local-preference 170
             ```
             ```
             diff
@@ -383,16 +390,16 @@ In this task, BGP is already configured and running on all SR Linux nodes. Your 
         === "Expected output"
             ``` srl
             --{ + candidate shared default }--[ network-instance default protocols bgp ]--
-            A:admin@g1-leaf21# neighbor fd00:fde8::1:13 description "iBGP-DC overlay peer to vRR"
+            A:admin@gX-leaf21# neighbor fd00:fde8::X:13 description "iBGP-DC overlay peer to vRR"
 
 
             --{ +* candidate shared default }--[ network-instance default protocols bgp ]--
-            A:admin@g1-leaf21# neighbor fd00:fde8::1:13 local-preference 170
+            A:admin@gX-leaf21# neighbor fd00:fde8::X:13 local-preference 170
 
 
             --{ +* candidate shared default }--[ network-instance default protocols bgp ]--
-            A:admin@g1-leaf21# diff
-                neighbor fd00:fde8::1:13 {
+            A:admin@gX-leaf21# diff
+                neighbor fd00:fde8::X:13 {
             +         description "iBGP-DC overlay peer to vRR"
             +         local-preference 170
                 }
@@ -416,17 +423,17 @@ In this task, BGP is already configured and running on all SR Linux nodes. Your 
         === "Expected output"
             ``` srl
             --{ +* candidate shared default }--[ network-instance default protocols bgp ]--
-            A:admin@g1-leaf21# commit validate
+            A:admin@gX-leaf21# commit validate
             All changes are valid.
 
 
             --{ +* candidate shared default }--[ network-instance default protocols bgp ]--
-            A:admin@g1-leaf21# commit now
+            A:admin@gX-leaf21# commit now
             All changes have been committed. Leaving candidate mode.
 
 
             --{ + running }--[ network-instance default protocols bgp ]--
-            A:admin@g1-leaf21#
+            A:admin@gX-leaf21#
             ```
 
     After a successful commit, the `*` disappears from the prompt and the mode switches back to `running`, confirming the running configuration now matches the committed candidate.
@@ -440,7 +447,7 @@ In this task, BGP is already configured and running on all SR Linux nodes. Your 
     !!! example "discard all changes"
         ``` srl
         --{ * candidate shared default }--[  ]--
-        A:admin@g1-leaf21# discard stay
+        A:admin@gX-leaf21# discard stay
         ```
 
     The `stay` keyword discards all changes but keeps you in candidate mode so you can continue editing. The `now` keyword discards changes and exits candidate mode.
@@ -452,7 +459,7 @@ In this task, BGP is already configured and running on all SR Linux nodes. Your 
     !!! example "load startup"
         ``` srl
         --{ * candidate shared default }--[  ]--
-        A:admin@g1-leaf21# load startup
+        A:admin@gX-leaf21# load startup
         ```
 
 
@@ -467,7 +474,7 @@ The SR Linux CLI supports environment customization at the session level, includ
     ??? example "info | as json"
         ``` srl
         --{ + running }--[ interface mgmt0 ]--
-        A:admin@g1-leaf21# info | as json
+        A:admin@gX-leaf21# info | as json
         {
         "name": "mgmt0",
         "admin-state": "enable",
@@ -512,10 +519,10 @@ The SR Linux CLI supports environment customization at the session level, includ
     ??? example "changing configuration using ranges"
         ``` srl
         --{ candidate shared default }--[  ]--
-        A:admin@g1-leaf21# interface ethernet-1/{5..10} admin-state enable
+        A:admin@gX-leaf21# interface ethernet-1/{5..10} admin-state enable
 
         --{ * candidate shared default }--[  ]--
-        A:admin@g1-leaf21# diff
+        A:admin@gX-leaf21# diff
         +     interface ethernet-1/5 {
         +         admin-state enable
         +     }
@@ -536,7 +543,7 @@ The SR Linux CLI supports environment customization at the session level, includ
         +     }
 
         --{ * candidate shared default }--[  ]--
-        A:admin@g1-leaf21# commit now
+        A:admin@gX-leaf21# commit now
         ```
 
 #### Output Modifiers Reference
@@ -568,10 +575,10 @@ Aliases allow operators to define custom command names that map to longer SR Lin
         === "Use alias from any context"
             ``` srl
             --{ candidate shared default }--[  ]--
-            A:admin@g1-leaf21# go-bgp
+            A:admin@gX-leaf21# go-bgp
 
             --{ candidate shared default }--[ network-instance default protocols bgp ]--
-            A:admin@g1-leaf21#
+            A:admin@gX-leaf21#
             ```
 
         !!! Warning
@@ -599,7 +606,7 @@ Aliases allow operators to define custom command names that map to longer SR Lin
         === "Expected output"
             ``` srl
             --{ + running }--[  ]--
-            A:admin@g1-leaf21# traffic-rate
+            A:admin@gX-leaf21# traffic-rate
             +---------------------+----------------------+----------------------+
             |      Interface      |        In-bps        |       Out-bps        |
             +=====================+======================+======================+
@@ -654,7 +661,7 @@ Aliases allow operators to define custom command names that map to longer SR Lin
         === "Expected output"
             ``` srl
             --{ + running }--[  ]--
-            A:admin@g1-leaf21# bgp-neighbor fd00:fde8::1:13
+            A:admin@gX-leaf21# bgp-neighbor fd00:fde8::X:13
             ------------------------------------------------------------------------------------------------------------------------
             BGP neighbor summary for network-instance "default"
             Flags: S static, D dynamic, L discovered by LLDP, B BFD enabled, - disabled, * slow
@@ -665,7 +672,7 @@ Aliases allow operators to define custom command names that map to longer SR Lin
             |            |            |            |            |            |            |            |            |    /Tx]    |
             +============+============+============+============+============+============+============+============+============+
             | default    | fd00:fde8: | iBGP-DC    | S          | 65000      | establishe | 4d:4h:58m: | evpn       | [58/58/23] |
-            |            | :1:13      |            |            |            | d          | 13s        |            |            |
+            |            | :X:13      |            |            |            | d          | 13s        |            |            |
             +------------+------------+------------+------------+------------+------------+------------+------------+------------+
             ------------------------------------------------------------------------------------------------------------------------
             Summary:
@@ -678,6 +685,45 @@ Now that you are familiar with alias definition in SRL CLI, try to configure fol
 - `show system-logs` :material-arrow-right: `show system logging buffer system`
 - `display up-int` :material-arrow-right: `display interfaces in the oper-state up`
 
+/// details | Escaping special characters in alias definitions
+    type: note
+    
+Some alias commands contain characters that are themselves meaningful to the CLI parser, most commonly double quotes inside filter expressions such as `| eql`, `| grep` or `| filter`. These need to be escaped, and the amount of escaping required depends on where the alias is defined.
+
+For a session-level alias (`environment alias`), escape the inner quotes once:
+
+```srl
+environment alias <name> "<command> | eql \"<expression>\""
+```
+
+For a persistent alias (`/system cli environment alias`), escape both the backslash and the quote:
+
+```srl
+/system cli environment alias <name> command "<command> | eql \\\"<expression>\\\""
+```
+
+The reason is that the persistent alias configuration is written to `/etc/opt/srlinux/srlinux.rc`, which uses TOML formatting. One level of escaping is consumed on the way into that file, so a single `\"` in the configuration ends up as a bare `"` in the `.rc` file. The alias will commit without complaint, but fail with a parsing error when you try to use it:
+
+```srl
+--{ + candidate shared default }--[  ]--
+A:admin@g1-leaf21# <name>
+Parsing error: Unknown token '='. Options are ['#', '>', '>>', '|']
+```
+
+With the double escaping applied, the stored configuration keeps the `\\\"` sequence and the correct string reaches the `.rc` file:
+
+```srl
+--{ + running }--[  ]--
+A:admin@g1-leaf21# info system cli
+    environment {
+        alias <name> {
+            command "<command> | eql \\\"<expression>\\\""
+        }
+    }
+```
+
+Aliases whose commands contain no quotes or backslashes need no escaping at all in either form.
+///
 
 ### Checkpoint & Rollback
 
@@ -697,7 +743,7 @@ SR Linux supports configuration rollback via checkpoint files. This allows opera
     ??? example "save checkpoint"
         ``` srl
         --{ running }--[  ]--
-        A:admin@g1-leaf21# tools system configuration generate-checkpoint name "before-bgp-changes"
+        A:admin@gX-leaf21# tools system configuration generate-checkpoint name "before-bgp-changes"
         /system:
             Generated checkpoint '/etc/opt/srlinux/checkpoint/checkpoint-0.json' with name 'before-bgp-changes' and comment ''
         ```
@@ -709,14 +755,14 @@ SR Linux supports configuration rollback via checkpoint files. This allows opera
     ??? example "load checkpoint"
         ``` srl
         --{ + candidate shared default }--[  ]--
-        A:admin@g1-leaf21# load checkpoint name before-bgp-changes
+        A:admin@gX-leaf21# load checkpoint name before-bgp-changes
         /system/configuration/checkpoint[id=before-bgp-changes]:
             Loaded checkpoint '/etc/opt/srlinux/checkpoint/checkpoint-0.json'
 
 
 
         --{ +* candidate shared default }--[  ]--
-        A:admin@g1-leaf21#
+        A:admin@gX-leaf21#
         ```
 
     Review the `diff` to confirm that the revert staged the expected changes, then `commit`.
@@ -724,11 +770,11 @@ SR Linux supports configuration rollback via checkpoint files. This allows opera
     ??? example "commit after rollback"
         ``` srl
         --{ * candidate shared default }--[  ]--
-        A:admin@g1-leaf21# diff
+        A:admin@gX-leaf21# diff
         # ... shows the reverted changes ...
 
         --{ * candidate shared default }--[  ]--
-        A:admin@g1-leaf21# commit now
+        A:admin@gX-leaf21# commit now
         ```
 
 3. **Revert to the startup configuration**
@@ -738,7 +784,7 @@ SR Linux supports configuration rollback via checkpoint files. This allows opera
     ??? example "load startup checkpoint"
         ``` srl
         --{ + candidate shared default }--[  ]--
-        A:admin@g1-leaf21# load startup auto-commit
+        A:admin@gX-leaf21# load startup auto-commit
         /system/configuration/checkpoint[id=__startup__]:
             Reverting to startup configuration
 
@@ -755,7 +801,7 @@ SR Linux supports configuration rollback via checkpoint files. This allows opera
     ??? example "list checkpoints"
         ``` srl
         --{ running }--[  ]--
-        A:admin@g1-leaf21# info from state / system configuration checkpoint * | as table | filter fields *
+        A:admin@gX-leaf21# info from state / system configuration checkpoint * | as table | filter fields *
         ```
 
 #### Operational Best Practices

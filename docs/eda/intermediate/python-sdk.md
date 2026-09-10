@@ -1631,3 +1631,16 @@ if __name__ == "__main__":
 ```
 
 ///
+
+## Summary
+
+Clicking through the UI is great for learning, but at scale network provisioning needs to be repeatable, reviewable, and driven by code. In this activity you moved from manual, GUI-based operations to fully programmatic automation using the EDA Python SDK.
+
+You started by generating a typed SDK directly from your live EDA platform. From there you:
+
+- Retrieved live network data through the Apps API using native, strongly-typed Python objects instead of raw REST calls.
+- Created your first resource to see the created workflow end to end.
+- Tackled a real-world provisioning challenge: parsing a JSON inventory that represents a legacy system and programmatically building out the full service.
+- Validated the result with `ping` and `traceroute`, confirming end-to-end connectivity between clients across different subnets.
+
+Because the SDK is generated from the platform and fully type-hinted, versioning and static typing catch mistakes before they ever reach the network — something raw REST calls cannot offer. You now have a solid foundation for automating complex, multi-step provisioning workflows and integrating EDA into larger systems, such as customer service portals or migrations away from legacy infrastructure.

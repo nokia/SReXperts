@@ -16,7 +16,7 @@ tags:
 | **Activity ID**           | 27                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | **Short Description**       | Securing the gRPC data-path from interception and attack                                                                                                                                                                                                                                                                    |
 | **Difficulty**              | Beginner                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| **Tools used**              | [gNMIc](https://gnmic.openconfig.net/) <br>[TShark](https://tshark.dev/)                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **Tools used**              | [gNMIc](https://gnmic.openconfig.net/) <br>[TShark](https://tshark.dev/) <br/> [Containerlab](https://containerlab.dev)                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | **Topology Nodes**          | :material-router: P1                                                                                                                                                                                                                                                                                                                                                         |
 | **References**              | [gRPC](https://grpc.io/docs/what-is-grpc/introduction/)<br/>[gRPC on SR OS in release 26.3.R1](https://documentation.nokia.com/sr/26-3/7x50-shared/system-management/grpc.html#ai9exgst78)<br/>[TLS on SR OS in release 26.3.R1](https://documentation.nokia.com/sr/26-3/7x50-shared/system-management/transport-layer-security.html#ai9exgst94)<br/>[gNMIc](https://gnmic.openconfig.net) |
 
@@ -27,8 +27,7 @@ are transmitted without encryption and so are subject to interception concerns.
 
 ## Objective
 
-Your task is the ensure that the telemetry streams are secured and can no longer be viewed.  You will use gNMI to
-make these configuration changes so you can automate all device changes without needing to log onto each node.
+Your task is to ensure that the telemetry streams are secured and can no longer be viewed.
 
 You will initially use :material-router: P1. You may choose to expand this to secure the whole network later.
 

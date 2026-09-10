@@ -58,19 +58,28 @@ You want to publish this application to your own container registry and your own
 
 The first task is to clone the application repository to your assigned VM. When cloned, check out the `srx2026` tag to get the application code validated for this activity.
 
-/// details | Verify the tag
-To verify that the tag has been checked out correctly, run:
+/// details | Clone the app repo and verify the tag
 
+Clone the application repository and the checkout the `srx2026` tag:
 ```
-git describe --tags --exact-match HEAD
-srx2026
-```
-
-If you don't see the `srx2026` tag, checkout the tag again:
-
-```
+git clone https://github.com/eda-labs/bottom-toolbar-app.git && \
+cd bottom-toolbar-app/ && \
 git checkout srx2026
 ```
+
+To verify that the tag has been checked out correctly, run:
+
+/// tab | Command
+```
+git describe --tags --exact-match HEAD
+```
+///
+/// tab | Output
+```
+$ git describe --tags --exact-match HEAD
+srx2026
+```
+///
 
 ///
 
@@ -82,9 +91,19 @@ Great solutions require great tools. The EDA team has developed the [`edabuilder
 
 `edabuilder` is already installed on your VM. To verify that it is installed, run:
 
+/// tab | Command
 ```
-edabuilder --version
+edabuilder version
 ```
+///
+/// tab | Output
+```
+$  edabuilder version
+CLI version: v26.4.1
+Build Id: v26.4.1-2604222052-g24ccd0bb
+AppImage builder spec version: v1.0.0
+```
+///
 
 ### Set up a container registry
 
@@ -172,14 +191,88 @@ In this manifest file the app team has defined the application image URL that th
 
 Save the edited manifest file and proceed to the next task.
 
+/// details | Solution: `manifest.yaml` file
+    type: info
+The outputs below display the `bottom_toolbar` directory listing and the `manifest.yaml` file contents.
+
+/// tab | `bottom_toolbar` dir listing
+``` bash
+$ ls -al bottom_toolbar/
+total 48
+drwxrwxr-x 7 nokia nokia 4096 Jul  9 09:30 .
+drwxrwxr-x 9 nokia nokia 4096 Jul  9 10:52 ..
+drwxrwxr-x 3 nokia nokia 4096 Jul  9 09:30 api
+drwxrwxr-x 2 nokia nokia 4096 Jul  9 09:30 crds
+drwxrwxr-x 5 nokia nokia 4096 Jul  9 09:30 docs
+-rw-rw-r-- 1 nokia nokia  956 Jul  9 09:30 go.mod
+-rw-rw-r-- 1 nokia nokia 9256 Jul  9 09:30 go.sum
+drwxrwxr-x 3 nokia nokia 4096 Jul  9 09:30 intents
+-rw-rw-r-- 1 nokia nokia 1204 Jul  9 09:30 manifest.yaml
+drwxrwxr-x 2 nokia nokia 4096 Jul  9 09:30 openapiv3
+
+```
+///
+/// tab | `manifest.yaml` file
+``` bash hl_lines="28"
+$ cat bottom_toolbar/manifest.yaml 
+apiVersion: core.eda.nokia.com/v1
+kind: Manifest
+metadata:
+  name: bottom-toolbar
+spec:
+  appInfo:
+    categories:
+      - networking
+    documentation: bottom_toolbar/docs
+  author: eda-labs
+  supportedEndpoints:
+    - "srl:25.*.*"
+    - "srl:26.*.*"
+  dependencies:
+    - file:
+        path: utils
+    - file:
+        path: common
+    - file:
+        path: core
+    - file:
+        path: bottom_toolbar/api/v1alpha1/pysrc
+    - file:
+        path: bottom_toolbar/intents
+  description: Set some crazy message in the CLI's bottom toolbar of the SR Linux nodes.
+  group: bottom-toolbar.eda.labs
+  image: ghcr.io/eda-labs/bottom-toolbar:v0.1.0    ### Update this URL e.g.: ghcr.io/<someuser>/bottom_toolbar:v0.1.0  
+  supportedCoreVersions:
+    - v4.0.0-0
+    - v5.0.0-0
+  title: Bottom Toolbar
+  version: v1alpha1
+  components:
+    - crd:
+        api:
+          expose: readWrite
+        path: bottom_toolbar/crds/bottom-toolbar.eda.labs_bottomtoolbars.yaml
+        schema: bottom_toolbar/openapiv3/eda_oas_bottom-toolbar.eda.labs_bottomtoolbars.json
+        ui:
+          category: Management
+          name: Bottom Toolbars
+    - script:
+        path: bottom_toolbar/intents/bottomtoolbar/config_intent.py
+        trigger:
+          kind: BottomToolbar
+        type: config
+```
+///
+///
+
 ### Release your application
 
 You reached an important milestone in the application delivery process. You have prepared the application catalog, logged in to the container registry and changed the application image URL in the manifest to point to the container registry of your choice. Everything is in place to release the application.
 
-The `edabuilder release` command will do everything for you:
+The `edabuilder release` command will do everything for you. Execute this command from the root of the `bottom-toolbar-app` repository
 
 ```bash
-edabuilder release --app bottom-toolbar-app https://github.com/someuser/some-repo.git #(1)!
+edabuilder release --app bottom_toolbar https://github.com/someuser/some-repo.git #(1)!
 ```
 
 1. It is important to keep the git schema (https) in the URL.
@@ -200,7 +293,8 @@ If you open up the repository in your browser, you will see a new tag and commit
 
 /// warning | Container image permissions
 While EDA can perfectly work with private container registries by providing the registry credentials, for this activity it is easier to make the published container image public.  
-For example, the images pushed to GitHub Container Registry are private by default; you will need to find the image in your registry and make it public.
+For example, the images pushed to GitHub Container Registry are private by default; you will need to find the image in your registry and make it public.  
+Under you GitHub account go to `Packages`, click your package, and select `Package settings`. Scroll down to the `Danger Zone` and `Change visibility` to `Public` (you need to type the package name to confirm the change).
 ///
 
 ### Configure Catalog in EDA
@@ -222,6 +316,32 @@ To add a new Catalog resource, select the **Catalogs** item in the left sidebar 
 In the resource editor form, fill in the details of your catalog. What do you think you should fill in there?
 
 Once you have filled in the details, click the **Commit** button in the edit form to have your new catalog resource created.
+
+
+/// details | Solution
+    type: solution
+
+To create a catalog in EDA you need to set a name, the title, define the URL and enable the catalog.  
+You may fill the catalog form or you can edit the yaml following the instructions below.
+
+/// tab | catalog yaml spec
+```bash hl_lines="4 8 11 13"
+apiVersion: appstore.eda.nokia.com/v1
+kind: Catalog
+metadata:
+  name: eda-catalog-builtin-apps   ### Set a name
+  namespace: eda-system
+spec:
+  authSecretRef: gh-catalog
+  enabled: true   ### By default a new catalog will be set as disabled, you need to enable it
+  refreshInterval: 180
+  remoteType: git
+  remoteURL: https://github.com/nokia-eda/catalog.git   ### Set your catalog URL
+  skipTLSVerify: false
+  title: EDA built in apps catalog   ### Set a title
+```
+///
+///
 
 ### Install the application
 

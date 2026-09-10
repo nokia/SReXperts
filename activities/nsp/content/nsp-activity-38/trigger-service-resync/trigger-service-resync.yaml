@@ -49,7 +49,7 @@ trigger-service-resync:
         data:
           config: []
       on-success:
-        - get_nodes
+        - build_find_filter
       on-error:
         - report_template_unavailable
 
@@ -70,15 +70,43 @@ trigger-service-resync:
       on-success:
         - done
 
+    build_find_filter:
+      action: nsp.python
+      input:
+        context:
+          group: <% $.group %>
+          node_scope: <% $.node_scope %>
+        script: |
+          group = int(context.get("group") or 1)
+          scope = (context.get("node_scope") or "all").lower()
+          g = "g%d" % group
+          if scope == "pe1":
+            pred = "contains('ne-name', '%s-pe1')" % g
+          elif scope == "pe2":
+            pred = "contains('ne-name', '%s-pe2')" % g
+          else:
+            pred = "contains('ne-name', '%s-pe1') or contains('ne-name', '%s-pe2')" % (g, g)
+          return "/nsp-equipment:network/network-element[%s]" % pred
+      publish:
+        xpath_filter: <% task().result %>
+      on-success:
+        - get_nodes
+
     get_nodes:
       action: nsp.https
       input:
-        url: 'https://<% locate_nsp() %>/restconf/data/nsp-equipment:network/network-element?include-meta=false&fields=ne-id;type;ne-name;ip-address'
-        method: GET
+        url: 'https://restconf-gateway/restconf/operations/nsp-inventory:find'
+        method: POST
         contentType: 'application/json'
         accept: 'application/json'
+        body:
+          input:
+            xpath-filter: <% $.xpath_filter %>
+            depth: "2"
+            fields: "ne-id;type;ne-name;ip-address"
+            include-meta: false
       publish:
-        node_detail: <% task().result.content["nsp-equipment:network-element"] %>
+        node_detail: <% task().result.content["nsp-inventory:output"].data %>
       publish-on-error:
         message: '<% "Failed to get network elements: " + str(task().result) %>'
       on-success:
@@ -91,27 +119,16 @@ trigger-service-resync:
       input:
         context:
           node_detail: <% $.node_detail %>
-          node_scope: <% $.node_scope %>
-          group: <% $.group %>
         script: |
           node_detail = context.get("node_detail") or []
           if isinstance(node_detail, dict):
             node_detail = [node_detail]
-          scope = (context.get("node_scope") or "all").lower()
-          group = int(context.get("group") or 1)
-          group_prefix = ("g" + str(group) + "-").lower()
           targets = []
           for n in node_detail:
             ne_id = n.get("ne-id")
-            ne_name = (n.get("ne-name") or "").lower()
-            if not ne_id or not ne_name.startswith(group_prefix):
+            if not ne_id:
               continue
-            if scope == "all" and ("pe1" in ne_name or "pe2" in ne_name):
-              targets.append({"ne-id": ne_id, "ne-name": n.get("ne-name", ne_id), "ip-address": n.get("ip-address")})
-            elif scope == "pe1" and "pe1" in ne_name:
-              targets.append({"ne-id": ne_id, "ne-name": n.get("ne-name", ne_id), "ip-address": n.get("ip-address")})
-            elif scope == "pe2" and "pe2" in ne_name:
-              targets.append({"ne-id": ne_id, "ne-name": n.get("ne-name", ne_id), "ip-address": n.get("ip-address")})
+            targets.append({"ne-id": ne_id, "ne-name": n.get("ne-name", ne_id), "ip-address": n.get("ip-address")})
           return targets
       publish:
         target_nodes: <% task().result %>
@@ -187,7 +204,7 @@ trigger-service-resync:
     trigger_resync:
       action: nsp.https
       input:
-        url: 'https://<% locate_nsp() %>/restconf/operations/nsp-admin-resync:trigger-resync'
+        url: 'https://restconf-gateway/restconf/operations/nsp-admin-resync:trigger-resync'
         method: POST
         contentType: 'application/json'
         accept: 'application/json'

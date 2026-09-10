@@ -494,6 +494,8 @@ rtt min/avg/max/mdev = 0.841/0.841/0.841/0.000 ms
 
 ///
 
+## Summary
+
 Great job completing the Bridge Domains exercise! You've successfully:
 
 - Created layer-2 connectivity between `client11` and `client13` using EDA's Bridge Domain, Bridge Interface, and VLAN resources

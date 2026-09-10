@@ -24,10 +24,23 @@ In this activity you will:
 
 <!-- --8<-- [start:connectivity-details] -->
 /// note | Connectivity details
-For this activity only you are going to use an EDA instance that is designated to host the digital twin. Access this instance by going to https://1.eda.srexperts.net and log in with the following credentials:
 
-- username: admin<b><ID></b> where <ID> is your group number
-- password: the event password provided to you (common for all instances of the hackathon)
+For this activity only you are going to use an EDA and VM instances `#1` that are designated to host the digital twin.  
+Access the EDA instance `#1` using the URL below and the credentials available in the leaflet provided to you.
+
+- https://1.eda.srexperts.net
+
+>  - username: `admin<ID>` where `<ID>` is your group number  
+>  - password: the event password provided to you (common for all instances of the hackathon)  
+
+Access the VM instance `#1` with the command below and the credentials available in the leaflet provided to you.  
+```
+ssh nokia@1.srexperts.net
+```
+
+>  - username: `admin`
+>  - password: the event password provided to you (common for all instances of the hackathon)  
+
 ///
 <!-- --8<-- [end:connectivity-details] -->
 
@@ -121,24 +134,23 @@ Let's zoom in and take a closer look at the information defined in these custom 
     type: tip
 The EDA CRDs are easy to view via the [CRD Browser](https://crd.eda.dev).
 
-CRDs (custom resource **definitions**) are essentially schemas that **define** what information will be found in a CR.
+CRDs (Custom Resource **Definitions**) are essentially schemas that **define** what information will be found in a CR.
 
 ///
 /// tab | TopoNode
 
 Taking a look at the leaf1 `TopoNode` resource we can see the key information about the leaf1 node.
 
-```
+```bash
 edactl -n eda get toponode leaf1 -o yaml
 ```
 
-<div class="embed-result">
 ```yaml
 apiVersion: core.eda.nokia.com/v1
 kind: TopoNode
 metadata:
   labels:
-    eda.nokia.com/role: leaf # (1)!
+    eda.nokia.com/role: leaf #(1)!
     eda.nokia.com/security-profile: managed
   name: leaf1
   namespace: eda
@@ -147,12 +159,12 @@ spec:
   npp:
     mode: normal
   onBoarded: true
-  operatingSystem: srl # (2)!
-  platform: 7220 IXR-D3L # (3)!
+  operatingSystem: srl #(2)!
+  platform: 7220 IXR-D3L #(3)!
   productionAddress: {}
-  version: 26.3.1 # (4)!
+  version: 26.3.1 #(4)!
 ```
-</div>
+
 1. The node has the role `leaf`
 2. It's running SR Linux
 3. The hardware platform is 7220 IXR-D3L
@@ -165,6 +177,10 @@ spec:
 
 Taking a look at the `TopoLink` resource for the link between leaf1 and spine1:
 
+```bash
+edactl -n eda get topolink leaf1-spine1-1 -o yaml
+```
+
 ```yaml
 apiVersion: core.eda.nokia.com/v1
 kind: TopoLink
@@ -176,7 +192,7 @@ metadata:
 spec:
   links:
   - local:
-      interface: ethernet-1-1 # (1)!
+      interface: ethernet-1-1 #(1)!
       interfaceResource: leaf1-ethernet-1-1
       node: leaf1
     remote:
@@ -188,11 +204,11 @@ status:
   members:
   - interface: ethernet-1-1
     node: leaf1
-    operationalState: Up # (2)!
+    operationalState: Up #(2)!
   - interface: ethernet-1-1
     node: spine1
     operationalState: Up
-  operationalState: up # (3)!
+  operationalState: up #(3)!
 ```
 
 1. Both nodes connect via `ethernet-1-1`
@@ -206,6 +222,10 @@ status:
 
 The leaf1 `SimNode` resource mirrors the `TopoNode` however with additional simulation-specific fields.
 
+```bash
+edactl -n eda get SimNodes leaf1 -o yaml
+```
+
 ```yaml
 apiVersion: core.eda.nokia.com/v1
 kind: SimNode
@@ -217,13 +237,13 @@ metadata:
   name: leaf1
   namespace: eda
 spec:
-  containerImage: ghcr.io/nokia/srlinux:26.3.1-410 # (1)!
+  containerImage: ghcr.io/nokia/srlinux:26.3.1-410 #(1)!
   dhcp:
     preferredAddressFamily: IPv4
   gatewayAddress:
     ipv4: 192.168.1.1/16
-  imagePullSecret: core # (2)!
-  license: cx-srl-26-3-1-ghcr-license # (3)!
+  imagePullSecret: core #(2)!
+  license: cx-srl-26-3-1-ghcr-license #(3)!
   operatingSystem: srl
   platform: 7220 IXR-D3L
   port: 57400
@@ -246,6 +266,10 @@ spec:
 
 The `leaf1-ethernet-1-1` resource represents interface ethernet-1/1 on leaf1:
 
+```bash
+edactl -n eda get interface leaf1-ethernet-1-1 -o yaml
+```
+
 ```yaml
 apiVersion: interfaces.eda.nokia.com/v1
 kind: Interface
@@ -256,10 +280,10 @@ metadata:
   namespace: eda
 spec:
   enabled: true
-  encapType: "Null" # (1)!
+  encapType: "Null" #(1)!
   ethernet:
     stormControl: {}
-  lldp: true # (2)!
+  lldp: true #(2)!
   members:
   - enabled: true
     interface: ethernet-1-1
@@ -274,12 +298,12 @@ status:
     interface: ethernet-1-1
     lastChange: "2026-05-04T04:53:57.800Z"
     neighbors:
-    - interface: ethernet-1/1 # (3)!
+    - interface: ethernet-1/1 #(3)!
       node: spine1
     node: leaf1
     nodeInterface: ethernet-1/1
     operationalState: Up
-    speed: 100G # (4)!
+    speed: 100G #(4)!
   operationalState: Up
   speed: 100G
 ```
@@ -314,9 +338,9 @@ So it is natural to see the **`NetworkTopology`** workflow being used to enable 
 
 The `NetworkTopology` workflow is the declarative way to define and deploy your network with EDA. It combines node definitions, link definitions, simulation parameters, and has powerful templating features into a single resource. Thus making fabric creation easy.
 
-Below is an example of the default 'Try EDA' 2 leaf, 1 spine topology.
+Below is an example of the default 2 leaves and 1 spine `Try EDA` topology.
 
-/// details | Full 'Try EDA' NetworkTopology Workflow definition  (click to expand)
+/// details | Full `Try EDA` NetworkTopology Workflow definition  (click to expand)
     type: example
 
 ```yaml
@@ -398,13 +422,13 @@ The key fields are:
 
 The EDA instance you are using for this activity is shared across all groups, which means you need to scope your work to a specific namespace to avoid conflicts with other attendees going over the same activity.
 
-EDA supports the notion of namespaces, which allow operators to scope their resources to a specific namespace, which in our case would be a "workspace" for your group. Make sure you check what group ID you have been assigned and execute the namespace creation command to create your unique namespace by replacing <ID> with your group number:
+EDA supports the notion of namespaces, which allow operators to scope their resources to a specific namespace, which in our case would be a "workspace" for your group. Make sure you check what group ID you have been assigned and execute the namespace creation command to create your unique namespace by replacing `<ID>` with your group number.
 
 ```bash title="Execute on the 1.srexperts.net instance"
 edactl namespace bootstrap create --from-namespace eda group<ID> #(1)!
 ```
 
-1. Make sure to replace <ID> with your group number.
+1. Make sure to replace `<ID>` with your group number.
 
 This command should create a namespace in EDA that you should be using for the rest of the activity. In the EDA UI go and select your freshly minted namespace:
 
@@ -415,8 +439,8 @@ This command should create a namespace in EDA that you should be using for the r
 First, we'll stand up our own Try EDA topology that consists of three nodes (2x leafs, 1x spine) using the `NetworkTopology` workflow.
 
 1. Navigate to the [workflows](https://1.eda.srexperts.net/ui/main/workflows) in EDA UI.
-2. Create a new workflow execution of `NetworkTopology`.
-3. Paste in the [workflow YAML](#the-networktopology-workflow)
+2. Create a new workflow execution of `NetworkTopology` (select from the dropdown).
+3. Paste in the [workflow YAML](#the-networktopology-workflow).
 4. Ensure that you fill in the namespace field in the YAML you pasted, as it is intentionally left blank.
 5. Run it.
 
@@ -438,9 +462,19 @@ Now let's verify that all the resources were created correctly.
 
 Use `edactl get -n group<ID> <resource>` to list the topology and simulation resources.
 
-Replace `<resource>` placeholder with the resource types we learned earlier.
+Replace `<ID>` with your group ID and the `<resource>` placeholder with the resource types we learned earlier (toponodes, topolinks, interfaces, simnodes and simlinks).
 
 We should find that they are all present in the cluster.
+
+/// admonition | Output example
+```
+$ edactl get -n group<ID> toponodes
+NAME     PLATFORM       VERSION   OS    ONBOARDED   MODE     NPP         NODE
+leaf1    7220 IXR-D3L   26.3.1    srl   true        normal   Connected   Synced
+leaf2    7220 IXR-D3L   26.3.1    srl   true        normal   Connected   Synced
+spine1   7220 IXR-D5    26.3.1    srl   true        normal   Connected   Synced
+```
+///
 
 ### TopoBuilder
 
@@ -484,12 +518,29 @@ Shift-select[^1] links that source from a SimNode and connect to two or more dif
 
 The fabric is live, but now requirements have changed and we need to grow the fabric to accommodate new workloads. Let's add a new leaf node.
 
-1. Paste the [Try EDA topology workflow](#the-networktopology-workflow) into the TopoBuilder tool
-2. {== Make sure to change the namespace field in the pasted YAML in the TopoBuilder UI to match your namespace, as by default it is empty==}
+1. Paste the [Try EDA topology workflow](#the-networktopology-workflow) into the TopoBuilder tool.
+2. {== Make sure to change the namespace field in the pasted YAML in the TopoBuilder UI to match your namespace, that should be `group<ID>` (replace `<ID>` with you group ID).==}
 3. Use the TopoBuilder to insert a new leaf node using the canvas (right button click to add the node) and connect it to `spine1`.
 4. Copy the YAML using the :material-content-copy: button in the toolbar.
 5. Create a new workflow in your namespace and paste in the YAML you copied.
 6. Run the workflow.
+
+
+/// details | Did you get an error?
+    type: warning
+
+When you create a new workflow EDA will generate a unique workflow name, however, when you paste the yaml file from TopoBuilder, the name is overwritten.  
+If you run the workflow with the TopoBuilder yaml file for a second time, without change the name, you'll get the error bellow.  
+On each execution you must give the new flow a unique name. You may use a custom name or add to the name an incremental suffix on each workflow execution, for example: `-v1`,`-v2` and so on. You may use the name `try-eda-topology-hackathon-v2`.
+
+/// tab | Error when you re-use the same name from a previous executed workflow.
+```text
+Flow try-eda-topology-hackathon in group<ID> already exists for GVK topologies.eda.nokia.com/v1, Kind=NetworkTopology.
+```
+///
+///
+
+
 
 After deploying, we should see our new leaf node in the topology.
 
@@ -506,8 +557,10 @@ After successful deployment of the workflow, we should see our new node in EDA.
 Confirm the new `node-1` appears and is onboarded.
 
 ```bash title="Get TopoNodes"
-edactl -n eda get TopoNodes
+edactl -n group<ID> get TopoNodes #(1)!
 ```
+
+1. Replace `<ID>` with your group ID
 
 <div class="embed-result">
 ```
@@ -543,13 +596,13 @@ Our workflow definition should include only the nodes and links that we want to 
 
 We need to set the operation to `Reconcile` and remove `node-1` from the workflow definition, as well as any links it may have had connecting to it.
 
-In TopoBuilder this is done easily, by just right-clicking on the `node-1` node and deleting it. The links for the node are then automatically deleted.
+In TopoBuilder this is done easily, by just right-clicking on the `node-1` node and deleting it. The links for the node are then automatically deleted. Ensure you also update the metadata name to be unique.
 
 ```diff title="Change operation to Reconcile"
 apiVersion: topologies.eda.nokia.com/v1
 kind: NetworkTopology
 metadata:
-  name: 46-add-node-topobuilder
+  name: 46-add-node-topobuilder   ### Name must be unique per workflow execution
 spec:
 -  operation: ReplaceAll
 +  operation: Reconcile
@@ -578,8 +631,10 @@ After executing the workflow, EDA removes `node-1` while leaving the other nodes
 Confirm `node-1` is gone and the other nodes we didn't intend to remove are still present.
 
 ```bash title="Get TopoNodes"
-edactl -n eda get TopoNodes
+edactl -n group<ID> get TopoNodes #(1)!
 ```
+
+1. Replace `<ID>` with your group ID
 
 <div class="embed-result">
 ```
@@ -687,20 +742,22 @@ Notice that each endpoint is connected to the same `SimNode` (`workload`), howev
 
 #### Create an ESI-LAG
 
-A new server needs redundant connectivity. Create an ESI-LAG that connects it to both `node-1` and `leaf2`.
+A new server needs redundant connectivity. Use TopoBuilder and create an ESI-LAG that connects it to both `leaf1` and `leaf2`.
 
 - Add a new SimNode to act as our server.
     - Set the `simTemplate` to `server`.
-- Create the edge links from our `node-1` and `leaf-2` leaf nodes to the server.
+- Create the edge links from our `leaf1` and `leaf-2` leaf nodes to the server.
 - Convert the two links into the ESI-LAG.
 - Verify that the ESI-LAG `TopoLink` resource was created.
+- update the name to be unique, e.g. `try-eda-topology-hackathon-v3`.
+- apply the new configurations using the TopoBuilder yaml file and create a new workflow.
 
 /// details | Solution & Verification
 The output workflow should look like below. Notice two key things:
 
 - Under `simulation.simNodes` we have a new `my-server` node. This is our mock server.
 - We set it to use the `server` sim template, which uses a simple Linux container image.
-- Under `links` we have the new `testman2-esi-lag-1` which has endpoint entries for **two different** nodes (`leaf2` and `node-1`).
+- Under `links` we have the new `testman2-esi-lag-1` which has endpoint entries for **two different** nodes (`leaf1` and `leaf2`).
 <video controls>
   <source src="../../../images/eda/digital-twin/SimEsiLag.mp4" type="video/mp4">
 
@@ -714,14 +771,16 @@ Let's verify the resources created from the workflow.
 
 /// tab | `edactl`
 
-Confirm `my-server-esi-lag-1` appears and is operationally up.
+Confirm `my-server-esi-lag-1` appears and is operationally up (Note: that other not in use interfaces may show up as down).
 
 ```bash title="Get TopoLinks"
-edactl -n eda get TopoLinks
+edactl -n group<ID> get TopoLinks #(1)!
 ```
 
+1. Replace `ID` with your group ID
+
 <div class="embed-result">
-```
+```bash hl_lines="23"
 NAME                  OPERATIONAL STATE
 leaf1-2-e1212         up
 leaf1-e1011           up
@@ -748,11 +807,13 @@ my-server-esi-lag-1   up
 ```
 </div>
 
-Inspect the endpoints to verify they connect to different nodes (`leaf2` and `node-1`).
+Inspect the endpoints to verify they connect to different nodes (`leaf1` and `leaf2`).
 
 ```bash title="Get TopoLink resource data"
-edactl get -n eda TopoLink my-server-esi-lag-1 -o yaml
+edactl get -n group<ID> TopoLink my-server-esi-lag-1 -o yaml #(1)!
 ```
+
+1. Replace `<ID>` with your group ID. Ensure you use the correct server name.
 
 <div class="embed-result">
 ```yaml
@@ -761,8 +822,8 @@ kind: TopoLink
 metadata:
   labels:
     eda.nokia.com/role: edge
-  name: my-server-esi-lag-1
-  namespace: eda
+  name: my-server-esi-lag-1   ### Name must be unique per workflow execution
+  namespace: group<ID>   ### Replace `<ID>` with your group ID
 spec:
   links:
   - local:
@@ -797,12 +858,12 @@ status:
 
 /// details | Solution workflow definition (click to expand)
 
-```yaml
+```yaml hl_lines="4 5"
 apiVersion: topologies.eda.nokia.com/v1
 kind: NetworkTopology
 metadata:
-  name: 46-esi-lag
-  namespace: ""
+  name: 46-esi-lag   ### Name must be unique per workflow execution
+  namespace: group<ID>   ### replace `<ID>` with you group ID
 spec:
   operation: Reconcile
   nodeTemplates:
@@ -1095,7 +1156,7 @@ There are many permutations and component combinations that can be had with the 
 
 EDA supports multiple vendors (and platforms) which each bring their own interface naming schemes. To provide consistency EDA uses a normalized naming convention which applies to the card slots and ports on SR OS devices.
 
-See the below sample table and [documentation reference](https://docs.eda.dev/26.4/apps/interfaces.eda.nokia.com/docs/resources/interface/#interface-naming-and-normalization) for further info.
+See the below sample table and [documentation reference](https://docs.eda.dev/26.4/apps/interfaces.eda.nokia.com/resources/interface/#interface-naming-and-normalization) for further info.
 
 | SR OS | EDA | Description |
 | - | - | - |
@@ -1104,6 +1165,7 @@ See the below sample table and [documentation reference](https://docs.eda.dev/26
 | `2/2/1` | `ethernet-2-b-1` | Linecard 2, MDA "b" (2nd), port 1 |
 | `2/2/c1/1` | `ethernet-2-b-1-1` | Linecard 2, MDA "b" (2nd), connector 1, port 1 |
 
+Note that when QSFP28 or QSFP-DD cards are used, the physical cages are always connectors that support breakouts to one or more ports.  
 ///
 
 Now time to add our DCGW.
@@ -1114,11 +1176,11 @@ You can use TopoBuilder to add the SR OS nodes and its components to the topolog
 
 We need to:
 
-- Add the node template for our 7750 SR-1 device
+- Add a new node template for our 7750 SR-1 device
     - Ensure it is using nodeProfile `sros-ghcr-26.3.r1`
 - Add the relevant CPM, IOM, MDA and Connector components.
 - Connect it to the spine node.
-    - Double-check to ensure the correct interface name is used.
+    - Double-check to ensure the correct interface name is used (ethernet-1-a-1-1).
 - Deploy the workflow!
 
 /// details | Solution & Verification
@@ -1141,15 +1203,17 @@ The `my-dcgw` node is successfully onboarded and we can see our defined componen
 Confirm `my-dcgw` appears with platform `7750 SR-1` and note the OS should be `sros`.
 
 ```bash title="Get TopoNodes"
-edactl -n eda get TopoNodes
+edactl -n group<ID> get TopoNodes #(1)!
 ```
+
+1. Replace `<ID>` with your group ID
 
 <div class="embed-result">
 ```
 NAME      PLATFORM       VERSION   OS     ONBOARDED   MODE     NPP         NODE
 leaf2     7220 IXR-D3L   26.3.1    srl    true        normal   Connected   Synced
 my-dcgw   7750 SR-1      26.3.r1   sros   true        normal   Connected   Synced
-node-1    7220 IXR-D3L   26.3.1    srl    true        normal   Connected   Synced
+leaf1    7220 IXR-D3L   26.3.1    srl    true        normal   Connected   Synced
 spine1    7220 IXR-D5    26.3.1    srl    true        normal   Connected   Synced
 ```
 </div>
@@ -1157,19 +1221,21 @@ spine1    7220 IXR-D5    26.3.1    srl    true        normal   Connected   Synce
 Inspect the `my-dcgw` TopoNode to verify the chassis components are defined.
 
 ```bash title="Get TopoNode resource data"
-edactl get -n eda TopoNode my-dcgw -o yaml
+edactl get -n group<ID> TopoNode my-dcgw -o yaml #(1)!
 ```
 
+1. Replace `<ID>` with your group ID
+
 <div class="embed-result">
-```yaml
+```yaml hl_lines="7 8"
 apiVersion: core.eda.nokia.com/v1
 kind: TopoNode
 metadata:
   labels:
     eda.nokia.com/role: borderleaf
     eda.nokia.com/security-profile: managed
-  name: my-dcgw
-  namespace: eda
+  name: my-dcgw   ### Name must be unique per workflow execution
+  namespace: group<ID>   ### replace `<ID>` with you group ID
 spec:
   component:
   - kind: controlCard
@@ -1209,12 +1275,12 @@ status:
 
 /// details | Solution workflow definition (click to expand)
 
-```yaml
+```yaml  hl_lines="4 5"
 apiVersion: topologies.eda.nokia.com/v1
 kind: NetworkTopology
 metadata:
-  name: 46-add-dcgw
-  namespace: ""
+  name: 46-add-dcgw   ### Name must be unique per workflow execution
+  namespace: group<ID>   ### replace `<ID>` with you group ID
 spec:
   operation: Reconcile
   nodeTemplates:
@@ -1526,8 +1592,10 @@ This is already part of the `NetworkTopology` you spun up, so you have nothing f
 In order to view the **TestMan** connections to our fabric, we can run the following **TestMan** `edactl` command:
 
 ```bash title="Retrieve TestMan interfaces"
-edactl -n eda testman get-edge-if all
+edactl -n group<ID> testman get-edge-if all #(1)!
 ```
+
+1. Replace `<ID>` with your group ID
 
 <div class="embed-result">
 ```
@@ -1551,11 +1619,12 @@ The MAC-VRF should be selecting all interfaces with the `eda.nokia.com/role=edge
 
 /// tab | fabric.yaml
 
-```yaml
+```yaml  hl_lines="4 5"
 apiVersion: fabrics.eda.nokia.com/v1
 kind: Fabric
 metadata:
-  name: myfabric-1
+  name: myfabric-1   ### Name must be unique per workflow execution
+  namespace: group<ID>   ### replace `<ID>` with you group ID
 spec:
   interSwitchLinks:
     linkSelectors:
@@ -1580,11 +1649,12 @@ spec:
 ///
 /// tab | macvrf10.yaml
 
-```yaml
+```yaml  hl_lines="4 5"
 apiVersion: services.eda.nokia.com/v2
 kind: VirtualNetwork
 metadata:
-  name: demo-vnet-bd-vlan-10
+  name: demo-vnet-bd-vlan-10   ### Name must be unique per workflow execution
+  namespace: group<ID>   ### replace `<ID>` with you group ID
 spec:
   bridgeDomains:
   - name: vnet-demo-bd
@@ -1614,13 +1684,15 @@ spec:
 ///
 /// tab | Applying resource manifests
 
-```bash
+You must replace `<ID>` with your group ID at both the Fabric and the VirtualNetwork.
+
+```bash hl_lines="5 6 30 31"
 cat << 'EOF' | kubectl apply -f -
 apiVersion: fabrics.eda.nokia.com/v1
 kind: Fabric
 metadata:
-  name: myfabric-1
-  namespace: eda
+  name: myfabric-1   ### Name must be unique per workflow execution
+  namespace: group<ID>    ### replace `<ID>` with you group ID
 spec:
   interSwitchLinks:
     linkSelectors:
@@ -1640,13 +1712,12 @@ spec:
       asnPool: asn-pool
     protocols:
     - EBGP
-
 ---
 apiVersion: services.eda.nokia.com/v2
 kind: VirtualNetwork
 metadata:
-  name: demo-vnet-bd-vlan-10
-  namespace: eda
+  name: demo-vnet-bd-vlan-10   ### Name must be unique per workflow execution
+  namespace: group<ID>    ### replace `<ID>` with you group ID
 spec:
   bridgeDomains:
   - name: vnet-demo-bd
@@ -1671,7 +1742,6 @@ spec:
       interfaceSelectors:
       - eda.nokia.com/role=edge
       vlanID: "10"
-
 EOF
 ```
 
@@ -1684,8 +1754,10 @@ EOF
 Now that our L2 service is up the first thing to check is that TestMan should now see some edge interfaces.
 
 ```bash title="Retrieve TestMan interfaces"
-edactl -n eda testman get-edge-if all
+edactl -n group<ID> testman get-edge-if all #(1)!
 ```
+
+1. Replace `<ID>` with your group ID
 
 <div class="embed-result">
 ```
@@ -1715,8 +1787,10 @@ We already have the IP address `10.0.0.8` from the above edge interface on leaf1
 Pick an edge interface on `leaf2` to source the ping from. Then execute:
 
 ```bash title="Run a ping test from an edge interface to a destination IP"
-edactl -n eda testman ping eif-name <edge interface> 10.0.0.8
+edactl -n group<ID> testman ping eif-name <edge interface> 10.0.0.8 #(1)!
 ```
+
+1. Replace `<ID>` with your group ID
 
 Where `<edge interface>` is replaced with the leaf2 edge interface name you have selected.
 
@@ -1733,12 +1807,14 @@ rtt min/avg/max/mdev = 2.103/2.103/2.103/0.000ms
 
 /// details | Solution
 
-```bash
-edactl -n eda testman ping eif-name eif-leaf2-ethernet-1-3-vlan-10 10.0.0.8
+```bash  hl_lines="1"
+edactl -n group<ID> testman ping eif-name eif-leaf2-ethernet-1-3-vlan-10 10.0.0.8 #(1)!
 ```
 
+1. Replace `<ID>` with your group ID
+
 <div class="embed-result">
-```
+```bash  hl_lines="2 5"
 --- timeout: 16.00 sec, interval: 1000000 µsec ---
 PING 10.0.0.8 from 10.0.0.14 &{eda eif-leaf2-ethernet-1-3-vlan-10}: 56(84) bytes of data.
 84 bytes from 10.0.0.8: icmp_seq=0 ttl=128 time=2.103ms

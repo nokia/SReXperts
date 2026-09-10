@@ -277,3 +277,15 @@ If you got lost somewhere along the way, or just want to inspect the finished re
 ///
 
 [^1]: You can use the search bar in the left menu to find the Fabrics resource group by typing 'Fabrics'.
+
+## Summary
+
+Working with the core building blocks of the EDA dashboard designer — **dashlets**, live **EDA queries (EQL)**, **flex layouts**, and **filters** — you:
+
+- Created and named a new dashboard.
+- Added a dashlet that aggregates IPv4 and IPv6 routes using summation operators and conditional logic.
+- Defined **Custom** filters and wired them into your queries to make the dashboard interactive.
+- Built a **table view** with a DataView dashlet that lists the SR Linux routing-table entries for the selected network instance.
+- Finished with a **donut chart** that groups routes by type (`bgp-evpn`, `local`, `host`, `arpnd`), each in its own color.
+
+You now have the skills to assemble purpose-built dashboards for any operational scenario, turning live network state into an at-a-glance view that makes monitoring and troubleshooting far faster.

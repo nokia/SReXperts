@@ -1,0 +1,286 @@
+version: '2.0'
+
+createIntentTypeVersion:
+  description: >
+    Fetches an intent type at the selected source version, updates the version
+    number, and creates a new intent type version at targetVersion.
+
+  type: direct
+
+  tags:
+    - Multiple Service Profile Excercise
+    - Hackathon 2026
+
+  workflow_meta:
+    title: Create Intent Type Version for All Groups
+    author: NSP
+    version: '1.0.0'
+
+  input:
+    - sourceIntentType
+    - targetVersion
+
+  output:
+    intentType: <% $.sourceIntentType.name %>
+    sourceVersion: <% $.sourceIntentType.version %>
+    targetVersion: <% $.targetVersion %>
+    status: <% $.createStatus %>
+    accessControlStatus: <% $.accessControlStatus %>
+    userGroups: <% $.userGroups %>
+    message: <% $.resultMessage %>
+
+  tasks:
+    checkTargetVersion:
+      action: nsp.https
+      input:
+        url: >-
+          https://restconf-gateway/restconf/data/ibn-administration:ibn-administration/intent-type-catalog/intent-type=<% $.sourceIntentType.name %>,<% $.targetVersion %>
+        method: GET
+        accept: application/json
+      publish:
+        createStatus: <% task().result.status %>
+      on-success:
+        - failTargetExists
+      on-error:
+        - getSourceIntentType
+
+    failTargetExists:
+      action: std.fail
+      input:
+        error_data:
+          message: >-
+            Intent type <% $.sourceIntentType.name %> version <% $.targetVersion %>
+            already exists. Choose a different target version.
+
+    getSourceIntentType:
+      action: nsp.https
+      input:
+        url: >-
+          https://restconf-gateway/restconf/data/ibn-administration:ibn-administration/intent-type-catalog/intent-type=<% $.sourceIntentType.name %>,<% $.sourceIntentType.version %>?content=config
+        method: GET
+        accept: application/json
+      publish:
+        sourceContent: <% task().result.content %>
+        createStatus: <% task().result.status %>
+      on-success:
+        - getSourceViews
+      on-error:
+        - failSourceNotFound
+
+    failSourceNotFound:
+      action: std.fail
+      input:
+        error_data:
+          message: >-
+            Intent type <% $.sourceIntentType.name %> version <% $.sourceIntentType.version %>
+            was not found.
+
+    getSourceViews:
+      action: nsp.https
+      input:
+        url: >-
+          https://restconf-gateway/restconf/data/nsp-intent-type-config-store:intent-type-config/intent-type-configs=<% $.sourceIntentType.name %>,<% $.sourceIntentType.version %>
+        method: GET
+        accept: application/yang-data+json
+      publish:
+        viewsContent: <% task().result.content %>
+      publish-on-error:
+        viewsContent: {}
+      on-complete:
+        - preparePayload
+
+    preparePayload:
+      action: nsp.python
+      input:
+        context:
+          - <% task(getSourceIntentType).result.content %>
+          - <% $.sourceIntentType.name %>
+          - <% $.targetVersion %>
+        script: |
+          import copy
+
+          KEY = "ibn-administration:intent-type"
+          source_content, intent_type, target_version = context
+
+          meta = source_content.get(KEY, source_content)
+          meta = copy.deepcopy(meta)
+
+          READONLY = {
+              "intent-type",
+              "signature",
+              "default-version",
+              "resourceDirectory",
+              "supported-hardware-types",
+          }
+          for field in READONLY:
+              meta.pop(field, None)
+
+          meta["name"] = intent_type
+          meta["version"] = int(target_version)
+          meta["lifecycle-state"] = "draft"
+
+          if "targetted-device" in meta:
+              for idx, entry in enumerate(meta["targetted-device"]):
+                  if "index" not in entry:
+                      entry["index"] = idx
+
+          return {KEY: meta}
+      publish:
+        intentTypePayload: <% task().result %>
+      on-success:
+        - createIntentType
+
+    createIntentType:
+      action: nsp.https
+      input:
+        url: >-
+          https://restconf-gateway/restconf/data/ibn-administration:ibn-administration/intent-type-catalog
+        method: POST
+        contentType: application/json
+        accept: application/json
+        body: <% task(preparePayload).result %>
+      publish:
+        createStatus: <% task().result.status %>
+        resultMessage: >-
+          Created <% $.sourceIntentType.name %> v<% $.targetVersion %>
+          from v<% $.sourceIntentType.version %>.
+      on-success:
+        - getUserGroups
+
+    getUserGroups:
+      action: nsp.https
+      input:
+        url: https://rest-gateway/access-control-api/rest/api/v3/nspuac/group/
+        method: GET
+        accept: application/json
+        resultFilter: $.content
+      publish:
+        groupsList: <% task().result.content %>
+      on-success:
+        - prepareAccessControl
+      on-error:
+        - failAccessControl
+
+    prepareAccessControl:
+      action: nsp.python
+      input:
+        context:
+          - <% $.groupsList %>
+        script: |
+          content = context[0]
+          groups = []
+
+          if not isinstance(content, list):
+              raise ValueError(
+                  "Expected a list of user groups, got: " + repr(type(content))
+              )
+
+          for item in content:
+              if isinstance(item, dict) and item.get("userGroupName"):
+                  groups.append(str(item["userGroupName"]))
+
+          groups = sorted(set(groups))
+          if not groups:
+              raise ValueError(
+                  "No user groups found in access-control API response: "
+                  + repr(content)
+              )
+
+          return {"userGroups": groups}
+      publish:
+        userGroups: <% task().result.userGroups %>
+      on-success:
+        - updateAccessControl
+      on-error:
+        - failAccessControl
+
+    updateAccessControl:
+      action: nsp.https
+      input:
+        url: >-
+          https://restconf-gateway/restconf/operations/nsp-intent-type-details:update-access-control
+        method: POST
+        contentType: application/json
+        accept: application/json
+        body:
+          nsp-intent-type-details:input:
+            intent-types:
+              - <% $.sourceIntentType.name %>
+            user-groups: <% $.userGroups %>
+      publish:
+        accessControlStatus: <% task().result.status %>
+        resultMessage: >-
+          Created <% $.sourceIntentType.name %> v<% $.targetVersion %> and granted
+          access to all user groups.
+      on-success:
+        - copyViews
+      on-error:
+        - failAccessControl
+
+    failAccessControl:
+      action: std.fail
+      input:
+        error_data:
+          message: >-
+            Intent type <% $.sourceIntentType.name %> v<% $.targetVersion %> was
+            created, but granting user-group access failed. Grant access manually
+            via Intent Types > Configure user access.
+
+    copyViews:
+      action: nsp.python
+      input:
+        context:
+          - <% task(getSourceViews).result.content %>
+          - <% $.sourceIntentType.name %>
+          - <% $.targetVersion %>
+        script: |
+          VIEW_KEY = "nsp-intent-type-config-store:intent-type-configs"
+
+          views_content, intent_type, target_version = context
+          if not views_content:
+              return {"copied": 0, "views": []}
+
+          configs = views_content.get(VIEW_KEY, [])
+          if isinstance(configs, dict):
+              configs = [configs]
+
+          views = []
+          for cfg in configs:
+              for view in cfg.get("views", []):
+                  views.append({
+                      "name": view.get("name"),
+                      "viewconfig": view.get("viewconfig", ""),
+                  })
+
+          return {"views": views, "copied": len(views)}
+      publish:
+        viewsToCopy: <% task().result %>
+      on-success:
+        - copyViewsRequest: <% $.viewsToCopy.copied > 0 %>
+      on-complete:
+        - done
+
+    copyViewsRequest:
+      with-items: view in <% $.viewsToCopy.views %>
+      action: nsp.https
+      input:
+        url: >-
+          https://restconf-gateway/restconf/data/nsp-intent-type-config-store:intent-type-config/intent-type-configs=<% $.sourceIntentType.name %>,<% $.targetVersion %>
+        method: PATCH
+        contentType: application/yang-data+json
+        accept: application/yang-data+json
+        body:
+          nsp-intent-type-config-store:intent-type-configs:
+            - views:
+                - name: <% $.view.name %>
+                  viewconfig: <% $.view.viewconfig %>
+      on-complete:
+        - done
+
+    done:
+      action: std.noop
+      publish:
+        resultMessage: >-
+          Intent type <% $.sourceIntentType.name %> version <% $.targetVersion %>
+          created successfully from version <% $.sourceIntentType.version %> with
+          access granted to all user groups.

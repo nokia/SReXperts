@@ -379,4 +379,4 @@ ANYsec is a built-in network encryption technology available on a selection of N
 
 It is possible to distinguish ANYsec encrypted packets by looking at the Encryption Label in the MPLS header and confirming that it is within the configured ANYsec MPLS label range but this is tedious and a better solution exists.
 
-This solution comes in the form of the [ANYsec Packet Dissectors for Wireshark](https://github.com/xavixava/anysec-dissectors). To start using this dissector, follow the steps outlined in the repo and load the LUA plugins into your Wireshark installation.
+This solution comes in the form of the [ANYsec Packet Dissectors for Wireshark](https://github.com/srl-labs/anysec-dissectors). To start using this dissector, follow the steps outlined in the repo and load the LUA plugins into your Wireshark installation.

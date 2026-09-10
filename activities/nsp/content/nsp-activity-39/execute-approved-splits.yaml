@@ -65,7 +65,7 @@ execute-approved-splits:
     find-existing-services:
       action: nsp.https
       input:
-        url: 'https://<% locate_nsp() %>/restconf/operations/nsp-inventory:find'
+        url: 'https://restconf-gateway/restconf/operations/nsp-inventory:find'
         method: POST
         body:
           input:
@@ -75,6 +75,7 @@ execute-approved-splits:
             sort-by: []
             xpath-filter: "/nsp-service:services/service-layer/elan|/nsp-service:services/service-layer/l3vpn"
             limit: 100
+            include-meta: false
         contentType: 'application/json'
         accept: 'application/json'
       publish:
@@ -183,7 +184,7 @@ execute-approved-splits:
       concurrency: 5
       action: nsp.https
       input:
-        url: 'https://<% locate_nsp() %>/restconf/operations/nsp-service-stitch:move-sites'
+        url: 'https://restconf-gateway/restconf/operations/nsp-service-stitch:move-sites'
         method: POST
         body:
           input: <% $.item.body_input %>

@@ -4,7 +4,7 @@
     {
       "name": "group",
       "title": "Group",
-      "description": "Required workgroup number (1, 2, …). Sets unique service names activity-38-gN-vprn / …-vpls and IDs 501+(N-1)*100 and 601+(N-1)*100.",
+      "description": "Required workgroup number (1, 2, …). Creates per-PE services activity-38-gN-vprn-pe1/pe2 and …-vpls-pe1/pe2 with IDs 501+(N-1)*100 and 601+(N-1)*100.",
       "columnSpan": 1,
       "newRow": true,
       "readOnly": false,

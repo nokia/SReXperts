@@ -73,8 +73,8 @@ It is tempting to skip ahead but tasks may require you to have completed previou
 ##### The Two-Line Prompt
 By default, the SR OS MD-CLI features a two-line prompt:
 
-- Line 1: Shows, baseline status indicator (`!`), uncommitted changes indicator (`*`), configuration mode (`ex`, `gl`, `pr`, `ro`), and current context in `[]`.
-- Line 2: Shows, the active CPM, your username, and the system name (e.g., `A:admin@g4-pe2#`).
+- Line 1: Shows baseline status indicator (`!`), uncommitted changes indicator (`*`), configuration mode (`ex`, `gl`, `pr`, `ro`), and current context in `[]`.
+- Line 2: Shows the active CPM, your username, and the system name (e.g., `A:admin@g4-pe2#`).
 
 More information about MD-CLI prompt can be found [here](https://documentation.nokia.com/sr/26-3/7x50-shared/md-cli-user/navigate.html#unique_591069178).
 ``` markdown title="Example prompt"
@@ -194,7 +194,7 @@ A:admin@g4-pe2#
         Present Working Context:
         /nokia-conf:configure/router[router-name="Base"]/bgp/group[group-name="iBGP-DC"]
         ```
-    ??? note "why this is useful?"
+    ??? note "why is this useful?"
         While developing your application or scripts to interact with SR OS, you can easily discover the appropriate path syntax by using CLI `pwc` command.
 
         | option      | description                       |
@@ -230,12 +230,12 @@ A:admin@g4-pe2#
 |Run a command in the other CLI engine	|   `//command`|
 |Exit the CLI session |  `logout` |
 
-A quick reference to this navigational commands can also be found in the [MD-CLI Quick Reference Guide](https://documentation.nokia.com/sr/26-3/7x50-shared/md-cli-quick-reference/navigational-operational-commands.html#ariaid-title1).
+A quick reference to these navigational commands can also be found in the [MD-CLI Quick Reference Guide](https://documentation.nokia.com/sr/26-3/7x50-shared/md-cli-quick-reference/navigational-operational-commands.html#ariaid-title1).
 
 #### Falling-back to Classic CLI engine
 You can use `//`, `/!classic-cli`, and `/!md-cli` to toggle between model-driven and classic CLI engines.
 
-A small subset of operational command functions is not yet available on model-driven. In order to run those, it's useful to briefly switch back to classic CLI engine (without making any intrusive configuration change). An example of such command is the classic command `oam sdp-ping`.
+A small subset of operational command functions is not yet available on model-driven. In order to run those, it's useful to briefly switch back to classic CLI engine (without making any intrusive configuration change). An example of such a command is the classic command `oam sdp-ping`.
 
 :material-router: PE2 should have SDP `1111` configured. Run `oam sdp-ping 1111 count 1` from the classic CLI engine to test reachability of this SDP.
 
@@ -492,7 +492,7 @@ The MD-CLI uses a **candidate configuration datastore** model. Changes are stage
     Make a targeted change to an existing configured neighbor, for example, change keepalive and hold-time value to one of the neighbors.
     /// tip
 
-    - From the `[/configure router "Base" bgp]` context, you can use `info neighbor *` to list all configured neighbors along with each respective configuration
+    From the `[/configure router "Base" bgp]` context, you can use `info neighbor *` to list all configured neighbors along with their respective configurations.
     ///
 
     ??? example "modifying configuration"
@@ -500,7 +500,7 @@ The MD-CLI uses a **candidate configuration datastore** model. Changes are stage
         (pr)[/configure router "Base" bgp]
         A:admin@g4-pe2# neighbor "xxxx:xxxx::x:xx" keepalive 10
 
-        *[gl:/configure router "Base" bgp]
+        *(pr)[/configure router "Base" bgp]
         A:admin@g4-pe2# neighbor "xxxx:xxxx::x:xx" hold-time seconds 30
         ```
 
@@ -864,7 +864,7 @@ Before applying any change to the BGP route policy, check the route table.
         ```
 
 
-2. **Identify the issue:** Check the route table and compare with the results recorded before the change. It is obvious that routes rejected by the import policy are not installed in the route table and causing route withdrawals and traffic loss.
+2. **Identify the issue:** Check the route table and compare with the results recorded before the change. It is obvious that routes rejected by the import policy are not installed in the route table, causing route withdrawals and traffic loss.
 
 
     ??? "checks after change"

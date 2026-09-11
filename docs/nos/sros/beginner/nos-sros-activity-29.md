@@ -500,7 +500,7 @@ The MD-CLI uses a **candidate configuration datastore** model. Changes are stage
         (pr)[/configure router "Base" bgp]
         A:admin@g4-pe2# neighbor "xxxx:xxxx::x:xx" keepalive 10
 
-        *[pr:/configure router "Base" bgp]
+        *(pr)[/configure router "Base" bgp]
         A:admin@g4-pe2# neighbor "xxxx:xxxx::x:xx" hold-time seconds 30
         ```
 

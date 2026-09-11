@@ -102,7 +102,7 @@ A:admin@g4-pe2#
 |Private (`pr`)  | Per-user private candidate configuration datastore|
 |Read-only (`ro`)	|	View only|
 
-1. Login to :material-router:PE2's MD-CLI and observe the prompt. Identify the CPM, username, and system name.
+1. Login to :material-router:PE2 MD-CLI and observe the prompt. Identify the CPM, username, and system name.
 
     !!! info "Connect to :material-router:PE2 from your group's hackathon instance"
         ```

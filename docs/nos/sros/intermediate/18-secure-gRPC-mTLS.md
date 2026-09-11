@@ -335,7 +335,7 @@ You may notice that some of the `openssl` commands present you with a number of 
 
 For your client, add only the IP addresses it will use to reach your nodes in the containerlab network. This IP address includes your instance identifier and will be of the form `10.128.${INSTANCE_ID}.1`.
 
-For your server, as you will start with :material-router: PE1, add the hostname and BOF IP Address. These values should look like `g${INSTANCE_ID}_pe1` and `10.128.${INSTANCE_ID}.21` respectively.
+For your server, as you will start with :material-router: PE1, add the hostname and BOF IP Address. These values should look like `clab-srexperts-pe1` and `10.128.${INSTANCE_ID}.21` respectively.
 
 Before proceeding, ensure both of your generated certificates can be verified against your CA using the `openssl` command from the previous section:
 

@@ -80,7 +80,10 @@ Drive pool utilization through **warning** and/or **critical** in a controlled w
 
 /// details | One reliable stress pattern
     type: hint
-Run the `create-evpn-epipe-service-with-resource-pool` workflow repeatedly with **unique** service names until utilization crosses your thresholds. Stop when the pool is full or runs fail as expected.
+Run the `create-evpn-epipe-service-with-resource-pool` workflow repeatedly with **unique** service names until utilization crosses your thresholds. Stop when the pool is full or runs fail as expected. 
+/// note
+If you notice VLAN ID conflicts, you can safely ignore and re-run the workflow again. 
+///
 ///
 
 /// details | What if you never see an alarm in FM?

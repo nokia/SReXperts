@@ -261,6 +261,7 @@ createIntentTypeVersion:
         - done
 
     copyViewsRequest:
+      concurrency: 1
       with-items: view in <% $.viewsToCopy.views %>
       action: nsp.https
       input:
@@ -274,6 +275,29 @@ createIntentTypeVersion:
             - views:
                 - name: <% $.view.name %>
                   viewconfig: <% $.view.viewconfig %>
+      on-complete:
+        - getAllUserGroups
+
+    getAllUserGroups:
+      action: nsp.https
+      input:
+        url: https://access-control/access-control-api/rest/api/v3/nspuac/group
+        resultFilter: $.content.select($.userGroupName)
+      publish:
+        userGroups: <% task().result.content %>
+      on-success:
+        - associateUserAccess
+
+    associateUserAccess:
+      action: nsp.https
+      input:
+        method: POST
+        url: https://restconf-gateway/restconf/operations/nsp-intent-type-details:update-access-control
+        body:
+          nsp-intent-type-details:input:
+            intent-types:
+              - <% $.sourceIntentType.name %>
+            user-groups: <% $.userGroups %>
       on-complete:
         - done
 
